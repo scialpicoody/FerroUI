@@ -18,6 +18,7 @@ jobs:
     timeout-minutes: 120
     env:
       CARGO_TERM_COLOR: always
+      CARGO_INCREMENTAL: '0'
       RUST_BACKTRACE: 1
       PYTHONUTF8: '1'
     steps:
@@ -64,6 +65,7 @@ jobs:
     timeout-minutes: 120
     env:
       CARGO_TERM_COLOR: always
+      CARGO_INCREMENTAL: '0'
       RUST_BACKTRACE: 1
       PYTHONUTF8: '1'
       FERROUI_CATALOG_WAYLAND: '0'
@@ -77,6 +79,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y pkg-config clang lld xvfb xauth libfontconfig1-dev libfreetype6-dev fonts-dejavu-core libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev libxcursor-dev libxfixes-dev libxext-dev libxkbcommon-dev libgl1-mesa-dev libegl1 libgl1-mesa-dri libgtk-3-0
       - name: Manifest tests
         run: cargo test --locked -p ferroui-build --lib
+      - name: Property ownership and binding transaction regressions
+        run: cargo test --locked -p ferroui-base --features hot-reload --lib
       - name: Development manifest profile boundaries
         run: python scripts/hot-reload/profile_probe.py
       - name: Runtime markup, resources and populate hooks

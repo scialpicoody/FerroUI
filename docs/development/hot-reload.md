@@ -367,8 +367,9 @@ Build-time placeholder geometry substitution is shared with runtime updates, so
 unchanged branding is not misclassified as a source edit.
 
 Compatible edits retain the page root and data context. Invalid markup retains its
-content and namescope. Width, Height and Margin are explicitly owned root literals;
-they can be edited or removed transactionally. New instances populate from accepted
+content and namescope. Width, Height and Margin are explicitly owned root literals
+or synchronous bindings; they can be replaced or removed transactionally under the
+binding ownership rules above. New instances populate from accepted
 sources. Registering a newly opened target retries its pending draft without another
 save. Source directories are watched for new documents; unsupported documents and
 changes without a live validation adapter require restart.
@@ -962,3 +963,31 @@ in [the root-binding observations](hot-reload-root-binding-baselines.json);
 these functional runs were not isolated latency benchmarks. Windows execution,
 latest-revision native Rust-patch validation, and the other documented integration
 and release gates remain open.
+
+## Native verification after root-binding integration
+
+After the root-binding integration, fresh desktop patch and
+owning-supervisor probes passed on macOS arm64 and Linux arm64/Xvfb with Rust
+1.93.0 and dx/Subsecond 0.7.10. The desktop probes covered combined revisions,
+code/UI rollback, preserved subscriptions and type identity, and explicit view
+builders. The supervisor probes retained the running application after a failed
+replacement build, restored state on acknowledged restart, and removed failed,
+retired and shutdown generations. The standalone macOS probe also passed its
+three rollback cases, including a deliberate panic.
+
+The existing catalog binaries built for the same implementation passed all ten
+pages and the resource/root-theme probe on both platforms. Python harness tests
+ran 27 cases on each platform: 25 passed and two Windows Job Object tests were
+skipped as expected. The acceptance workflow now includes the base property-store
+suite and disables incremental output to reduce temporary build storage.
+
+[Recorded observations](hot-reload-native-acceptance-macos-linux.json) identify the
+tested source, toolchains and individual gates. The supervisor observations took
+5.68 seconds on macOS and 10.89 seconds on Linux from save to render completion,
+including 3.06 and 2.82 seconds in the patch compiler respectively. These are
+single functional observations with potentially overlapping validation work,
+excluding watch debounce and physical display scan-out.
+
+These runs predate the Windows watcher-shutdown fix below. The Windows results
+are recorded separately; the full current revision and remaining integration work
+still require acceptance before release.
