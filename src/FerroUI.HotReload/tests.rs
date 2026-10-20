@@ -2798,3 +2798,515 @@ fn preserved_root_static_theme_tracks_resources_and_rolls_back() {
     assert_eq!(root.opacity(), 0.6);
     window.close();
 }
+
+#[test]
+fn paused_two_way_binding_retains_subscription_and_never_writes_stale_values() {
+    use ferroui_base::{
+        data::{BindingMode, ReflectionBinding},
+        layout::Layoutable,
+        threading::Dispatcher,
+    };
+    use ferroui_controls::Border;
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    let target = Border::new();
+    let binding = ReflectionBinding::new("Width")
+        .with_source(Some(Rc::new(source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    let expression = target.bind_binding(Layoutable::width_property(), &*binding);
+    assert!(expression.can_pause_for_reload());
+    assert_eq!(target.width(), 10.0);
+    for value in 20..30 {
+        assert!(expression.pause_for_reload());
+        assert!(
+            !expression.pause_for_reload(),
+            "nested pause must not steal ownership"
+        );
+        let before = source.width();
+        target.set_current_value(Layoutable::width_property(), 999.0);
+        expression.update_source();
+        assert_eq!(source.width(), before, "paused target wrote into the model");
+        source.set_width(value as f64);
+        assert_eq!(
+            target.width(),
+            999.0,
+            "paused source changed the visible target"
+        );
+        expression.resume_after_reload();
+        assert_eq!(
+            target.width(),
+            value as f64,
+            "resume lost the latest source value"
+        );
+        target.set_current_value(Layoutable::width_property(), value as f64 + 0.5);
+        assert_eq!(
+            source.width(),
+            value as f64 + 0.5,
+            "original two-way subscription did not resume"
+        );
+    }
+    expression.dispose();
+    source.set_width(1000.0);
+    assert_ne!(target.width(), 1000.0);
+}
+
+#[test]
+fn paused_binding_preserves_invalid_input_until_a_real_source_change() {
+    use ferroui_base::{
+        data::{BindingMode, ReflectionBinding},
+        threading::Dispatcher,
+    };
+    use ferroui_controls::{Border, DataValidationErrors, TextBox};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    let target = TextBox::new();
+    let binding = ReflectionBinding::new("Width")
+        .with_source(Some(Rc::new(source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    let expression = target.bind_binding(TextBox::text_property(), &*binding);
+    target.set_current_value(TextBox::text_property(), Some("invalid".into()));
+    assert!(DataValidationErrors::get_has_errors(&target));
+    assert_eq!(source.width(), 10.0);
+
+    assert!(expression.pause_for_reload());
+    expression.resume_after_reload();
+    assert_eq!(target.text().as_deref(), Some("invalid"));
+    assert!(DataValidationErrors::get_has_errors(&target));
+    assert_eq!(source.width(), 10.0);
+
+    assert!(expression.pause_for_reload());
+    source.set_width(20.0);
+    assert_eq!(target.text().as_deref(), Some("invalid"));
+    assert!(DataValidationErrors::get_has_errors(&target));
+    expression.resume_after_reload();
+    assert_eq!(target.text().as_deref(), Some("20"));
+    assert!(!DataValidationErrors::get_has_errors(&target));
+    assert_eq!(source.width(), 20.0);
+}
+
+#[test]
+fn paused_binding_drains_reentrant_source_changes_without_target_writes() {
+    use ferroui_base::{
+        data::{BindingMode, ReflectionBinding},
+        layout::Layoutable,
+        threading::Dispatcher,
+    };
+    use ferroui_controls::Border;
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    let target = Border::new();
+    let binding = ReflectionBinding::new("Width")
+        .with_source(Some(Rc::new(source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    let expression = target.bind_binding(Layoutable::width_property(), &*binding);
+    let source_for_callback = source.clone();
+    let target_for_callback = target.downgrade();
+    let _subscription = target.property_changed(move |e| {
+        let target_for_callback = target_for_callback.upgrade().unwrap();
+        if e.property().id() == Layoutable::width_property().id()
+            && target_for_callback.width() == 20.0
+        {
+            source_for_callback.set_width(30.0);
+            target_for_callback.set_current_value(Layoutable::width_property(), 999.0);
+        }
+    });
+    assert!(expression.pause_for_reload());
+    source.set_width(20.0);
+    expression.resume_after_reload();
+    assert_eq!(target.width(), 30.0);
+    assert_eq!(source.width(), 30.0);
+    target.set_current_value(Layoutable::width_property(), 40.0);
+    assert_eq!(source.width(), 40.0);
+}
+
+#[test]
+fn local_binding_reload_rolls_back_and_retires_subscriptions() {
+    use ferroui_base::{
+        data::{BindingMode, LocalBindingReload, ReflectionBinding},
+        layout::Layoutable,
+        threading::Dispatcher,
+    };
+    use ferroui_controls::Border;
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let original_source = Border::new();
+    original_source.set_width(10.0);
+    let next_source = Border::new();
+    next_source.set_width(20.0);
+    let target = Border::new();
+    let original = ReflectionBinding::new("Width")
+        .with_source(Some(Rc::new(original_source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    let next = ReflectionBinding::new("Width")
+        .with_source(Some(Rc::new(next_source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    let expression = target.bind_binding(Layoutable::width_property(), &*original);
+    let old_weak = Rc::downgrade(&expression);
+    drop(expression);
+    let root = target.clone().upcast();
+    for value in 30..40 {
+        let mut change =
+            LocalBindingReload::prepare(&root, Layoutable::width_property(), Some(&*next), None)
+                .unwrap();
+        assert_eq!(target.width(), original_source.width());
+        change.commit().unwrap();
+        assert_eq!(target.width(), 20.0);
+        assert_ne!(
+            original_source.width(),
+            20.0,
+            "replacement wrote into old model"
+        );
+        original_source.set_width(value as f64);
+        assert_eq!(
+            target.width(),
+            20.0,
+            "detached original published while paused"
+        );
+        change.rollback().unwrap();
+        assert_eq!(target.width(), value as f64);
+        assert_eq!(
+            next_source.width(),
+            20.0,
+            "rollback wrote into replacement model"
+        );
+    }
+    {
+        let mut change =
+            LocalBindingReload::prepare(&root, Layoutable::width_property(), Some(&*next), None)
+                .unwrap();
+        change.commit().unwrap();
+        // An unfinished transaction must restore the old binding on drop.
+    }
+    assert_eq!(target.width(), 39.0);
+    let mut change =
+        LocalBindingReload::prepare(&root, Layoutable::width_property(), Some(&*next), None)
+            .unwrap();
+    change.commit().unwrap();
+    change.finish().unwrap();
+    drop(change);
+    assert!(
+        old_weak.upgrade().is_none(),
+        "finished reload retained old expression"
+    );
+    original_source.set_width(500.0);
+    assert_eq!(
+        target.width(),
+        20.0,
+        "retired subscription still updates target"
+    );
+    target.set_current_value(Layoutable::width_property(), 60.0);
+    assert_eq!(next_source.width(), 60.0);
+    assert_eq!(original_source.width(), 500.0);
+}
+
+#[test]
+fn local_binding_reload_removal_restores_invalid_input_and_validation() {
+    use ferroui_base::{
+        data::{BindingMode, LocalBindingReload, ReflectionBinding},
+        threading::Dispatcher,
+    };
+    use ferroui_controls::{Border, DataValidationErrors, TextBox};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    let target = TextBox::new();
+    let binding = ReflectionBinding::new("Width")
+        .with_source(Some(Rc::new(source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    target.bind_binding(TextBox::text_property(), &*binding);
+    target.set_current_value(TextBox::text_property(), Some("invalid".into()));
+    let root = target.clone().upcast();
+    let mut change =
+        LocalBindingReload::prepare(&root, TextBox::text_property(), None, None).unwrap();
+    change.commit().unwrap();
+    assert!(target.text().is_none());
+    assert!(!DataValidationErrors::get_has_errors(&target));
+    change.rollback().unwrap();
+    assert_eq!(target.text().as_deref(), Some("invalid"));
+    assert!(DataValidationErrors::get_has_errors(&target));
+    assert_eq!(source.width(), 10.0);
+    source.set_width(20.0);
+    assert_eq!(target.text().as_deref(), Some("20"));
+    assert!(!DataValidationErrors::get_has_errors(&target));
+
+    let mut change =
+        LocalBindingReload::prepare(&root, TextBox::text_property(), None, None).unwrap();
+    change.commit().unwrap();
+    change.finish().unwrap();
+    source.set_width(30.0);
+    assert!(target.text().is_none());
+    assert!(!target.has_local_value_binding(TextBox::text_property()));
+}
+
+#[test]
+fn local_binding_reload_keeps_replacement_validation_on_finish() {
+    use ferroui_base::{
+        data::{BindingMode, LocalBindingReload, ReflectionBinding},
+        threading::Dispatcher,
+    };
+    use ferroui_controls::{Border, DataValidationErrors, TextBox};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    source.set_height(20.0);
+    let target = TextBox::new();
+    let original = ReflectionBinding::new("Width")
+        .with_source(Some(Rc::new(source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    let next = ReflectionBinding::new("Height")
+        .with_source(Some(Rc::new(source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    target.bind_binding(TextBox::text_property(), &*original);
+    let mut change = LocalBindingReload::prepare(
+        &target.clone().upcast(),
+        TextBox::text_property(),
+        Some(&*next),
+        None,
+    )
+    .unwrap();
+    change.commit().unwrap();
+    target.set_current_value(TextBox::text_property(), Some("invalid".into()));
+    assert!(DataValidationErrors::get_has_errors(&target));
+    change.finish().unwrap();
+    assert!(
+        DataValidationErrors::get_has_errors(&target),
+        "retired binding cleared new error"
+    );
+    assert_eq!(source.width(), 10.0);
+    assert_eq!(source.height(), 20.0);
+}
+
+#[test]
+fn local_binding_reload_rejects_unsupported_and_changed_owners() {
+    use ferroui_base::{
+        data::{BindingMode, LocalBindingReload, ReflectionBinding, UpdateSourceTrigger},
+        layout::Layoutable,
+        threading::Dispatcher,
+    };
+    use ferroui_controls::Border;
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    let target = Border::new();
+    let binding = ReflectionBinding::new("Width")
+        .with_source(Some(Rc::new(source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    target.bind_binding(Layoutable::width_property(), &*binding);
+    let root = target.clone().upcast();
+    let unsupported = ReflectionBinding::new("Width")
+        .with_source(Some(Rc::new(source.clone())))
+        .with_mode(BindingMode::TwoWay);
+    unsupported.set_update_source_trigger(UpdateSourceTrigger::Explicit);
+    assert!(LocalBindingReload::prepare(
+        &root,
+        Layoutable::width_property(),
+        Some(&*unsupported),
+        None,
+    )
+    .is_err());
+    let mut change =
+        LocalBindingReload::prepare(&root, Layoutable::width_property(), None, None).unwrap();
+    target.set_current_value(Layoutable::width_property(), 10.0);
+    assert!(
+        change.commit().is_err(),
+        "equal-value application write must invalidate preparation"
+    );
+    assert_eq!(target.width(), 10.0);
+    source.set_width(20.0);
+    assert_eq!(target.width(), 20.0);
+
+    let mut change =
+        LocalBindingReload::prepare(&root, Layoutable::width_property(), None, None).unwrap();
+    change.commit().unwrap();
+    target.set_width(50.0);
+    assert!(change.rollback().is_err());
+    assert_eq!(
+        target.width(),
+        50.0,
+        "rollback overwrote application ownership"
+    );
+    source.set_width(30.0);
+    assert_eq!(target.width(), 50.0);
+}
+
+#[test]
+fn local_binding_reload_can_add_after_removal_and_restore_literal_or_style() {
+    use ferroui_base::{
+        data::{BindingPriority, LocalBindingReload, ReflectionBinding},
+        layout::Layoutable,
+        threading::Dispatcher,
+    };
+    use ferroui_controls::Border;
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    let target = Border::new();
+    let _style =
+        target.set_value_with_priority(Layoutable::width_property(), 5.0, BindingPriority::Style);
+    let root = target.clone().upcast();
+    let binding = ReflectionBinding::new("Width").with_source(Some(Rc::new(source.clone())));
+    for local in [None, Some(7.0)] {
+        if let Some(value) = local {
+            target.set_width(value);
+        }
+        let mut change =
+            LocalBindingReload::prepare(&root, Layoutable::width_property(), Some(&*binding), None)
+                .unwrap();
+        change.commit().unwrap();
+        assert_eq!(target.width(), 10.0);
+        change.rollback().unwrap();
+        assert_eq!(target.width(), local.unwrap_or(5.0));
+        assert!(!target.has_local_value_binding(Layoutable::width_property()));
+    }
+    let mut install =
+        LocalBindingReload::prepare(&root, Layoutable::width_property(), Some(&*binding), None)
+            .unwrap();
+    install.commit().unwrap();
+    install.finish().unwrap();
+    let mut remove =
+        LocalBindingReload::prepare(&root, Layoutable::width_property(), None, None).unwrap();
+    remove.commit().unwrap();
+    remove.finish().unwrap();
+    assert_eq!(target.width(), 5.0, "removal must reveal underlying style");
+    let mut reinstall =
+        LocalBindingReload::prepare(&root, Layoutable::width_property(), Some(&*binding), None)
+            .unwrap();
+    reinstall.commit().unwrap();
+    reinstall.finish().unwrap();
+    source.set_width(20.0);
+    assert_eq!(target.width(), 20.0);
+}
+
+#[test]
+fn local_binding_reload_unwinds_a_failed_initial_publication() {
+    use ferroui_base::{
+        data::{BindingOperations, LocalBindingReload, ReflectionBinding},
+        layout::Layoutable,
+        threading::Dispatcher,
+    };
+    use ferroui_controls::Border;
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    source.set_height(20.0);
+    let target = Border::new();
+    let original = ReflectionBinding::new("Width").with_source(Some(Rc::new(source.clone())));
+    let next = ReflectionBinding::new("Height").with_source(Some(Rc::new(source.clone())));
+    let expression = target.bind_binding(Layoutable::width_property(), &*original);
+    let once = Rc::new(Cell::new(true));
+    let target_weak = target.downgrade();
+    let _subscription = target.property_changed(move |e| {
+        if e.property().id() == Layoutable::width_property().id()
+            && target_weak.upgrade().unwrap().width() == 20.0
+            && once.replace(false)
+        {
+            panic!("observer failed");
+        }
+    });
+    assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let mut change = LocalBindingReload::prepare(
+            &target.clone().upcast(),
+            Layoutable::width_property(),
+            Some(&*next),
+            None,
+        )
+        .unwrap();
+        change.commit().unwrap();
+    }))
+    .is_err());
+    assert_eq!(target.width(), 10.0);
+    assert!(Rc::ptr_eq(
+        &expression,
+        &BindingOperations::get_binding_expression_base(&target, Layoutable::width_property())
+            .unwrap(),
+    ));
+    source.set_width(30.0);
+    assert_eq!(target.width(), 30.0);
+}
+
+#[test]
+fn local_binding_reload_does_not_claim_reentrant_application_writes() {
+    use ferroui_base::{
+        data::{LocalBindingReload, ReflectionBinding},
+        layout::Layoutable,
+        threading::Dispatcher,
+    };
+    use ferroui_controls::Border;
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    source.set_height(20.0);
+    let target = Border::new();
+    let original = ReflectionBinding::new("Width").with_source(Some(Rc::new(source.clone())));
+    let next = ReflectionBinding::new("Height").with_source(Some(Rc::new(source.clone())));
+    target.bind_binding(Layoutable::width_property(), &*original);
+    let target_weak = target.downgrade();
+    let _subscription = target.property_changed(move |e| {
+        if e.property().id() == Layoutable::width_property().id() {
+            let target = target_weak.upgrade().unwrap();
+            if target.width() == 20.0 {
+                // Even the same value changes ownership.
+                target.set_width(20.0);
+            }
+        }
+    });
+    let mut change = LocalBindingReload::prepare(
+        &target.clone().upcast(),
+        Layoutable::width_property(),
+        Some(&*next),
+        None,
+    )
+    .unwrap();
+    assert!(change.commit().is_err());
+    assert!(change.rollback().is_err());
+    assert_eq!(target.width(), 20.0);
+    source.set_width(30.0);
+    assert_eq!(target.width(), 20.0);
+}
+
+#[test]
+fn local_binding_reload_snapshots_source_updates_at_commit() {
+    use ferroui_base::{
+        data::{LocalBindingReload, ReflectionBinding},
+        layout::Layoutable,
+        threading::Dispatcher,
+    };
+    use ferroui_controls::Border;
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    let source = Border::new();
+    source.set_width(10.0);
+    source.set_height(20.0);
+    let target = Border::new();
+    let original = ReflectionBinding::new("Width").with_source(Some(Rc::new(source.clone())));
+    let next = ReflectionBinding::new("Height").with_source(Some(Rc::new(source.clone())));
+    target.bind_binding(Layoutable::width_property(), &*original);
+    let mut change = LocalBindingReload::prepare(
+        &target.clone().upcast(),
+        Layoutable::width_property(),
+        Some(&*next),
+        None,
+    )
+    .unwrap();
+    source.set_width(30.0);
+    change.commit().unwrap();
+    assert_eq!(target.width(), 20.0);
+    change.rollback().unwrap();
+    assert_eq!(
+        target.width(),
+        30.0,
+        "rollback restored a stale preparation snapshot"
+    );
+}

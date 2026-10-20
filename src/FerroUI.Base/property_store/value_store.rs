@@ -235,6 +235,48 @@ impl ValueStore {
         local()
     }
 
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub(crate) fn detach_expression_for_reload(
+        &self,
+        property: &'static FerroProperty,
+        expression: &Rc<dyn BindingExpressionBase>,
+    ) -> bool {
+        let mut expressions = self.local_value_expressions.borrow_mut();
+        let Some(index) = expressions.iter().position(|(id, value)| {
+            *id == property.id() && Rc::ptr_eq(value, expression)
+        }) else {
+            return false;
+        };
+        expressions.remove(index);
+        self.local_value_bindings.borrow_mut().retain(|(id, _)| *id != property.id());
+        self.record_local_write(property);
+        true
+    }
+
+    /// Reinstalls a paused expression whose sink still points at this store.
+    /// It must not be attached or started again: that would recreate subscriptions
+    /// and discard pending user input and validation.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub(crate) fn restore_expression_after_reload(
+        &self,
+        property: &'static FerroProperty,
+        expression: Rc<dyn BindingExpressionBase>,
+    ) {
+        assert!(!self.has_local_value_binding(property));
+        self.set_local_value_binding(property, expression.clone());
+        self.local_value_expressions.borrow_mut().push((property.id(), expression));
+    }
+
+    fn is_current_local_expression(
+        &self,
+        property: &'static FerroProperty,
+        expression: &Rc<dyn BindingExpressionBase>,
+    ) -> bool {
+        self.local_value_expressions.borrow().iter().any(|(id, value)| {
+            *id == property.id() && Rc::ptr_eq(value, expression)
+        })
+    }
+
     /// Called by a binding expression attached to this store when its value
     /// or error state changes.
     pub fn on_expression_changed(
@@ -245,6 +287,13 @@ impl ValueStore {
         has_error_changed: bool,
     ) {
         let property = instance.target_property().expect("the binding expression is attached");
+        // A reload transaction can keep a detached expression subscribed while
+        // another expression owns the slot. Only the current owner may publish.
+        if instance.priority() == BindingPriority::LocalValue
+            && !self.is_current_local_expression(property, instance)
+        {
+            return;
+        }
         let entry: Rc<dyn IValueEntry> = instance.clone();
 
         if property.is_direct() {
@@ -286,6 +335,13 @@ impl ValueStore {
     /// completes.
     pub fn on_expression_completed(&self, owner: &FerroObject, instance: &Rc<dyn BindingExpressionBase>) {
         let property = instance.target_property().expect("the binding expression is attached");
+        // Disposing a retired expression must not clear its replacement's
+        // validation state (nor its value).
+        if instance.priority() == BindingPriority::LocalValue
+            && !self.is_current_local_expression(property, instance)
+        {
+            return;
+        }
 
         if instance.is_data_validation_enabled() {
             owner.on_update_data_validation(property, BindingValueType::UNSET_VALUE, None);

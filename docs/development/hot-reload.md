@@ -68,6 +68,22 @@ framework-wide integration and the three-platform release gate remain incomplete
   Custom property callbacks must support reversible assignment. This explicit API
   does not infer ownership from arbitrary application setters; root binding and
   subscription replacement remains unfinished. The registered catalog pages claim Width, Height and Margin.
+- The development-only `ferroui_base::data::LocalBindingReload` primitive prepares
+  an inactive replacement binding for the preserved object, then supports commit,
+  rollback and finish. Explicit adapters must provide the binding description and
+  its correct source, namescope and service context. It supports adding, replacing
+  and removing local synchronous OneWay/TwoWay bindings, including the optimized
+  compiled-binding expression. Delayed, explicit/lost-focus update triggers,
+  other modes, observable bindings and animated properties are not admitted.
+  The old expression stays subscribed but paused until finish; rollback restores
+  its original expression identity, pending invalid input and validation, then
+  publishes genuine source/context changes received during the pause without
+  stale two-way writes. Completion of a detached expression cannot clear its
+  replacement's validation. A reentrant application write invalidates ownership;
+  rollback reports the conflict rather than overwriting it. Custom observers still
+  require reversible, non-panicking cleanup. This is the property-store foundation;
+  automatic root-binding description capture and component/panel integration are
+  not yet implemented.
 - `with_owned_root_static_resource_property` explicitly claims a literal or
   `StaticResource` root assignment, including Theme and Template. Unlike literal
   ownership, it compares the detached candidate value even when the attribute text
