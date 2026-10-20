@@ -141,6 +141,26 @@ impl ComponentReloadTarget {
         }
         self
     }
+    /// Claims a root literal or StaticResource assignment, including Theme/Template.
+    /// Re-resolves the candidate value on dependency revisions even when the markup
+    /// attribute is unchanged. Call immediately after initial population. Dynamic
+    /// resources, bindings and application overrides require another adapter or restart.
+    /// Property callbacks must support reversible assignment.
+    pub fn with_owned_root_static_resource_property<T: ferroui_base::PropertyValue>(
+        mut self,
+        property: &'static ferroui_base::StyledProperty<T>,
+    ) -> Self {
+        if let Some(root) = self.root.upgrade() {
+            self.properties
+                .retain(|owned| owned.name() != property.name());
+            self.properties
+                .push(crate::root_properties::own_static_resource(
+                    &root.element(),
+                    property,
+                ));
+        }
+        self
+    }
     pub fn is_alive(&self) -> bool {
         self.root.upgrade().is_some()
     }

@@ -151,12 +151,13 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                                 for (_, root) in &context.targets {
                                     let Some(root) = root.upgrade() else { continue };
                                     let Some(content) = root.content().as_ref().and_then(Ref::<ferroui_controls::Control>::from_xaml_object) else { continue };
+                                    let theme = root.theme().as_ref().map(|theme| &**theme as *const _ as *const ()).unwrap_or(std::ptr::null());
                                     let width = content.width();
                                     let width = if width.is_finite() { width.to_string() } else { "null".into() };
                                     let model = root.data_context().as_ref().map(|value| Rc::as_ptr(value) as *const ()).unwrap_or(std::ptr::null());
                                     let window = ferroui_controls::TopLevel::get_top_level(Some(&root));
                                     let window = window.as_ref().map(|window| &**window as *const _ as *const ()).unwrap_or(std::ptr::null());
-                                    eprintln!("FERROUI_RELOAD_TARGET_STATE={{\"revision\":{},\"status\":\"{:?}\",\"root\":\"{:p}\",\"window\":\"{:p}\",\"model\":\"{:p}\",\"content\":\"{:p}\",\"content_width\":{}}}", outcome.revision, outcome.status, &*root, window, model, &*content, width);
+                                    eprintln!("FERROUI_RELOAD_TARGET_STATE={{\"revision\":{},\"status\":\"{:?}\",\"root\":\"{:p}\",\"window\":\"{:p}\",\"model\":\"{:p}\",\"content\":\"{:p}\",\"content_width\":{},\"theme\":\"{:p}\"}}", outcome.revision, outcome.status, &*root, window, model, &*content, width, theme);
                                 }
                             }
 
@@ -190,6 +191,7 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
         let baseline = context.session.sources()[canonical.absolute_uri()].clone();
         let mut target = ComponentReloadTarget::content_page(&root, uri, baseline, configuration())
             .with_dependencies(context.resource_documents.clone())
+            .with_owned_root_static_resource_property(ferroui_base::StyledElement::theme_property())
             .with_owned_root_property(ferroui_base::layout::Layoutable::width_property())
             .with_owned_root_property(ferroui_base::layout::Layoutable::height_property())
             .with_owned_root_property(ferroui_base::layout::Layoutable::margin_property());

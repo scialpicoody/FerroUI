@@ -2633,3 +2633,168 @@ fn linked_resource_provenance_does_not_retain_document_roots() {
         "development provenance retained a detached resource root"
     );
 }
+
+#[test]
+fn preserved_root_static_theme_tracks_resources_and_rolls_back() {
+    use ferroui_base::{
+        controls::{IResourceProvider, ResourceDictionary, ResourceKey},
+        threading::Dispatcher,
+        Ref, StyledElement,
+    };
+    use ferroui_controls::{
+        testing::{TestServices, UnitTestApplication},
+        Application, ContentControl, Control, Window,
+    };
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _application = UnitTestApplication::start(TestServices::styled_window());
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let values = |opacity| {
+        format!(
+            r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ControlTheme x:Key="RootTheme" TargetType="ContentControl"><Setter Property="Opacity" Value="{opacity}"/><Setter Property="Template"><ControlTemplate><Border Width="{opacity}"/></ControlTemplate></Setter></ControlTheme></ResourceDictionary>"#
+        )
+    };
+    let load = |source: &str| {
+        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+            RuntimeXamlLoaderDocument::with_base_uri(None, source),
+            None,
+        )
+        .unwrap()
+    };
+    let resources = Application::current().unwrap().resources();
+    resources.add_merged_dictionary(Rc::<dyn IResourceProvider>::from(
+        Ref::<ResourceDictionary>::from_xaml_object(&load(&values(0.2))).unwrap(),
+    ));
+    let view = r#"<ContentControl xmlns="https://github.com/ferroui" Theme="{StaticResource RootTheme}"><Border/></ContentControl>"#;
+    let root = Ref::<ContentControl>::from_xaml_object(&load(view)).unwrap();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&root.clone().upcast::<Control>())));
+    window.show();
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(root.opacity(), 0.2);
+    let uri = "ferres://root-theme/View.xaml";
+    let resource_uri = "ferres://root-theme/Theme.xaml";
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), view.into()).unwrap();
+    session
+        .register_document(resource_uri.into(), values(0.2))
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        ComponentReloadTarget::content_control(
+            &root,
+            uri.into(),
+            view.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .with_dependencies([resource_uri.into()])
+        .with_owned_root_static_resource_property(StyledElement::theme_property()),
+    );
+    let owner: Rc<dyn ReloadTarget> = Rc::new(
+        ResourceReloadTarget::merged(
+            &resources,
+            0,
+            resource_uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&target);
+    session.register_target(&owner);
+    let old_theme = root.theme().unwrap();
+    let retired_theme = old_theme.downgrade();
+    let old_content = root.content();
+    let old_part = root.visual_children().get(0);
+    let retired_part = old_part.downgrade();
+    session.submit(resource_uri.into(), values(0.4));
+    assert_eq!(
+        session
+            .apply_pending_with(|| Err(ReloadError::Failed("later failure".into())))
+            .unwrap()
+            .status,
+        ReloadStatus::Failed
+    );
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(root.theme().unwrap().ptr_eq(&old_theme));
+    assert!(
+        root.visual_children().get(0).ptr_eq(&old_part),
+        "rollback replaced the previous template graph"
+    );
+    assert_eq!(root.content(), old_content);
+    assert_eq!(root.opacity(), 0.2);
+    session.submit(resource_uri.into(), values(0.6));
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    Dispatcher::ui_thread().run_jobs(None);
+    let published = resources
+        .try_get_resource(&ResourceKey::from("RootTheme"), None)
+        .unwrap()
+        .unwrap();
+    let published =
+        Ref::<ferroui_base::styling::ControlTheme>::from_xaml_object(&published).unwrap();
+    assert!(
+        root.theme().unwrap().ptr_eq(&published),
+        "preserved root still holds the previous static theme"
+    );
+    assert_eq!(root.opacity(), 0.6);
+    let new_part = root
+        .visual_children()
+        .get(0)
+        .cast::<ferroui_controls::Border>()
+        .unwrap();
+    assert_eq!(new_part.width(), 0.6);
+    drop(old_part);
+    assert!(
+        retired_part.upgrade().is_none(),
+        "retired template part retained after commit"
+    );
+    drop(old_theme);
+    assert!(
+        retired_theme.upgrade().is_none(),
+        "retired root theme retained after commit"
+    );
+    let accepted_content = root.content();
+    session.submit(
+        resource_uri.into(),
+        r#"<ResourceDictionary xmlns="https://github.com/ferroui"/>"#.into(),
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert!(root.theme().unwrap().ptr_eq(&published));
+    assert_eq!(root.content(), accepted_content);
+    session.submit(resource_uri.into(), values(0.6));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    let without_theme = view.replace(" Theme=\"{StaticResource RootTheme}\"", "");
+    session.submit(uri.into(), without_theme);
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    Dispatcher::ui_thread().run_jobs(None);
+    assert!(root.theme().is_none());
+    assert_eq!(root.opacity(), 1.0);
+    session.submit(uri.into(), view.into());
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(root.opacity(), 0.6);
+    // Equal-value application writes transfer ownership just like different values.
+    root.set_theme(root.theme());
+    let accepted_content = root.content();
+    session.submit(resource_uri.into(), values(0.8));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(root.content(), accepted_content);
+    assert_eq!(root.opacity(), 0.6);
+    window.close();
+}

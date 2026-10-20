@@ -74,6 +74,8 @@ def main():
                 before = accepted_state(save_and_render(process, log, page, page_source), 611)
                 changed = accepted_state(save_and_render(process, log, resource, resources(612), atomic=True), 612)
                 assert_identity(before, changed)
+                if before['theme'] == changed['theme'] or changed['theme'] == '0x0':
+                    raise RuntimeError('Preserved root did not adopt the candidate static theme')
                 if before['content'] == changed['content']:
                     raise RuntimeError('Static consumer was not rebuilt for the resource revision')
                 failures = log.read_text(encoding='utf-8', errors='replace').count('status: Failed')
@@ -81,13 +83,16 @@ def main():
                 text = wait_for(process, log, lambda text: text.count('status: Failed') > failures)
                 failed = [state for state in states(text) if state['status'] == 'Failed' and state['root'] == changed['root']][-1]
                 assert_identity(changed, failed)
-                if failed['content'] != changed['content'] or failed['content_width'] != 612:
+                if (failed['content'] != changed['content'] or failed['content_width'] != 612
+                        or failed['theme'] != changed['theme']):
                     raise RuntimeError('Missing resource damaged the last-good static consumer')
                 recovered = accepted_state(save_and_render(process, log, resource, resources(613), atomic=True), 613)
                 assert_identity(changed, recovered)
+                if recovered['theme'] == changed['theme']:
+                    raise RuntimeError('Recovery did not refresh the root static theme')
                 save_and_render(process, log, page, original_page)
                 save_and_render(process, log, resource, original_resources)
-                print(f'PASS: native resource reload PID {process.pid}: static consumer updated, missing key retained last-good view, atomic recovery preserved root/window/model', flush=True)
+                print(f'PASS: native resource reload PID {process.pid}: static consumer and root theme updated, missing key retained last-good view, atomic recovery preserved root/window/model', flush=True)
             except BaseException:
                 print(log.read_text(encoding='utf-8', errors='replace'), flush=True)
                 raise

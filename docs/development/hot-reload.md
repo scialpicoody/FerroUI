@@ -68,6 +68,16 @@ framework-wide integration and the three-platform release gate remain incomplete
   Custom property callbacks must support reversible assignment. This explicit API
   does not infer ownership from arbitrary application setters; root binding and
   subscription replacement remains unfinished. The registered catalog pages claim Width, Height and Margin.
+- `with_owned_root_static_resource_property` explicitly claims a literal or
+  `StaticResource` root assignment, including Theme and Template. Unlike literal
+  ownership, it compares the detached candidate value even when the attribute text
+  is unchanged, so dependency revisions replace old resource instances on the
+  preserved root. Commit and rollback use the same ownership/version checks;
+  removing the attribute clears its local contribution. Dynamic-resource bindings,
+  animations, application overrides and unrelated root lifecycle properties are
+  rejected. Property callbacks must support reversible assignment. ControlCatalog
+  claims its root Theme this way. Deferred-template validation and template-part
+  state transfer still require additional coverage.
 - `ResourceReloadTarget::merged`: replaces an explicitly owned merged dictionary
   contribution while preserving its container, direct application resources and
   other merged entries. Normal owner notifications update dynamic consumers,
@@ -870,8 +880,8 @@ instrumentation. Its six save-to-render observations are recorded in
 and the two page updates took 177–187 ms. No compiler ran concurrently. These
 are individual observations, not percentile estimates or display scan-out
 measurements. They validate static resources on replacement children, not every
-root resource expression or deferred template. Linux execution of the same
-probe is pending; Windows acceptance remains outstanding.
+root resource expression or deferred template. The same probe subsequently passed
+on Linux/Xvfb before the root-theme extension; Windows acceptance remains outstanding.
 
 A fresh native macOS desktop patch probe also passed against the include-discovery
 engine using Rust 1.93.0 and dx/Subsecond 0.7.10. The process, live root, framework
@@ -881,3 +891,20 @@ registered view-builder updates rejected invalid candidate markup with code/UI
 rollback, replaced valid views, and retained the derived view through a subsequent
 handler-only patch. This rerun covers the current engine through include discovery;
 Windows and the equivalent latest Linux native patch rerun remain outstanding.
+
+### Preserved-root static resources
+
+A regression initially accepted an application-theme edit while the preserved root
+still held its previous StaticResource theme. Explicit static-resource ownership
+now refreshes the root from the same prepared resource instance that commits.
+The regression checks style and template effects, rollback after a later failure, missing-key
+rejection, preservation of the previous template graph on rollback, release of
+the retired theme/template parts, attribute removal/reapplication and
+same-value application writes transferring ownership. All 63 reload tests pass
+on macOS and Linux; both macOS catalog integration tests and the release check
+also pass. The native resource probe now also requires root-theme identity to change
+on successful dependency revisions and remain unchanged on failure; these stronger
+native runs passed on macOS and Linux/Xvfb. Their raw observations, compiler
+versions and source hashes are in `hot-reload-root-theme-baselines.json`; other
+validation builds were running, so these are correctness-run measurements rather
+than a clean performance benchmark. Windows remains unverified.

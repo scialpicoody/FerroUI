@@ -1,4 +1,4 @@
-//! Explicit ownership of literal styled-property assignments on preserved roots.
+//! Explicit ownership of literal and static-resource assignments on preserved roots.
 use crate::{PreparedReload, ReloadError};
 use ferroui_base::{
     data::BindingPriority, diagnostics::FerroObjectDiagnosticExtensions, AnyValue, FerroObject,
@@ -21,6 +21,7 @@ pub(crate) trait OwnedRootProperty {
 }
 struct Property<T: PropertyValue> {
     property: &'static StyledProperty<T>,
+    static_resources: bool,
     expected: Rc<RefCell<Result<Option<T>, ReloadError>>>,
     version: Rc<Cell<u64>>,
 }
@@ -51,11 +52,30 @@ pub(crate) fn own<T: PropertyValue>(
     root: &FerroObject,
     property: &'static StyledProperty<T>,
 ) -> Box<dyn OwnedRootProperty> {
+    own_with_policy(root, property, false)
+}
+pub(crate) fn own_static_resource<T: PropertyValue>(
+    root: &FerroObject,
+    property: &'static StyledProperty<T>,
+) -> Box<dyn OwnedRootProperty> {
+    own_with_policy(root, property, true)
+}
+fn own_with_policy<T: PropertyValue>(
+    root: &FerroObject,
+    property: &'static StyledProperty<T>,
+    static_resources: bool,
+) -> Box<dyn OwnedRootProperty> {
     Box::new(Property {
         property,
+        static_resources,
         version: Rc::new(Cell::new(root.local_write_version(property))),
         expected: Rc::new(RefCell::new(snapshot(root, property))),
     })
+}
+fn is_static_resource(value: &str) -> bool {
+    value
+        .strip_prefix("{StaticResource")
+        .is_some_and(|rest| rest.starts_with(char::is_whitespace) && rest.ends_with('}'))
 }
 fn attribute(source: &str, name: &str) -> Result<Option<String>, ReloadError> {
     let xml = roxmltree::Document::parse(source)
@@ -75,23 +95,23 @@ impl<T: PropertyValue> OwnedRootProperty for Property<T> {
     ) -> Result<Option<Box<dyn PreparedReload>>, ReloadError> {
         let old = attribute(before, self.name())?;
         let new = attribute(after, self.name())?;
-        if old == new {
+        if old == new && (!self.static_resources || old.is_none()) {
             return Ok(None);
         }
         if matches!(
             self.name(),
-            "Content" | "DataContext" | "Name" | "Resources" | "Styles" | "Theme" | "Template"
-        ) {
+            "Content" | "DataContext" | "Name" | "Resources" | "Styles"
+        ) || (!self.static_resources && matches!(self.name(), "Theme" | "Template"))
+        {
             return Err(ReloadError::RestartRequired(format!(
                 "Root {} requires its lifecycle adapter",
                 self.name()
             )));
         }
-        if old
-            .iter()
-            .chain(new.iter())
-            .any(|value| value.trim_start().starts_with('{'))
-        {
+        if old.iter().chain(new.iter()).any(|value| {
+            let value = value.trim();
+            value.starts_with('{') && !(self.static_resources && is_static_resource(value))
+        }) {
             return Err(ReloadError::RestartRequired(format!(
                 "Root {} markup extensions require a binding/resource adapter",
                 self.name()
@@ -111,15 +131,20 @@ impl<T: PropertyValue> OwnedRootProperty for Property<T> {
         let value = if new.is_some() {
             snapshot(candidate, self.property)?
                 .ok_or_else(|| {
-                    ReloadError::RestartRequired(format!(
-                        "Root {} did not produce a literal local value",
-                        self.name()
-                    ))
+                    let message = format!("Root {} did not produce a local value", self.name());
+                    if self.static_resources {
+                        ReloadError::Failed(message)
+                    } else {
+                        ReloadError::RestartRequired(message)
+                    }
                 })?
                 .into()
         } else {
             None
         };
+        if old == new && equal(&current, &value) {
+            return Ok(None);
+        }
         Ok(Some(Box::new(Change {
             root: root.clone(),
             property: self.property,
