@@ -37,7 +37,17 @@ pub struct ResourceDictionary {
     merged_dictionaries: OnceCell<FerroList<Rc<dyn IResourceProvider>>>,
     theme_dictionaries: OnceCell<FerroDictionary<ThemeVariant, Rc<dyn IThemeVariantProvider>>>,
     key: RefCell<Option<ThemeVariant>>,
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    writes: RefCell<HashMap<ResourceKey, u64, ResourceKeyBuildHasher>>,
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    next_write: std::cell::Cell<u64>,
 }
+
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+#[path = "resource_dictionary_reload.rs"]
+mod reload;
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+pub use reload::{ResourceDictionaryChange, ResourceDictionaryOwnership};
 
 ferro_class!(ResourceDictionary: ResourceProvider);
 crate::ferro_class_info!(ResourceDictionary {
@@ -156,6 +166,10 @@ impl ResourceDictionary {
             merged_dictionaries: OnceCell::new(),
             theme_dictionaries: OnceCell::new(),
             key: RefCell::new(None),
+            #[cfg(all(debug_assertions, feature = "hot-reload"))]
+            writes: RefCell::new(HashMap::default()),
+            #[cfg(all(debug_assertions, feature = "hot-reload"))]
+            next_write: std::cell::Cell::new(0),
         }
     }
 
@@ -192,7 +206,9 @@ impl ResourceDictionary {
 
     /// Adds or replaces a resource.
     pub fn set(&self, key: impl Into<ResourceKey>, value: ResourceValue) {
-        self.inner.borrow_mut().insert(key.into(), ResourceItem::Value(value));
+        let key = key.into();
+        self.record_write(&key);
+        self.inner.borrow_mut().insert(key, ResourceItem::Value(value));
         self.raise_resources_changed();
     }
 
@@ -363,6 +379,7 @@ impl ResourceDictionary {
             if inner.contains_key(&key) {
                 panic!("An item with the same key has already been added. Key: {key}");
             }
+            self.record_write(&key);
             inner.insert(key, item);
         }
         self.raise_resources_changed();
@@ -395,6 +412,7 @@ impl ResourceDictionary {
         {
             let mut inner = self.inner.borrow_mut();
             for (key, value) in values {
+                self.record_write(&key);
                 inner.insert(key, ResourceItem::Value(value));
             }
         }
@@ -409,6 +427,8 @@ impl ResourceDictionary {
                 false
             } else {
                 inner.clear();
+                #[cfg(all(debug_assertions, feature = "hot-reload"))]
+                self.writes.borrow_mut().clear();
                 true
             }
         };
@@ -426,6 +446,8 @@ impl ResourceDictionary {
     pub fn remove(&self, key: &ResourceKey) -> bool {
         let removed = self.inner.borrow_mut().remove(key).is_some();
         if removed {
+            #[cfg(all(debug_assertions, feature = "hot-reload"))]
+            self.writes.borrow_mut().remove(key);
             self.raise_resources_changed();
         }
         removed
@@ -477,6 +499,18 @@ impl ResourceDictionary {
             self.inner.borrow().get(key),
             Some(ResourceItem::Deferred(_) | ResourceItem::NotSharedDeferred(_))
         )
+    }
+
+    #[inline]
+    fn record_write(&self, key: &ResourceKey) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        {
+            let version = self.next_write.get().checked_add(1).expect("resource write version overflow");
+            self.next_write.set(version);
+            self.writes.borrow_mut().insert(key.clone(), version);
+        }
+        #[cfg(not(all(debug_assertions, feature = "hot-reload")))]
+        let _ = key;
     }
 }
 

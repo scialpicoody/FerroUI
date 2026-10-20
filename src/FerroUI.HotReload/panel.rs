@@ -29,6 +29,7 @@ pub struct PanelReloadTarget {
     configuration: RuntimeXamlLoaderConfiguration,
     refresh: Option<Rc<dyn ComponentRefresh>>,
     properties: Vec<Box<dyn crate::root_properties::OwnedRootProperty>>,
+    resources: Option<crate::root_resources::OwnedResources>,
     state_adapters: Vec<Rc<dyn crate::ControlStateAdapter>>,
     restoration: crate::control_state::StateRestoration,
 }
@@ -72,12 +73,18 @@ impl PanelReloadTarget {
             configuration,
             refresh: None,
             properties: Vec::new(),
+            resources: None,
             state_adapters: Vec::new(),
             restoration: Default::default(),
         })
     }
     pub fn with_refresh(mut self, refresh: Rc<dyn ComponentRefresh>) -> Self {
         self.refresh = Some(refresh);
+        self
+    }
+    /// Claims existing XAML Resources contributions; see ComponentReloadTarget.
+    pub fn with_owned_resources(mut self) -> Self {
+        self.resources = self.root.upgrade().map(|root| crate::root_resources::OwnedResources::capture(&root.upcast()));
         self
     }
     /// Add application state transfer for uniquely identified controls in the
@@ -318,6 +325,7 @@ impl ReloadTarget for PanelReloadTarget {
                 .iter()
                 .map(|property| property.name())
                 .collect::<Vec<_>>(),
+            if self.resources.is_some() { &["Resources"] } else { &[] },
         )?;
         let uri = ferroui_base::utilities::Uri::try_create(
             &self.uri,
@@ -328,13 +336,21 @@ impl ReloadTarget for PanelReloadTarget {
             self.uri.clone(),
             self.properties.iter().filter_map(|property| property.binding_property()),
         );
+        let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &prepared);
+        document.service_provider = self.resources.as_ref().map(|resources| resources.services()).transpose()?;
+        let deferred = ferroui_markup_xaml::xaml_il::runtime::DeferredContentReloadScope::new();
+        let dynamic = ferroui_markup_xaml::reload_resources::DynamicResourceReloadScope::new();
         let candidate = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
-            RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &prepared),
+            document,
             Some(self.configuration.clone()),
         )
         .map_err(|error| ReloadError::Failed(error.to_string()))?;
         let candidate = Ref::<Panel>::from_xaml_object(&candidate)
             .ok_or_else(|| ReloadError::RestartRequired("Document is not a panel".into()))?;
+        if self.resources.is_some() {
+            ferroui_markup_xaml::reload_validation::prepare_candidate(&candidate)
+                .map_err(|error| ReloadError::Failed(error.to_string()))?;
+        }
         let mut properties = Vec::new();
         for property in &self.properties {
             if let Some(change) = property.prepare(
@@ -347,10 +363,20 @@ impl ReloadTarget for PanelReloadTarget {
                 properties.push(change);
             }
         }
+        properties.insert(0, crate::deferred_context::prepare(
+            &deferred, &candidate.clone().upcast(), &root.clone().upcast(), self.resources.is_some(),
+        ));
         let new = candidate.children().to_vec();
         let new_scope = NameScope::get_name_scope(&candidate);
         candidate.children().clear();
         NameScope::set_name_scope(&candidate, None);
+        if let Some(resources) = &self.resources {
+            properties.insert(1, resources.prepare(&candidate.clone().upcast())?);
+        }
+        let dynamic_index = if self.resources.is_some() { 2 } else { 1 };
+        properties.insert(dynamic_index, crate::deferred_context::prepare_dynamic(
+            &dynamic, &candidate.clone().upcast(), &root.clone().upcast(),
+        ));
         let refresh = self
             .refresh
             .as_ref()

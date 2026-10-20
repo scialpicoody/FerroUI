@@ -8,6 +8,48 @@ use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use std::rc::Rc;
 
 #[test]
+fn catalog_root_resources_reload_without_replacing_page_dictionary_or_application_keys() {
+    use ferroui_controls::Border;
+    let _application = super::support::start_catalog_application();
+    let page = crate::pages::BorderPage::new();
+    let root: Ref<ContentPage> = page.clone().upcast();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&page.clone().upcast::<Control>())));
+    window.show();
+    let uri = "ferres://controlcatalog/reload-tests/InlineResources.xaml";
+    let baseline = include_str!("../Pages/BorderPage.xaml");
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::hot_reload::component_target(
+        &root, uri.into(), baseline.into(), Vec::new(),
+    ));
+    let dictionary = root.resources();
+    dictionary.add_value("ApplicationKey", "preserved".to_string());
+    let app_value = dictionary.get(&"ApplicationKey".into()).unwrap();
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), baseline.into()).unwrap();
+    session.register_target(&target);
+    for width in [240, 280] {
+        let update = baseline.replace(
+            "  <ScrollViewer", &format!(r#"<ContentPage.Resources><x:Double x:Key="RootWidth">{width}</x:Double></ContentPage.Resources>
+  <ScrollViewer"#),
+        ).replacen("<Border BorderBrush=", r#"<Border Width="{StaticResource RootWidth}" BorderBrush="#, 1);
+        session.submit(uri.into(), update);
+        let result = session.apply_pending().unwrap();
+        assert_eq!(result.status, ReloadStatus::Applied, "{result:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        assert!(root.resources().ptr_eq(&dictionary));
+        assert!(Rc::ptr_eq(&app_value, &dictionary.get(&"ApplicationKey".into()).unwrap()));
+        let border = page.get_logical_descendants().find_map(|control| control.cast::<Border>()).unwrap();
+        assert_eq!(border.width(), width as f64);
+    }
+    session.submit(uri.into(), baseline.into());
+    let result = session.apply_pending().unwrap();
+    assert_eq!(result.status, ReloadStatus::Applied, "{result:?}");
+    assert!(!dictionary.contains_key(&"RootWidth".into()));
+    assert!(Rc::ptr_eq(&app_value, &dictionary.get(&"ApplicationKey".into()).unwrap()));
+    window.close();
+}
+
+#[test]
 fn generated_manifest_allows_binding_element_path_edits() {
     use ferroui_controls::{CheckBox, ContentControl, TextBlock};
     use ferroui_markup_xaml::FromXamlObject;

@@ -25,6 +25,12 @@ use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+#[path = "deferred_reload.rs"]
+mod reload;
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub use reload::{DeferredContentRebase, DeferredContentReloadScope};
+
 /// The function that builds deferred content: the compiled (or interpreted)
 /// body of a template or of a deferred resource. It receives the service
 /// provider of the instantiation and returns the object it built.
@@ -109,6 +115,8 @@ pub struct DeferredContent {
     parent_resource_nodes: Rc<CapturedResourceNodes>,
     builder: DeferredContentBuilder,
     result_type: ValueType,
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    reload_context: RefCell<Option<Rc<reload::Context>>>,
 }
 
 /// The resource nodes above a declaration, held weakly, shared by the
@@ -140,14 +148,19 @@ impl DeferredContent {
         builder: DeferredContentBuilder,
         result_type: ValueType,
     ) -> Rc<Self> {
-        Rc::new_cyclic(|this| Self {
+        let content = Rc::new_cyclic(|this| Self {
             this: this.clone(),
             parent_name_scope: parent_name_scope.map(|scope| Rc::downgrade(&scope.0)),
             root_object: root_object.as_ref().map(WeakValue::new),
             parent_resource_nodes,
             builder,
             result_type,
-        })
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            reload_context: RefCell::new(None),
+        });
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        reload::record(&content);
+        content
     }
 
     /// The type the built object is expected to be (the type argument of the
@@ -180,10 +193,16 @@ impl DeferredContent {
         };
         // The captured objects that are still alive, for the time of the
         // instantiation.
+        let nodes = self.parent_resource_nodes.clone();
+        let root = self.root_object.clone();
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        let (nodes, root) = self.reload_context.borrow().as_ref()
+            .map(|context| (context.nodes.clone(), context.root.clone()))
+            .unwrap_or((nodes, root));
         let provider: Rc<dyn IServiceProvider> = DeferredParentServiceProvider::new(
             service_provider.cloned(),
-            self.parent_resource_nodes.alive(),
-            self.root_object.as_ref().and_then(WeakValue::upgrade),
+            nodes.alive(),
+            root.as_ref().and_then(WeakValue::upgrade),
             scope.clone(),
         );
         let obj = self.builder.invoke(&provider)?;

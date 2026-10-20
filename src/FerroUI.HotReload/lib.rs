@@ -2,6 +2,7 @@
 #![cfg(debug_assertions)]
 mod component;
 mod detached_context;
+mod deferred_context;
 mod frame_timing;
 pub use frame_timing::record_frame_timing;
 mod input_pause;
@@ -14,6 +15,7 @@ mod resource_preparation;
 mod resources;
 pub use resource_preparation::ResourcePreparation;
 mod root_properties;
+mod root_resources;
 #[cfg(test)]
 mod root_binding_tests;
 mod styles;

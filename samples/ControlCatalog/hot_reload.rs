@@ -209,6 +209,7 @@ pub(crate) fn component_target(
 ) -> ComponentReloadTarget {
     let mut target = ComponentReloadTarget::content_page(root, uri, baseline, configuration())
         .with_dependencies(dependencies)
+        .with_owned_resources()
         .with_owned_root_static_resource_property(ferroui_base::StyledElement::theme_property())
         .with_owned_root_binding_property(ferroui_base::layout::Layoutable::width_property())
         .with_owned_root_binding_property(ferroui_base::layout::Layoutable::height_property())

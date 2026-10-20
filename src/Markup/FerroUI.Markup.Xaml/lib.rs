@@ -23,6 +23,8 @@ mod populate_overrides;
 pub mod source_overlay;
 #[cfg(all(feature = "hot-reload", debug_assertions))]
 pub mod reload_validation;
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod reload_resources;
 mod markup_extension;
 mod object_casts;
 mod register_types;

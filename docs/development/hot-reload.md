@@ -31,7 +31,8 @@ separately.
   ContentControl and UserControl components. It retains the existing component,
   application-owned root values and view model, transfers a fresh namescope and
   rolls back content/scope on failure. Implicit content and explicit framework
-  `Content` property elements use the same transaction. Unregistered root assignments, other root property elements,
+  `Content` property elements use the same transaction. Opt-in inline `Resources`
+  ownership is described below. Unregistered root assignments, other root property elements,
   named roots and XAML handlers are conservatively rejected until their adapters
   support them. `with_refresh` accepts a `ComponentRefresh` implementation for
   cached controls and application-installed subscriptions: prepare validates the
@@ -62,6 +63,34 @@ separately.
   scopes. External interleaving/removal of owned children, items-host panels, root
   assignment edits without explicit ownership and unsupported handler/resource
   ownership require restart.
+- Component and panel adapters expose `with_owned_resources`, called immediately
+  after initial XAML population. The root dictionary retains its identity.
+  Replacement removes old XAML entries, merged dictionaries and theme dictionaries,
+  installs the new contributions, and retains the previous graph until commit
+  succeeds. Deferred factories remain deferred; values already realized during
+  preparation retain the identity captured by static-resource consumers.
+  Later application keys survive. Detached candidates see application resources
+  and parent/application scopes, but cannot fall back to removed XAML keys.
+  Root static values deferred until initialization are resolved on the detached
+  candidate before capturing their commit changes, without rerunning the component
+  constructor. Root `Theme` still needs `with_owned_root_static_resource_property`.
+  Its selected root template is built for validation while candidate resources
+  are available, without attaching the template or raising `TemplateApplied`.
+  Deferred resource/template declarations transfer their weak root and dictionary
+  context at commit, so later instantiations resolve through the preserved owners.
+  Rollback restores the previous context. Data bindings remain pending during
+  deferred-value preparation; conversion/setter errors fail preparation.
+  Non-control `DynamicResource` consumers realized during preparation, such as
+  brushes, transfer their temporary-root anchors and subscriptions to the preserved
+  root. Captured extension values also use that root for future expressions.
+  Rollback restores those anchors; retired resource values are not retained by
+  the capture scopes.
+  External writes to owned keys, dictionary replacement, ambiguous provider
+  ownership, and collisions with application keys require restart. Mixed application
+  and XAML merged/theme provider trees need an explicit composed-preview adapter.
+  Custom dictionaries and irreversible notification callbacks need a custom adapter;
+  collection observers must not panic or mutate the collections during commit.
+  This API does not claim inline `Styles` ownership.
 - Component and panel adapters expose `with_owned_root_property` for literal styled
   properties. Register immediately after initial population to claim the attribute
   as XAML-owned. Edits use detached, converted candidate values; removal clears only

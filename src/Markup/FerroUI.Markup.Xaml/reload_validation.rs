@@ -26,6 +26,74 @@ pub(crate) fn record(target: &Ref<Control>, key: ResourceKey, theme: Option<Them
     });
 }
 
+/// Completes markup values on a detached framework root after its resource
+/// declarations have been populated. Does not raise Initialized or invoke an
+/// application constructor. Validate while the candidate still has its parent
+/// and resource graph, before a reload adapter detaches its replacement content.
+pub fn prepare_candidate(root: &ferroui_base::StyledElement) -> Result<(), XamlLoadException> {
+    let mut elements = vec![root.to_ref()];
+    elements.extend(root.get_logical_descendants());
+    let lookups = LOOKUPS.with(|slot| {
+        let mut slot = slot.borrow_mut();
+        let mut selected = Vec::new();
+        if let Some(pending) = slot.as_mut() {
+            let mut rest = Vec::new();
+            for lookup in std::mem::take(pending) {
+                if lookup.target.upgrade().is_some_and(|target| {
+                    elements
+                        .iter()
+                        .any(|element| element.ptr_eq(&target))
+                }) {
+                    selected.push(lookup);
+                } else {
+                    rest.push(lookup);
+                }
+            }
+            *pending = rest;
+        }
+        selected
+    });
+    validate_lookups(lookups)?;
+    for element in elements {
+        ferroui_markup::markup::data::DelayedBinding::prepare_values(&element)
+            .map_err(|error| XamlLoadException::with_message(error.to_string()))?;
+    }
+    Ok(())
+}
+
+/// Builds a root's selected template against the detached resource graph.
+/// Does not attach it, raise TemplateApplied, or replace the visible template.
+/// Custom template builders with external effects require their own reload adapter.
+pub fn validate_root_template(root: &ferroui_base::StyledElement) -> Result<(), XamlLoadException> {
+    if let Some(control) = root.to_ref().cast::<ferroui_controls::primitives::TemplatedControl>() {
+        control.apply_styling();
+        if let Some(template) = control.template() {
+            if let Some(result) = template.build(&control) {
+                let (child, _) = result.deconstruct();
+                prepare_candidate(&child)?;
+            }
+        }
+    }
+    Ok(())
+}
+
+fn validate_lookups(lookups: Vec<Lookup>) -> Result<(), XamlLoadException> {
+    for lookup in lookups {
+        if let Some(target) = lookup.target.upgrade() {
+            if target
+                .try_find_resource(&lookup.key, lookup.theme.as_ref())
+                .is_none()
+            {
+                return Err(XamlLoadException::with_message(format!(
+                    "Static resource '{}' not found in reload candidate.",
+                    lookup.key
+                )));
+            }
+        }
+    }
+    Ok(())
+}
+
 /// A UI-thread scope that restores the enclosing validator even on unwind.
 /// Validate after construction, before publishing or attaching the candidate.
 /// Deferred templates are checked only if instantiated inside this scope.
@@ -52,20 +120,7 @@ impl ValidationScope {
                 .map(std::mem::take)
                 .unwrap_or_default()
         });
-        for lookup in lookups {
-            if let Some(target) = lookup.target.upgrade() {
-                if target
-                    .try_find_resource(&lookup.key, lookup.theme.as_ref())
-                    .is_none()
-                {
-                    return Err(XamlLoadException::with_message(format!(
-                        "Static resource '{}' not found in reload candidate.",
-                        lookup.key
-                    )));
-                }
-            }
-        }
-        Ok(())
+        validate_lookups(lookups)
     }
 }
 impl Drop for ValidationScope {

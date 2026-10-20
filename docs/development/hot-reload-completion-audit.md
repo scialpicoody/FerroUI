@@ -11,7 +11,7 @@ retain their original source revisions.
 | Runtime XAML and last-good replacement | Session, overlay, detached preparation, reversible content/component/panel adapters and failure tests exist. Native catalog probes ran on all three platforms at recorded revisions. |
 | Sessions and build/loading integration | Manifest, persistent/scoped populate hooks, weak targets, document buffers, directory polling/debounce, superseded revisions, transformed-document cache and debug/release gates exist. Build handler contracts include signatures and conservative unresolved-type admission, verified by build/engine tests on macOS/Linux and generated-manifest catalog tests on macOS. |
 | Stable windows, roots and view models | Native identity probes and lifecycle tests cover supported adapters. Root literal/static-resource/binding ownership supports removal and rollback. |
-| Compatible UI state | Focus, text/caret/selection, scroll and selection-model tests exist. Current working changes add application state callbacks and prevent two rapid accepted revisions from losing queued state. |
+| Compatible UI state | Focus, text/caret/selection, scroll and selection-model tests exist. Application state callbacks and queued-revision state preservation are implemented. |
 | Cached controls and subscriptions | Transactional refresh hooks and the Expander sample exercise rollback, disposal and retired-tree release. Ten catalog pages are registered. This is representative integration, not all-page support. |
 | Included resources/styles and static consumers | Registered application containers discover direct live includes; dependency revisions prepare resources and consumers coherently. Resource/theme probes and include lifetime tests exist. Standard inline component ownership remains incomplete below. |
 | Explicit Rust patching | Real Subsecond patches update existing callback subscriptions, with stable framework identity, conservative admission and controlled application. Native patch evidence exists for macOS, Linux and Windows at recorded revisions. |
@@ -21,8 +21,10 @@ retain their original source revisions.
 ## Required completion work
 
 1. **Close standard component integration gaps.** The shared component/panel
-   preparation currently rejects all XAML event handlers and most root property
-   elements, including inline resources/styles. Implement the needed ownership
+   preparation currently rejects XAML event handlers and inline root Styles.
+   Inline Resources now have an explicit ownership adapter, including deferred
+   template context transfer; mixed application/XAML provider trees still require
+   a composed preview adapter. Implement the remaining ownership
    adapters and exercise standard handlers and resource/style replacement through
    actual component-loading paths. Preserve the documented restart boundary for
    unsupported custom mutations and irreversible user code.
@@ -47,6 +49,36 @@ The subsequent compatibility metadata change passed 27 build tests and 99 engine
 tests on macOS and Linux, and six catalog reload integration tests on macOS.
 The latter include actual generated-manifest admission for binding-path edits and
 application state restoration. Final native acceptance remains a separate gate.
+
+The inline-resource implementation passed 106 engine tests on macOS and Linux.
+It covers component/panel dictionary identity, application keys/children, removed
+keys, repeated commit/rollback, deferred resource identity and ownership transfer.
+A root inline-theme test builds its template before commit, rejects missing or
+invalid template resources, and verifies that a later successful template resolves
+against the preserved root dictionary. Markup tests additionally check weak context
+rebasing, nested scopes on unwind, and deferred setter errors without activating
+data bindings: 271 markup and 205 XAML tests pass on both macOS and Linux.
+The engine suite also reproduces and fixes a realized brush losing its
+DynamicResource anchor when the candidate root dies; repeated rollback/commit,
+subsequent resource changes and retired-brush/root release are covered.
+All seven ControlCatalog reload integration tests pass on macOS, including
+resource replacement/removal through the registered component adapter with the
+catalog's assembly identity and assets. Commands:
+
+```sh
+cargo test --locked -p ferroui-hot-reload --lib
+cargo test --locked -p ferroui-markup -p ferroui-markup-xaml --features ferroui-markup-xaml/hot-reload --lib
+cargo test --locked -p control-catalog --features hot-reload --lib tests::hot_reload
+```
+
+The Linux release-mode check also passes with development features requested:
+
+```sh
+cargo check --locked -p control-catalog -p ferroui-hot-reload -p ferroui-hot-patch --features control-catalog/hot-reload --release
+```
+
+These checks do not close the separate handler/style or final
+native acceptance requirements.
 
 ## Follow-ups outside the first-release requirement
 
