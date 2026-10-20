@@ -43,14 +43,20 @@ struct ContentChange {
     old_source: String,
     new_source: String,
     accepted_source: Rc<RefCell<String>>,
+    detached_context: Option<crate::detached_context::DetachedContext>,
 }
 impl PreparedReload for ContentChange {
     fn commit(&mut self) -> Result<(), ReloadError> {
+        self.detached_context = crate::detached_context::DetachedContext::freeze(&self.before);
         self.host.set_content(self.after.clone());
         Ok(())
     }
     fn rollback(&mut self) {
+        let _retired = crate::detached_context::DetachedContext::freeze(&self.after);
         self.host.set_content(self.before.clone());
+        if let Some(context) = self.detached_context.take() {
+            context.restore();
+        }
     }
     fn finish(&mut self) {
         *self.accepted_source.borrow_mut() = self.new_source.clone();
@@ -108,6 +114,7 @@ impl ReloadTarget for ContentReloadTarget {
             old_source: self.accepted_source.borrow().clone(),
             new_source: source.clone(),
             accepted_source: self.accepted_source.clone(),
+            detached_context: None,
             before: host.content(),
             host,
             after: Some(after),

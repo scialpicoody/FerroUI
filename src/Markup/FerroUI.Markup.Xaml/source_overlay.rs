@@ -68,7 +68,8 @@ impl SourceRegistration {
 }
 impl Drop for SourceRegistration {
     fn drop(&mut self) {
-        PUBLISHED.with(|published| {
+        // A session can itself live in TLS and outlive this weak registry.
+        let _ = PUBLISHED.try_with(|published| {
             published.borrow_mut().remove(&self.id);
         });
     }
@@ -81,4 +82,27 @@ fn published_source(uri: &str) -> Option<String> {
             .filter_map(std::rc::Weak::upgrade)
             .find_map(|sources| sources.borrow().get(uri).cloned())
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn registration_can_outlive_its_thread_local_registry() {
+        std::thread::spawn(|| {
+            ferroui_base::ferro_thread_local! {
+                static OWNER: RefCell<Option<(Rc<RefCell<Rc<Sources>>>, SourceRegistration)>> = const { RefCell::new(None) };
+            }
+            // Initialize the owner first: its destructor runs after PUBLISHED.
+            OWNER.with(|owner| {
+                let sources = Rc::new(RefCell::new(Rc::new(Sources::from([
+                    ("ferres://teardown/View.xaml".into(), "<Border/>".into()),
+                ]))));
+                let registration = SourceRegistration::new(&sources).unwrap();
+                *owner.borrow_mut() = Some((sources, registration));
+            });
+            assert_eq!(source("ferres://teardown/View.xaml").as_deref(), Some("<Border/>"));
+        }).join().unwrap();
+    }
 }

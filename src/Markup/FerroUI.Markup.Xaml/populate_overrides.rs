@@ -65,6 +65,22 @@ impl FerroXamlLoader {
         })
     }
 
+    /// Removes only the persistent hook owned by the caller. Safe during TLS
+    /// teardown and independent of any active constructor-scoped override.
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    pub fn remove_populate_override(class: &'static TypeInfo, expected: &PopulateOverride) {
+        let _ = PERSISTENT.try_with(|map| {
+            let key = class as *const TypeInfo as usize;
+            let mut map = map.borrow_mut();
+            if map
+                .get(&key)
+                .is_some_and(|current| Rc::ptr_eq(current, expected))
+            {
+                map.remove(&key);
+            }
+        });
+    }
+
     #[inline]
     pub fn populate_override(class: &'static TypeInfo) -> Option<PopulateOverride> {
         #[cfg(any(feature = "runtime-populate", test))]
@@ -92,6 +108,29 @@ mod tests {
     use super::*;
     use ferroui_controls::Control;
     use std::cell::Cell;
+    #[test]
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    fn persistent_cleanup_preserves_other_owners_and_ignores_scoped_hooks() {
+        let first: PopulateOverride = Rc::new(|_, _| Ok(()));
+        let replacement: PopulateOverride = Rc::new(|_, _| Ok(()));
+        FerroXamlLoader::set_populate_override(Control::TYPE, Some(first.clone()));
+        FerroXamlLoader::set_populate_override(Control::TYPE, Some(replacement.clone()));
+        FerroXamlLoader::remove_populate_override(Control::TYPE, &first);
+        assert!(Rc::ptr_eq(
+            &FerroXamlLoader::populate_override(Control::TYPE).unwrap(),
+            &replacement
+        ));
+        let scoped: PopulateOverride = Rc::new(|_, _| Ok(()));
+        let guard = FerroXamlLoader::scoped_populate_override(Control::TYPE, scoped.clone());
+        FerroXamlLoader::remove_populate_override(Control::TYPE, &replacement);
+        assert!(Rc::ptr_eq(
+            &FerroXamlLoader::populate_override(Control::TYPE).unwrap(),
+            &scoped
+        ));
+        drop(guard);
+        assert!(FerroXamlLoader::populate_override(Control::TYPE).is_none());
+    }
+
     #[test]
     fn nested_override_restores_on_unwind() {
         let calls = Rc::new(Cell::new(0));

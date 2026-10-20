@@ -295,7 +295,7 @@ cargo run -p control-catalog-desktop --features hot-reload
 ```
 
 Supported pages are **Border, Slider, ProgressBar, CheckBox, Canvas,
-RadioButton, TextBlock, Viewbox, and Expander**. Edit their documents under
+RadioButton, TextBlock, Viewbox, Expander, and ListBox**. Edit their documents under
 `samples/ControlCatalog/Pages`. The custom catalog build emits a 220-document
 manifest, and the session resolves local include dependencies from that baseline.
 Build-time placeholder geometry substitution is shared with runtime updates, so
@@ -319,7 +319,7 @@ named controls and cancellation subscriptions are replaced transactionally. The 
 handlers remain available for rollback and are removed after successful commit;
 the page constructor and view-model initialization are not rerun. This remains
 partial catalog integration.
-`python3 scripts/hot-reload/catalog_probe.py` exercises all nine supported pages;
+`python3 scripts/hot-reload/catalog_probe.py` exercises all ten registered pages;
 `FERROUI_CATALOG_RELOAD_PAGES=Border,Slider` selects a subset. Each case changes an
 owned root attribute, rejects invalid syntax, recovers through atomic replacement,
 and removes the attribute. The probes also wait for the corresponding compositor
@@ -494,7 +494,7 @@ before patch application with a missing build-script object. The selection and
 process-local environment fixes have separate Python regression tests.
 A manual `Hot reload acceptance` workflow defines separate Rust patch and catalog
 XAML jobs on macOS, Windows and Linux. Catalog coverage includes manifest/runtime
-tests, compiled/runtime parity, the subscription-refresh adapter, all nine native
+tests, compiled/runtime parity, the subscription-refresh adapter, shared-selection regression, all ten native
 page probes, and release compilation with development features selected. Parity
 runs without `runtime-markup`, which otherwise excludes those tests. The workflow
 has not been dispatched from this worktree. Adding it is not evidence of passing
@@ -606,7 +606,7 @@ before the old process retired; the probe verified the next click advanced it fr
 7 to 8 and retained the accepted markup. Failed and retired generation directories were
 removed in the expected order, and shutdown removed the accepted generation.
 The native supervisor acceptance completed successfully under Xvfb.
-All nine supported catalog pages also passed native Linux reload, invalid-markup
+The original nine supported catalog pages also passed native Linux reload, invalid-markup
 retention/recovery, atomic-save, and owned root-property-removal checks. GNU ld
 exceeded the container's memory limit on this larger full-debug executable;
 `cargo rustc --locked -p control-catalog-desktop --features hot-reload --bin
@@ -664,6 +664,13 @@ state transfer are validated separately. The same 226 compiled/runtime tests als
 passed on Linux ARM64 under the isolated validation VM (Rust 1.93.0, LLD 18.1.3);
 the test executable used only the default and placeholder-branding features,
 without runtime-markup or hot-reload.
+
+The full macOS native desktop patch probe was rerun after the root-property write
+tracking change. It passed combined XAML/Rust revisions, invalid-markup
+and missing-library rollback, handler-only graph preservation, invalid registered
+view-builder rollback, and valid view rebuilding followed by another handler patch.
+The original event subscription, component root and framework type identity
+survived in the same process.
 
 Root-property ownership regression coverage now checks equal-value application
 writes both between reloads and between preparation and commit. The macOS run
@@ -735,7 +742,7 @@ to their recorded fixtures, platforms, sampling methods and sample counts.
 - Extend the component, panel and merged-resource adapters with root-property and
   subscription ownership tracking; complete automatic resource/style owner and
   consumer discovery. Explicit post-reload hooks exist for component and panel adapters.
-- Expand ControlCatalog beyond its nine supported pages,
+- Expand ControlCatalog beyond its ten registered pages,
   including cached-control refresh and disposal of application child subscriptions.
 - Complete metadata-based contracts, native directory notifications, dependency
   discovery/cache invalidation, custom selection-state adapters and repeated-template identity.
@@ -745,3 +752,36 @@ to their recorded fixtures, platforms, sampling methods and sample counts.
 
 Issues #233/#234 must remain open until these gates pass. No cross-platform or
 production-ready support is claimed by the new crates.
+
+### Shared selection during subtree replacement
+
+Content, component and panel transactions now preserve inherited data contexts on
+retired trees while detaching them. On rollback, the reattached tree resumes
+inheritance. Explicit application data contexts remain untouched. This avoids
+publishing empty binding values into view models shared with the replacement tree.
+It does not promise rollback of arbitrary application property callbacks.
+
+ListBoxPage is now registered for catalog reload. Its integration regression uses
+the actual 10,000-item view model and shared selection model in a shown test window.
+Three failed transactions followed by successful replacements preserve selection
+index 42 and the view-model identity; each retired tree is released. The regression
+first reproduced a selection-source panic and loss of selection, and passes with
+the context handoff. The 58 engine tests also pass on macOS. Native macOS ListBoxPage acceptance also passed valid edits, invalid-markup
+recovery, atomic save and root-attribute removal. Its three save-to-render
+observations were 1,826.92 ms, 213.57 ms and 186.57 ms under concurrent compilation;
+the first may include startup/navigation work. Raw stage timings and limitations
+are in `hot-reload-listbox-baseline-macos.json`. Linux/Windows coverage of the new
+handoff remains pending.
+
+Enabling automatic catalog tracking exposed a TLS destruction-order bug: a
+thread-local session could outlive its source registry. Registration cleanup now
+uses fallible TLS access, and persistent populate cleanup removes only the owning
+session's hook even while a constructor-scoped override is active.
+
+After the teardown fix, macOS passed all 58 reload tests, all 203 markup tests
+(including TLS destruction and persistent-hook ownership), and the catalog
+shared-selection regression with automatic tracking enabled. Release checks for
+both the engine and ControlCatalog with development features selected also passed.
+The Linux standalone registered-function probe passed two accepted patches and
+three view-transaction rollbacks, including a panicking candidate, while retaining
+its original framework object, type identity, subscription and counter.

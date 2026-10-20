@@ -35,6 +35,7 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
         "/Pages/TextBlockPage.xaml",
         "/Pages/ViewboxPage.xaml",
         "/Pages/ExpanderPage.xaml",
+        "/Pages/ListBoxPage.xaml",
     ]
     .contains(&path)
     {

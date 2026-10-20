@@ -101,6 +101,7 @@ struct Change {
     refresh: Option<Box<dyn PreparedReload>>,
     properties: Vec<Box<dyn PreparedReload>>,
     started: bool,
+    detached_contexts: Vec<crate::detached_context::DetachedContext>,
 }
 impl PreparedReload for Change {
     fn commit(&mut self) -> Result<(), ReloadError> {
@@ -112,6 +113,13 @@ impl PreparedReload for Change {
         for property in &mut self.properties {
             property.commit()?;
         }
+        self.detached_contexts = self
+            .old
+            .iter()
+            .filter_map(|child| {
+                crate::detached_context::DetachedContext::freeze(&Some(Control::boxed(child)))
+            })
+            .collect();
         self.started = true;
         for child in &self.old {
             self.root.children().remove(child.clone());
@@ -132,6 +140,13 @@ impl PreparedReload for Change {
         if !self.started {
             return;
         }
+        let _retired: Vec<_> = self
+            .new
+            .iter()
+            .filter_map(|child| {
+                crate::detached_context::DetachedContext::freeze(&Some(Control::boxed(child)))
+            })
+            .collect();
         // Also handles a partially completed removal/insertion before a setter panics.
         for child in self.new.iter().chain(&self.old) {
             self.root.children().remove(child.clone());
@@ -139,6 +154,9 @@ impl PreparedReload for Change {
         self.root
             .children()
             .insert_range(self.index, self.old.clone());
+        for context in self.detached_contexts.drain(..) {
+            context.restore();
+        }
         NameScope::set_name_scope(&self.root, self.old_scope.clone());
         if let Some(refresh) = &mut self.refresh {
             refresh.rollback();
@@ -280,6 +298,7 @@ impl ReloadTarget for PanelReloadTarget {
             refresh,
             properties,
             started: false,
+            detached_contexts: Vec::new(),
         }))
     }
 }

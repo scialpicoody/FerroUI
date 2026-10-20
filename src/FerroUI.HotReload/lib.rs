@@ -1,6 +1,7 @@
 //! Development reload transactions. All targets and commits remain on the creating UI thread.
 #![cfg(debug_assertions)]
 mod component;
+mod detached_context;
 mod frame_timing;
 pub use frame_timing::record_frame_timing;
 mod input_pause;
@@ -447,11 +448,7 @@ fn catch_reload<T>(action: impl FnOnce() -> Result<T, ReloadError>) -> Result<T,
 impl Drop for HotReloadSession {
     fn drop(&mut self) {
         for (class, installed) in &self.overrides {
-            if ferroui_markup_xaml::FerroXamlLoader::populate_override(class)
-                .is_some_and(|current| Rc::ptr_eq(&current, installed))
-            {
-                ferroui_markup_xaml::FerroXamlLoader::set_populate_override(class, None);
-            }
+            ferroui_markup_xaml::FerroXamlLoader::remove_populate_override(class, installed);
         }
     }
 }

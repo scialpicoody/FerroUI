@@ -225,12 +225,14 @@ struct Change {
     baseline: Rc<RefCell<String>>,
     refresh: Option<Box<dyn PreparedReload>>,
     properties: Vec<Box<dyn PreparedReload>>,
+    detached_context: Option<crate::detached_context::DetachedContext>,
 }
 impl PreparedReload for Change {
     fn commit(&mut self) -> Result<(), ReloadError> {
         for property in &mut self.properties {
             property.commit()?;
         }
+        self.detached_context = crate::detached_context::DetachedContext::freeze(&self.old_content);
         self.root.set_content(self.new_content.clone());
         NameScope::set_name_scope(&self.root.element(), self.new_scope.clone());
         if let Some(refresh) = &mut self.refresh {
@@ -242,7 +244,11 @@ impl PreparedReload for Change {
         for property in self.properties.iter_mut().rev() {
             property.rollback();
         }
+        let _retired = crate::detached_context::DetachedContext::freeze(&self.new_content);
         self.root.set_content(self.old_content.clone());
+        if let Some(context) = self.detached_context.take() {
+            context.restore();
+        }
         NameScope::set_name_scope(&self.root.element(), self.old_scope.clone());
         if let Some(refresh) = &mut self.refresh {
             refresh.rollback();
@@ -352,6 +358,7 @@ impl ReloadTarget for ComponentReloadTarget {
             baseline: self.baseline.clone(),
             refresh,
             properties,
+            detached_context: None,
         }))
     }
 }

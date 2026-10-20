@@ -89,6 +89,8 @@ jobs:
         run: cargo test --locked -p control-catalog --lib tests::compiled_markup
       - name: Cached references and subscription lifecycle
         run: cargo test --locked -p control-catalog --features hot-reload --lib expander_refresh_releases
+      - name: Shared view-model selection survives reload and rollback
+        run: cargo test --locked -p control-catalog --features hot-reload --lib tests::hot_reload
       - name: Build runtime-markup catalog and small fixture
         run: cargo build --locked -p control-catalog-desktop -p hot-reload-demo --features control-catalog-desktop/hot-reload,hot-reload-demo/patch-control
       - name: Native restart placement and state restoration
