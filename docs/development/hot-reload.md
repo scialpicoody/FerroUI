@@ -40,7 +40,8 @@ framework-wide integration and the three-platform release gate remain incomplete
   registered include dependencies; resource changes rebuild consumers, including
   static resource uses. Edits without a live validation adapter require restart.
   Failed resource/style loads reset their recursion guard and can be retried.
-  Automatic discovery of global resource/style owners remains unfinished.
+  Direct application resource/style includes can be discovered from development
+  source metadata; arbitrary global owner and consumer discovery remains unfinished.
 - `PanelReloadTarget`: preserves a framework panel and replaces an explicitly owned
   contiguous child range. Application children outside that range retain their
   identity/order; empty and growing ranges are supported. The adapter retains the
@@ -82,8 +83,13 @@ framework-wide integration and the three-platform release gate remain incomplete
   owners or publishing notifications. Consumers share the exact resource instance
   that commits, including chained resource dependencies. Duplicate ownership is
   rejected. Component, panel, style and resource adapters expose `with_dependencies`
-  for resource documents outside inline includes; automatic global consumer/owner
-  discovery is still unfinished.
+  for resource documents outside inline includes. `discover_merged` and style
+  `discover` find direct include contributions using canonical source metadata,
+  without loading assets. ControlCatalog registers application includes present in
+  its manifest and conservatively makes tracked pages depend on those documents.
+  Discovery currently runs when the catalog session starts; dynamically added
+  application includes, inline application resources, theme dictionary slots and
+  arbitrary static consumers still need integration.
   Custom resource adapters can implement `ReloadTarget::resource_preparation`
   and return `ResourcePreparation::new(original, factory)`. The factory returns
   the detached resource node and its reversible `PreparedReload`; the node must
@@ -821,3 +827,57 @@ The Linux native desktop patch probe passed the shared-context handoff build:
 combined revisions, both rollback paths, handler-only graph preservation and
 registered view-builder replacement. That snapshot predates the later TLS cleanup
 and resource-preview changes; it is not final acceptance of the current tree.
+
+### Include discovery integration
+
+Development resource-provider metadata exposes an include's canonical source URI
+without loading its document. Absolute sources retain their assembly; relative
+sources resolve against the include's original base URI. The interface addition
+and implementations are gated by both debug assertions and the development
+feature. Discovery adapters retain weak owners and preserve application-owned
+siblings. The application-resource/style integration regressions now use actual
+cached includes and discover their targets, checking subsequent replacement,
+missing-resource rejection and duplicate ownership.
+
+The real-application regression exposed group compilation removing include
+wrappers. Runtime document builds now record weak resource-root provenance so
+optimized includes remain discoverable. Provenance records do not retain the
+resource graph and are excluded from ordinary release builds. This covers the
+runtime-markup development path; emitted compiled resource factories do not yet
+record equivalent provenance.
+
+macOS validation for include discovery: 62 reload tests, 204 markup tests, both
+ControlCatalog reload integration tests, and the ControlCatalog release check
+with development features selected passed. Linux also passed all 62 reload and
+204 markup tests including the linked-root provenance change. These results do
+not replace native desktop acceptance.
+
+### Native application-resource acceptance
+
+After building ControlCatalog with `hot-reload`, run
+`python scripts/hot-reload/resource_probe.py` (under Xvfb on Linux). The probe
+uses isolated copies of BorderPage and CustomThemes, adds a resource, makes the
+page consume it through StaticResource, and changes the resource through atomic
+saves. It checks actual content width and stable native-window, component-root
+and view-model identities. Removing the required key must retain the previous
+content object and value; restoring it must recover. It finally removes the
+consumer and resource again. Opt-in `FERROUI_RELOAD_TARGET_STATE=1` emits only
+object identities, content width and revision outcome for these assertions.
+
+The macOS native run passed on the include-discovery engine with the new probe
+instrumentation. Its six save-to-render observations are recorded in
+`hot-reload-resource-baseline-macos.json`; four resource updates took 227–380 ms,
+and the two page updates took 177–187 ms. No compiler ran concurrently. These
+are individual observations, not percentile estimates or display scan-out
+measurements. They validate static resources on replacement children, not every
+root resource expression or deferred template. Linux execution of the same
+probe is pending; Windows acceptance remains outstanding.
+
+A fresh native macOS desktop patch probe also passed against the include-discovery
+engine using Rust 1.93.0 and dx/Subsecond 0.7.10. The process, live root, framework
+type identity and existing handler survived two combined Rust/XAML revisions and
+both rollback paths. Handler-only updates retained the child and markup revision;
+registered view-builder updates rejected invalid candidate markup with code/UI
+rollback, replaced valid views, and retained the derived view through a subsequent
+handler-only patch. This rerun covers the current engine through include discovery;
+Windows and the equivalent latest Linux native patch rerun remain outstanding.

@@ -42,3 +42,7 @@ pub use resources_changed_event_args::ResourcesChangedEventArgs;
 
 #[cfg(test)]
 mod resource_tests;
+
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+#[doc(hidden)]
+pub mod resource_provenance;

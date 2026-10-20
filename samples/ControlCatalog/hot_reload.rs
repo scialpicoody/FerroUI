@@ -4,6 +4,7 @@ use ferroui_base::{Ref, TypeInfo, WeakRef};
 use ferroui_controls::ContentPage;
 use ferroui_hot_reload::{
     ComponentReloadTarget, FileWatcher, HotReloadSession, ReloadManifest, ReloadTarget,
+    ResourceReloadTarget, StyleReloadTarget,
 };
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use std::{cell::RefCell, collections::BTreeSet, rc::Rc, time::Duration};
@@ -12,6 +13,8 @@ struct CatalogSession {
     session: HotReloadSession,
     watcher: FileWatcher,
     targets: Vec<(Rc<ComponentReloadTarget>, WeakRef<ContentPage>)>,
+    _resource_targets: Vec<Rc<dyn ReloadTarget>>,
+    resource_documents: Vec<String>,
     timer: Option<Rc<DispatcherTimer>>,
     bound: BTreeSet<String>,
 }
@@ -78,13 +81,47 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                 for source in manifest.sources.values_mut() {
                     *source = normalize(source.clone()).expect("valid embedded geometry");
                 }
-                let session = manifest
+                let mut session = manifest
                     .session()
                     .expect("register catalog reload documents");
+                let mut resource_targets: Vec<Rc<dyn ReloadTarget>> = Vec::new();
+                if let Some(application) = ferroui_controls::Application::current() {
+                    for target in ResourceReloadTarget::discover_merged(
+                        &application.resources(),
+                        configuration(),
+                    )
+                    .expect("discover catalog resource includes")
+                    {
+                        resource_targets.push(Rc::new(target));
+                    }
+                    for target in
+                        StyleReloadTarget::discover(&application.styles(), configuration())
+                            .expect("discover catalog style includes")
+                    {
+                        resource_targets.push(Rc::new(target));
+                    }
+                }
+                // This session owns only documents in its build manifest. Framework
+                // themes from dependency assemblies need their own source manifests.
+                resource_targets.retain(|target| {
+                    target
+                        .documents()
+                        .iter()
+                        .all(|uri| manifest.sources.contains_key(uri))
+                });
+                let resource_documents: Vec<_> = resource_targets
+                    .iter()
+                    .flat_map(|target| target.documents())
+                    .collect();
+                for target in &resource_targets {
+                    session.register_target(target);
+                }
                 let context = Rc::new(RefCell::new(CatalogSession {
                     session,
                     watcher,
                     targets: Vec::new(),
+                    _resource_targets: resource_targets,
+                    resource_documents,
                     timer: None,
                     bound: BTreeSet::new(),
                 }));
@@ -109,6 +146,20 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                             context.session.submit_files(batch);
                         }
                         if let Some(outcome) = context.session.apply_pending() {
+                            if std::env::var("FERROUI_RELOAD_TARGET_STATE").as_deref() == Ok("1") {
+                                use ferroui_markup_xaml::FromXamlObject;
+                                for (_, root) in &context.targets {
+                                    let Some(root) = root.upgrade() else { continue };
+                                    let Some(content) = root.content().as_ref().and_then(Ref::<ferroui_controls::Control>::from_xaml_object) else { continue };
+                                    let width = content.width();
+                                    let width = if width.is_finite() { width.to_string() } else { "null".into() };
+                                    let model = root.data_context().as_ref().map(|value| Rc::as_ptr(value) as *const ()).unwrap_or(std::ptr::null());
+                                    let window = ferroui_controls::TopLevel::get_top_level(Some(&root));
+                                    let window = window.as_ref().map(|window| &**window as *const _ as *const ()).unwrap_or(std::ptr::null());
+                                    eprintln!("FERROUI_RELOAD_TARGET_STATE={{\"revision\":{},\"status\":\"{:?}\",\"root\":\"{:p}\",\"window\":\"{:p}\",\"model\":\"{:p}\",\"content\":\"{:p}\",\"content_width\":{}}}", outcome.revision, outcome.status, &*root, window, model, &*content, width);
+                                }
+                            }
+
                             if let Some(top_level) = context.targets.iter().find_map(|(_, root)| {
                                 root.upgrade().and_then(|root| {
                                     ferroui_controls::TopLevel::get_top_level(Some(&root))
@@ -138,6 +189,7 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
         }
         let baseline = context.session.sources()[canonical.absolute_uri()].clone();
         let mut target = ComponentReloadTarget::content_page(&root, uri, baseline, configuration())
+            .with_dependencies(context.resource_documents.clone())
             .with_owned_root_property(ferroui_base::layout::Layoutable::width_property())
             .with_owned_root_property(ferroui_base::layout::Layoutable::height_property())
             .with_owned_root_property(ferroui_base::layout::Layoutable::margin_property());

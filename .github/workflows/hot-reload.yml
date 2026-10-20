@@ -111,5 +111,11 @@ jobs:
       - name: Native catalog reload under Xvfb
         if: runner.os == 'Linux'
         run: xvfb-run -a python scripts/hot-reload/catalog_probe.py
+      - name: Application resource and static-consumer acceptance
+        if: runner.os != 'Linux'
+        run: python scripts/hot-reload/resource_probe.py
+      - name: Application resource and static-consumer acceptance under Xvfb
+        if: runner.os == 'Linux'
+        run: xvfb-run -a python scripts/hot-reload/resource_probe.py
       - name: Release compilation with development features enabled
         run: cargo check --locked -p control-catalog -p ferroui-hot-reload -p ferroui-hot-patch --features control-catalog/hot-reload --release

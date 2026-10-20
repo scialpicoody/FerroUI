@@ -2253,17 +2253,12 @@ fn owned_root_property_rechecks_equal_value_writes_before_commit() {
 
 #[test]
 fn application_resource_revision_prepares_static_consumers_against_new_values() {
-    use ferroui_base::{
-        controls::{IResourceProvider, ResourceDictionary},
-        Ref,
-    };
+    use ferroui_base::{controls::IResourceProvider, Ref};
     use ferroui_controls::{
         testing::{TestServices, UnitTestApplication},
         Application, Border, ContentControl,
     };
-    use ferroui_markup_xaml::{
-        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
-    };
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
     let _application = UnitTestApplication::start(TestServices::styled_window());
     ferroui_controls::register_types();
     ferroui_markup_xaml::register_types();
@@ -2272,14 +2267,6 @@ fn application_resource_revision_prepares_static_consumers_against_new_values() 
             r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">{value}</x:Double></ResourceDictionary>"#
         )
     };
-    let initial = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
-        RuntimeXamlLoaderDocument::with_base_uri(None, &values(7)),
-        None,
-    )
-    .unwrap();
-    let dictionary = Ref::<ResourceDictionary>::from_xaml_object(&initial).unwrap();
-    let resources = Application::current().unwrap().resources();
-    resources.add_merged_dictionary(Rc::<dyn IResourceProvider>::from(dictionary));
     let resource_uri = "ferres://global/Values.xaml";
     let view_uri = "ferres://global/View.xaml";
     let view = r#"<Border xmlns="https://github.com/ferroui" Width="{StaticResource width}"/>"#;
@@ -2290,6 +2277,20 @@ fn application_resource_revision_prepares_static_consumers_against_new_values() 
     session
         .register_document(view_uri.into(), view.into())
         .unwrap();
+    ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
+    let base = ferroui_base::utilities::Uri::try_create(
+        view_uri,
+        ferroui_base::utilities::UriKind::Absolute,
+    )
+    .unwrap();
+    let include = ferroui_markup_xaml::styling::ResourceInclude::new(Some(base));
+    include.set_source(ferroui_base::utilities::Uri::try_create(
+        "Values.xaml",
+        ferroui_base::utilities::UriKind::RelativeOrAbsolute,
+    ));
+    assert_eq!(include.development_source().as_deref(), Some(resource_uri));
+    let resources = Application::current().unwrap().resources();
+    resources.add_merged_dictionary(include.as_resource_provider());
     let host = ContentControl::new();
     let consumer: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
         &host,
@@ -2297,15 +2298,14 @@ fn application_resource_revision_prepares_static_consumers_against_new_values() 
         vec![resource_uri.into()],
         RuntimeXamlLoaderConfiguration::default(),
     ));
-    let owner: Rc<dyn ReloadTarget> = Rc::new(
-        ResourceReloadTarget::merged(
-            &resources,
-            0,
-            resource_uri.into(),
-            RuntimeXamlLoaderConfiguration::default(),
-        )
-        .unwrap(),
-    );
+    let mut discovered = ResourceReloadTarget::discover_merged(
+        &resources,
+        RuntimeXamlLoaderConfiguration::default(),
+    )
+    .unwrap();
+    assert_eq!(discovered.len(), 1);
+    let owner: Rc<dyn ReloadTarget> = Rc::new(discovered.remove(0));
+    assert_eq!(owner.documents(), vec![resource_uri.to_owned()]);
     // Registration order must not determine which resource revision is observed.
     session.register_target(&consumer);
     session.register_target(&owner);
@@ -2485,14 +2485,12 @@ fn resource_previews_share_instances_and_resolve_chained_dependencies() {
 
 #[test]
 fn application_style_revision_prepares_static_consumers_against_new_values() {
-    use ferroui_base::{styling::IStyle, Ref};
+    use ferroui_base::{controls::IResourceProvider, Ref};
     use ferroui_controls::{
         testing::{TestServices, UnitTestApplication},
         Application, Border, ContentControl,
     };
-    use ferroui_markup_xaml::{
-        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
-    };
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
     let _application = UnitTestApplication::start(TestServices::styled_window());
     ferroui_controls::register_types();
     ferroui_markup_xaml::register_types();
@@ -2501,14 +2499,6 @@ fn application_style_revision_prepares_static_consumers_against_new_values() {
             r#"<Styles xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Styles.Resources><x:Double x:Key="width">{value}</x:Double></Styles.Resources></Styles>"#
         )
     };
-    let initial = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
-        RuntimeXamlLoaderDocument::with_base_uri(None, &values(7)),
-        None,
-    )
-    .unwrap();
-    let styles = Application::current().unwrap().styles();
-    let index = styles.count();
-    styles.add(Rc::<dyn IStyle>::from_xaml_object(&initial).unwrap());
     let resource_uri = "ferres://globalstyles/Values.xaml";
     let view_uri = "ferres://globalstyles/View.xaml";
     let view = r#"<Border xmlns="https://github.com/ferroui" Width="{StaticResource width}"/>"#;
@@ -2519,6 +2509,21 @@ fn application_style_revision_prepares_static_consumers_against_new_values() {
     session
         .register_document(view_uri.into(), view.into())
         .unwrap();
+    ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
+    let base = ferroui_base::utilities::Uri::try_create(
+        view_uri,
+        ferroui_base::utilities::UriKind::Absolute,
+    )
+    .unwrap();
+    let include = ferroui_markup_xaml::styling::StyleInclude::new(Some(base));
+    include.set_source(ferroui_base::utilities::Uri::try_create(
+        "Values.xaml",
+        ferroui_base::utilities::UriKind::RelativeOrAbsolute,
+    ));
+    assert_eq!(include.development_source().as_deref(), Some(resource_uri));
+    let styles = Application::current().unwrap().styles();
+    let index = styles.count();
+    styles.add(include.as_style());
     let host = ContentControl::new();
     let consumer: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
         &host,
@@ -2526,15 +2531,11 @@ fn application_style_revision_prepares_static_consumers_against_new_values() {
         vec![resource_uri.into()],
         RuntimeXamlLoaderConfiguration::default(),
     ));
-    let owner: Rc<dyn ReloadTarget> = Rc::new(
-        StyleReloadTarget::contribution(
-            &styles,
-            index,
-            resource_uri.into(),
-            RuntimeXamlLoaderConfiguration::default(),
-        )
-        .unwrap(),
-    );
+    let mut discovered =
+        StyleReloadTarget::discover(&styles, RuntimeXamlLoaderConfiguration::default()).unwrap();
+    assert_eq!(discovered.len(), 1);
+    let owner: Rc<dyn ReloadTarget> = Rc::new(discovered.remove(0));
+    assert_eq!(owner.documents(), vec![resource_uri.to_owned()]);
     // Registration order must not determine which resource revision is observed.
     session.register_target(&consumer);
     session.register_target(&owner);
@@ -2591,5 +2592,44 @@ fn application_style_revision_prepares_static_consumers_against_new_values() {
         notifications.get(),
         0,
         "ambiguous ownership mutated live resources"
+    );
+}
+
+#[test]
+fn linked_resource_provenance_does_not_retain_document_roots() {
+    use ferroui_base::{
+        controls::{IResourceProvider, ResourceDictionary},
+        threading::Dispatcher,
+        Ref,
+    };
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderDocument};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let uri = ferroui_base::utilities::Uri::try_create(
+        "ferres://provenance/Values.xaml",
+        ferroui_base::utilities::UriKind::Absolute,
+    )
+    .unwrap();
+    let value = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_base_uri(
+            Some(uri.clone()),
+            r#"<ResourceDictionary xmlns="https://github.com/ferroui"/>"#,
+        ),
+        None,
+    )
+    .unwrap();
+    let dictionary = Ref::<ResourceDictionary>::from_xaml_object(&value).unwrap();
+    let weak = dictionary.downgrade();
+    let provider: Rc<dyn IResourceProvider> = dictionary.into();
+    assert_eq!(
+        provider.development_source().as_deref(),
+        Some(uri.absolute_uri())
+    );
+    drop(value);
+    drop(provider);
+    assert!(
+        weak.upgrade().is_none(),
+        "development provenance retained a detached resource root"
     );
 }

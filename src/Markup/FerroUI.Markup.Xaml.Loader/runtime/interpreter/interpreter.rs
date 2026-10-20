@@ -412,6 +412,17 @@ impl Interpreter {
         let root_type = root_value.type_().get_clr_type()?;
         let instance = eval.evaluate(&root_value.as_node(), Some(&root_type))?;
         self.populate(root, parent_service_provider, &instance, document)?;
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        if let (Some(value), Some(uri)) = (&instance, &document.base_uri) {
+            use ferroui_markup_xaml::FromXamlObject;
+            // Linked includes call this same build path after their wrapper has
+            // been optimized away. Retain provenance, never the resource graph.
+            if Rc::<dyn ferroui_base::controls::IResourceProvider>::from_xaml_object(value).is_some() {
+                if let Some(root) = ferroui_base::Ref::<ferroui_base::FerroObject>::from_xaml_object(value) {
+                    ferroui_base::controls::resource_provenance::register(&root, uri.absolute_uri().to_owned());
+                }
+            }
+        }
         Ok(instance)
     }
 

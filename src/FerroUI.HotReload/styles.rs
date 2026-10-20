@@ -56,6 +56,25 @@ impl StyleReloadTarget {
             configuration,
         })
     }
+    /// Discovers direct style includes without evaluating their markup.
+    pub fn discover(
+        container: &Ref<Styles>,
+        configuration: RuntimeXamlLoaderConfiguration,
+    ) -> Result<Vec<Self>, ReloadError> {
+        container
+            .snapshot()
+            .iter()
+            .enumerate()
+            .filter_map(|(index, style)| {
+                style
+                    .as_resource_provider()?
+                    .development_source()
+                    .map(|uri| (index, uri))
+            })
+            .map(|(index, uri)| Self::contribution(container, index, uri, configuration.clone()))
+            .collect()
+    }
+
     pub fn is_alive(&self) -> bool {
         self.container.upgrade().is_some()
     }

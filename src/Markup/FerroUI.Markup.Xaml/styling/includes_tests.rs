@@ -701,3 +701,18 @@ fn failed_resource_and_style_loads_do_not_latch_the_loading_flag() {
     FerroXamlLoader::unregister_compiled_xaml("include.retry");
     scope.dispose();
 }
+
+#[cfg(all(debug_assertions, feature = "hot-reload"))]
+#[test]
+fn development_include_sources_resolve_without_loading_missing_assets() {
+    let resource = ResourceInclude::new(Some(uri("ferres://Discovery/Views/Page.xaml")));
+    resource.set_source(Some(uri("../Resources/Values.xaml")));
+    assert_eq!(resource.development_source().as_deref(), Some("ferres://discovery/Resources/Values.xaml"));
+    let style = StyleInclude::new(None);
+    style.set_source(Some(uri("Styles.xaml")));
+    assert_eq!(style.development_source(), None, "relative source needs a base URI");
+    style.set_source(Some(uri("ferres://Discovery/Styles.xaml")));
+    assert_eq!(style.development_source().as_deref(), Some("ferres://discovery/Styles.xaml"));
+    // No asset loader or runtime loader is installed: metadata discovery must
+    // never construct a dictionary/style or resolve an asset.
+}

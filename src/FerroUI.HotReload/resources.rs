@@ -60,6 +60,23 @@ impl ResourceReloadTarget {
             configuration,
         })
     }
+    /// Discovers direct merged include contributions without loading their source.
+    /// Keep the returned adapters alive and register their documents as dependencies
+    /// of static consumers. Nested includes are covered by source dependency traversal.
+    pub fn discover_merged(
+        container: &Ref<ResourceDictionary>,
+        configuration: RuntimeXamlLoaderConfiguration,
+    ) -> Result<Vec<Self>, ReloadError> {
+        container
+            .merged_dictionaries()
+            .to_vec()
+            .iter()
+            .enumerate()
+            .filter_map(|(index, provider)| provider.development_source().map(|uri| (index, uri)))
+            .map(|(index, uri)| Self::merged(container, index, uri, configuration.clone()))
+            .collect()
+    }
+
     pub fn is_alive(&self) -> bool {
         self.container.upgrade().is_some()
     }

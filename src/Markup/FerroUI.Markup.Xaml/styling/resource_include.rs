@@ -129,6 +129,17 @@ impl IResourceNode for ResourceInclude {
 }
 
 impl IResourceProvider for ResourceInclude {
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn development_source(&self) -> Option<String> {
+        let source = self.source()?;
+        let uri = if source.is_absolute_uri() {
+            source
+        } else {
+            Uri::combine(self.base_uri.as_ref()?, &source)
+        };
+        Some(uri.absolute_uri().to_owned())
+    }
+
     fn owner(&self) -> Option<ResourceHostRef> {
         self.loaded().owner()
     }
