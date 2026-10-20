@@ -3,7 +3,7 @@ use std::{
     collections::BTreeMap,
     path::PathBuf,
     sync::{
-        atomic::{AtomicBool, Ordering},
+        atomic::{AtomicBool, AtomicU64, Ordering},
         mpsc::{self, Receiver},
         Arc,
     },
@@ -21,6 +21,20 @@ pub struct FileChange {
 pub struct FileBatch {
     pub files: Vec<FileChange>,
     pub diagnostics: Vec<String>,
+    /// The watcher invalidates this as soon as a different read is observed,
+    /// including an unstable/partial save which has not passed debounce yet.
+    /// Editor-owned snapshots without a watcher can use `None`.
+    pub revision: Option<WatchRevision>,
+}
+#[derive(Clone, Debug)]
+pub struct WatchRevision {
+    current: Arc<AtomicU64>,
+    observed: u64,
+}
+impl WatchRevision {
+    pub fn is_current(&self) -> bool {
+        self.current.load(Ordering::Acquire) == self.observed
+    }
 }
 /// A document directory and its canonical assembly URI prefix (ending in `/`).
 #[derive(Clone, Debug)]
@@ -68,6 +82,8 @@ impl FileWatcher {
         let worker_stop = stop.clone();
         let (send, changes) = mpsc::channel();
         let worker = thread::spawn(move || {
+            let generation = Arc::new(AtomicU64::new(0));
+            let mut delivered_generation = 0;
             let read =
                 |path: &PathBuf| std::fs::read_to_string(path).map_err(|error| error.to_string());
             let mut accepted: BTreeMap<_, _> = match baseline {
@@ -96,9 +112,15 @@ impl FileWatcher {
                     .iter()
                     .map(|(uri, path)| (uri.clone(), read(path)))
                     .collect();
+                if next != previous || diagnostics != previous_diagnostics {
+                    generation.fetch_add(1, Ordering::AcqRel);
+                }
+                let observed = generation.load(Ordering::Acquire);
                 if next == previous
                     && diagnostics == previous_diagnostics
-                    && (next != accepted || diagnostics != accepted_diagnostics)
+                    && (next != accepted
+                        || diagnostics != accepted_diagnostics
+                        || observed != delivered_generation)
                 {
                     let batch = FileBatch {
                         files: next
@@ -109,12 +131,17 @@ impl FileWatcher {
                             })
                             .collect(),
                         diagnostics: diagnostics.clone(),
+                        revision: Some(WatchRevision {
+                            current: generation.clone(),
+                            observed,
+                        }),
                     };
                     if send.send(batch).is_err() {
                         return;
                     }
                     accepted = next.clone();
                     accepted_diagnostics = diagnostics.clone();
+                    delivered_generation = observed;
                 }
                 previous = next;
                 previous_diagnostics = diagnostics;

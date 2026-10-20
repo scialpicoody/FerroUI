@@ -229,6 +229,18 @@ requires explicit document paths. Directory watching still uses portable polling
 not native filesystem notification APIs. Pass the loaded sources to
 `FileWatcher::with_baseline` to avoid missing saves during startup.
 
+Each watcher batch carries a `WatchRevision`. A different observed read invalidates
+it immediately, before debounce completes. The session checks it before preparation
+and again before commit: superseded candidates are dropped without publishing
+sources, mutating the live graph, or invoking a coordinated code finalizer. Failed
+drafts remain available for the next stable batch. A transient edit followed by a
+revert issues a fresh token even when the text matches the previously delivered
+batch. `has_pending_changes` also reports an invalidated read awaiting debounce,
+so a coordinated handler patch cannot bypass that outstanding markup revision.
+Editor-owned `FileBatch` values can set `revision: None` when no watcher owns their
+source snapshot. The two watcher regressions pass in the 57-test macOS and Linux
+session suites.
+
 Use explicit development keys when a control needs an identity independent of its
 name (the prefix is arbitrary):
 
@@ -399,6 +411,12 @@ debug executable was linked with LLD 18.1.3. The
 [raw XAML baseline](hot-reload-baseline-linux.json) includes preparation, application,
 render completion, and atomic-save cases. These small samples are not percentile
 estimates. Windows timing and sustained-edit distributions remain unmeasured.
+The small Linux fixture subsequently passed valid edits, invalid-XAML recovery,
+atomic replacement, and an included-resource update with the supersession guards
+enabled. Its two view observations were 143.03 and 97.44 ms save-to-render; the
+included-resource observation was 145.09 ms. The separate
+[fixture baseline](hot-reload-fixture-baseline-linux.json) records all stages and
+the same VM/Xvfb limitations.
 
 ## Rust patch acceptance gate
 
@@ -585,8 +603,7 @@ retention/recovery, atomic-save, and owned root-property-removal checks. GNU ld
 exceeded the container's memory limit on this larger full-debug executable;
 `cargo rustc --locked -p control-catalog-desktop --features hot-reload --bin
 control-catalog-desktop -- -Clink-arg=-fuse-ld=lld` linked successfully with LLD
-18.1.3. This catalog result does not cover compiled/runtime parity or the standalone
-placement probe on Linux.
+18.1.3. This catalog result does not cover compiled/runtime parity on Linux.
 The macOS `restart_state_probe.py` separately changed the live window to 520×300
 at (80, 100), captured state after two clicks, and started another instance from
 that state. It verified the exact placement and navigation, then the next click
@@ -596,8 +613,10 @@ the supervisor probe separately verifies build-before-retire ordering.
 The native macOS backend requires an active display: an initial attempt failed in
 its render timer with `-6661` while the display was inactive. Repeating with
 `caffeinate -u -t 30 python3 scripts/hot-reload/restart_state_probe.py` passed.
-The placement probe is included in the three-platform acceptance workflow; Linux
-and Windows placement execution is still pending.
+The placement probe also passed natively under Linux/Xvfb, including exact
+non-default placement/navigation/counter restoration and invalid/frozen placement
+rejection. It is included in the three-platform workflow; Windows execution
+remains pending.
 The development manifest profile probe passed all ten cases on macOS and Linux,
 including custom profiles, build-script overrides and explicit target rustflags.
 The subsequent Linux regression run passed 53 reload tests, 21 patch tests, and
@@ -614,6 +633,13 @@ patch retaining the derived view. All 54 macOS session tests now pass, including
 explicit reapplication retaining unsaved drafts and read errors. The tooling suite
 passes 25 tests with two Windows-only skips after adding exact CRLF/UTF-8 source
 snapshot coverage.
+An additional macOS regression exercises a real background producer: handoff
+waits for its pause acknowledgement, production requests remain queued while
+state is captured, cancellation releases the queued work, a later participant
+failure resumes it, and a pre-existing pause survives handoff. FIFO barriers
+make these checks independent of sleeps or thread scheduling. This validates
+the application participant protocol; native application-specific asynchronous
+draining still requires integration coverage.
 
 The macOS compiled/runtime catalog parity suite passed all 226 tests after the
 ExpanderPage integration (`cargo test --locked -p control-catalog --lib
@@ -676,8 +702,8 @@ to their recorded fixtures, platforms, sampling methods and sample counts.
 - Generalize the owning sample supervisor to application registrations and explicit
   external build inputs (ignored workspace inputs now support `--input`). Keep pinned compiler replay and artifact provenance
   covered by native acceptance; source checks alone cannot validate jump-table addresses.
-- Exercise application-defined quiescence with asynchronous/background producers
-  beyond the timer participant tests, and validate source watching under
+- Exercise native application-defined quiescence with asynchronous/background producers
+  beyond the timer and acknowledged-worker participant tests, and validate source watching under
   sustained edits. The sample
   now automatically builds replacements for incompatible edits and retains the old
   process on failed builds or failed acknowledgement.

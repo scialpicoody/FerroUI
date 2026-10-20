@@ -148,4 +148,113 @@ mod tests {
         assert!(root.is_enabled());
         timer.stop();
     }
+
+    #[test]
+    fn background_producer_acknowledges_quiescence_and_resumes_queued_work() {
+        use std::sync::mpsc::{self, Sender};
+        enum Command {
+            Produce(Sender<u64>),
+            Pause(Sender<bool>),
+            Inspect(Sender<(u64, bool, usize)>),
+            Resume,
+            Stop,
+        }
+        struct Worker {
+            send: Sender<Command>,
+            join: Option<std::thread::JoinHandle<()>>,
+        }
+        impl Drop for Worker {
+            fn drop(&mut self) {
+                let _ = self.send.send(Command::Stop);
+                self.join.take().unwrap().join().unwrap();
+            }
+        }
+        let _dispatcher = Dispatcher::unit_test_scope();
+        let root = Border::new();
+        let (send, receive) = mpsc::channel();
+        let worker = Worker {
+            send,
+            join: Some(std::thread::spawn(move || {
+                let mut state = 0;
+                let mut paused = false;
+                let mut pending = Vec::new();
+                while let Ok(command) = receive.recv() {
+                    match command {
+                        Command::Produce(done) if paused => pending.push(done),
+                        Command::Produce(done) => {
+                            state += 1;
+                            let _ = done.send(state);
+                        }
+                        Command::Pause(done) => {
+                            let was_paused = paused;
+                            paused = true;
+                            let _ = done.send(was_paused);
+                        }
+                        Command::Inspect(done) => {
+                            let _ = done.send((state, paused, pending.len()));
+                        }
+                        Command::Resume => {
+                            paused = false;
+                            for done in pending.drain(..) {
+                                state += 1;
+                                let _ = done.send(state);
+                            }
+                        }
+                        Command::Stop => break,
+                    }
+                }
+            })),
+        };
+        let inspect = || {
+            let (send, receive) = mpsc::channel();
+            worker.send.send(Command::Inspect(send)).unwrap();
+            receive.recv_timeout(Duration::from_secs(5)).unwrap()
+        };
+        // The application adapter waits for the producer's acknowledgement; an
+        // input-only pause would not stop this non-UI state from changing.
+        let participant: Rc<dyn RestartParticipant> = Rc::new({
+            let commands = worker.send.clone();
+            move || {
+                let (send, receive) = mpsc::channel();
+                commands.send(Command::Pause(send)).unwrap();
+                let was_paused = receive.recv_timeout(Duration::from_secs(5)).unwrap();
+                let commands = commands.clone();
+                Ok(RestartResume::new(move || {
+                    if !was_paused {
+                        commands.send(Command::Resume).unwrap();
+                    }
+                }))
+            }
+        });
+        let handoff = RestartHandoff::begin(&root, [participant.clone()]).unwrap();
+        let (done, produced) = mpsc::channel();
+        worker.send.send(Command::Produce(done)).unwrap();
+        // Inspect is a FIFO barrier: the worker has seen the production request
+        // and queued it, so this assertion does not depend on scheduling/sleeps.
+        assert_eq!(inspect(), (0, true, 1));
+        assert!(matches!(
+            produced.try_recv(),
+            Err(mpsc::TryRecvError::Empty)
+        ));
+        assert!(!root.is_enabled());
+        drop(handoff);
+        assert_eq!(produced.recv_timeout(Duration::from_secs(5)).unwrap(), 1);
+        assert_eq!(inspect(), (1, false, 0));
+        assert!(root.is_enabled());
+
+        // Failure in another participant must release this background producer,
+        // just as cancellation of a replacement startup does.
+        let failure: Rc<dyn RestartParticipant> =
+            Rc::new(|| Err(ReloadError::Failed("replacement is not ready".into())));
+        assert!(RestartHandoff::begin(&root, [participant.clone(), failure]).is_err());
+        assert_eq!(inspect(), (1, false, 0));
+        assert!(root.is_enabled());
+
+        // A producer paused by the application before handoff stays paused.
+        let (send, receive) = mpsc::channel();
+        worker.send.send(Command::Pause(send)).unwrap();
+        assert!(!receive.recv_timeout(Duration::from_secs(5)).unwrap());
+        drop(RestartHandoff::begin(&root, [participant]).unwrap());
+        assert_eq!(inspect(), (1, true, 0));
+    }
 }

@@ -37,6 +37,187 @@ struct Target {
 }
 
 #[test]
+fn watcher_revision_changed_during_preparation_discards_candidate_before_commit() {
+    use std::time::{Duration, Instant};
+    struct SupersedingTarget {
+        inner: Target,
+        path: std::path::PathBuf,
+        revision: WatchRevision,
+        supersede: Cell<bool>,
+    }
+    impl ReloadTarget for SupersedingTarget {
+        fn documents(&self) -> Vec<String> {
+            self.inner.documents()
+        }
+        fn prepare(&self, sources: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError> {
+            let candidate = self.inner.prepare(sources)?;
+            if self.supersede.replace(false) {
+                std::fs::write(&self.path, "<View Width=\"3\"/>").unwrap();
+                let deadline = Instant::now() + Duration::from_secs(5);
+                while self.revision.is_current() {
+                    assert!(
+                        Instant::now() < deadline,
+                        "watcher did not observe newer source"
+                    );
+                    std::thread::sleep(Duration::from_millis(1));
+                }
+            }
+            Ok(candidate)
+        }
+    }
+    let directory = std::env::temp_dir().join(format!(
+        "ferroui-superseded-preparation-{}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&directory).unwrap();
+    let path = directory.join("View.xaml");
+    let uri = "ferres://test/View.xaml";
+    std::fs::write(&path, "<View/>").unwrap();
+    let watcher = FileWatcher::with_baseline(
+        BTreeMap::from([(uri.into(), path.clone())]),
+        Duration::from_millis(10),
+        BTreeMap::from([(uri.into(), "<View/>".into())]),
+    );
+    std::fs::write(&path, "<View Width=\"2\"/>").unwrap();
+    let batch = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(5))
+        .unwrap();
+    let revision = batch.revision.clone().unwrap();
+    let value = Rc::new(RefCell::new("before".into()));
+    let prepares = Rc::new(Cell::new(0));
+    let target: Rc<dyn ReloadTarget> = Rc::new(SupersedingTarget {
+        inner: Target {
+            value: value.clone(),
+            fail: Rc::new(Cell::new(false)),
+            prepares: prepares.clone(),
+        },
+        path: path.clone(),
+        revision,
+        supersede: Cell::new(true),
+    });
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), "<View/>".into())
+        .unwrap();
+    session.register_target(&target);
+    session.submit_files(batch);
+    let finalized = Cell::new(false);
+    let outcome = session
+        .apply_pending_with(|| {
+            finalized.set(true);
+            Ok(())
+        })
+        .unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Superseded);
+    assert_eq!(prepares.get(), 1);
+    assert!(!finalized.get());
+    assert_eq!(&*value.borrow(), "before");
+    assert_eq!(session.sources()[uri], "<View/>");
+    assert_eq!(session.applied_revision(), 0);
+    assert!(
+        session.apply_pending().is_none(),
+        "stale drafts must not spin"
+    );
+
+    session.submit_files(
+        watcher
+            .changes
+            .recv_timeout(Duration::from_secs(5))
+            .unwrap(),
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(&*value.borrow(), "<View Width=\"3\"/>");
+    assert!(!session.has_pending_changes());
+    let applied_read = session.watch_revision.clone().unwrap();
+    std::fs::write(&path, "<View Width=\"4\"/>").unwrap();
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while applied_read.is_current() {
+        assert!(Instant::now() < deadline);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    assert!(
+        session.has_pending_changes(),
+        "observed reads await debounce"
+    );
+    assert!(session
+        .apply_pending_with(|| {
+            panic!("must not finalize code while a newer read awaits admission")
+        })
+        .is_none());
+    drop(watcher);
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn watcher_reissues_a_current_revision_after_an_observed_edit_is_reverted() {
+    use std::time::{Duration, Instant};
+    let directory = std::env::temp_dir().join(format!(
+        "ferroui-reverted-watch-revision-{}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&directory).unwrap();
+    let path = directory.join("View.xaml");
+    let uri = "ferres://test/View.xaml";
+    std::fs::write(&path, "<View/>").unwrap();
+    let watcher = FileWatcher::with_baseline(
+        BTreeMap::from([(uri.into(), path.clone())]),
+        Duration::from_millis(50),
+        BTreeMap::from([(uri.into(), "<View/>".into())]),
+    );
+    let accepted_text = "<View Width=\"2\"/>";
+    std::fs::write(&path, accepted_text).unwrap();
+    let batch = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(5))
+        .unwrap();
+    let revision = batch.revision.clone().unwrap();
+    std::fs::write(&path, "<").unwrap();
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while revision.is_current() {
+        assert!(Instant::now() < deadline);
+        std::thread::sleep(Duration::from_millis(1));
+    }
+    std::fs::write(&path, accepted_text).unwrap();
+    let mut session = session();
+    let (_target, value) = target(&mut session, false);
+    session.submit_files(batch);
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Superseded
+    );
+    assert_eq!(&*value.borrow(), "before");
+    // Even if the partial edit never survives debounce, the previously delivered
+    // token is stale. Returning to its text must deliver a fresh usable token.
+    loop {
+        assert!(Instant::now() < deadline);
+        let batch = watcher
+            .changes
+            .recv_timeout(Duration::from_secs(5))
+            .unwrap();
+        if batch
+            .files
+            .iter()
+            .any(|file| file.contents.as_deref() == Ok(accepted_text))
+            && batch.revision.as_ref().unwrap().is_current()
+        {
+            session.submit_files(batch);
+            break;
+        }
+    }
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(&*value.borrow(), accepted_text);
+    drop(watcher);
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
 fn builder_reapplication_retains_drafts_and_read_errors() {
     let mut session = session();
     let (_target, value) = target(&mut session, false);
@@ -57,6 +238,7 @@ fn builder_reapplication_retains_drafts_and_read_errors() {
     assert!(session.applied_revision() > before);
 
     session.submit_files(FileBatch {
+        revision: None,
         files: vec![FileChange {
             uri: uri.into(),
             contents: Err("unreadable".into()),
@@ -680,6 +862,7 @@ fn directory_scan_failure_blocks_pending_edits_until_recovery() {
         "<Border Width=\"2\"/>".into(),
     );
     session.submit_files(FileBatch {
+        revision: None,
         files: Vec::new(),
         diagnostics: vec!["directory unavailable".into()],
     });
@@ -689,6 +872,7 @@ fn directory_scan_failure_blocks_pending_edits_until_recovery() {
     );
     assert_eq!(&*value.borrow(), "before");
     session.submit_files(FileBatch {
+        revision: None,
         files: Vec::new(),
         diagnostics: Vec::new(),
     });
@@ -709,6 +893,7 @@ fn missing_file_blocks_entire_revision_and_recovery_keeps_neighbor_edits() {
     let view = "ferres://test/View.xaml";
     let other = "ferres://test/Other.xaml";
     let batch = |other_contents| FileBatch {
+        revision: None,
         diagnostics: Vec::new(),
         files: vec![
             FileChange {

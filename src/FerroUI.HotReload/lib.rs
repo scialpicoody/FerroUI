@@ -31,7 +31,7 @@ use std::{
     rc::{Rc, Weak},
     time::{Duration, Instant},
 };
-pub use watcher::{FileBatch, FileChange, FileWatcher, WatchDirectory};
+pub use watcher::{FileBatch, FileChange, FileWatcher, WatchDirectory, WatchRevision};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ReloadError {
@@ -70,6 +70,7 @@ pub trait ReloadTarget {
 /// Session ownership is intentionally `!Send`: callers must pump it on the UI thread.
 #[derive(Default)]
 pub struct HotReloadSession {
+    watch_revision: Option<WatchRevision>,
     accepted: Rc<Sources>,
     published: Rc<std::cell::RefCell<Rc<Sources>>>,
     overrides: Vec<(
@@ -223,6 +224,7 @@ impl HotReloadSession {
     /// Editors can recover an unreadable file by submitting its unsaved text.
     pub fn submit_files(&mut self, batch: FileBatch) -> u64 {
         self.revision += 1;
+        self.watch_revision = batch.revision;
         self.watch_errors = batch.diagnostics;
         for file in batch.files {
             let uri = document_key(&file.uri);
@@ -249,7 +251,13 @@ impl HotReloadSession {
         self.applied_revision
     }
     pub fn has_pending_changes(&self) -> bool {
-        !self.pending.is_empty() || !self.read_errors.is_empty() || !self.watch_errors.is_empty()
+        !self.pending.is_empty()
+            || !self.read_errors.is_empty()
+            || !self.watch_errors.is_empty()
+            || self
+                .watch_revision
+                .as_ref()
+                .is_some_and(|revision| !revision.is_current())
     }
     pub fn apply_pending(&mut self) -> Option<ReloadOutcome> {
         self.apply_pending_with(|| Ok(()))
@@ -294,6 +302,16 @@ impl HotReloadSession {
             preparation: Duration::ZERO,
             application: Duration::ZERO,
         };
+        if self
+            .watch_revision
+            .as_ref()
+            .is_some_and(|revision| !revision.is_current())
+        {
+            outcome.status = ReloadStatus::Superseded;
+            outcome.diagnostic =
+                Some("A newer source read superseded this document revision".into());
+            return Some(outcome);
+        }
         if !self.read_errors.is_empty() || !self.watch_errors.is_empty() {
             outcome.fail(ReloadError::Failed(
                 self.read_errors
@@ -359,6 +377,15 @@ impl HotReloadSession {
                 return Some(outcome);
             }
         };
+        if self
+            .watch_revision
+            .as_ref()
+            .is_some_and(|revision| !revision.is_current())
+        {
+            outcome.status = ReloadStatus::Superseded;
+            outcome.diagnostic = Some("Sources changed while preparing the candidate view".into());
+            return Some(outcome);
+        }
         let start = Instant::now();
         let result = with_sources(candidate.clone(), || {
             for index in 0..prepared.len() {
