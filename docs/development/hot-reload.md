@@ -159,7 +159,11 @@ separately.
   eager validation of every deferred template remain unfinished.
 - Conservative transfer of uniquely identified text-control state, scroll offset and
   focus after the dispatcher processes the replacement. Existing property values
-  and bindings take precedence. Internal selection models restore single/multiple
+  and bindings take precedence. TextBox transfer retains the caret and both selection
+  endpoints, including backwards selections. The three cursor properties are
+  admitted together: a binding, existing value or authored change/removal on any
+  member prevents restoring the group, because their setters update each other.
+  Internal selection models restore single/multiple
   selection and anchors by unique item equality across reordering. Missing or
   ambiguous items are skipped, as are custom models, authored/bound selection,
   changed selection modes and controls that already have a selection. Direct-property
@@ -1037,6 +1041,14 @@ GNU ld was killed while linking under the local container's memory limit.
 Rebuilding the test target with
 `cargo rustc --locked -p control-catalog --features hot-reload --lib --profile test -- -Clink-arg=-fuse-ld=lld`
 and running that binary with the `tests::hot_reload` filter succeeded.
+
+The subsequent caret-state correction passed 89 engine cases on macOS (the
+88-case suite followed by the additional session regression) and the full
+89-case Linux suite. Before the fix, two regressions reproduced the lost active
+caret and stale selection after removing an authored caret position. Coverage
+also checks each two-way cursor binding and six successful replacement/failed
+commit cycles, including release of retired text boxes. These are engine tests;
+native Windows verification of this follow-up remains outstanding.
 
 These checks do not establish a green remote CI matrix or final feature
 acceptance. Current-revision native patch/supervisor runs and the remaining

@@ -1131,6 +1131,69 @@ fn runtime_content_replacement_retains_host_and_last_valid_control() {
 }
 
 #[test]
+fn runtime_text_cursor_survives_repeated_subtree_swaps_and_rollback() {
+    use ferroui_base::{threading::Dispatcher, Ref};
+    use ferroui_controls::{ContentControl, TextBox};
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let source = r#"<TextBox xmlns="https://github.com/ferroui" Name="edit" Width="100"/>"#;
+    let uri = "ferres://cursor/View.xaml";
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), source.into()).unwrap();
+    let host = ContentControl::new();
+    let target: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &host,
+        uri.into(),
+        vec![],
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&target);
+    session.submit(uri.into(), source.into());
+    assert_eq!(session.apply_pending().unwrap().status, ReloadStatus::Applied);
+    Dispatcher::ui_thread().run_jobs(None);
+    for revision in 1..=6 {
+        let old = Ref::<TextBox>::from_xaml_object(&host.content().unwrap()).unwrap();
+        let (start, end) = if revision % 2 == 0 { (5, 2) } else { (2, 5) };
+        old.set_text(Some("draft text"));
+        old.set_caret_index(end);
+        old.set_selection_start(start);
+        old.set_selection_end(end);
+        let retired = old.downgrade();
+        let update = source.replace("100", &(100 + revision).to_string());
+        session.submit(uri.into(), update.clone());
+        let failed = session
+            .apply_pending_with(|| {
+                Err(ReloadError::Failed("later target rejects the revision".into()))
+            })
+            .unwrap();
+        assert_eq!(failed.status, ReloadStatus::Failed, "{failed:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        let current = Ref::<TextBox>::from_xaml_object(&host.content().unwrap()).unwrap();
+        assert!(current.ptr_eq(&old));
+        assert_eq!(
+            (current.selection_start(), current.selection_end(), current.caret_index()),
+            (start, end, end),
+        );
+        drop(current);
+        session.submit(uri.into(), update);
+        let applied = session.apply_pending().unwrap();
+        assert_eq!(applied.status, ReloadStatus::Applied, "{applied:?}");
+        let new = Ref::<TextBox>::from_xaml_object(&host.content().unwrap()).unwrap();
+        assert!(!new.ptr_eq(&old));
+        Dispatcher::ui_thread().run_jobs(None);
+        assert_eq!(new.text().as_deref(), Some("draft text"));
+        assert_eq!(
+            (new.selection_start(), new.selection_end(), new.caret_index()),
+            (start, end, end),
+        );
+        drop(old);
+        assert!(retired.upgrade().is_none(), "state transfer retained a retired text box");
+    }
+}
+
+#[test]
 fn runtime_selection_restores_the_item_after_markup_reorders_it() {
     use ferroui_base::{threading::Dispatcher, Ref};
     use ferroui_controls::{ContentControl, ListBox};

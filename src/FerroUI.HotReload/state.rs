@@ -9,9 +9,15 @@ pub(crate) struct ViewState(BTreeMap<Vec<String>, Option<Entry>>);
 struct Entry {
     kind: &'static ferroui_base::TypeInfo,
     focused: bool,
-    text: Option<(Option<String>, i32, i32)>,
+    text: Option<TextState>,
     scroll: Option<Vector>,
     selection: Option<SelectionState>,
+}
+struct TextState {
+    value: Option<String>,
+    start: i32,
+    end: i32,
+    caret: i32,
 }
 struct SelectionState {
     items: Vec<Option<BoxedValue>>,
@@ -151,7 +157,12 @@ impl ViewState {
                     .is_some_and(|input| input.is_focused()),
                 text: element
                     .cast::<TextBox>()
-                    .map(|text| (text.text(), text.selection_start(), text.selection_end())),
+                    .map(|text| TextState {
+                        value: text.text(),
+                        start: text.selection_start(),
+                        end: text.selection_end(),
+                        caret: text.caret_index(),
+                    }),
                 scroll: element.cast::<ScrollViewer>().map(|scroll| scroll.offset()),
                 selection: element
                     .cast::<SelectingItemsControl>()
@@ -187,27 +198,40 @@ impl ViewState {
             if !std::ptr::eq(entry.kind, element.get_type()) {
                 continue;
             }
-            if let (Some(text), Some((value, start, end))) =
+            if let (Some(text), Some(saved)) =
                 (element.cast::<TextBox>(), &entry.text)
             {
                 if unchanged_unbound(before, after, &name, "Text")
                     && !text.is_set(TextBox::text_property())
+                    && !text.has_local_value_binding(TextBox::text_property())
                 {
-                    text.set_text(value.as_deref());
+                    text.set_text(saved.value.as_deref());
                 }
-                // Restore selection only against identical text; never writes through a Text binding.
-                if !text.is_set(TextBox::selection_start_property())
-                    && !text.is_set(TextBox::selection_end_property())
-                    && text.text() == *value
-                    && unchanged_unbound(before, after, &name, "SelectionStart")
-                    && unchanged_unbound(before, after, &name, "SelectionEnd")
+                // Caret and selection setters update each other. Admit the entire group
+                // before writing any member, so neither authored changes (including
+                // removal) nor a two-way binding on another member can be overwritten.
+                let cursor_properties = [
+                    TextBox::caret_index_property(),
+                    TextBox::selection_start_property(),
+                    TextBox::selection_end_property(),
+                ];
+                if text.text() == saved.value
+                    && cursor_properties.iter().all(|property| {
+                        !text.is_set(*property)
+                            && !text.has_local_value_binding(property)
+                            && unchanged_unbound(before, after, &name, property.name())
+                    })
                 {
-                    text.set_selection_start(*start);
-                    text.set_selection_end(*end);
+                    // Setting the caret collapses selection. Set it first, then restore
+                    // the endpoints in their original order, including backwards ranges.
+                    text.set_caret_index(saved.caret);
+                    text.set_selection_start(saved.start);
+                    text.set_selection_end(saved.end);
                 }
             }
             if let (Some(scroll), Some(offset)) = (element.cast::<ScrollViewer>(), entry.scroll) {
                 if !scroll.is_set(ScrollViewer::offset_property())
+                    && !scroll.has_local_value_binding(ScrollViewer::offset_property())
                     && unchanged_unbound(before, after, &name, "Offset")
                 {
                     scroll.set_offset(offset);
@@ -343,6 +367,84 @@ mod tests {
         state.restore(&after, &source, &source);
         assert_eq!(new.text().as_deref(), Some("draft text"));
         assert_eq!((new.selection_start(), new.selection_end()), (2, 5));
+    }
+    #[test]
+    fn selection_restores_its_active_caret_end() {
+        let _scope = Dispatcher::unit_test_scope();
+        let source = source("");
+        for (start, end, caret) in [(2, 5, 5), (5, 2, 2), (2, 5, 2), (4, 4, 4)] {
+            let (before, old) = load(&source);
+            old.set_text(Some("draft text"));
+            old.set_caret_index(caret);
+            old.set_selection_start(start);
+            old.set_selection_end(end);
+            let state = ViewState::capture(Some(&before), &source);
+            let (after, new) = load(&source);
+            state.restore(&after, &source, &source);
+            assert_eq!(
+                (new.selection_start(), new.selection_end(), new.caret_index()),
+                (start, end, caret),
+            );
+        }
+    }
+    #[test]
+    fn removed_authored_caret_does_not_restore_old_selection() {
+        let _scope = Dispatcher::unit_test_scope();
+        let before_source = source(r#"CaretIndex="4""#);
+        let after_source = source("");
+        let (before, old) = load(&before_source);
+        old.set_text(Some("draft text"));
+        old.set_caret_index(5);
+        old.set_selection_start(2);
+        old.set_selection_end(5);
+        let state = ViewState::capture(Some(&before), &before_source);
+        let (after, new) = load(&after_source);
+        state.restore(&after, &before_source, &after_source);
+        assert_eq!(new.text().as_deref(), Some("draft text"));
+        assert_eq!(
+            (new.selection_start(), new.selection_end(), new.caret_index()),
+            (0, 0, 0),
+        );
+    }
+    #[test]
+    fn cursor_restoration_never_writes_through_any_two_way_cursor_binding() {
+        use ferroui_base::data::{BindingMode, IndexerBinding};
+        let _scope = Dispatcher::unit_test_scope();
+        let source = source("");
+        let (before, old) = load(&source);
+        old.set_text(Some("draft text"));
+        old.set_caret_index(5);
+        old.set_selection_start(2);
+        old.set_selection_end(5);
+        let state = ViewState::capture(Some(&before), &source);
+        for property in [
+            TextBox::caret_index_property(),
+            TextBox::selection_start_property(),
+            TextBox::selection_end_property(),
+        ] {
+            let (after, new) = load(&source);
+            new.set_text(Some("draft text"));
+            let model = TextBox::new();
+            model.set_text(Some("draft text"));
+            model.set_caret_index(1);
+            let binding = IndexerBinding::new(
+                model.clone().upcast(),
+                TextBox::caret_index_property().as_property(),
+                BindingMode::TwoWay,
+            );
+            let expression = new.bind_binding(property.as_property(), &binding);
+            let expected = (new.caret_index(), new.selection_start(), new.selection_end());
+            state.restore(&after, &source, &source);
+            assert_eq!(
+                (new.caret_index(), new.selection_start(), new.selection_end()),
+                expected,
+                "restoration must leave the whole bound cursor group intact",
+            );
+            assert_eq!(model.caret_index(), 1, "restoration wrote into the model");
+            new.set_value(property, 3);
+            assert_eq!(model.caret_index(), 3, "the original binding must remain active");
+            expression.dispose();
+        }
     }
     #[test]
     fn authored_changes_and_removals_take_precedence() {
