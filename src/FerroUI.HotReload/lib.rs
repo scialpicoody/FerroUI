@@ -5,6 +5,7 @@ mod detached_context;
 mod frame_timing;
 pub use frame_timing::record_frame_timing;
 mod input_pause;
+mod include_tracking;
 pub use input_pause::InputPause;
 mod restart_handoff;
 pub use restart_handoff::{RestartHandoff, RestartParticipant, RestartResume};
@@ -95,6 +96,7 @@ pub struct HotReloadSession {
     read_errors: BTreeMap<String, String>,
     watch_errors: Vec<String>,
     targets: Vec<Weak<dyn ReloadTarget>>,
+    includes: include_tracking::IncludeTracking,
     revision: u64,
     applied_revision: u64,
     attempted_revision: u64,
@@ -184,6 +186,28 @@ impl HotReloadSession {
         if !self.pending.is_empty() {
             self.revision += 1;
         }
+    }
+    /// Track direct resource includes in this container, including later additions
+    /// and removals. Only includes whose documents belong to this session are adopted.
+    /// Owners are weakly held. Repeated registration keeps the first configuration.
+    /// All registered targets conservatively depend on these includes, so static
+    /// consumers prepare with the same resource revision. Do not also manually
+    /// register adapters for the same contributions.
+    pub fn track_resource_includes(
+        &mut self,
+        owner: &ferroui_base::Ref<ferroui_base::controls::ResourceDictionary>,
+        configuration: ferroui_markup_xaml::RuntimeXamlLoaderConfiguration,
+    ) {
+        self.includes.resources(owner, configuration);
+    }
+    /// Track direct style includes with the same ownership and dependency rules as
+    /// `track_resource_includes`. Arbitrary inline styles need explicit adapters.
+    pub fn track_style_includes(
+        &mut self,
+        owner: &ferroui_base::Ref<ferroui_base::styling::Styles>,
+        configuration: ferroui_markup_xaml::RuntimeXamlLoaderConfiguration,
+    ) {
+        self.includes.styles(owner, configuration);
     }
     pub fn submit(&mut self, uri: String, text: String) -> u64 {
         self.revision += 1;
@@ -290,9 +314,19 @@ impl HotReloadSession {
         &mut self,
         finalize: impl FnOnce() -> Result<(), ReloadError>,
     ) -> Option<ReloadOutcome> {
-        if (self.pending.is_empty() && self.read_errors.is_empty() && self.watch_errors.is_empty())
-            || self.attempted_revision == self.revision
+        if self.pending.is_empty() && self.read_errors.is_empty() && self.watch_errors.is_empty() {
+            return None;
+        }
+        let start = Instant::now();
+        let discovered = catch_reload(|| self.includes.refresh(&self.accepted));
+        if self.attempted_revision == self.revision
+            && discovered.as_ref().is_ok_and(|(_, changed)| *changed)
         {
+            // A newly attached include can validate a previously rejected draft
+            // without requiring another filesystem save.
+            self.revision += 1;
+        }
+        if self.attempted_revision == self.revision {
             return None;
         }
         self.attempted_revision = self.revision;
@@ -335,7 +369,6 @@ impl HotReloadSession {
             ));
             return Some(outcome);
         }
-        let start = Instant::now();
         let mut candidate = (*self.accepted).clone();
         for (uri, text) in &pending {
             let check =
@@ -359,14 +392,21 @@ impl HotReloadSession {
         self.targets.retain(|target| target.strong_count() != 0);
         let affected: BTreeSet<_> = pending.keys().cloned().collect();
         let prepared = with_sources(candidate.clone(), || {
+            let (include_targets, _) = discovered?;
+            let ambient_documents: Vec<_> = include_targets
+                .iter()
+                .flat_map(|target| target.documents())
+                .collect();
             let validation = ferroui_markup_xaml::reload_validation::ValidationScope::new();
             let previews = ferroui_base::controls::resource_preview::ResourcePreviewScope::new();
             let mut prepared = Vec::new();
             let mut resources = Vec::new();
             let mut consumers = Vec::new();
             let mut covered = BTreeSet::new();
-            for target in self.targets.iter().filter_map(Weak::upgrade) {
-                let dependencies = dependencies_of(target.documents(), &candidate);
+            for target in self.targets.iter().filter_map(Weak::upgrade).chain(include_targets) {
+                let mut documents = target.documents();
+                documents.extend(ambient_documents.iter().cloned());
+                let dependencies = dependencies_of(documents, &candidate);
                 if !dependencies.is_disjoint(&affected) {
                     if let Some(resource) =
                         catch_reload(|| target.clone().resource_preparation(candidate.clone()))?

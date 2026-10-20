@@ -78,6 +78,17 @@ impl StyleReloadTarget {
     pub fn is_alive(&self) -> bool {
         self.container.upgrade().is_some()
     }
+    pub(crate) fn tracks(&self, style: &Rc<dyn IStyle>) -> bool {
+        self.current
+            .borrow()
+            .upgrade()
+            .is_some_and(|current| style_ptr_eq(&current, style))
+    }
+    pub(crate) fn is_attached(&self) -> bool {
+        self.container.upgrade().is_some_and(|container| {
+            container.snapshot().iter().any(|style| self.tracks(style))
+        })
+    }
 }
 struct Change {
     container: Ref<Styles>,

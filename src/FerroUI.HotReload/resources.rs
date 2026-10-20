@@ -80,6 +80,17 @@ impl ResourceReloadTarget {
     pub fn is_alive(&self) -> bool {
         self.container.upgrade().is_some()
     }
+    pub(crate) fn tracks(&self, provider: &Rc<dyn IResourceProvider>) -> bool {
+        self.current
+            .borrow()
+            .upgrade()
+            .is_some_and(|current| resource_provider_ptr_eq(&current, provider))
+    }
+    pub(crate) fn is_attached(&self) -> bool {
+        self.container.upgrade().is_some_and(|container| {
+            container.merged_dictionaries().to_vec().iter().any(|provider| self.tracks(provider))
+        })
+    }
 }
 struct Change {
     container: Ref<ResourceDictionary>,

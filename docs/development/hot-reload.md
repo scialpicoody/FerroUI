@@ -136,11 +136,19 @@ separately.
   rejected. Component, panel, style and resource adapters expose `with_dependencies`
   for resource documents outside inline includes. `discover_merged` and style
   `discover` find direct include contributions using canonical source metadata,
-  without loading assets. ControlCatalog registers application includes present in
-  its manifest and conservatively makes tracked pages depend on those documents.
-  Discovery currently runs when the catalog session starts; dynamically added
-  application includes, inline application resources, theme dictionary slots and
-  arbitrary static consumers still need integration.
+  without loading assets. `HotReloadSession::track_resource_includes` and
+  `track_style_includes` keep weak references to explicitly registered containers
+  and discover their direct include contributions before pending revisions.
+  Only documents registered with that session are adopted. Accepted replacements
+  stay tracked; removed contributions and closed containers are retired. A new
+  include retries a previously unvalidated draft without another save.
+  Every registered target conservatively depends on the tracked include documents,
+  so static consumers prepare in the same transaction as resource/style owners.
+  Register each contribution either through container tracking or an explicit
+  adapter, not both. Repeated container registration is idempotent and retains
+  the first runtime configuration. ControlCatalog uses this tracking for its
+  application resource and style containers. Inline application resources, theme
+  dictionary slots and unregistered static consumers still need integration.
   Custom resource adapters can implement `ReloadTarget::resource_preparation`
   and return `ResourcePreparation::new(original, factory)`. The factory returns
   the detached resource node and its reversible `PreparedReload`; the node must
@@ -384,6 +392,12 @@ binding ownership rules above. New instances populate from accepted
 sources. Registering a newly opened target retries its pending draft without another
 save. Source directories are watched for new documents; unsupported documents and
 changes without a live validation adapter require restart.
+
+Application resource/style includes are rediscovered when a revision is pending,
+including contributions added after the catalog session starts. Source documents
+must belong to the catalog manifest; dependency-assembly themes are not adopted
+without their own registered sources. Discovery retains neither the application
+container nor retired dictionaries/styles.
 
 `FERROUI_HOT_RELOAD_ROOT` supplies a partial source overlay for acceptance probes:
 existing overlay files replace their manifest paths, and remaining files use the
@@ -1049,6 +1063,17 @@ caret and stale selection after removing an authored caret position. Coverage
 also checks each two-way cursor binding and six successful replacement/failed
 commit cycles, including release of retired text boxes. These are engine tests;
 native Windows verification of this follow-up remains outstanding.
+
+Live include tracking passed all 92 engine tests and all four
+catalog reload integration tests on macOS and Linux. The new cases exercise
+late include attachment, failed-draft retry, repeated replacement and rollback,
+removal/reinsertion, retired contribution release and weak container lifetimes.
+A fresh macOS catalog build also passed the native resource/root-theme probe
+through session container tracking, including missing-key rollback and atomic
+recovery with stable window/root/model identities. [The recorded run](hot-reload-include-tracking-macos.json)
+includes source/compiler/binary identities and six functional timing observations.
+It does not test native late attachment/removal or replace current-revision
+Windows/Linux native acceptance.
 
 These checks do not establish a green remote CI matrix or final feature
 acceptance. Current-revision native patch/supervisor runs and the remaining

@@ -4,7 +4,6 @@ use ferroui_base::{FerroLocator, Ref, TypeInfo, WeakRef};
 use ferroui_controls::ContentPage;
 use ferroui_hot_reload::{
     ComponentReloadTarget, FileWatcher, HotReloadSession, ReloadManifest, ReloadTarget,
-    ResourceReloadTarget, StyleReloadTarget,
 };
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use std::{cell::RefCell, collections::BTreeSet, rc::{Rc, Weak}, time::Duration};
@@ -13,8 +12,6 @@ struct CatalogSession {
     session: HotReloadSession,
     watcher: FileWatcher,
     targets: Vec<(Rc<ComponentReloadTarget>, WeakRef<ContentPage>)>,
-    _resource_targets: Vec<Rc<dyn ReloadTarget>>,
-    resource_documents: Vec<String>,
     timer: Option<Rc<DispatcherTimer>>,
     bound: BTreeSet<String>,
 }
@@ -109,44 +106,17 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                 let mut session = manifest
                     .session()
                     .expect("register catalog reload documents");
-                let mut resource_targets: Vec<Rc<dyn ReloadTarget>> = Vec::new();
                 if let Some(application) = ferroui_controls::Application::current() {
-                    for target in ResourceReloadTarget::discover_merged(
+                    session.track_resource_includes(
                         &application.resources(),
                         configuration(),
-                    )
-                    .expect("discover catalog resource includes")
-                    {
-                        resource_targets.push(Rc::new(target));
-                    }
-                    for target in
-                        StyleReloadTarget::discover(&application.styles(), configuration())
-                            .expect("discover catalog style includes")
-                    {
-                        resource_targets.push(Rc::new(target));
-                    }
-                }
-                // This session owns only documents in its build manifest. Framework
-                // themes from dependency assemblies need their own source manifests.
-                resource_targets.retain(|target| {
-                    target
-                        .documents()
-                        .iter()
-                        .all(|uri| manifest.sources.contains_key(uri))
-                });
-                let resource_documents: Vec<_> = resource_targets
-                    .iter()
-                    .flat_map(|target| target.documents())
-                    .collect();
-                for target in &resource_targets {
-                    session.register_target(target);
+                    );
+                    session.track_style_includes(&application.styles(), configuration());
                 }
                 let context = Rc::new(RefCell::new(CatalogSession {
                     session,
                     watcher,
                     targets: Vec::new(),
-                    _resource_targets: resource_targets,
-                    resource_documents,
                     timer: None,
                     bound: BTreeSet::new(),
                 }));
@@ -222,7 +192,7 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                 .expect("bind catalog class");
         }
         let baseline = context.session.sources()[canonical.absolute_uri()].clone();
-        let target = component_target(&root, uri, baseline, context.resource_documents.clone());
+        let target = component_target(&root, uri, baseline, Vec::new());
         let target = Rc::new(target);
         let erased: Rc<dyn ReloadTarget> = target.clone();
         context.session.register_target(&erased);

@@ -145,25 +145,18 @@ fn list_box_reload_preserves_shared_selection_on_commit_and_rollback() {
 #[test]
 fn application_resource_include_is_discovered_and_replaced() {
     use ferroui_controls::Application;
-    use ferroui_hot_reload::ResourceReloadTarget;
     let _application = super::support::start_catalog_app();
     let application = Application::current().unwrap();
     let resources = application.resources();
     let mut configuration = RuntimeXamlLoaderConfiguration::default();
     configuration.local_assembly = Some(&crate::register_types::ASSEMBLY);
-    let discovered = ResourceReloadTarget::discover_merged(&resources, configuration).unwrap();
     let uri = "ferres://controlcatalog/CustomThemes.xaml";
-    let target = discovered
-        .into_iter()
-        .find(|target| target.documents() == [uri.to_owned()])
-        .expect("application retains the CustomThemes include's source");
-    let target: Rc<dyn ReloadTarget> = Rc::new(target);
     let source = include_str!("../CustomThemes.xaml");
     let mut session = HotReloadSession::new();
     session
         .register_document(uri.into(), source.into())
         .unwrap();
-    session.register_target(&target);
+    session.track_resource_includes(&resources, configuration);
     let old = resources.merged_dictionaries().to_vec();
     session.submit(uri.into(), source.replace("#2B2B33", "#2C2C34"));
     let result = session.apply_pending().unwrap();
