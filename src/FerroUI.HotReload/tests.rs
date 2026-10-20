@@ -2250,3 +2250,346 @@ fn owned_root_property_rechecks_equal_value_writes_before_commit() {
     change.rollback();
     assert_eq!(root.width(), 20.0);
 }
+
+#[test]
+fn application_resource_revision_prepares_static_consumers_against_new_values() {
+    use ferroui_base::{
+        controls::{IResourceProvider, ResourceDictionary},
+        Ref,
+    };
+    use ferroui_controls::{
+        testing::{TestServices, UnitTestApplication},
+        Application, Border, ContentControl,
+    };
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _application = UnitTestApplication::start(TestServices::styled_window());
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let values = |value| {
+        format!(
+            r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">{value}</x:Double></ResourceDictionary>"#
+        )
+    };
+    let initial = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_base_uri(None, &values(7)),
+        None,
+    )
+    .unwrap();
+    let dictionary = Ref::<ResourceDictionary>::from_xaml_object(&initial).unwrap();
+    let resources = Application::current().unwrap().resources();
+    resources.add_merged_dictionary(Rc::<dyn IResourceProvider>::from(dictionary));
+    let resource_uri = "ferres://global/Values.xaml";
+    let view_uri = "ferres://global/View.xaml";
+    let view = r#"<Border xmlns="https://github.com/ferroui" Width="{StaticResource width}"/>"#;
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(resource_uri.into(), values(7))
+        .unwrap();
+    session
+        .register_document(view_uri.into(), view.into())
+        .unwrap();
+    let host = ContentControl::new();
+    let consumer: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &host,
+        view_uri.into(),
+        vec![resource_uri.into()],
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    let owner: Rc<dyn ReloadTarget> = Rc::new(
+        ResourceReloadTarget::merged(
+            &resources,
+            0,
+            resource_uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    // Registration order must not determine which resource revision is observed.
+    session.register_target(&consumer);
+    session.register_target(&owner);
+    session.submit(view_uri.into(), view.into());
+    let initial = session.apply_pending().unwrap();
+    assert_eq!(initial.status, ReloadStatus::Applied, "{initial:?}");
+    session.submit(resource_uri.into(), values(8));
+    let applied = session.apply_pending().unwrap();
+    assert_eq!(applied.status, ReloadStatus::Applied, "{applied:?}");
+    let child = Ref::<Border>::from_xaml_object(&host.content().unwrap()).unwrap();
+    child.initialize_if_needed();
+    assert_eq!(
+        child.width(),
+        8.0,
+        "static consumer used the old application resource"
+    );
+    let before = host.content();
+    let notifications = Rc::new(std::cell::Cell::new(0));
+    let observed = notifications.clone();
+    let _subscription = Application::current()
+        .unwrap()
+        .resources_changed(move |_| observed.set(observed.get() + 1));
+    session.submit(
+        resource_uri.into(),
+        r#"<ResourceDictionary xmlns="https://github.com/ferroui"/>"#.into(),
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(host.content(), before);
+    assert_eq!(
+        notifications.get(),
+        0,
+        "failed preparation published resource notifications"
+    );
+    let duplicate: Rc<dyn ReloadTarget> = Rc::new(
+        ResourceReloadTarget::merged(
+            &resources,
+            0,
+            resource_uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&duplicate);
+    session.submit(resource_uri.into(), values(9));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(host.content(), before);
+    assert_eq!(
+        notifications.get(),
+        0,
+        "ambiguous ownership mutated live resources"
+    );
+}
+
+#[test]
+fn resource_previews_share_instances_and_resolve_chained_dependencies() {
+    use ferroui_base::{
+        controls::{IResourceProvider, ResourceDictionary, ResourceKey},
+        Ref,
+    };
+    use ferroui_controls::{
+        testing::{TestServices, UnitTestApplication},
+        Application, Border, ContentControl,
+    };
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _application = UnitTestApplication::start(TestServices::styled_window());
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let values = |value| {
+        format!(
+            r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">{value}</x:Double></ResourceDictionary>"#
+        )
+    };
+    let shared = r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Border x:Key="shared" Width="{StaticResource width}"/></ResourceDictionary>"#;
+    let load = |source: &str| {
+        let value = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+            RuntimeXamlLoaderDocument::with_base_uri(None, source),
+            None,
+        )
+        .unwrap();
+        Ref::<ResourceDictionary>::from_xaml_object(&value).unwrap()
+    };
+    let resources = Application::current().unwrap().resources();
+    resources.add_merged_dictionary(Rc::<dyn IResourceProvider>::from(load(&values(7))));
+    resources.add_merged_dictionary(Rc::<dyn IResourceProvider>::from(load(shared)));
+    let value_uri = "ferres://chain/Values.xaml";
+    let shared_uri = "ferres://chain/Shared.xaml";
+    let view_uri = "ferres://chain/View.xaml";
+    let view = r#"<Border xmlns="https://github.com/ferroui" Tag="{StaticResource shared}"/>"#;
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(value_uri.into(), values(7))
+        .unwrap();
+    session
+        .register_document(shared_uri.into(), shared.into())
+        .unwrap();
+    session
+        .register_document(view_uri.into(), view.into())
+        .unwrap();
+    let host = ContentControl::new();
+    let consumer: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &host,
+        view_uri.into(),
+        vec![shared_uri.into(), value_uri.into()],
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    let shared_owner: Rc<dyn ReloadTarget> = Rc::new(
+        ResourceReloadTarget::merged(
+            &resources,
+            1,
+            shared_uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap()
+        .with_dependencies([value_uri.into()]),
+    );
+    let values_owner: Rc<dyn ReloadTarget> = Rc::new(
+        ResourceReloadTarget::merged(
+            &resources,
+            0,
+            value_uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&shared_owner);
+    session.register_target(&consumer);
+    session.register_target(&values_owner);
+    session.submit(view_uri.into(), view.into());
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    let original = host.content();
+    session.submit(value_uri.into(), values(8));
+    assert_eq!(
+        session
+            .apply_pending_with(|| Err(ReloadError::Failed("later failure".into())))
+            .unwrap()
+            .status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(host.content(), original);
+    let old_shared = resources
+        .try_get_resource(&ResourceKey::from("shared"), None)
+        .unwrap()
+        .unwrap();
+    assert_eq!(
+        Ref::<Border>::from_xaml_object(&old_shared)
+            .unwrap()
+            .width(),
+        7.0
+    );
+    session.submit(value_uri.into(), values(8));
+    let applied = session.apply_pending().unwrap();
+    assert_eq!(applied.status, ReloadStatus::Applied, "{applied:?}");
+    let child = Ref::<Border>::from_xaml_object(&host.content().unwrap()).unwrap();
+    let consumed = Ref::<Border>::from_xaml_object(&child.tag().unwrap()).unwrap();
+    let published = resources
+        .try_get_resource(&ResourceKey::from("shared"), None)
+        .unwrap()
+        .unwrap();
+    let published = Ref::<Border>::from_xaml_object(&published).unwrap();
+    assert_eq!(consumed.width(), 8.0);
+    assert!(
+        consumed.ptr_eq(&published),
+        "static consumers must share the committed resource instance"
+    );
+}
+
+#[test]
+fn application_style_revision_prepares_static_consumers_against_new_values() {
+    use ferroui_base::{styling::IStyle, Ref};
+    use ferroui_controls::{
+        testing::{TestServices, UnitTestApplication},
+        Application, Border, ContentControl,
+    };
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _application = UnitTestApplication::start(TestServices::styled_window());
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let values = |value| {
+        format!(
+            r#"<Styles xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Styles.Resources><x:Double x:Key="width">{value}</x:Double></Styles.Resources></Styles>"#
+        )
+    };
+    let initial = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_base_uri(None, &values(7)),
+        None,
+    )
+    .unwrap();
+    let styles = Application::current().unwrap().styles();
+    let index = styles.count();
+    styles.add(Rc::<dyn IStyle>::from_xaml_object(&initial).unwrap());
+    let resource_uri = "ferres://globalstyles/Values.xaml";
+    let view_uri = "ferres://globalstyles/View.xaml";
+    let view = r#"<Border xmlns="https://github.com/ferroui" Width="{StaticResource width}"/>"#;
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(resource_uri.into(), values(7))
+        .unwrap();
+    session
+        .register_document(view_uri.into(), view.into())
+        .unwrap();
+    let host = ContentControl::new();
+    let consumer: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &host,
+        view_uri.into(),
+        vec![resource_uri.into()],
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    let owner: Rc<dyn ReloadTarget> = Rc::new(
+        StyleReloadTarget::contribution(
+            &styles,
+            index,
+            resource_uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    // Registration order must not determine which resource revision is observed.
+    session.register_target(&consumer);
+    session.register_target(&owner);
+    session.submit(view_uri.into(), view.into());
+    let initial = session.apply_pending().unwrap();
+    assert_eq!(initial.status, ReloadStatus::Applied, "{initial:?}");
+    session.submit(resource_uri.into(), values(8));
+    let applied = session.apply_pending().unwrap();
+    assert_eq!(applied.status, ReloadStatus::Applied, "{applied:?}");
+    let child = Ref::<Border>::from_xaml_object(&host.content().unwrap()).unwrap();
+    child.initialize_if_needed();
+    assert_eq!(
+        child.width(),
+        8.0,
+        "static consumer used the old application resource"
+    );
+    let before = host.content();
+    let notifications = Rc::new(std::cell::Cell::new(0));
+    let observed = notifications.clone();
+    let _subscription = Application::current()
+        .unwrap()
+        .resources_changed(move |_| observed.set(observed.get() + 1));
+    session.submit(
+        resource_uri.into(),
+        r#"<Styles xmlns="https://github.com/ferroui"/>"#.into(),
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(host.content(), before);
+    assert_eq!(
+        notifications.get(),
+        0,
+        "failed preparation published resource notifications"
+    );
+    let duplicate: Rc<dyn ReloadTarget> = Rc::new(
+        StyleReloadTarget::contribution(
+            &styles,
+            index,
+            resource_uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&duplicate);
+    session.submit(resource_uri.into(), values(9));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(host.content(), before);
+    assert_eq!(
+        notifications.get(),
+        0,
+        "ambiguous ownership mutated live resources"
+    );
+}

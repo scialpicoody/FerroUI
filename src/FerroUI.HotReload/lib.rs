@@ -9,7 +9,9 @@ pub use input_pause::InputPause;
 mod restart_handoff;
 pub use restart_handoff::{RestartHandoff, RestartParticipant, RestartResume};
 mod panel;
+mod resource_preparation;
 mod resources;
+pub use resource_preparation::ResourcePreparation;
 mod root_properties;
 mod styles;
 pub use panel::PanelReloadTarget;
@@ -66,6 +68,13 @@ pub trait ReloadTarget {
     /// Includes transitive document dependencies. A target may refresh this list after each revision.
     fn documents(&self) -> Vec<String>;
     fn prepare(&self, sources: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError>;
+    /// Resource owners provide a lazy preview before ordinary view preparation.
+    fn resource_preparation(
+        self: Rc<Self>,
+        _sources: Rc<Sources>,
+    ) -> Result<Option<ResourcePreparation>, ReloadError> {
+        Ok(None)
+    }
 }
 /// Sources become authoritative only after every affected live target commits successfully.
 /// Session ownership is intentionally `!Send`: callers must pump it on the UI thread.
@@ -349,12 +358,22 @@ impl HotReloadSession {
         let affected: BTreeSet<_> = pending.keys().cloned().collect();
         let prepared = with_sources(candidate.clone(), || {
             let validation = ferroui_markup_xaml::reload_validation::ValidationScope::new();
+            let previews = ferroui_base::controls::resource_preview::ResourcePreviewScope::new();
             let mut prepared = Vec::new();
+            let mut resources = Vec::new();
+            let mut consumers = Vec::new();
             let mut covered = BTreeSet::new();
             for target in self.targets.iter().filter_map(Weak::upgrade) {
                 let dependencies = dependencies_of(target.documents(), &candidate);
                 if !dependencies.is_disjoint(&affected) {
-                    prepared.push(catch_reload(|| target.prepare(candidate.clone()))?);
+                    if let Some(resource) =
+                        catch_reload(|| target.clone().resource_preparation(candidate.clone()))?
+                    {
+                        resource.register(&previews)?;
+                        resources.push(resource);
+                    } else {
+                        consumers.push(target);
+                    }
                     covered.extend(dependencies);
                 }
             }
@@ -362,6 +381,13 @@ impl HotReloadSession {
                 return Err(ReloadError::RestartRequired(
                     "Changed document has no live validation adapter".into(),
                 ));
+            }
+            // All factories are visible before any dictionary or view is built.
+            for resource in resources {
+                prepared.push(resource.take_change()?);
+            }
+            for target in consumers {
+                prepared.push(catch_reload(|| target.prepare(candidate.clone()))?);
             }
             catch_reload(|| {
                 validation
@@ -436,6 +462,9 @@ mod tests;
 
 fn catch_reload<T>(action: impl FnOnce() -> Result<T, ReloadError>) -> Result<T, ReloadError> {
     std::panic::catch_unwind(std::panic::AssertUnwindSafe(action)).unwrap_or_else(|payload| {
+        if let Some(error) = payload.downcast_ref::<ReloadError>() {
+            return Err(error.clone());
+        }
         let message = payload
             .downcast_ref::<String>()
             .cloned()

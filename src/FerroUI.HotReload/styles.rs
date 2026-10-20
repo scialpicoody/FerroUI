@@ -22,9 +22,21 @@ pub struct StyleReloadTarget {
     container: WeakRef<Styles>,
     current: Rc<RefCell<Weak<dyn IStyle>>>,
     uri: String,
+    dependencies: Vec<String>,
     configuration: RuntimeXamlLoaderConfiguration,
 }
 impl StyleReloadTarget {
+    /// Declares resources/styles outside the document's inline includes, such as
+    /// application resources consumed through StaticResource. Their revisions are
+    /// prepared and committed in the same transaction as this target.
+    pub fn with_dependencies(mut self, dependencies: impl IntoIterator<Item = String>) -> Self {
+        self.dependencies = dependencies
+            .into_iter()
+            .map(|uri| crate::document_key(&uri))
+            .collect();
+        self
+    }
+
     pub fn contribution(
         container: &Ref<Styles>,
         index: usize,
@@ -40,6 +52,7 @@ impl StyleReloadTarget {
             container: container.downgrade(),
             current: Rc::new(RefCell::new(Rc::downgrade(&provider))),
             uri: crate::document_key(&uri),
+            dependencies: Vec::new(),
             configuration,
         })
     }
@@ -93,9 +106,31 @@ impl PreparedReload for Change {
 }
 impl ReloadTarget for StyleReloadTarget {
     fn documents(&self) -> Vec<String> {
-        vec![self.uri.clone()]
+        let mut documents = self.dependencies.clone();
+        documents.push(self.uri.clone());
+        documents
     }
     fn prepare(&self, sources: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError> {
+        self.prepare_change(sources)
+            .map(|change| Box::new(change) as Box<dyn PreparedReload>)
+    }
+    fn resource_preparation(
+        self: Rc<Self>,
+        sources: Rc<Sources>,
+    ) -> Result<Option<crate::ResourcePreparation>, ReloadError> {
+        let old = self.current.borrow().upgrade().ok_or_else(|| {
+            ReloadError::RestartRequired("Owned resource/style contribution was removed".into())
+        })?;
+        let original: Rc<dyn ferroui_base::controls::IResourceNode> = old;
+        Ok(Some(crate::ResourcePreparation::new(original, move || {
+            let change = self.prepare_change(sources.clone())?;
+            let replacement: Rc<dyn ferroui_base::controls::IResourceNode> = change.new.clone();
+            Ok((replacement, Box::new(change)))
+        })))
+    }
+}
+impl StyleReloadTarget {
+    fn prepare_change(&self, sources: Rc<Sources>) -> Result<Change, ReloadError> {
         let container = self
             .container
             .upgrade()
@@ -142,13 +177,13 @@ impl ReloadTarget for StyleReloadTarget {
         .map_err(|error| ReloadError::Failed(error.to_string()))?;
         let new = Rc::<dyn IStyle>::from_xaml_object(&candidate)
             .ok_or_else(|| ReloadError::Failed("Expected style".into()))?;
-        Ok(Box::new(Change {
+        Ok(Change {
             container,
             index,
             old,
             new,
             current: self.current.clone(),
             started: false,
-        }))
+        })
     }
 }

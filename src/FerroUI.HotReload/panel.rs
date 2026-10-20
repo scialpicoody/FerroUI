@@ -23,6 +23,7 @@ struct Owned {
 pub struct PanelReloadTarget {
     root: WeakRef<Panel>,
     uri: String,
+    dependencies: Vec<String>,
     baseline: Rc<RefCell<String>>,
     owned: Rc<RefCell<Owned>>,
     configuration: RuntimeXamlLoaderConfiguration,
@@ -30,6 +31,17 @@ pub struct PanelReloadTarget {
     properties: Vec<Box<dyn crate::root_properties::OwnedRootProperty>>,
 }
 impl PanelReloadTarget {
+    /// Declares resources/styles outside the document's inline includes, such as
+    /// application resources consumed through StaticResource. Their revisions are
+    /// prepared and committed in the same transaction as this target.
+    pub fn with_dependencies(mut self, dependencies: impl IntoIterator<Item = String>) -> Self {
+        self.dependencies = dependencies
+            .into_iter()
+            .map(|uri| crate::document_key(&uri))
+            .collect();
+        self
+    }
+
     pub fn new(
         root: &Ref<Panel>,
         owned: Range<usize>,
@@ -49,6 +61,7 @@ impl PanelReloadTarget {
         Ok(Self {
             root: root.downgrade(),
             uri: crate::document_key(&uri),
+            dependencies: Vec::new(),
             baseline: Rc::new(RefCell::new(baseline)),
             owned: Rc::new(RefCell::new(Owned {
                 children: range.iter().map(Ref::downgrade).collect(),
@@ -194,7 +207,9 @@ impl PreparedReload for Change {
 }
 impl ReloadTarget for PanelReloadTarget {
     fn documents(&self) -> Vec<String> {
-        vec![self.uri.clone()]
+        let mut documents = self.dependencies.clone();
+        documents.push(self.uri.clone());
+        documents
     }
     fn prepare(&self, sources: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError> {
         let root = self

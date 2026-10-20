@@ -77,6 +77,21 @@ framework-wide integration and the three-platform release gate remain incomplete
   Candidate preparation checks deferred static-resource lookups after construction,
   allowing forward references while rejecting missing resources before commit.
   Lazy templates are checked only when instantiated during preparation.
+  Resource and style adapters register lazy candidate previews before any view is
+  prepared. Application-resource lookups see those previews without replacing live
+  owners or publishing notifications. Consumers share the exact resource instance
+  that commits, including chained resource dependencies. Duplicate ownership is
+  rejected. Component, panel, style and resource adapters expose `with_dependencies`
+  for resource documents outside inline includes; automatic global consumer/owner
+  discovery is still unfinished.
+  Custom resource adapters can implement `ReloadTarget::resource_preparation`
+  and return `ResourcePreparation::new(original, factory)`. The factory returns
+  the detached resource node and its reversible `PreparedReload`; the node must
+  be the same instance that commit publishes. Factories must not install live
+  owners or mutate application state. The session registers every preview before
+  evaluating factories, resolves dependencies lazily, and rejects recursive
+  candidate dependencies. Explicit document dependencies still determine which
+  targets participate in a revision.
 - `StyleReloadTarget::contribution`: replaces one explicitly owned `Style` or
   nested `Styles` entry. Removal detaches old selector subscriptions and setter
   frames; addition invalidates styling and templates on existing controls. Other
@@ -785,3 +800,24 @@ both the engine and ControlCatalog with development features selected also passe
 The Linux standalone registered-function probe passed two accepted patches and
 three view-transaction rollbacks, including a panicking candidate, while retaining
 its original framework object, type identity, subscription and counter.
+
+### Application-resource transaction coverage
+
+The global-resource regression initially accepted a new dictionary while a static
+consumer retained its previous value. Candidate-only resource resolution now fixes
+that mismatch. The macOS engine suite passes 61 tests, including application-style static
+resources, registration-order
+independence, removal of required resources, chained dependencies, shared resource
+identity after commit, rollback after a later failure, no notifications from failed
+preparation, and rejection of duplicate ownership. New previews are scoped to the
+UI thread and disappear on unwind; ordinary release lookup retains its original
+behavior. macOS also passes 203 markup tests, 4,380 base tests and a release
+check with development features selected. Linux passes all 61 engine and 203
+markup tests including the final ambient-lookup and application-style additions.
+These are unit/integration results; native desktop acceptance of this resource
+change remains outstanding on all three platforms.
+
+The Linux native desktop patch probe passed the shared-context handoff build:
+combined revisions, both rollback paths, handler-only graph preservation and
+registered view-builder replacement. That snapshot predates the later TLS cleanup
+and resource-preview changes; it is not final acceptance of the current tree.

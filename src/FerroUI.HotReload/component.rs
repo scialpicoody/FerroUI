@@ -67,12 +67,24 @@ pub trait ComponentRefresh {
 pub struct ComponentReloadTarget {
     root: Root,
     uri: String,
+    dependencies: Vec<String>,
     baseline: Rc<RefCell<String>>,
     configuration: RuntimeXamlLoaderConfiguration,
     refresh: Option<Rc<dyn ComponentRefresh>>,
     properties: Vec<Box<dyn crate::root_properties::OwnedRootProperty>>,
 }
 impl ComponentReloadTarget {
+    /// Declares resources/styles outside the document's inline includes, such as
+    /// application resources consumed through StaticResource. Their revisions are
+    /// prepared and committed in the same transaction as this target.
+    pub fn with_dependencies(mut self, dependencies: impl IntoIterator<Item = String>) -> Self {
+        self.dependencies = dependencies
+            .into_iter()
+            .map(|uri| crate::document_key(&uri))
+            .collect();
+        self
+    }
+
     pub fn content_control(
         root: &Ref<ContentControl>,
         uri: String,
@@ -82,6 +94,7 @@ impl ComponentReloadTarget {
         Self {
             root: Root::Control(root.downgrade()),
             uri: crate::document_key(&uri),
+            dependencies: Vec::new(),
             baseline: Rc::new(RefCell::new(baseline)),
             configuration,
             refresh: None,
@@ -97,6 +110,7 @@ impl ComponentReloadTarget {
         Self {
             root: Root::Page(root.downgrade()),
             uri: crate::document_key(&uri),
+            dependencies: Vec::new(),
             baseline: Rc::new(RefCell::new(baseline)),
             configuration,
             refresh: None,
@@ -282,7 +296,9 @@ impl PreparedReload for Change {
 }
 impl ReloadTarget for ComponentReloadTarget {
     fn documents(&self) -> Vec<String> {
-        vec![self.uri.clone()]
+        let mut documents = self.dependencies.clone();
+        documents.push(self.uri.clone());
+        documents
     }
     fn prepare(&self, sources: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError> {
         let root = self

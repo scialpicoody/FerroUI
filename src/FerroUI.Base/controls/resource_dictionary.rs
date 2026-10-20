@@ -69,7 +69,7 @@ impl ResourceProviderImpl for ResourceDictionary {
             if let Some(theme) = theme {
                 if *theme != ThemeVariant::default() {
                     if let Some(provider) = this.theme_dictionary(theme) {
-                        if let Some(value) = provider.try_get_resource(key, Some(theme)) {
+                        if let Some(value) = super::resource_preview::lookup(&*provider, key, Some(theme)) {
                             return Some(value);
                         }
                     }
@@ -77,7 +77,7 @@ impl ResourceProviderImpl for ResourceDictionary {
                     let mut theme_inherit = theme.inherit_variant();
                     while let Some(inherit) = theme_inherit {
                         if let Some(provider) = this.theme_dictionary(&inherit) {
-                            if let Some(value) = provider.try_get_resource(key, Some(theme)) {
+                            if let Some(value) = super::resource_preview::lookup(&*provider, key, Some(theme)) {
                                 return Some(value);
                             }
                         }
@@ -87,7 +87,7 @@ impl ResourceProviderImpl for ResourceDictionary {
             }
 
             if let Some(provider) = this.theme_dictionary(&ThemeVariant::default()) {
-                if let Some(value) = provider.try_get_resource(key, theme) {
+                if let Some(value) = super::resource_preview::lookup(&*provider, key, theme) {
                     return Some(value);
                 }
             }
@@ -96,7 +96,7 @@ impl ResourceProviderImpl for ResourceDictionary {
         if let Some(merged) = this.merged_dictionaries.get() {
             if !merged.is_empty() {
                 for provider in merged.snapshot().iter().rev() {
-                    if let Some(value) = provider.try_get_resource(key, theme) {
+                    if let Some(value) = super::resource_preview::lookup(&**provider, key, theme) {
                         return Some(value);
                     }
                 }

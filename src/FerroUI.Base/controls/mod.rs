@@ -18,6 +18,8 @@ mod resource_dictionary;
 mod resource_key;
 mod resource_node_extensions;
 mod resource_provider;
+#[doc(hidden)]
+pub mod resource_preview;
 mod resources_changed_event_args;
 
 pub use child_name_scope::ChildNameScope;

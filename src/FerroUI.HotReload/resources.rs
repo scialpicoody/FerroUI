@@ -25,9 +25,21 @@ pub struct ResourceReloadTarget {
     container: WeakRef<ResourceDictionary>,
     current: Rc<RefCell<Weak<dyn IResourceProvider>>>,
     uri: String,
+    dependencies: Vec<String>,
     configuration: RuntimeXamlLoaderConfiguration,
 }
 impl ResourceReloadTarget {
+    /// Declares resources/styles outside the document's inline includes, such as
+    /// application resources consumed through StaticResource. Their revisions are
+    /// prepared and committed in the same transaction as this target.
+    pub fn with_dependencies(mut self, dependencies: impl IntoIterator<Item = String>) -> Self {
+        self.dependencies = dependencies
+            .into_iter()
+            .map(|uri| crate::document_key(&uri))
+            .collect();
+        self
+    }
+
     pub fn merged(
         container: &Ref<ResourceDictionary>,
         index: usize,
@@ -44,6 +56,7 @@ impl ResourceReloadTarget {
             container: container.downgrade(),
             current: Rc::new(RefCell::new(Rc::downgrade(&provider))),
             uri: crate::document_key(&uri),
+            dependencies: Vec::new(),
             configuration,
         })
     }
@@ -91,9 +104,31 @@ impl PreparedReload for Change {
 }
 impl ReloadTarget for ResourceReloadTarget {
     fn documents(&self) -> Vec<String> {
-        vec![self.uri.clone()]
+        let mut documents = self.dependencies.clone();
+        documents.push(self.uri.clone());
+        documents
     }
     fn prepare(&self, sources: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError> {
+        self.prepare_change(sources)
+            .map(|change| Box::new(change) as Box<dyn PreparedReload>)
+    }
+    fn resource_preparation(
+        self: Rc<Self>,
+        sources: Rc<Sources>,
+    ) -> Result<Option<crate::ResourcePreparation>, ReloadError> {
+        let old = self.current.borrow().upgrade().ok_or_else(|| {
+            ReloadError::RestartRequired("Owned resource/style contribution was removed".into())
+        })?;
+        let original: Rc<dyn ferroui_base::controls::IResourceNode> = old;
+        Ok(Some(crate::ResourcePreparation::new(original, move || {
+            let change = self.prepare_change(sources.clone())?;
+            let replacement: Rc<dyn ferroui_base::controls::IResourceNode> = change.new.clone();
+            Ok((replacement, Box::new(change)))
+        })))
+    }
+}
+impl ResourceReloadTarget {
+    fn prepare_change(&self, sources: Rc<Sources>) -> Result<Change, ReloadError> {
         let container = self
             .container
             .upgrade()
@@ -141,13 +176,13 @@ impl ReloadTarget for ResourceReloadTarget {
         let dictionary = Ref::<ResourceDictionary>::from_xaml_object(&candidate)
             .ok_or_else(|| ReloadError::Failed("Expected resource dictionary".into()))?;
         let new: Rc<dyn IResourceProvider> = dictionary.into();
-        Ok(Box::new(Change {
+        Ok(Change {
             container,
             index,
             old,
             new,
             current: self.current.clone(),
             started: false,
-        }))
+        })
     }
 }
