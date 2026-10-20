@@ -8,6 +8,41 @@ use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use std::rc::Rc;
 
 #[test]
+fn generated_manifest_allows_binding_element_path_edits() {
+    use ferroui_controls::{CheckBox, ContentControl, TextBlock};
+    use ferroui_markup_xaml::FromXamlObject;
+    let _application = super::support::start_catalog_application();
+    let uri = "ferres://catalog-binding-contract/View.xaml";
+    let source = r#"<TextBlock xmlns="https://github.com/ferroui"><TextBlock.Text><Binding Path="Tag"/></TextBlock.Text></TextBlock>"#;
+    let mut manifest = ferroui_hot_reload::ReloadManifest::parse(
+        include_str!(env!("FERROUI_HOT_RELOAD_MANIFEST")),
+    ).unwrap();
+    manifest.sources.clear();
+    manifest.sources.insert(uri.into(), source.into());
+    let mut session = manifest.session().unwrap();
+    let model = CheckBox::new();
+    model.set_tag(Some(Rc::new("tag value".to_string())));
+    model.set_content(Some(Rc::new("content value".to_string())));
+    let host = ContentControl::new();
+    host.set_data_context(Some(Rc::new(model)));
+    let target: Rc<dyn ReloadTarget> = Rc::new(ferroui_hot_reload::ContentReloadTarget::new(
+        &host, uri.into(), Vec::new(), RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&target);
+    for (source, expected) in [
+        (source.to_owned(), "tag value"),
+        (source.replace("Path=\"Tag\"", "Path=\"Content\""), "content value"),
+    ] {
+        session.submit(uri.into(), source);
+        let outcome = session.apply_pending().unwrap();
+        assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        let text = Ref::<TextBlock>::from_xaml_object(&host.content().unwrap()).unwrap();
+        assert_eq!(text.text().as_deref(), Some(expected));
+    }
+}
+
+#[test]
 fn checkbox_application_state_adapter_preserves_input_and_respects_new_markup() {
     use ferroui_base::controls::NameScope;
     use ferroui_controls::CheckBox;
@@ -24,8 +59,14 @@ fn checkbox_application_state_adapter_preserves_input_and_respects_new_markup() 
     };
     let uri = "ferres://catalog-state-tests/CheckBoxPage.xaml";
     let source = include_str!("../Pages/CheckBoxPage.xaml");
-    let mut session = HotReloadSession::new();
-    session.register_document(uri.into(), source.into()).unwrap();
+    // Exercise the actual build metadata while isolating this session's document
+    // URI from the application's own development session.
+    let mut manifest = ferroui_hot_reload::ReloadManifest::parse(
+        include_str!(env!("FERROUI_HOT_RELOAD_MANIFEST")),
+    ).unwrap();
+    manifest.sources.clear();
+    manifest.sources.insert(uri.into(), source.into());
+    let mut session = manifest.session().unwrap();
     let target: Rc<dyn ReloadTarget> = Rc::new(crate::hot_reload::component_target(
         &root, uri.into(), source.into(), Vec::new(),
     ));

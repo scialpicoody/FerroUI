@@ -539,6 +539,11 @@ impl Build {
         report.read_dependencies = started.elapsed();
         report.dependency_files = dependency_files.len();
         report.dependency_models = models.len();
+        let mut manifest_models = if hot_reload_profile::enabled(self.hot_reload) {
+            models.clone()
+        } else {
+            Vec::new()
+        };
         for file in &dependency_files {
             rerun(&mut lines, file);
         }
@@ -585,12 +590,6 @@ impl Build {
             model.metadata.iter().find(|(key, _)| key == ferroui_build_scan::CREATE_SOURCE_INFO).is_some_and(|(_, value)| value.trim().eq_ignore_ascii_case("true"))
         });
 
-        if hot_reload_profile::enabled(self.hot_reload) {
-            match hot_reload_manifest::write(&self.manifest_dir, &self.manifest_dir.join(&self.xaml_root), &self.out_dir, &assembly_name) {
-                Ok(path) => lines.push(format!("cargo::rustc-env=FERROUI_HOT_RELOAD_MANIFEST={}", path.display())),
-                Err(error) => errors.push(error),
-            }
-        }
         // The type system of the build.
         let mut model_host: Option<(Rc<dyn IXamlTypeSystem>, Rc<dyn IXamlTypeSystem>, ModelEmitTypes)> = None;
         if on_models {
@@ -624,6 +623,23 @@ impl Build {
             let _ = assembly;
         }
 
+        if hot_reload_profile::enabled(self.hot_reload) {
+            if let Some(model) = &model {
+                let mut own = model.clone();
+                own.name = assembly_name.clone();
+                manifest_models.push(own);
+            }
+            let system = model_host.as_ref().map(|(_, system, _)| system.clone()).unwrap_or_else(|| {
+                #[cfg(feature = "runtime-host")]
+                { ferroui_markup_xaml_loader::runtime::type_system::RuntimeTypeSystem::new() as Rc<dyn IXamlTypeSystem> }
+                #[cfg(not(feature = "runtime-host"))]
+                { ModelTypeSystem::new(manifest_models) as Rc<dyn IXamlTypeSystem> }
+            });
+            match hot_reload_manifest::write(&self.manifest_dir, &self.manifest_dir.join(&self.xaml_root), &self.out_dir, &assembly_name, system) {
+                Ok(path) => lines.push(format!("cargo::rustc-env=FERROUI_HOT_RELOAD_MANIFEST={}", path.display())),
+                Err(error) => errors.push(error),
+            }
+        }
         // 2. The groups.
         for file in &self.analyzer_config_files {
             rerun(&mut lines, file);

@@ -1221,13 +1221,25 @@ The output of the five that compile is checked in (`emitter/generated_handlers/`
 Upstream stores the override in a static field found by reflection. There is no reflection, so the slot lives in the runtime library, keyed by class:
 
 ```rust
-impl FerroXamlLoader {                                   // (new) R6
-    pub fn set_populate_override(class: &'static TypeInfo, f: Option<Rc<dyn Fn(&MarkupValue)>>);
-    pub fn populate_override(class: &'static TypeInfo) -> Option<Rc<dyn Fn(&MarkupValue)>>;
+pub type PopulateOverride =
+    Rc<dyn Fn(Option<&Rc<dyn IServiceProvider>>, &BoxedValue) -> Result<(), XamlLoadException>>;
+
+impl FerroXamlLoader {
+    pub fn set_populate_override(
+        class: &'static TypeInfo,
+        populate: Option<PopulateOverride>,
+    ) -> Option<PopulateOverride>;
+    pub fn populate_override(class: &'static TypeInfo) -> Option<PopulateOverride>;
 }
 ```
 
-Thread-local map; `initialize_component` performs one lookup. The lookup is compiled out unless the crate enables the Cargo feature `hot-reload` of `ferroui-markup-xaml` (the generated code writes `rt::populate_override(Self::TYPE)`, which is `None` as a `const fn`-like inline without the feature). The previewer host registers, per class, a closure that runs the interpreter's `populate` on the instance with the current text of the document.
+Persistent overrides use a thread-local map, gated on both `hot-reload` and debug
+assertions. Constructor-scoped overrides, enabled separately by `runtime-populate`,
+take precedence and restore the previous hook on unwinding. Generated populate
+functions retain the service-provider context and propagate load failures.
+Development sessions install persistent hooks for new instances using the latest
+accepted source. Existing instances are updated through transactional reload
+adapters; calling the populate hook alone is not a safe replacement operation.
 
 #### 9.4.6 What option A requires from the class model
 
@@ -2752,9 +2764,27 @@ Status of the open technical issues: O1 (strong capture of the root by handler d
 
 The asset URI scheme of the port is `ferres://` everywhere (asset loader, includes, group transformers, error messages); the upstream scheme is not accepted. Markup files of the port have the extension `.xaml` only: the upstream-derived extension is not used or recognised anywhere (loader, build integration, asset and URI handling, tests, documentation). Files brought over from upstream are renamed. Earlier sections of this document were updated accordingly.
 
-### E6 implementation status (2026-10-19)
+### E6 implementation status (2026-10-20)
 
-The initial development session, populate hooks, source overlay, classless content
-replacement and conservative Rust patch admission are implemented. E6 is **not
-complete**: class-root ownership, general resource/style replacement and the catalog
-workflow still require work. See [the implementation status and acceptance gates](../development/hot-reload.md).
+The development session, populate hooks, source overlays and detached replacement
+adapters are implemented. Supported component and panel adapters preserve roots,
+view models and compatible UI state, including application state callbacks.
+Explicit root-property ownership and application resource/style include tracking
+support rollback. Ten ControlCatalog pages demonstrate the integration.
+
+Development manifests use the compiler's type metadata to record handler
+signatures, including inherited and qualified events. Sessions freeze that
+classification across lazy runtime registration and reject changed handlers or
+unresolved-type attributes before preparing candidates. Compiled-binding data
+types and generic type arguments retain conservative restart boundaries.
+
+Explicit Rust callbacks are patched through Subsecond in the dedicated executable;
+the owning supervisor admits changes, coordinates XAML updates and builds a
+replacement before retiring the old process on restart. Native evidence exists
+on all three desktop platforms at recorded revisions.
+
+E6 is **not complete**: standard component XAML handler attachment and inline
+resource/style ownership remain incomplete, and final acceptance must cover the
+finished revision. The [bounded completion audit](../development/hot-reload-completion-audit.md)
+and [implementation status](../development/hot-reload.md) distinguish these
+requirements from later designer tooling and optional extensions.

@@ -9,7 +9,7 @@ retain their original source revisions.
 | Requirement | Current evidence and limits |
 | --- | --- |
 | Runtime XAML and last-good replacement | Session, overlay, detached preparation, reversible content/component/panel adapters and failure tests exist. Native catalog probes ran on all three platforms at recorded revisions. |
-| Sessions and build/loading integration | Manifest, persistent/scoped populate hooks, weak targets, document buffers, directory polling/debounce, superseded revisions, transformed-document cache and debug/release gates exist. Handler manifest coverage remains incomplete below. |
+| Sessions and build/loading integration | Manifest, persistent/scoped populate hooks, weak targets, document buffers, directory polling/debounce, superseded revisions, transformed-document cache and debug/release gates exist. Build handler contracts include signatures and conservative unresolved-type admission, verified by build/engine tests on macOS/Linux and generated-manifest catalog tests on macOS. |
 | Stable windows, roots and view models | Native identity probes and lifecycle tests cover supported adapters. Root literal/static-resource/binding ownership supports removal and rollback. |
 | Compatible UI state | Focus, text/caret/selection, scroll and selection-model tests exist. Current working changes add application state callbacks and prevent two rapid accepted revisions from losing queued state. |
 | Cached controls and subscriptions | Transactional refresh hooks and the Expander sample exercise rollback, disposal and retired-tree release. Ten catalog pages are registered. This is representative integration, not all-page support. |
@@ -26,26 +26,27 @@ retain their original source revisions.
    adapters and exercise standard handlers and resource/style replacement through
    actual component-loading paths. Preserve the documented restart boundary for
    unsupported custom mutations and irreversible user code.
-2. **Finish compatibility metadata.** Build-manifest handler signatures and
-   conservative unknown-type handling still need completion. Keep class, named
-   control, handler and compiled-binding contracts consistent between generated
-   and runtime loading.
-3. **Finalize the current state change.** The working tree's application-state
-   callbacks and rapid-reload correction passed 97 engine tests and five catalog
-   integration tests on both macOS and Linux. Commit the reviewed implementation
-   and retain its source-specific evidence; Windows has not tested these changes.
-4. **Freeze a final implementation revision and close acceptance.** Reuse existing
+2. **Freeze a final implementation revision and close acceptance.** Reuse existing
    evidence where behavior and inputs are unchanged, but run the final relevant
    native XAML, Rust, combined, restart, lifecycle and release-boundary gates on
    macOS, Windows and Linux. Fix failures without treating another incomplete
    moving revision as final acceptance.
-5. **Publish the supported contract and results.** Reconcile the existing design
+3. **Publish the supported contract and results.** Reconcile the existing design
    documentation and issues #233/#234 with actual supported edits, restart
    boundaries, extension APIs and measured baselines. Do not claim untested paths.
 
 The Windows fixes are integrated. The full 21-command Windows acceptance run
 applies to an earlier revision; focused Windows checks followed the fixes, without
 a full acceptance run of newer code. See [the Windows report](hot-reload-windows-verification.md).
+
+The application-state callbacks and rapid-reload correction passed 97 engine
+tests and five catalog integration tests on both macOS and Linux. Windows has not
+tested that revision.
+
+The subsequent compatibility metadata change passed 27 build tests and 99 engine
+tests on macOS and Linux, and six catalog reload integration tests on macOS.
+The latter include actual generated-manifest admission for binding-path edits and
+application state restoration. Final native acceptance remains a separate gate.
 
 ## Follow-ups outside the first-release requirement
 

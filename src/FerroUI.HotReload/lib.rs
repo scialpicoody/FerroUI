@@ -98,6 +98,7 @@ pub struct HotReloadSession {
     )>,
     source_registration: Option<ferroui_markup_xaml::source_overlay::SourceRegistration>,
     contracts: BTreeMap<String, DocumentContract>,
+    build_contracts: Option<Rc<contract::BuildContracts>>,
     pending: BTreeMap<String, String>,
     read_errors: BTreeMap<String, String>,
     watch_errors: Vec<String>,
@@ -118,7 +119,7 @@ impl HotReloadSession {
                 "Document already registered: {uri}"
             )));
         }
-        let contract = DocumentContract::parse(&source)?;
+        let contract = DocumentContract::parse_with_build(&source, self.build_contracts.as_deref())?;
         if self.source_registration.is_none() {
             self.source_registration = Some(
                 ferroui_markup_xaml::source_overlay::SourceRegistration::new(&self.published)
@@ -391,8 +392,24 @@ impl HotReloadSession {
         }
         let mut candidate = (*self.accepted).clone();
         for (uri, text) in &pending {
+            if let (Some(contracts), Some(before)) = (&self.build_contracts, self.accepted.get(uri)) {
+                let check = contracts.fingerprint(before).and_then(|baseline| {
+                    if baseline == contracts.fingerprint(text)? {
+                        Ok(())
+                    } else {
+                        Err(ReloadError::RestartRequired(format!(
+                            "Built handler or unresolved type contract changed: {uri}"
+                        )))
+                    }
+                });
+                if let Err(error) = check {
+                    outcome.fail(error);
+                    outcome.preparation = start.elapsed();
+                    return Some(outcome);
+                }
+            }
             let check =
-                DocumentContract::parse(text).and_then(|contract| match self.contracts.get(uri) {
+                DocumentContract::parse_with_build(text, self.build_contracts.as_deref()).and_then(|contract| match self.contracts.get(uri) {
                     Some(baseline) if baseline == &contract => Ok(()),
                     Some(_) => Err(ReloadError::RestartRequired(format!(
                         "XAML contract changed: {uri}"

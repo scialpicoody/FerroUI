@@ -224,11 +224,18 @@ separately.
   the build script's own debug configuration is not used. The dependency-free
   `python scripts/hot-reload/profile_probe.py` checks these boundaries with Cargo.
   It records the build's source baseline, paths,
-  classes, names, data types, member attributes and includes. `ReloadManifest` reads
-  it and resolves transitive dependencies. Session handler contracts inspect registered class and markup-type metadata,
+  classes, names, expanded data types, member attributes and includes. Handler
+  contracts include resolved event signatures, inherited events and qualified
+  routed-event owners. Classification uses the build's type system for both model
+  and runtime hosts, without invoking constructors or event accessors.
+  `ReloadManifest` reads it and resolves transitive dependencies. Manifest sessions
+  freeze that type classification so lazy runtime registration cannot change their
+  baseline. Changed handler assignments and attributes on unresolved types require
+  restart before candidate preparation. Session handler contracts also inspect registered class and markup-type metadata,
   including inherited events and owner-qualified routed-event definitions. A common-event
-  fallback remains for types not yet registered. Build-manifest handler signatures and
-  complete unknown-type handling still need integration.
+  fallback remains for manually registered documents without build metadata.
+  Applications creating those sessions must register their runtime metadata before
+  registering documents and supply compatibility checks for unknown custom types.
 - `ferroui-hot-patch`: explicit callback indirection through Subsecond 0.7.10,
   body-only synchronous-function admission, full supplied input-set comparison,
   stale patch rejection and an unsafe controlled-apply API. It rejects application
@@ -842,8 +849,8 @@ to their recorded fixtures, platforms, sampling methods and sample counts.
 
 The [completion audit](hot-reload-completion-audit.md) separates requirements from
 optional extensions and supersedes this section's former expanding checklist.
-Remaining work is to close the standard component handler/resource ownership and
-manifest contract gaps, then validate and document the final implementation on
+Remaining work is to close the standard component handler/resource ownership
+gaps, then validate and document the final implementation on
 all three desktop platforms. Existing native runs are evidence for their recorded
 source revisions, not missing work to be started from scratch.
 
@@ -1096,3 +1103,17 @@ the scheduled path updates layout before restoring state and precedes rendering.
 Tests also cover authored changes/removal, two-way bindings, ambiguous identities,
 changed types, replaced graphs, rollback and release of retired controls. These
 are engine/integration results, not native Windows acceptance of this change.
+
+Build compatibility metadata subsequently passed 27 build tests and 99 engine
+tests on both macOS and Linux using
+`cargo test --locked -p ferroui-build -p ferroui-hot-reload --features ferroui-build/runtime-host --lib`.
+The build cases exercise both compiler hosts, custom/inherited/qualified events,
+markup-extension resolution, binding aliases and sharing metadata across documents.
+Session cases reject handler edits before preparation and retain the same contract
+across lazy runtime registration; generic type-argument changes also require restart.
+All six macOS catalog reload integration tests passed, including actual generated
+manifest admission for a `<Binding>` path edit and application state restoration.
+ControlCatalog's manifest contains 220 documents, 240 shared type contracts and
+495 handler assignments; sharing the table avoids duplicating inherited event
+metadata in every document. These focused results do not replace final native
+acceptance on Windows or Linux.

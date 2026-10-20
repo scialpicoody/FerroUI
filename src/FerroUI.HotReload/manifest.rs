@@ -8,6 +8,79 @@ pub struct ReloadManifest {
     pub files: BTreeMap<String, PathBuf>,
     pub sources: BTreeMap<String, String>,
     pub dependencies: BTreeMap<String, Vec<String>>,
+    contracts: Option<std::rc::Rc<crate::contract::BuildContracts>>,
+}
+
+#[cfg(test)]
+mod contract_tests {
+    use super::*;
+    use crate::{PreparedReload, ReloadStatus, ReloadTarget, Sources};
+    use std::{cell::Cell, rc::Rc};
+    struct Target(Rc<Cell<usize>>);
+    impl ReloadTarget for Target {
+        fn documents(&self) -> Vec<String> {
+            vec!["ferres://manifest/View.xaml".into()]
+        }
+        fn prepare(&self, _: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError> {
+            self.0.set(self.0.get() + 1);
+            struct Change;
+            impl PreparedReload for Change {
+                fn commit(&mut self) -> Result<(), ReloadError> {
+                    Ok(())
+                }
+                fn rollback(&mut self) {}
+            }
+            Ok(Box::new(Change))
+        }
+    }
+    #[test]
+    fn frozen_build_events_and_unknown_types_are_checked_before_preparation() {
+        let _scope = ferroui_base::threading::Dispatcher::unit_test_scope();
+        let source =
+            r#"<Custom xmlns="urn:unregistered-build-type" Recomputed="Before" Width="10"/>"#;
+        let manifest = |known| {
+            ReloadManifest::parse(&serde_json::json!({
+            "version": 1,
+            "type_contracts": [{"namespace": "urn:unregistered-build-type", "name": "Custom",
+                "known": known, "events": {"Recomputed": ["Action<Boolean>"]}}],
+            "documents": [{
+                "uri": "ferres://manifest/View.xaml", "source_path": "View.xaml", "source": source
+            }]
+        }).to_string()).unwrap()
+        };
+        for known in [true, false] {
+            let manifest = manifest(known);
+            let mut session = manifest.session().unwrap();
+            let prepares = Rc::new(Cell::new(0));
+            let target: Rc<dyn ReloadTarget> = Rc::new(Target(prepares.clone()));
+            session.register_target(&target);
+            for edited in [
+                source.replace("Before", "After"),
+                source.replace(" Recomputed=\"Before\"", ""),
+                source.replace("Recomputed", "AnotherEvent"),
+            ] {
+                session.submit("ferres://manifest/View.xaml".into(), edited);
+                assert_eq!(
+                    session.apply_pending().unwrap().status,
+                    ReloadStatus::RestartRequired
+                );
+                assert_eq!(prepares.get(), 0);
+            }
+            session.submit(
+                "ferres://manifest/View.xaml".into(),
+                source.replace("10", "20"),
+            );
+            assert_eq!(
+                session.apply_pending().unwrap().status,
+                if known {
+                    ReloadStatus::Applied
+                } else {
+                    ReloadStatus::RestartRequired
+                }
+            );
+            assert_eq!(prepares.get(), usize::from(known));
+        }
+    }
 }
 impl ReloadManifest {
     pub fn read(path: &Path) -> Result<Self, ReloadError> {
@@ -30,7 +103,19 @@ impl ReloadManifest {
             files: BTreeMap::new(),
             sources: BTreeMap::new(),
             dependencies: BTreeMap::new(),
+            contracts: None,
         };
+        if let Some(contracts) = value.get("type_contracts") {
+            let contracts = contracts
+                .as_array()
+                .ok_or_else(|| ReloadError::Failed("Invalid type contracts".into()))?;
+            let catalog = manifest.contracts.get_or_insert_with(Default::default);
+            let catalog =
+                std::rc::Rc::get_mut(catalog).expect("unshared manifest under construction");
+            for contract in contracts {
+                catalog.insert(contract)?;
+            }
+        }
         for document in documents {
             let string = |key: &str| {
                 document[key]
@@ -79,6 +164,7 @@ impl ReloadManifest {
     }
     pub fn session(&self) -> Result<HotReloadSession, ReloadError> {
         let mut session = HotReloadSession::new();
+        session.build_contracts = self.contracts.clone();
         for (uri, source) in &self.sources {
             session.register_document(uri.clone(), source.clone())?;
         }
