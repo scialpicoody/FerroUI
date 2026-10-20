@@ -29,6 +29,8 @@ pub struct PanelReloadTarget {
     configuration: RuntimeXamlLoaderConfiguration,
     refresh: Option<Rc<dyn ComponentRefresh>>,
     properties: Vec<Box<dyn crate::root_properties::OwnedRootProperty>>,
+    state_adapters: Vec<Rc<dyn crate::ControlStateAdapter>>,
+    restoration: crate::control_state::StateRestoration,
 }
 impl PanelReloadTarget {
     /// Declares resources/styles outside the document's inline includes, such as
@@ -70,10 +72,18 @@ impl PanelReloadTarget {
             configuration,
             refresh: None,
             properties: Vec::new(),
+            state_adapters: Vec::new(),
+            restoration: Default::default(),
         })
     }
     pub fn with_refresh(mut self, refresh: Rc<dyn ComponentRefresh>) -> Self {
         self.refresh = Some(refresh);
+        self
+    }
+    /// Add application state transfer for uniquely identified controls in the
+    /// panel's namescope. Application children must use separate scopes.
+    pub fn with_state_adapter(mut self, adapter: Rc<dyn crate::ControlStateAdapter>) -> Self {
+        self.state_adapters.push(adapter);
         self
     }
     /// Claims an initially populated literal root attribute for reversible reload.
@@ -129,6 +139,7 @@ impl PanelReloadTarget {
     }
 }
 struct Change {
+    restoration: crate::control_state::StateRestoration,
     root: Ref<Panel>,
     original: Vec<Ref<Control>>,
     old: Vec<Ref<Control>>,
@@ -222,20 +233,34 @@ impl PreparedReload for Change {
         let state = self.state.clone();
         let before = self.before.clone();
         let after = self.after.clone();
-        ferroui_base::threading::Dispatcher::current_dispatcher().post_local(
+        let children: Vec<_> = self.new.iter().map(Ref::downgrade).collect();
+        let index = self.index;
+        self.restoration.schedule(
             move || {
                 if let Some(root) = root.upgrade() {
-                    if NameScope::get_name_scope(&root) == scope {
+                    let current = || {
+                        NameScope::get_name_scope(&root) == scope
+                            && root.children().to_vec().get(index..index + children.len())
+                                .is_some_and(|current| current.iter().zip(&children).all(|(actual, expected)| {
+                                    expected.upgrade().is_some_and(|expected| expected.ptr_eq(actual))
+                                }))
+                    };
+                    if current() {
+                        root.update_layout();
+                    }
+                    if current() {
                         let value: BoxedValue = Rc::new(root);
                         state.restore(&value, &before, &after);
                     }
                 }
             },
-            ferroui_base::threading::DispatcherPriority::BACKGROUND,
         );
     }
 }
 impl ReloadTarget for PanelReloadTarget {
+    fn complete_pending_state(&self) {
+        self.restoration.complete();
+    }
     fn documents(&self) -> Vec<String> {
         let mut documents = self.dependencies.clone();
         documents.push(self.uri.clone());
@@ -333,7 +358,10 @@ impl ReloadTarget for PanelReloadTarget {
             .transpose()?;
         let value: BoxedValue = Rc::new(root.clone());
         Ok(Box::new(Change {
-            state: Rc::new(crate::state::ViewState::capture(Some(&value), &before)),
+            restoration: self.restoration.clone(),
+            state: Rc::new(crate::state::ViewState::capture_with(
+                Some(&value), &before, &self.state_adapters,
+            )),
             old_scope: NameScope::get_name_scope(&root),
             root,
             original,

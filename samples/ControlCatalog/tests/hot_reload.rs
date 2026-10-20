@@ -8,6 +8,65 @@ use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use std::rc::Rc;
 
 #[test]
+fn checkbox_application_state_adapter_preserves_input_and_respects_new_markup() {
+    use ferroui_base::controls::NameScope;
+    use ferroui_controls::CheckBox;
+    let _application = super::support::start_catalog_application();
+    let page = crate::pages::CheckBoxPage::new();
+    let root: Ref<ContentPage> = page.clone().upcast();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&page.clone().upcast::<Control>())));
+    window.show();
+    Dispatcher::ui_thread().run_jobs(None);
+    let find = || {
+        NameScope::get_name_scope(&root).unwrap()
+            .find("ReloadCheckBox").unwrap().cast::<CheckBox>().unwrap()
+    };
+    let uri = "ferres://catalog-state-tests/CheckBoxPage.xaml";
+    let source = include_str!("../Pages/CheckBoxPage.xaml");
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), source.into()).unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::hot_reload::component_target(
+        &root, uri.into(), source.into(), Vec::new(),
+    ));
+    session.register_target(&target);
+    for revision in 1..=3 {
+        let old = find();
+        old.set_is_checked(Some(true));
+        let retired = old.downgrade();
+        let update = source.replace("A check box control", &format!("Check box revision {revision}"));
+        session.submit(uri.into(), update.clone());
+        let failed = session.apply_pending_with(|| Err(ReloadError::Failed("rollback".into()))).unwrap();
+        assert_eq!(failed.status, ReloadStatus::Failed, "{failed:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        assert!(find().ptr_eq(&old));
+        assert_eq!(old.is_checked(), Some(true));
+        session.submit(uri.into(), update);
+        let applied = session.apply_pending().unwrap();
+        assert_eq!(applied.status, ReloadStatus::Applied, "{applied:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        assert!(!find().ptr_eq(&old));
+        assert_eq!(find().is_checked(), Some(true));
+        drop(old);
+        assert!(retired.upgrade().is_none(), "custom state retained an old check box");
+    }
+    session.submit(uri.into(), source.replace(
+        "x:Name=\"ReloadCheckBox\"", "x:Name=\"ReloadCheckBox\" IsChecked=\"False\"",
+    ));
+    let applied = session.apply_pending().unwrap();
+    assert_eq!(applied.status, ReloadStatus::Applied, "{applied:?}");
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(find().is_checked(), Some(false));
+    find().set_is_checked(Some(true));
+    session.submit(uri.into(), source.into());
+    let applied = session.apply_pending().unwrap();
+    assert_eq!(applied.status, ReloadStatus::Applied, "{applied:?}");
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(find().is_checked(), Some(false), "removed authored value must not restore stale input");
+    window.close();
+}
+
+#[test]
 fn registered_catalog_root_binding_uses_preserved_page_and_window() {
     let _application = super::support::start_catalog_application();
     let page = crate::pages::BorderPage::new();

@@ -21,6 +21,8 @@ pub use panel::PanelReloadTarget;
 pub use resources::ResourceReloadTarget;
 pub use styles::StyleReloadTarget;
 mod content;
+mod control_state;
+pub use control_state::{CapturedControlState, ControlStateAdapter, ControlStateRestoreContext};
 pub use component::{ComponentRefresh, ComponentReloadTarget};
 mod contract;
 mod identity;
@@ -68,6 +70,10 @@ pub trait PreparedReload {
     fn finish(&mut self) {}
 }
 pub trait ReloadTarget {
+    /// Complete state restoration from an earlier accepted revision at the UI
+    /// boundary. Runs against accepted sources, before candidate resource previews
+    /// or preparation. Custom adapters normally need only the default no-op.
+    fn complete_pending_state(&self) {}
     /// Includes transitive document dependencies. A target may refresh this list after each revision.
     fn documents(&self) -> Vec<String>;
     fn prepare(&self, sources: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError>;
@@ -367,6 +373,20 @@ impl HotReloadSession {
                     .collect::<Vec<_>>()
                     .join("; "),
             ));
+            return Some(outcome);
+        }
+        let completion = with_sources(self.accepted.clone(), || {
+            for target in self.targets.iter().filter_map(Weak::upgrade) {
+                catch_reload(|| {
+                    target.complete_pending_state();
+                    Ok(())
+                })?;
+            }
+            Ok::<_, ReloadError>(())
+        });
+        if let Err(error) = completion {
+            outcome.fail(error);
+            outcome.preparation = start.elapsed();
             return Some(outcome);
         }
         let mut candidate = (*self.accepted).clone();

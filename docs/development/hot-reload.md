@@ -166,7 +166,7 @@ separately.
   lifecycle; detached template parts are released. Template-state transfer and
   eager validation of every deferred template remain unfinished.
 - Conservative transfer of uniquely identified text-control state, scroll offset and
-  focus after the dispatcher processes the replacement. Existing property values
+  focus after updating layout, before the queued render phase. Existing property values
   and bindings take precedence. TextBox transfer retains the caret and both selection
   endpoints, including backwards selections. The three cursor properties are
   admitted together: a binding, existing value or authored change/removal on any
@@ -180,6 +180,24 @@ separately.
   across repeated items remains unfinished. Development keys take
   precedence over names, and stable named/keyed scope owners qualify descendants.
   Ambiguous matches and anonymous nested scope owners are skipped.
+- Content, component and panel adapters accept `with_state_adapter` for
+  application-defined control state. `ControlStateAdapter::capture` returns an
+  optional `CapturedControlState`; restoration receives the compatible control
+  and `ControlStateRestoreContext`. The context exposes its scoped identity and
+  `may_restore_property`, which rejects changed/removed authored values, existing
+  property values and local bindings. Applications must also check their own
+  storage and coupled-property rules. Snapshots must not retain old controls;
+  capture must not mutate live state and restore must not panic.
+  Callbacks run only after the whole revision succeeds. If another revision arrives
+  before the queued restoration, the session completes accepted state first,
+  against accepted sources and before candidate resource previews exist. Each
+  snapshot runs once; replaced graphs and externally replaced panel children are
+  skipped. This also prevents rapid edits from capturing unrestored default values.
+  The catalog's named, unbound `ReloadCheckBox` demonstrates an application adapter
+  in [the catalog integration](../../samples/ControlCatalog/hot_reload.rs).
+  Authored-value comparisons follow the captured name on the old side and the new
+  name on the replacement, so stable development keys remain authoritative when
+  names are exchanged.
 - Persistent populate overrides and weak component tracking in generated class
   populate functions and ControlCatalog's component-loading helper. Scoped runtime
   constructor overrides restore on unwind and take precedence over persistent ones.
@@ -822,27 +840,17 @@ to their recorded fixtures, platforms, sampling methods and sample counts.
 
 ## Remaining release work
 
-- Generalize the owning sample supervisor to application registrations and explicit
-  external build inputs (ignored workspace inputs now support `--input`). Keep pinned compiler replay and artifact provenance
-  covered by native acceptance; source checks alone cannot validate jump-table addresses.
-- Exercise native application-defined quiescence with asynchronous/background producers
-  beyond the timer and acknowledged-worker participant tests, and validate source watching under
-  sustained edits. The sample
-  now automatically builds replacements for incompatible edits and retains the old
-  process on failed builds or failed acknowledgement.
-- Extend the component, panel and merged-resource adapters with root-property and
-  subscription ownership tracking; complete automatic resource/style owner and
-  consumer discovery. Explicit post-reload hooks exist for component and panel adapters.
-- Expand ControlCatalog beyond its ten registered pages,
-  including cached-control refresh and disposal of application child subscriptions.
-- Complete metadata-based contracts, native directory notifications, dependency
-  discovery/cache invalidation, custom selection-state adapters and repeated-template identity.
-- Complete native macOS validation and Windows/Linux execution of both paths,
-  combined XAML/Rust revisions, repeated-reload leak tests, and broader XAML/Rust
-  latency distributions including the owning watch loop's polling/debounce.
+The [completion audit](hot-reload-completion-audit.md) separates requirements from
+optional extensions and supersedes this section's former expanding checklist.
+Remaining work is to close the standard component handler/resource ownership and
+manifest contract gaps, then validate and document the final implementation on
+all three desktop platforms. Existing native runs are evidence for their recorded
+source revisions, not missing work to be started from scratch.
 
-Issues #233/#234 must remain open until these gates pass. No cross-platform or
-production-ready support is claimed by the new crates.
+Native filesystem notification backends, every ControlCatalog page, a general
+supervisor for arbitrary applications and restoration of ambiguous repeated
+template instances are follow-ups, not additional first-release requirements.
+Issues #233/#234 remain open pending the bounded acceptance work.
 
 ### Shared selection during subtree replacement
 
@@ -1078,3 +1086,13 @@ Windows/Linux native acceptance.
 These checks do not establish a green remote CI matrix or final feature
 acceptance. Current-revision native patch/supervisor runs and the remaining
 resource, style, state and handler integration boundaries still apply.
+
+Application control-state callbacks and the rapid-revision restoration correction
+passed 97 engine tests and five catalog reload integration tests on both macOS
+and Linux. The regression first reproduced a lost checked value when a second
+revision arrived before the first restoration callback. Restoration now completes
+once, against the accepted source snapshot, before preparing another candidate;
+the scheduled path updates layout before restoring state and precedes rendering.
+Tests also cover authored changes/removal, two-way bindings, ambiguous identities,
+changed types, replaced graphs, rollback and release of retired controls. These
+are engine/integration results, not native Windows acceptance of this change.

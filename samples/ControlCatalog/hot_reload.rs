@@ -216,7 +216,36 @@ pub(crate) fn component_target(
     if let Some(page) = root.cast::<crate::pages::ExpanderPage>() {
         target = target.with_refresh(page.reload_refresh());
     }
+    if root.cast::<crate::pages::CheckBoxPage>().is_some() {
+        target = target.with_state_adapter(Rc::new(CheckBoxStateAdapter));
+    }
     target
+}
+
+// Application opt-in: built-in state transfer does not assume ownership of every
+// control property. The named unbound check box demonstrates a custom snapshot.
+struct CheckBoxStateAdapter;
+struct CheckBoxState(Option<bool>);
+impl ferroui_hot_reload::ControlStateAdapter for CheckBoxStateAdapter {
+    fn capture(
+        &self,
+        control: &Ref<ferroui_base::StyledElement>,
+    ) -> Option<Box<dyn ferroui_hot_reload::CapturedControlState>> {
+        Some(Box::new(CheckBoxState(control.cast::<ferroui_controls::CheckBox>()?.is_checked())))
+    }
+}
+impl ferroui_hot_reload::CapturedControlState for CheckBoxState {
+    fn restore(
+        &self,
+        control: &Ref<ferroui_base::StyledElement>,
+        context: &ferroui_hot_reload::ControlStateRestoreContext<'_>,
+    ) {
+        if context.may_restore_property(ferroui_controls::primitives::ToggleButton::is_checked_property()) {
+            if let Some(control) = control.cast::<ferroui_controls::CheckBox>() {
+                control.set_is_checked(self.0);
+            }
+        }
+    }
 }
 
 #[path = "build/placeholder_geometry.rs"]

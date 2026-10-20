@@ -48,6 +48,12 @@ impl LiveRoot {
         }
     }
 }
+fn matches_replacement(root: &Ref<StyledElement>, scope: &Option<NameScopeRef>, content: &BoxedValue) -> bool {
+    NameScope::get_name_scope(root) == *scope
+        && root.cast::<ContentControl>().and_then(|root| root.content())
+            .or_else(|| root.cast::<ContentPage>().and_then(|root| root.content()))
+            .is_some_and(|current| Rc::ptr_eq(&current, content))
+}
 /// Prepares application reference/subscription changes without mutating the live component.
 /// Commit runs after content and namescope replacement. Rollback runs after restoring the
 /// previous graph; finish runs only after every target commits. Retain old subscriptions
@@ -72,6 +78,8 @@ pub struct ComponentReloadTarget {
     configuration: RuntimeXamlLoaderConfiguration,
     refresh: Option<Rc<dyn ComponentRefresh>>,
     properties: Vec<Box<dyn crate::root_properties::OwnedRootProperty>>,
+    state_adapters: Vec<Rc<dyn crate::ControlStateAdapter>>,
+    restoration: crate::control_state::StateRestoration,
 }
 impl ComponentReloadTarget {
     /// Declares resources/styles outside the document's inline includes, such as
@@ -99,6 +107,8 @@ impl ComponentReloadTarget {
             configuration,
             refresh: None,
             properties: Vec::new(),
+            state_adapters: Vec::new(),
+            restoration: Default::default(),
         }
     }
     pub fn content_page(
@@ -115,10 +125,18 @@ impl ComponentReloadTarget {
             configuration,
             refresh: None,
             properties: Vec::new(),
+            state_adapters: Vec::new(),
+            restoration: Default::default(),
         }
     }
     pub fn with_refresh(mut self, refresh: Rc<dyn ComponentRefresh>) -> Self {
         self.refresh = Some(refresh);
+        self
+    }
+    /// Add application state transfer for named/keyed replacement children.
+    /// The preserved component root is not reconstructed or restored by this hook.
+    pub fn with_state_adapter(mut self, adapter: Rc<dyn crate::ControlStateAdapter>) -> Self {
+        self.state_adapters.push(adapter);
         self
     }
     /// Claims XAML ownership of this literal root attribute. Call immediately after
@@ -264,6 +282,7 @@ pub(crate) fn shadow_source(
     crate::identity::runtime_source(&result)
 }
 struct Change {
+    restoration: crate::control_state::StateRestoration,
     root: LiveRoot,
     old_content: Option<BoxedValue>,
     new_content: Option<BoxedValue>,
@@ -318,19 +337,26 @@ impl PreparedReload for Change {
         let state = self.state.clone();
         let before = self.before.clone();
         let after = self.after.clone();
-        ferroui_base::threading::Dispatcher::current_dispatcher().post_local(
+        self.restoration.schedule(
             move || {
                 if let (Some(root), Some(content)) = (root.upgrade(), content) {
-                    if NameScope::get_name_scope(&root) == scope {
+                    if matches_replacement(&root, &scope, &content) {
+                        if let Some(layout) = root.cast::<ferroui_base::layout::Layoutable>() {
+                            layout.update_layout();
+                        }
+                    }
+                    if matches_replacement(&root, &scope, &content) {
                         state.restore(&content, &before, &after);
                     }
                 }
             },
-            ferroui_base::threading::DispatcherPriority::BACKGROUND,
         );
     }
 }
 impl ReloadTarget for ComponentReloadTarget {
+    fn complete_pending_state(&self) {
+        self.restoration.complete();
+    }
     fn documents(&self) -> Vec<String> {
         let mut documents = self.dependencies.clone();
         documents.push(self.uri.clone());
@@ -401,10 +427,12 @@ impl ReloadTarget for ComponentReloadTarget {
             .map(|refresh| refresh.prepare(&root.element(), new_scope.as_ref()))
             .transpose()?;
         Ok(Box::new(Change {
+            restoration: self.restoration.clone(),
             old_content: root.content(),
-            state: Rc::new(crate::state::ViewState::capture(
+            state: Rc::new(crate::state::ViewState::capture_with(
                 root.content().as_ref(),
                 &before,
+                &self.state_adapters,
             )),
             old_scope: NameScope::get_name_scope(&root.element()),
             root,

@@ -15,6 +15,8 @@ pub struct ContentReloadTarget {
     dependencies: Vec<String>,
     configuration: RuntimeXamlLoaderConfiguration,
     accepted_source: Rc<RefCell<String>>,
+    state_adapters: Vec<Rc<dyn crate::ControlStateAdapter>>,
+    restoration: crate::control_state::StateRestoration,
 }
 impl ContentReloadTarget {
     pub fn new(
@@ -32,10 +34,19 @@ impl ContentReloadTarget {
                 .collect(),
             configuration,
             accepted_source: Rc::new(RefCell::new(String::new())),
+            state_adapters: Vec::new(),
+            restoration: Default::default(),
         }
+    }
+    /// Add application state transfer for uniquely identified, compatible controls.
+    /// Restoration runs after a successful revision, alongside built-in state transfer.
+    pub fn with_state_adapter(mut self, adapter: Rc<dyn crate::ControlStateAdapter>) -> Self {
+        self.state_adapters.push(adapter);
+        self
     }
 }
 struct ContentChange {
+    restoration: crate::control_state::StateRestoration,
     host: Ref<ContentControl>,
     before: Option<BoxedValue>,
     after: Option<BoxedValue>,
@@ -65,9 +76,12 @@ impl PreparedReload for ContentChange {
         let state = self.state.clone();
         let before = self.old_source.clone();
         let after = self.new_source.clone();
-        ferroui_base::threading::Dispatcher::current_dispatcher().post_local(
+        self.restoration.schedule(
             move || {
                 if let (Some(host), Some(root)) = (host.upgrade(), root) {
+                    if host.content().is_some_and(|current| Rc::ptr_eq(&current, &root)) {
+                        host.update_layout();
+                    }
                     if host
                         .content()
                         .is_some_and(|current| Rc::ptr_eq(&current, &root))
@@ -76,11 +90,13 @@ impl PreparedReload for ContentChange {
                     }
                 }
             },
-            ferroui_base::threading::DispatcherPriority::BACKGROUND,
         );
     }
 }
 impl ReloadTarget for ContentReloadTarget {
+    fn complete_pending_state(&self) {
+        self.restoration.complete();
+    }
     fn documents(&self) -> Vec<String> {
         let mut all = self.dependencies.clone();
         all.push(self.uri.clone());
@@ -107,9 +123,11 @@ impl ReloadTarget for ContentReloadTarget {
             FerroRuntimeXamlLoader::load_document(document, Some(self.configuration.clone()))
                 .map_err(|error| ReloadError::Failed(error.to_string()))?;
         Ok(Box::new(ContentChange {
-            state: Rc::new(crate::state::ViewState::capture(
+            restoration: self.restoration.clone(),
+            state: Rc::new(crate::state::ViewState::capture_with(
                 host.content().as_ref(),
                 &self.accepted_source.borrow(),
+                &self.state_adapters,
             )),
             old_source: self.accepted_source.borrow().clone(),
             new_source: source.clone(),

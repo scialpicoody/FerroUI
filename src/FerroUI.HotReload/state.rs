@@ -7,11 +7,13 @@ use std::collections::BTreeMap;
 #[derive(Default)]
 pub(crate) struct ViewState(BTreeMap<Vec<String>, Option<Entry>>);
 struct Entry {
+    name: String,
     kind: &'static ferroui_base::TypeInfo,
     focused: bool,
     text: Option<TextState>,
     scroll: Option<Vector>,
     selection: Option<SelectionState>,
+    custom: Vec<Box<dyn crate::CapturedControlState>>,
 }
 struct TextState {
     value: Option<String>,
@@ -55,7 +57,7 @@ impl SelectionState {
             mode: control.selection_mode(),
         })
     }
-    fn restore(&self, control: &SelectingItemsControl, before: &str, after: &str, name: &str) {
+    fn restore(&self, control: &SelectingItemsControl, before: &str, after: &str, old_name: &str, name: &str) {
         let properties = [
             SelectingItemsControl::selected_index_property().as_property(),
             SelectingItemsControl::selected_item_property().as_property(),
@@ -68,7 +70,7 @@ impl SelectionState {
             if control.has_local_value_binding(property)
                 || control.is_set(property)
                 || authored(after, name, property.name()).is_some()
-                || !unchanged_unbound(before, after, name, property.name())
+                || !unchanged_unbound(before, after, old_name, name, property.name())
             {
                 return;
             }
@@ -141,16 +143,25 @@ fn controls(root: &BoxedValue, source: &str) -> Vec<(Vec<String>, Ref<StyledElem
     result
 }
 use crate::identity::authored;
-fn unchanged_unbound(before: &str, after: &str, name: &str, property: &str) -> bool {
-    let old = authored(before, name, property);
+pub(crate) fn unchanged_unbound(before: &str, after: &str, old_name: &str, name: &str, property: &str) -> bool {
+    let old = authored(before, old_name, property);
     let new = authored(after, name, property);
     old == new && !new.as_deref().is_some_and(|value| value.starts_with('{'))
 }
 impl ViewState {
+    #[cfg(test)]
     pub(crate) fn capture(root: Option<&BoxedValue>, source: &str) -> Self {
+        Self::capture_with(root, source, &[])
+    }
+    pub(crate) fn capture_with(
+        root: Option<&BoxedValue>,
+        source: &str,
+        adapters: &[std::rc::Rc<dyn crate::ControlStateAdapter>],
+    ) -> Self {
         let mut state = Self::default();
         for (identity, element) in root.map(|root| controls(root, source)).unwrap_or_default() {
             let entry = Entry {
+                name: element.name().unwrap_or_default(),
                 kind: element.get_type(),
                 focused: element
                     .cast::<ferroui_base::input::InputElement>()
@@ -167,6 +178,7 @@ impl ViewState {
                 selection: element
                     .cast::<SelectingItemsControl>()
                     .and_then(|control| SelectionState::capture(&control)),
+                custom: adapters.iter().filter_map(|adapter| adapter.capture(&element)).collect(),
             };
             state
                 .0
@@ -201,7 +213,7 @@ impl ViewState {
             if let (Some(text), Some(saved)) =
                 (element.cast::<TextBox>(), &entry.text)
             {
-                if unchanged_unbound(before, after, &name, "Text")
+                if unchanged_unbound(before, after, &entry.name, &name, "Text")
                     && !text.is_set(TextBox::text_property())
                     && !text.has_local_value_binding(TextBox::text_property())
                 {
@@ -219,7 +231,7 @@ impl ViewState {
                     && cursor_properties.iter().all(|property| {
                         !text.is_set(*property)
                             && !text.has_local_value_binding(property)
-                            && unchanged_unbound(before, after, &name, property.name())
+                            && unchanged_unbound(before, after, &entry.name, &name, property.name())
                     })
                 {
                     // Setting the caret collapses selection. Set it first, then restore
@@ -232,7 +244,7 @@ impl ViewState {
             if let (Some(scroll), Some(offset)) = (element.cast::<ScrollViewer>(), entry.scroll) {
                 if !scroll.is_set(ScrollViewer::offset_property())
                     && !scroll.has_local_value_binding(ScrollViewer::offset_property())
-                    && unchanged_unbound(before, after, &name, "Offset")
+                    && unchanged_unbound(before, after, &entry.name, &name, "Offset")
                 {
                     scroll.set_offset(offset);
                 }
@@ -245,7 +257,18 @@ impl ViewState {
             if let (Some(control), Some(selection)) =
                 (element.cast::<SelectingItemsControl>(), &entry.selection)
             {
-                selection.restore(&control, before, after, &name);
+                selection.restore(&control, before, after, &entry.name, &name);
+            }
+            let context = crate::ControlStateRestoreContext {
+                control: &element,
+                identity: &identity,
+                before,
+                after,
+                before_name: &entry.name,
+                name: &name,
+            };
+            for custom in &entry.custom {
+                custom.restore(&element, &context);
             }
         }
     }
@@ -460,6 +483,41 @@ mod tests {
             state.restore(&after, &old_source, &new_source);
             assert_eq!(new.text(), authored);
         }
+    }
+    #[test]
+    fn authored_values_follow_development_keys_when_names_are_exchanged() {
+        use ferroui_controls::StackPanel;
+        let _scope = Dispatcher::unit_test_scope();
+        ferroui_controls::register_types();
+        ferroui_markup_xaml::register_types();
+        let before_source = r#"<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:hr="https://github.com/ferroui/hot-reload"
+            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="hr">
+            <TextBox Name="a" hr:Key="left" Text="initial"/>
+            <TextBox Name="b" hr:Key="right"/>
+        </StackPanel>"#;
+        let after_source = before_source
+            .replace(r#"Name="a" hr:Key="left" Text="initial""#, r#"Name="b" hr:Key="left""#)
+            .replace(r#"Name="b" hr:Key="right""#, r#"Name="a" hr:Key="right""#);
+        assert_eq!(
+            crate::DocumentContract::parse(before_source).unwrap(),
+            crate::DocumentContract::parse(&after_source).unwrap(),
+        );
+        let load_pair = |source: &str| {
+            let prepared = crate::identity::runtime_source(source).unwrap();
+            let value = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+                RuntimeXamlLoaderDocument::new(&prepared), None,
+            ).unwrap();
+            let panel = Ref::<StackPanel>::from_xaml_object(&value).unwrap();
+            let first = panel.children().to_vec()[0].cast::<TextBox>().unwrap();
+            (value, first)
+        };
+        let (before, old) = load_pair(before_source);
+        old.set_text(Some("stale input"));
+        let state = ViewState::capture(Some(&before), before_source);
+        let (after, new) = load_pair(&after_source);
+        state.restore(&after, before_source, &after_source);
+        assert_eq!(new.text(), None, "removed authored Text belongs to the stable key, not the old name");
     }
     #[test]
     fn restoration_does_not_write_through_two_way_binding() {
