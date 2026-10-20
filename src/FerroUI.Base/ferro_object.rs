@@ -490,6 +490,14 @@ impl FerroObject {
         self.values.local_write_version(property)
     }
 
+    /// Tracks explicit local assignments and binding-slot changes. Unlike
+    /// `local_write_version`, SetCurrentValue (for example two-way user input)
+    /// does not transfer assignment ownership.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub fn local_assignment_version(&self, property: &FerroProperty) -> u64 {
+        self.values.local_assignment_version(property)
+    }
+
     /// Clears a property's local value.
     pub fn clear_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) {
         self.values.clear_value(self, property);

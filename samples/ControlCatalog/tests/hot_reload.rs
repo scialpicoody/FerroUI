@@ -8,6 +8,49 @@ use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use std::rc::Rc;
 
 #[test]
+fn registered_catalog_root_binding_uses_preserved_page_and_window() {
+    let _application = super::support::start_catalog_application();
+    let page = crate::pages::BorderPage::new();
+    let root: Ref<ContentPage> = page.clone().upcast();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&page.clone().upcast::<Control>())));
+    window.show();
+    let uri = "ferres://controlcatalog/reload-tests/BorderPage.xaml";
+    let source = include_str!("../Pages/BorderPage.xaml");
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::hot_reload::component_target(
+        &root, uri.into(), source.into(), Vec::new(),
+    ));
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), source.into()).unwrap();
+    session.register_target(&target);
+    root.set_height(320.0);
+    let edited = source.replacen(
+        "<ContentPage ", r#"<ContentPage Width="{Binding Height, RelativeSource={RelativeSource Self}}" "#, 1,
+    );
+    assert_ne!(edited, source);
+    let old = root.content();
+    session.submit(uri.into(), edited.clone());
+    let finalized = std::cell::Cell::new(false);
+    let outcome = session.apply_pending_with(|| {
+        finalized.set(true);
+        assert_eq!(root.width(), 320.0);
+        Err(ReloadError::Failed("later target failed".into()))
+    }).unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Failed, "{outcome:?}");
+    assert!(finalized.get(), "fixture failed before testing transaction rollback: {outcome:?}");
+    assert_eq!(root.content(), old);
+    assert!(root.width().is_nan());
+    session.submit(uri.into(), edited);
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    assert_eq!(root.width(), 320.0);
+    root.set_height(400.0);
+    assert_eq!(root.width(), 400.0);
+    assert_eq!(window.content(), Some(Control::boxed(&page.clone().upcast::<Control>())));
+    window.close();
+}
+
+#[test]
 fn list_box_reload_preserves_shared_selection_on_commit_and_rollback() {
     let _application = super::support::start_catalog_application();
     let page = crate::pages::ListBoxPage::new();

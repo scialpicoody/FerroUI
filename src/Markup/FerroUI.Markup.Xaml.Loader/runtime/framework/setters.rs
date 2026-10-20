@@ -230,6 +230,10 @@ fn bind(
     let property = load_property(field, line_info)?;
     let binding = binding_of(binding, line_info)?;
     let object = object_of(target, line_info)?;
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    if crate::binding_capture::defer(&object, property, &binding) {
+        return Ok(());
+    }
     let _ = object.bind_binding(property, &*binding);
     Ok(())
 }

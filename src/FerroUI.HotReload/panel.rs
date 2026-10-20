@@ -114,6 +114,19 @@ impl PanelReloadTarget {
     pub fn is_alive(&self) -> bool {
         self.root.upgrade().is_some()
     }
+
+    /// Claims a literal or synchronous root binding with the same ownership and
+    /// context contract as ComponentReloadTarget::with_owned_root_binding_property.
+    pub fn with_owned_root_binding_property<T: ferroui_base::PropertyValue>(
+        mut self,
+        property: &'static ferroui_base::StyledProperty<T>,
+    ) -> Self {
+        if let Some(root) = self.root.upgrade() {
+            self.properties.retain(|owned| owned.name() != property.name());
+            self.properties.push(crate::root_properties::own_binding(&root, property));
+        }
+        self
+    }
 }
 struct Change {
     root: Ref<Panel>,
@@ -286,6 +299,10 @@ impl ReloadTarget for PanelReloadTarget {
             ferroui_base::utilities::UriKind::Absolute,
         )
         .ok_or_else(|| ReloadError::Failed("Invalid panel URI".into()))?;
+        let bindings = ferroui_markup_xaml_loader::binding_capture::BindingCaptureScope::new(
+            self.uri.clone(),
+            self.properties.iter().filter_map(|property| property.binding_property()),
+        );
         let candidate = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
             RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &prepared),
             Some(self.configuration.clone()),
@@ -300,6 +317,7 @@ impl ReloadTarget for PanelReloadTarget {
                 &candidate.clone().upcast(),
                 &before,
                 source,
+                &bindings,
             )? {
                 properties.push(change);
             }

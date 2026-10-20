@@ -57,7 +57,7 @@ pub(crate) struct ValueStore {
     /// Value frames ordered from lowest to highest precedence.
     frames: RefCell<Vec<Rc<dyn ValueFrame>>>,
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
-    local_write_versions: RefCell<Vec<(u32, u64)>>,
+    local_write_versions: RefCell<Vec<(u32, u64, u64)>>,
     local_value_bindings: RefCell<Vec<(u32, Rc<dyn IDisposable>)>>,
     /// The local value bindings that are binding expressions.
     local_value_expressions: RefCell<Vec<(u32, Rc<dyn BindingExpressionBase>)>>,
@@ -92,16 +92,31 @@ impl ValueStore {
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     pub fn local_write_version(&self, property: &FerroProperty) -> u64 {
         let mut versions = self.local_write_versions.borrow_mut();
-        if let Some((_, version)) = versions.iter().find(|(id, _)| *id == property.id()) {
+        if let Some((_, version, _)) = versions.iter().find(|(id, _, _)| *id == property.id()) {
             return *version;
         }
-        versions.push((property.id(), 0));
+        versions.push((property.id(), 0, 0));
         0
     }
 
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub fn local_assignment_version(&self, property: &FerroProperty) -> u64 {
+        self.local_write_version(property);
+        self.local_write_versions.borrow().iter()
+            .find(|(id, _, _)| *id == property.id()).unwrap().2
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
     fn record_local_write(&self, property: &FerroProperty) {
-        if let Some((_, version)) = self.local_write_versions.borrow_mut().iter_mut().find(|(id, _)| *id == property.id()) {
+        if let Some((_, version, assignment)) = self.local_write_versions.borrow_mut().iter_mut().find(|(id, _, _)| *id == property.id()) {
+            *version = version.checked_add(1).expect("local write version overflow");
+            *assignment = assignment.checked_add(1).expect("local assignment version overflow");
+        }
+    }
+
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    fn record_current_write(&self, property: &FerroProperty) {
+        if let Some((_, version, _)) = self.local_write_versions.borrow_mut().iter_mut().find(|(id, _, _)| *id == property.id()) {
             *version = version.checked_add(1).expect("local write version overflow");
         }
     }
@@ -397,7 +412,7 @@ impl ValueStore {
 
     pub fn set_current_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>, value: T) {
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
-        self.record_local_write(property);
+        self.record_current_write(property);
         let effective = self.get_or_add_effective_value(owner, property);
         cast_effective_value::<T>(&*effective).set_current_value_and_raise(owner, value);
     }

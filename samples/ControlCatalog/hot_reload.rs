@@ -154,10 +154,14 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                                     let theme = root.theme().as_ref().map(|theme| &**theme as *const _ as *const ()).unwrap_or(std::ptr::null());
                                     let width = content.width();
                                     let width = if width.is_finite() { width.to_string() } else { "null".into() };
+                                    let root_width = root.width();
+                                    let root_width = if root_width.is_finite() { root_width.to_string() } else { "null".into() };
+                                    let root_height = root.height();
+                                    let root_height = if root_height.is_finite() { root_height.to_string() } else { "null".into() };
                                     let model = root.data_context().as_ref().map(|value| Rc::as_ptr(value) as *const ()).unwrap_or(std::ptr::null());
                                     let window = ferroui_controls::TopLevel::get_top_level(Some(&root));
                                     let window = window.as_ref().map(|window| &**window as *const _ as *const ()).unwrap_or(std::ptr::null());
-                                    eprintln!("FERROUI_RELOAD_TARGET_STATE={{\"revision\":{},\"status\":\"{:?}\",\"root\":\"{:p}\",\"window\":\"{:p}\",\"model\":\"{:p}\",\"content\":\"{:p}\",\"content_width\":{},\"theme\":\"{:p}\"}}", outcome.revision, outcome.status, &*root, window, model, &*content, width, theme);
+                                    eprintln!("FERROUI_RELOAD_TARGET_STATE={{\"revision\":{},\"status\":\"{:?}\",\"root\":\"{:p}\",\"window\":\"{:p}\",\"model\":\"{:p}\",\"content\":\"{:p}\",\"content_width\":{},\"root_width\":{},\"root_height\":{},\"theme\":\"{:p}\"}}", outcome.revision, outcome.status, &*root, window, model, &*content, width, root_width, root_height, theme);
                                 }
                             }
 
@@ -189,21 +193,31 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                 .expect("bind catalog class");
         }
         let baseline = context.session.sources()[canonical.absolute_uri()].clone();
-        let mut target = ComponentReloadTarget::content_page(&root, uri, baseline, configuration())
-            .with_dependencies(context.resource_documents.clone())
-            .with_owned_root_static_resource_property(ferroui_base::StyledElement::theme_property())
-            .with_owned_root_property(ferroui_base::layout::Layoutable::width_property())
-            .with_owned_root_property(ferroui_base::layout::Layoutable::height_property())
-            .with_owned_root_property(ferroui_base::layout::Layoutable::margin_property());
-        if let Some(page) = root.cast::<crate::pages::ExpanderPage>() {
-            target = target.with_refresh(page.reload_refresh());
-        }
+        let target = component_target(&root, uri, baseline, context.resource_documents.clone());
         let target = Rc::new(target);
         let erased: Rc<dyn ReloadTarget> = target.clone();
         context.session.register_target(&erased);
         context.targets.push((target, root.downgrade()));
         eprintln!("Catalog reload tracking: {path}");
     });
+}
+
+pub(crate) fn component_target(
+    root: &Ref<ContentPage>,
+    uri: String,
+    baseline: String,
+    dependencies: Vec<String>,
+) -> ComponentReloadTarget {
+    let mut target = ComponentReloadTarget::content_page(root, uri, baseline, configuration())
+        .with_dependencies(dependencies)
+        .with_owned_root_static_resource_property(ferroui_base::StyledElement::theme_property())
+        .with_owned_root_binding_property(ferroui_base::layout::Layoutable::width_property())
+        .with_owned_root_binding_property(ferroui_base::layout::Layoutable::height_property())
+        .with_owned_root_binding_property(ferroui_base::layout::Layoutable::margin_property());
+    if let Some(page) = root.cast::<crate::pages::ExpanderPage>() {
+        target = target.with_refresh(page.reload_refresh());
+    }
+    target
 }
 
 #[path = "build/placeholder_geometry.rs"]

@@ -62,8 +62,8 @@ pub trait ComponentRefresh {
 }
 /// Explicitly opt in for declarative content. Use `with_refresh` for cached references and
 /// application child subscriptions. The original component is never reconstructed. Root
-/// literals can be claimed with `with_owned_root_property`; bindings, resources/styles
-/// and XAML handlers still require a more specific adapter.
+/// assignments can be claimed with the literal, static-resource and binding ownership
+/// methods. Inline resources/styles and XAML handlers need their own adapter.
 pub struct ComponentReloadTarget {
     root: Root,
     uri: String,
@@ -163,6 +163,22 @@ impl ComponentReloadTarget {
     }
     pub fn is_alive(&self) -> bool {
         self.root.upgrade().is_some()
+    }
+
+    /// Claims a root literal or synchronous reflection/compiled binding. Register
+    /// immediately after population, before application assignments. Preparation
+    /// defers the candidate root binding and recreates it for the preserved root;
+    /// its new namescope belongs to the candidate children. Custom binding kinds,
+    /// delayed/asynchronous update modes and lifecycle properties need an adapter.
+    pub fn with_owned_root_binding_property<T: ferroui_base::PropertyValue>(
+        mut self,
+        property: &'static ferroui_base::StyledProperty<T>,
+    ) -> Self {
+        if let Some(root) = self.root.upgrade() {
+            self.properties.retain(|owned| owned.name() != property.name());
+            self.properties.push(crate::root_properties::own_binding(&root.element(), property));
+        }
+        self
     }
 }
 pub(crate) fn shadow_source(
@@ -345,6 +361,10 @@ impl ReloadTarget for ComponentReloadTarget {
             ferroui_base::utilities::UriKind::Absolute,
         )
         .ok_or_else(|| ReloadError::Failed("Invalid component URI".into()))?;
+        let bindings = ferroui_markup_xaml_loader::binding_capture::BindingCaptureScope::new(
+            self.uri.clone(),
+            self.properties.iter().filter_map(|property| property.binding_property()),
+        );
         let candidate = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
             RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &prepared),
             Some(self.configuration.clone()),
@@ -366,6 +386,7 @@ impl ReloadTarget for ComponentReloadTarget {
                 &candidate.element().upcast(),
                 &before,
                 source,
+                &bindings,
             )? {
                 properties.push(change);
             }

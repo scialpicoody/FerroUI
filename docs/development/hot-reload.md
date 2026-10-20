@@ -66,8 +66,27 @@ framework-wide integration and the three-platform release gate remain incomplete
   from value equality. Lifecycle
   properties such as Content, DataContext, Theme and Template use their own adapters.
   Custom property callbacks must support reversible assignment. This explicit API
-  does not infer ownership from arbitrary application setters; root binding and
-  subscription replacement remains unfinished. The registered catalog pages claim Width, Height and Margin.
+  does not infer ownership from arbitrary application setters.
+- Component and panel adapters expose `with_owned_root_binding_property` for
+  literal or synchronous reflection/compiled bindings on declared root properties.
+  The runtime loader captures these descriptions without activating bindings on
+  the candidate root. Admission therefore rejects unsupported modes before a
+  one-way-to-source binding can write to its model. The adapter creates an
+  independent description for the preserved root, retaining the candidate
+  namescope for child references and rebasing a direct Source reference to the
+  temporary root. Strong root references in converter parameters, fallback values
+  or target-null values require an adapter, avoiding candidate retention or a
+  live-root ownership cycle. Old subscriptions stay paused until the entire revision succeeds.
+  Rollback reinstates their original identity; success disposes them. Literal
+  replacement, removal and subsequent re-addition use the same transaction.
+  Unchanged bindings depending only on the preserved data context keep their
+  existing expression and user input during child edits. Named/relative sources
+  and resource-dependent options are prepared against the new context instead.
+  Explicit assignments (including equal-value writes) invalidate ownership;
+  ordinary `SetCurrentValue` input does not transfer binding ownership.
+  Custom binding kinds, delayed/explicit/lost-focus updates, lifecycle properties,
+  arbitrary captured extension state and irreversible converters require their
+  own adapter. ControlCatalog registers Width, Height and Margin through this API.
 - The development-only `ferroui_base::data::LocalBindingReload` primitive prepares
   an inactive replacement binding for the preserved object, then supports commit,
   rollback and finish. Explicit adapters must provide the binding description and
@@ -81,9 +100,8 @@ framework-wide integration and the three-platform release gate remain incomplete
   stale two-way writes. Completion of a detached expression cannot clear its
   replacement's validation. A reentrant application write invalidates ownership;
   rollback reports the conflict rather than overwriting it. Custom observers still
-  require reversible, non-panicking cleanup. This is the property-store foundation;
-  automatic root-binding description capture and component/panel integration are
-  not yet implemented.
+  require reversible, non-panicking cleanup. The component and panel binding
+  ownership adapters use this property-store primitive.
 - `with_owned_root_static_resource_property` explicitly claims a literal or
   `StaticResource` root assignment, including Theme and Template. Unlike literal
   ownership, it compares the detached candidate value even when the attribute text
@@ -924,3 +942,23 @@ native runs passed on macOS and Linux/Xvfb. Their raw observations, compiler
 versions and source hashes are in `hot-reload-root-theme-baselines.json`; other
 validation builds were running, so these are correctness-run measurements rather
 than a clean performance benchmark. Windows remains unverified.
+
+### Preserved-root bindings
+
+Component and panel root-binding integration now has 85 passing engine tests on
+macOS and Linux, including original-expression rollback, fresh child namescopes,
+compiled bindings, multiple instances, pre-activation admission, resource-supplied
+fallbacks and paths, unchanged data-context subscriptions, direct-source rebasing
+and application ownership after a rejected commit. macOS also passes all three
+catalog integration tests, 4,381 base tests, 204 markup tests and 404 loader tests
+(one existing metadata diagnostic is ignored), plus release compilation.
+
+The native `root_binding_probe.py` passes on macOS and Linux/Xvfb. It checks
+literal-to-binding replacement, updates through the preserved root's self source,
+invalid/unsupported edits retaining the last-good graph, atomic recovery and
+binding removal while retaining window/root/model identities. The workflow runs
+this probe on all three desktop platforms. Raw stage timings and source hashes are
+in [the root-binding observations](hot-reload-root-binding-baselines.json);
+these functional runs were not isolated latency benchmarks. Windows execution,
+latest-revision native Rust-patch validation, and the other documented integration
+and release gates remain open.

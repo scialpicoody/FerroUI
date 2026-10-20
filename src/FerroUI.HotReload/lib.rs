@@ -13,6 +13,8 @@ mod resource_preparation;
 mod resources;
 pub use resource_preparation::ResourcePreparation;
 mod root_properties;
+#[cfg(test)]
+mod root_binding_tests;
 mod styles;
 pub use panel::PanelReloadTarget;
 pub use resources::ResourceReloadTarget;

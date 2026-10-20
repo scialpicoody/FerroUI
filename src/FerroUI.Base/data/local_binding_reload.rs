@@ -22,6 +22,7 @@ pub struct LocalBindingReload<T: PropertyValue> {
     property: &'static StyledProperty<T>,
     original: Option<Rc<dyn BindingExpressionBase>>,
     replacement: Option<Rc<dyn BindingExpressionBase>>,
+    replacement_value: Option<T>,
     original_value: Option<T>,
     original_current_value: bool,
     prepared_version: u64,
@@ -79,12 +80,24 @@ impl<T: PropertyValue> LocalBindingReload<T> {
             property,
             original,
             replacement,
+            replacement_value: None,
             original_value,
             original_current_value: diagnostic.is_overridden_current_value(),
             prepared_version,
             applied_version: 0,
             state: State::Prepared,
         })
+    }
+
+    /// Replaces a binding with a converted literal, or clears its contribution.
+    pub fn prepare_value(
+        target: &Ref<FerroObject>,
+        property: &'static StyledProperty<T>,
+        value: Option<T>,
+    ) -> Result<Self, String> {
+        let mut change = Self::prepare(target, property, None, None)?;
+        change.replacement_value = value;
+        Ok(change)
     }
 
     fn owns(&self, expression: &Rc<dyn BindingExpressionBase>) -> bool {
@@ -143,7 +156,10 @@ impl<T: PropertyValue> LocalBindingReload<T> {
                 );
             }
             None => {
-                self.target.clear_value(self.property);
+                match &self.replacement_value {
+                    Some(value) => self.target.set_value(self.property, value.clone()),
+                    None => self.target.clear_value(self.property),
+                }
                 self.target.on_update_data_validation(
                     self.property,
                     BindingValueType::UNSET_VALUE,

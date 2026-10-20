@@ -2239,6 +2239,9 @@ fn owned_root_property_rechecks_equal_value_writes_before_commit() {
             &candidate_object,
             "<ContentControl Width=\"20\"/>",
             "<ContentControl Width=\"30\"/>",
+            &ferroui_markup_xaml_loader::binding_capture::BindingCaptureScope::new(
+                "ferres://test/View.xaml".into(), [],
+            ),
         )
         .unwrap()
         .unwrap();

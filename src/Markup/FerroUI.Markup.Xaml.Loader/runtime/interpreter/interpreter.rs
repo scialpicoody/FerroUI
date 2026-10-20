@@ -439,6 +439,11 @@ impl Interpreter {
         let context = self.create_context(parent_service_provider, document, &*manipulation)?;
         context.set_root_object(root_instance.clone());
         context.set_intermediate_root_object(root_instance.clone());
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        crate::binding_capture::register_root(
+            document.base_uri.as_ref().map(|uri| uri.absolute_uri()),
+            root_instance,
+        );
         let scope = Rc::as_ptr(&manipulation) as *const () as usize;
         let mut eval = EvalContext::new(self, Some(context), document.clone(), scope);
         eval.manipulate(&manipulation.as_node(), root_instance)
