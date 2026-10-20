@@ -224,6 +224,7 @@ impl ReloadTarget for PanelReloadTarget {
                 "Grid",
                 "UniformGrid",
             ],
+            "Children",
             &self
                 .properties
                 .iter()

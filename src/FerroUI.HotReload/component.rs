@@ -135,6 +135,7 @@ pub(crate) fn shadow_source(
     source: &str,
     baseline: &str,
     supported: &[&str],
+    content_member: &str,
     owned_properties: &[&str],
 ) -> Result<String, ReloadError> {
     const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
@@ -179,7 +180,16 @@ pub(crate) fn shadow_source(
         ));
     }
     for node in root.children().filter(|node| node.is_element()) {
-        if node.tag_name().name().contains('.') {
+        if let Some((owner, member)) = node.tag_name().name().split_once('.') {
+            // Explicit Content/Children syntax owns the same graph as implicit
+            // content. Other root property elements still need their own adapter.
+            if member == content_member
+                && supported.contains(&owner)
+                && node.tag_name().namespace() == Some("https://github.com/ferroui")
+                && node.attributes().len() == 0
+            {
+                continue;
+            }
             return Err(ReloadError::RestartRequired(
                 "Root property-element assignments require an ownership-aware adapter".into(),
             ));
@@ -281,6 +291,7 @@ impl ReloadTarget for ComponentReloadTarget {
             source,
             &before,
             &["ContentControl", "UserControl", "ContentPage"],
+            "Content",
             &self
                 .properties
                 .iter()

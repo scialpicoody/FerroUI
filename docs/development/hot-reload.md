@@ -23,7 +23,8 @@ framework-wide integration and the three-platform release gate remain incomplete
 - `ComponentReloadTarget`: opt-in content replacement for declarative ContentPage,
   ContentControl and UserControl components. It retains the existing component,
   application-owned root values and view model, transfers a fresh namescope and
-  rolls back content/scope on failure. Unregistered root assignments, root property elements,
+  rolls back content/scope on failure. Implicit content and explicit framework
+  `Content` property elements use the same transaction. Unregistered root assignments, other root property elements,
   named roots and XAML handlers are conservatively rejected until their adapters
   support them. `with_refresh` accepts a `ComponentRefresh` implementation for
   cached controls and application-installed subscriptions: prepare validates the
@@ -45,6 +46,10 @@ framework-wide integration and the three-platform release gate remain incomplete
   identity/order; empty and growing ranges are supported. The adapter retains the
   old children and namescope for rollback, refreshes references through
   `ComponentRefresh`, and restores compatible child state after the dispatcher runs.
+  Explicit framework `Children` property elements, including inherited
+  `Panel.Children`, have the same ownership rules as implicit children. The
+  lifecycle tests alternate the two forms while preserving application siblings,
+  input state and fresh namescopes.
   Its root namescope must be XAML-owned; named application children need separate
   scopes. External interleaving/removal of owned children, items-host panels, root
   assignment edits without explicit ownership and unsupported handler/resource
@@ -55,7 +60,9 @@ framework-wide integration and the three-platform release gate remain incomplete
   that local contribution, exposing a style or default. Commit failure restores the
   previous local value together with the graph. Unrelated application values and
   the root data context survive. Binding/resource expressions, animations,
-  current-value overrides and changed application values require restart. Lifecycle
+  current-value overrides and application writes (including equal-value assignments)
+  require restart. Development-only write versions distinguish ownership changes
+  from value equality. Lifecycle
   properties such as Content, DataContext, Theme and Template use their own adapters.
   Custom property callbacks must support reversible assignment. This explicit API
   does not infer ownership from arbitrary application setters; root binding and
@@ -166,7 +173,8 @@ framework-wide integration and the three-platform release gate remain incomplete
   `apply_with`; failed candidate markup rolls back code and UI. The expanded
   native Linux/Xvfb probe passed invalid-builder rollback, successful live view
   replacement, and retention of that derived view through a later handler-only
-  patch. Native macOS and Windows execution of this expanded probe remains open.
+  patch. The same expanded probe also passed on macOS with an active display.
+  Windows execution remains open.
 - `HotReloadSession::submit_texts` accepts editor/supervisor document snapshots
   without rebuilding unchanged accepted markup. Reverting one document discards
   its failed draft without discarding neighboring drafts; resubmitting a pending
@@ -627,6 +635,12 @@ passed. The expanded native handler-only desktop probe passed under Linux/Xvfb:
 it applied two combined revisions and checked both failure paths, then verified
 a third, handler-only patch retained child identity and markup revision. Its
 macOS attempt stopped at startup with native render-timer error `-6661`.
+After a successful native display-link preflight, the expanded macOS probe passed
+using `caffeinate -d -i -u` for the build and desktop run. It verified the combined
+updates, both rollback paths, handler-only child identity, invalid-builder
+dispatch/UI rollback, successful builder replacement, and preservation of that
+derived view through a later handler patch. This supersedes the earlier
+display-blocked attempt without treating that attempt as a product pass.
 The subsequent Linux builder run also passed candidate-markup rejection with
 dispatch/UI rollback, successful builder replacement, and a later handler-only
 patch retaining the derived view. All 54 macOS session tests now pass, including
@@ -646,7 +660,18 @@ ExpanderPage integration (`cargo test --locked -p control-catalog --lib
 tests::compiled_markup`, without `runtime-markup`). It compares generated markup
 with runtime loading, including application resources, shown visual trees, handler
 dispatch and image assets. This covers initial-loading parity; reload ownership and
-state transfer are validated separately.
+state transfer are validated separately. The same 226 compiled/runtime tests also
+passed on Linux ARM64 under the isolated validation VM (Rust 1.93.0, LLD 18.1.3);
+the test executable used only the default and placeholder-branding features,
+without runtime-markup or hot-reload.
+
+Root-property ownership regression coverage now checks equal-value application
+writes both between reloads and between preparation and commit. The macOS run
+passed all 58 reload tests, including rollback followed by retry; Linux passed
+the same 58 tests. macOS also passed all 4,380
+base tests with development write tracking enabled. Release compilation also
+passed; the tracking field, API and mutation hooks are gated out without both
+`debug_assertions` and the base `hot-reload` feature.
 
 The macOS desktop demo passed initial loading, a valid edit, invalid XML rejection,
 and recovery through atomic replacement in one process. Reproduce after building

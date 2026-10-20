@@ -568,7 +568,14 @@ fn panel_reload_retains_root_and_application_children_and_rolls_back() {
         old.set_text(Some("unsaved edit"));
         let weak = old.downgrade();
         drop(old);
-        let changed = source.replace("<TextBox", &format!("<TextBox Width=\"{}\"", index + 30));
+        let mut changed = source.replace("<TextBox", &format!("<TextBox Width=\"{}\"", index + 30));
+        if index % 2 == 0 {
+            // The inherited property owner is Panel, even though the component
+            // is a StackPanel. Switching syntax must preserve the same ownership.
+            changed = changed
+                .replace("<TextBox", "<Panel.Children><TextBox")
+                .replace("/></StackPanel>", "/></Panel.Children></StackPanel>");
+        }
         session.submit(uri.into(), changed);
         assert_eq!(
             session.apply_pending().unwrap().status,
@@ -1467,7 +1474,10 @@ fn component_reload_preserves_root_model_and_installs_a_fresh_namescope() {
         RuntimeXamlLoaderConfiguration::default(),
     ));
     session.register_target(&target);
-    session.submit("ferres://component/View.xaml".into(), text("2"));
+    let explicit = text("2")
+        .replace("<Border", "<ContentPage.Content><Border")
+        .replace("/></ContentPage>", "/></ContentPage.Content></ContentPage>");
+    session.submit("ferres://component/View.xaml".into(), explicit);
     let outcome = session.apply_pending().unwrap();
     assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
     assert_eq!(root.width(), 321.0);
@@ -1491,6 +1501,22 @@ fn component_reload_preserves_root_model_and_installs_a_fresh_namescope() {
         ReloadStatus::RestartRequired
     );
     assert_eq!(root.width(), 321.0);
+    for unsupported in [
+        text("3")
+            .replace("<Border", "<Border.Content><Border")
+            .replace("/></ContentPage>", "/></Border.Content></ContentPage>"),
+        text("3").replace(
+            "<Border",
+            "<ContentPage.Resources><ResourceDictionary/></ContentPage.Resources><Border",
+        ),
+    ] {
+        session.submit("ferres://component/View.xaml".into(), unsupported);
+        assert_eq!(
+            session.apply_pending().unwrap().status,
+            ReloadStatus::RestartRequired
+        );
+        assert!(Rc::ptr_eq(&root.content().unwrap(), &content));
+    }
 }
 
 #[test]
@@ -2019,6 +2045,15 @@ fn component_owned_root_values_remove_restore_and_protect_application_overrides(
         ReloadStatus::Applied
     );
     assert_eq!(root.width(), 40.0);
+    root.set_width(40.0); // Application ownership changes even when the value does not.
+    let old_content = root.content();
+    session.submit(uri.into(), source("", 6));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(root.width(), 40.0);
+    assert_eq!(root.content(), old_content);
     root.set_width(77.0);
     let accepted = session.sources();
     let old_content = root.content();
@@ -2184,4 +2219,34 @@ fn opening_a_target_retries_a_draft_without_another_file_save() {
         session.sources()["ferres://test/View.xaml"],
         "<Border Width=\"7\"/>"
     );
+}
+
+#[test]
+fn owned_root_property_rechecks_equal_value_writes_before_commit() {
+    use ferroui_base::{layout::Layoutable, threading::Dispatcher, FerroObject, Ref};
+    use ferroui_controls::ContentControl;
+    let _scope = Dispatcher::unit_test_scope();
+    let root = ContentControl::new();
+    let candidate = ContentControl::new();
+    root.set_width(20.0);
+    candidate.set_width(30.0);
+    let root_object: Ref<FerroObject> = root.clone().upcast();
+    let candidate_object: Ref<FerroObject> = candidate.upcast();
+    let property = crate::root_properties::own(&root_object, Layoutable::width_property());
+    let mut change = property
+        .prepare(
+            &root_object,
+            &candidate_object,
+            "<ContentControl Width=\"20\"/>",
+            "<ContentControl Width=\"30\"/>",
+        )
+        .unwrap()
+        .unwrap();
+    root.set_width(20.0);
+    assert!(matches!(
+        change.commit(),
+        Err(ReloadError::RestartRequired(_))
+    ));
+    change.rollback();
+    assert_eq!(root.width(), 20.0);
 }

@@ -482,6 +482,14 @@ impl FerroObject {
 
     // --- styled properties ------------------------------------------------
 
+    /// Starts tracking explicit local/current writes to this property and returns
+    /// its version. Equal-value writes count; style evaluation does not.
+    /// Tracking lives with this object and is available only in development builds.
+    #[cfg(all(debug_assertions, feature = "hot-reload"))]
+    pub fn local_write_version(&self, property: &FerroProperty) -> u64 {
+        self.values.local_write_version(property)
+    }
+
     /// Clears a property's local value.
     pub fn clear_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) {
         self.values.clear_value(self, property);

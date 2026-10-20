@@ -4,7 +4,10 @@ use ferroui_base::{
     data::BindingPriority, diagnostics::FerroObjectDiagnosticExtensions, AnyValue, FerroObject,
     PropertyValue, Ref, StyledProperty,
 };
-use std::{cell::RefCell, rc::Rc};
+use std::{
+    cell::{Cell, RefCell},
+    rc::Rc,
+};
 
 pub(crate) trait OwnedRootProperty {
     fn name(&self) -> &str;
@@ -19,6 +22,7 @@ pub(crate) trait OwnedRootProperty {
 struct Property<T: PropertyValue> {
     property: &'static StyledProperty<T>,
     expected: Rc<RefCell<Result<Option<T>, ReloadError>>>,
+    version: Rc<Cell<u64>>,
 }
 fn snapshot<T: PropertyValue>(
     root: &FerroObject,
@@ -49,6 +53,7 @@ pub(crate) fn own<T: PropertyValue>(
 ) -> Box<dyn OwnedRootProperty> {
     Box::new(Property {
         property,
+        version: Rc::new(Cell::new(root.local_write_version(property))),
         expected: Rc::new(RefCell::new(snapshot(root, property))),
     })
 }
@@ -94,7 +99,10 @@ impl<T: PropertyValue> OwnedRootProperty for Property<T> {
         }
         let current = snapshot(root, self.property)?;
         let expected = self.expected.borrow().clone()?;
-        if !equal(&current, &expected) || (old.is_none() && current.is_some()) {
+        if root.local_write_version(self.property) != self.version.get()
+            || !equal(&current, &expected)
+            || (old.is_none() && current.is_some())
+        {
             return Err(ReloadError::RestartRequired(format!(
                 "Application changed owned root {}",
                 self.name()
@@ -118,6 +126,8 @@ impl<T: PropertyValue> OwnedRootProperty for Property<T> {
             before: current,
             after: value,
             expected: self.expected.clone(),
+            version: self.version.clone(),
+            committed_version: 0,
             started: false,
         })))
     }
@@ -128,7 +138,9 @@ struct Change<T: PropertyValue> {
     before: Option<T>,
     after: Option<T>,
     expected: Rc<RefCell<Result<Option<T>, ReloadError>>>,
+    version: Rc<Cell<u64>>,
     started: bool,
+    committed_version: u64,
 }
 impl<T: PropertyValue> Change<T> {
     fn assign(&self, value: &Option<T>) {
@@ -140,7 +152,9 @@ impl<T: PropertyValue> Change<T> {
 }
 impl<T: PropertyValue> PreparedReload for Change<T> {
     fn commit(&mut self) -> Result<(), ReloadError> {
-        if !equal(&snapshot(&self.root, self.property)?, &self.before) {
+        if self.root.local_write_version(self.property) != self.version.get()
+            || !equal(&snapshot(&self.root, self.property)?, &self.before)
+        {
             return Err(ReloadError::RestartRequired(format!(
                 "Root {} changed after preparation",
                 self.property.name()
@@ -148,14 +162,18 @@ impl<T: PropertyValue> PreparedReload for Change<T> {
         }
         self.started = true;
         self.assign(&self.after);
+        self.committed_version = self.root.local_write_version(self.property);
         Ok(())
     }
     fn rollback(&mut self) {
         if self.started {
             self.assign(&self.before);
+            self.version
+                .set(self.root.local_write_version(self.property));
         }
     }
     fn finish(&mut self) {
         *self.expected.borrow_mut() = Ok(self.after.clone());
+        self.version.set(self.committed_version);
     }
 }
