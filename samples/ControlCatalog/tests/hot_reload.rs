@@ -51,6 +51,16 @@ fn registered_catalog_root_binding_uses_preserved_page_and_window() {
 }
 
 #[test]
+fn application_scope_releases_catalog_watcher_before_thread_teardown() {
+    let released = {
+        let _application = super::support::start_catalog_application();
+        let _page = crate::pages::ListBoxPage::new();
+        crate::hot_reload::session_release_check()
+    };
+    assert!(released(), "application scope retained the catalog reader");
+}
+
+#[test]
 fn list_box_reload_preserves_shared_selection_on_commit_and_rollback() {
     let _application = super::support::start_catalog_application();
     let page = crate::pages::ListBoxPage::new();

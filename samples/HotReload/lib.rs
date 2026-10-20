@@ -130,8 +130,17 @@ impl ApplicationImpl for App {
         let references = Rc::new(refresh::CounterReferences::default());
         let event_references = references.clone();
         let weak_window = window.downgrade();
-        host.add_handler(Button::click_event(), move |_, _| {
+        host.add_handler(Button::click_event(), move |_, args| {
             let count = ACTION.with(|action| action.borrow().as_ref().map(|action| action()));
+            #[cfg(feature = "patch-control")]
+            if std::env::var_os("FERROUI_TRACE_CLICKS").is_some() {
+                eprintln!("FERROUI_COUNTER_EVENT={}", serde_json::json!({
+                    "counter": count,
+                    "source_is_button": args.source().is_some_and(|source| source.cast::<Button>().is_some()),
+                    "unix_ns": std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH).unwrap().as_nanos().to_string(),
+                }));
+            }
             if let (Some(window), Some(count)) = (weak_window.upgrade(), count) {
                 window.set_title(Some(format!("Hot reload — counter {count}")));
                 event_references.update(count);

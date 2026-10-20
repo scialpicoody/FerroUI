@@ -1,13 +1,13 @@
 //! Manifest-backed catalog sessions. Cached-reference/handler pages require explicit refresh adapters.
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
-use ferroui_base::{Ref, TypeInfo, WeakRef};
+use ferroui_base::{FerroLocator, Ref, TypeInfo, WeakRef};
 use ferroui_controls::ContentPage;
 use ferroui_hot_reload::{
     ComponentReloadTarget, FileWatcher, HotReloadSession, ReloadManifest, ReloadTarget,
     ResourceReloadTarget, StyleReloadTarget,
 };
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
-use std::{cell::RefCell, collections::BTreeSet, rc::Rc, time::Duration};
+use std::{cell::RefCell, collections::BTreeSet, rc::{Rc, Weak}, time::Duration};
 
 struct CatalogSession {
     session: HotReloadSession,
@@ -19,8 +19,32 @@ struct CatalogSession {
     bound: BTreeSet<String>,
 }
 ferroui_base::ferro_thread_local! {
-    static SESSION: RefCell<Option<Rc<RefCell<CatalogSession>>>> = const { RefCell::new(None) };
+    static SESSION: RefCell<Weak<RefCell<CatalogSession>>> = const { RefCell::new(Weak::new()) };
 }
+impl Drop for CatalogSession {
+    fn drop(&mut self) {
+        if let Some(timer) = self.timer.take() {
+            timer.stop();
+        }
+    }
+}
+
+/// Join the reader before Windows enters TLS destruction under the loader lock.
+pub(crate) fn shutdown() {
+    let context = SESSION.with(|slot| slot.replace(Weak::new()).upgrade());
+    FerroLocator::current_mutable()
+        .bind::<RefCell<CatalogSession>>()
+        .to_func(|| None);
+    drop(context);
+}
+
+#[cfg(test)]
+pub(crate) fn session_release_check() -> impl Fn() -> bool {
+    let session = SESSION.with(|slot| slot.borrow().clone());
+    assert!(session.upgrade().is_some(), "a catalog watcher must be running");
+    move || session.upgrade().is_none()
+}
+
 fn configuration() -> RuntimeXamlLoaderConfiguration {
     let mut configuration = RuntimeXamlLoaderConfiguration::default();
     configuration.local_assembly = Some(&crate::register_types::ASSEMBLY);
@@ -48,7 +72,8 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
         let mut slot = slot.borrow_mut();
         let uri = crate::markup::document_uri(path);
         let context = slot
-            .get_or_insert_with(|| {
+            .upgrade()
+            .unwrap_or_else(|| {
                 let mut manifest =
                     ReloadManifest::parse(include_str!(env!("FERROUI_HOT_RELOAD_MANIFEST")))
                         .expect("catalog development manifest");
@@ -177,9 +202,13 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                     },
                 );
                 context.borrow_mut().timer = Some(timer);
+                // The application/test service scope ends before thread teardown.
+                // Joining a watcher from a Windows TLS destructor deadlocks with
+                // the worker's own loader-lock-protected thread exit.
+                FerroLocator::current_mutable().bind_to_self(context.clone());
+                *slot = Rc::downgrade(&context);
                 context
-            })
-            .clone();
+            });
         let mut context = context.borrow_mut();
         let canonical = ferroui_base::utilities::Uri::try_create(
             &uri,

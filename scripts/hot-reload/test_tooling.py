@@ -67,6 +67,12 @@ class CompilerReplayTests(unittest.TestCase):
                 FERROUI_TEST_VALUE='prefix:')), 'prefix:input\n')
             with self.assertRaisesRegex(RuntimeError, 'diagnostic'):
                 run([sys.executable, '-c', 'import sys; sys.stderr.write("diagnostic"); sys.exit(3)'], directory)
+            # dx puts compiler diagnostics in JSON on stdout. Later build progress
+            # must not hide the original error when a native build fails.
+            with self.assertRaises(RuntimeError) as failure:
+                run([sys.executable, '-c', 'import sys; '
+                    'print("original compiler error"); print("x" * 7000); sys.exit(3)'], directory)
+            self.assertIn('original compiler error', str(failure.exception))
 
     def test_timeout_stops_descendants_even_after_compiler_parent_exits(self):
         for parent_exits in [False, True]:

@@ -92,6 +92,9 @@ def main():
                     raise RuntimeError('Recovery did not refresh the root static theme')
                 save_and_render(process, log, page, original_page)
                 save_and_render(process, log, resource, original_resources)
+                print('FERROUI_RESOURCE_OBSERVATION=' + json.dumps({
+                    'before': before, 'changed': changed, 'failed': failed, 'recovered': recovered,
+                }), flush=True)
                 print(f'PASS: native resource reload PID {process.pid}: static consumer and root theme updated, missing key retained last-good view, atomic recovery preserved root/window/model', flush=True)
             except BaseException:
                 print(log.read_text(encoding='utf-8', errors='replace'), flush=True)

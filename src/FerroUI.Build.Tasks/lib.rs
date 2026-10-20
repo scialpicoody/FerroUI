@@ -1196,9 +1196,12 @@ mod tests {
     /// Cargo run the script again.
     #[test]
     fn build_without_an_assembly_is_an_error() {
-        let outcome = Build::new(PathBuf::from("/crate"), PathBuf::from("/out"), "my-crate", Vec::new()).compile_xaml().execute();
+        let root = PathBuf::from("/crate");
+        let outcome = Build::new(root.clone(), PathBuf::from("/out"), "my-crate", Vec::new()).compile_xaml().execute();
         assert_eq!(outcome.errors, ["the assembly of the crate is not stated (Build::assembly)"]);
-        assert_eq!(outcome.lines, ["cargo::rerun-if-changed=/crate/build.rs", "cargo::rerun-if-changed=/crate/Cargo.toml"]);
+        assert_eq!(outcome.lines, ["build.rs", "Cargo.toml"].map(|file| {
+            format!("cargo::rerun-if-changed={}", root.join(file).display())
+        }));
     }
 }
 

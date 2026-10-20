@@ -4,6 +4,13 @@ Status: experimental implementation; **not ready for the first release described
 issues #233 and #234**. The dedicated sample has an operational owning supervisor;
 framework-wide integration and the three-platform release gate remain incomplete.
 
+Native Windows verification passed all 21 acceptance commands and a focused
+catalog shutdown check. The [Windows report](hot-reload-windows-verification.md)
+records the environment, the results, the expected skips, the native identity and
+state observations and the fixes they led to. Earlier platform notes below retain
+their original source scope; results for later revisions must be recorded
+separately.
+
 ## Implemented
 
 - `ferroui-hot-reload`: UI-thread sessions, coherent multi-document source snapshots,
@@ -991,3 +998,46 @@ excluding watch debounce and physical display scan-out.
 These runs predate the Windows watcher-shutdown fix below. The Windows results
 are recorded separately; the full current revision and remaining integration work
 still require acceptance before release.
+
+## Windows fixes and CI repairs
+
+The Windows verification led to the following fixes. The catalog session now belongs to the application
+locator scope; its thread-local handle is weak. Explicit desktop exit cleanup
+releases the watcher before thread teardown, avoiding the Windows loader-lock
+deadlock found on Windows. Compiler failures also keep their full diagnostics,
+the build tests use portable paths, the supervisor uses shorter temporary paths
+and the sample has opt-in click diagnostics.
+
+After these fixes, four catalog tests, 85 reload tests, 19 patch tests, the
+Python harness and a fresh native root-binding probe passed on Windows (the
+[Windows report](hot-reload-windows-verification.md)); its complete 21-command run
+applies to an earlier revision. The full current 22-command Windows matrix
+remains open.
+
+The release groups and license/notice links of both development
+crates are repaired, the generated README table is current, and theme/handler
+reference files have been regenerated using their existing generators. These
+address the inherited package and generated-reference CI failures. A local
+49-crate packaging dry run passed with `--no-verify --allow-dirty`; it neither
+compiled every packaged crate nor published anything.
+
+Local macOS integration checks passed all four catalog reload tests, all 25
+build-task tests and 598 markup tests (17 existing ignored tests). Python ran
+27 tests, with 25 passing and two Windows-only skips. The theme suites passed
+200 Fluent, 203 Simple and 286 WinUI tests, retaining their existing ignored
+tests. Each theme run explicitly filtered out the two managed file chooser
+tests: a preceding unfiltered Fluent run was stopped after both tests blocked
+in `BclMountedVolumeInfoProvider::listen`, inside the OS directory-open call
+while enumerating mounted volumes. This is a local verification limitation,
+not a passing result for those six cases. No test assertions or repository
+test filters were changed.
+
+All four catalog reload tests also passed on Linux arm64 with Rust 1.93.0.
+GNU ld was killed while linking under the local container's memory limit.
+Rebuilding the test target with
+`cargo rustc --locked -p control-catalog --features hot-reload --lib --profile test -- -Clink-arg=-fuse-ld=lld`
+and running that binary with the `tests::hot_reload` filter succeeded.
+
+These checks do not establish a green remote CI matrix or final feature
+acceptance. Current-revision native patch/supervisor runs and the remaining
+resource, style, state and handler integration boundaries still apply.

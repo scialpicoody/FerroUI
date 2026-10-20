@@ -140,7 +140,7 @@ def run(command, root, stdin=None, timeout=300, env=None):
         for pipe in (process.stdin, process.stdout, process.stderr):
             pipe.close()
     if process.returncode:
-        raise RuntimeError(f"{command[0]} failed ({process.returncode})\n{stderr}\n{stdout[-6000:]}")
+        raise RuntimeError(f"{command[0]} failed ({process.returncode})\n{stderr}\n{stdout}")
     return stdout
 
 

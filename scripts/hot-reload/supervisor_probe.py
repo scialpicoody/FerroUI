@@ -13,12 +13,19 @@ from catalog_probe import frames, wait_for
 
 def main():
     os.environ['FERROUI_RELOAD_TIMINGS'] = '1'
+    os.environ['FERROUI_TRACE_CLICKS'] = '1'
     original = stable_capture(ROOT)
-    with tempfile.TemporaryDirectory(prefix='ferroui-supervisor-probe-') as directory:
+    # Skia invokes Windows curl with a cache path below the staged target tree.
+    # Keep that path below MAX_PATH even with the default per-user temp directory.
+    with tempfile.TemporaryDirectory(prefix='fr-supervisor-') as directory:
         directory = Path(directory)
         source = directory / 'editor'
         stage(source, original)
         subprocess.run(['git', 'init', '-q'], cwd=source, check=True)
+        # The verification workspace must keep its byte-exact source baseline,
+        # regardless of the developer's global Windows checkout settings.
+        subprocess.run(['git', 'config', 'core.autocrlf', 'false'], cwd=source, check=True)
+        subprocess.run(['git', 'config', 'core.eol', 'lf'], cwd=source, check=True)
         subprocess.run(['git', 'add', '-f', '.'], cwd=source, check=True)
         owner = Supervisor(source, directory / 'builds', os.environ.get('FERROUI_DX', 'dx'))
         try:
@@ -82,8 +89,8 @@ def main():
             program.write_text('not valid Rust', encoding='utf-8')
             try:
                 owner.update(stable_capture(source))
-            except RuntimeError:
-                pass
+            except RuntimeError as error:
+                print(f'EXPECTED_REPLACEMENT_BUILD_FAILURE={error}', flush=True)
             else:
                 raise AssertionError('Invalid replacement unexpectedly built')
             assert owner.application is app and app.process.poll() is None
@@ -101,7 +108,19 @@ def main():
             assert replacement is not app and app.process.poll() is not None
             assert not (owner.directory / '1').exists(), 'Retired build directory was retained'
             assert (owner.directory / '3').exists(), 'Replacement build files were removed'
+            # Keep click as the first command after startup; a preceding state
+            # query must not hide a startup/order-dependent counter failure.
             current = replacement.command({'op': 'click'})
+            restored = replacement.command({'op': 'state'})
+            print('FERROUI_RESTART_OBSERVATION=' + json.dumps({
+                'captured': replacement.startup_state,
+                'first_click': current,
+                'restored': restored,
+            }), flush=True)
+            expected = json.loads(json.dumps(replacement.startup_state))
+            assert expected['application_state']['counter'] == 7, expected
+            expected['application_state']['counter'] = 8
+            assert restored['state'] == expected, restored
             assert current['counter'] == 8 and current['spacing'] == 24, current
             print('PASS: supervisor markup, admitted combined patch, failed build retention, acknowledged stateful restart and generation cleanup', flush=True)
         finally:

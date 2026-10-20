@@ -182,6 +182,7 @@ class Application:
         self.client = client
         self.files = files
         self.directory = directory
+        self.startup_state = state
         baseline = directory / 'baseline.json'
         baseline.write_text(json.dumps(admission_snapshot(files)))
         environment = dict(os.environ, FERROUI_PATCH_BASELINE=str(baseline))
@@ -240,7 +241,12 @@ class Application:
             for pipe in (self.process.stdin, self.process.stdout):
                 if pipe is not None:
                     pipe.close()
-        self.log.close()
+        if not self.log.closed:
+            self.log.close()
+            if os.environ.get('FERROUI_TRACE_CLICKS'):
+                print(f'FERROUI_APPLICATION_LOG_BEGIN pid={self.process.pid if self.process else None}', flush=True)
+                print((self.directory / 'application.log').read_text(encoding='utf-8', errors='replace'), end='', flush=True)
+                print('FERROUI_APPLICATION_LOG_END', flush=True)
 
 
 class Supervisor:
