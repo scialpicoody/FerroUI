@@ -353,6 +353,10 @@ impl ValueStore {
         Self::find(&self.effective_values.borrow(), property.id()).is_some()
     }
 
+    pub fn has_local_value_binding(&self, property: &FerroProperty) -> bool {
+        self.local_value_bindings.borrow().iter().any(|(id, _)| *id == property.id())
+    }
+
     pub fn coerce_value(&self, owner: &FerroObject, property: &'static FerroProperty) {
         match self.get_effective_value(property) {
             Some(v) => v.coerce_value(owner),

@@ -510,6 +510,14 @@ impl FerroObject {
         self.values.is_set(property)
     }
 
+    /// Whether a local-value binding targets this property, including direct
+    /// properties and observable bindings. Unlike `is_set`, this does not rely
+    /// on a styled property's effective-value entry. It does not inspect bindings
+    /// at style/template priorities.
+    pub fn has_local_value_binding(&self, property: &FerroProperty) -> bool {
+        self.values.has_local_value_binding(property)
+    }
+
     /// Sets a property value with local value priority.
     #[inline]
     pub fn set_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>, value: T) {

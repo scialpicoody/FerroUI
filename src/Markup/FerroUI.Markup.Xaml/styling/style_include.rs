@@ -86,6 +86,11 @@ impl StyleInclude {
         }
 
         self.is_loading.set(true);
+        struct LoadingGuard<'a>(&'a Cell<bool>);
+        impl Drop for LoadingGuard<'_> {
+            fn drop(&mut self) { self.0.set(false); }
+        }
+        let _loading = LoadingGuard(&self.is_loading);
         let Some(source) = self.source() else {
             return Err(XamlLoadException::with_message("StyleInclude.Source must be set."));
         };
@@ -98,7 +103,6 @@ impl StyleInclude {
             )));
         };
         *self.loaded.borrow_mut() = Some(Rc::new(vec![loaded.clone()]));
-        self.is_loading.set(false);
 
         Ok(loaded)
     }

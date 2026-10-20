@@ -1,0 +1,2002 @@
+use super::*;
+use std::cell::{Cell, RefCell};
+
+#[test]
+fn uncommon_handler_contract_edits_restart_before_preparing_targets() {
+    ferroui_controls::register_types();
+    let uri = "ferres://test/View.xaml";
+    let source = r#"<Button xmlns="https://github.com/ferroui" PointerMoved="Before"/>"#;
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), source.into())
+        .unwrap();
+    let prepares = Rc::new(Cell::new(0));
+    let live: Rc<dyn ReloadTarget> = Rc::new(Target {
+        value: Rc::new(RefCell::new("before".into())),
+        fail: Rc::new(Cell::new(false)),
+        prepares: prepares.clone(),
+    });
+    session.register_target(&live);
+    for changed in [
+        source.replace("Before", "After"),
+        source.replace(" PointerMoved=\"Before\"", ""),
+    ] {
+        session.submit(uri.into(), changed);
+        assert_eq!(
+            session.apply_pending().unwrap().status,
+            ReloadStatus::RestartRequired
+        );
+        assert_eq!(prepares.get(), 0);
+    }
+}
+
+struct Target {
+    value: Rc<RefCell<String>>,
+    fail: Rc<Cell<bool>>,
+    prepares: Rc<Cell<usize>>,
+}
+
+#[test]
+fn builder_reapplication_retains_drafts_and_read_errors() {
+    let mut session = session();
+    let (_target, value) = target(&mut session, false);
+    let uri = "ferres://test/View.xaml";
+    session.submit(uri.into(), "<View Width=\"23\"/>".into());
+    session.reapply_document(uri).unwrap();
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(&*value.borrow(), "<View Width=\"23\"/>");
+    let before = session.applied_revision();
+    session.reapply_document(uri).unwrap();
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert!(session.applied_revision() > before);
+
+    session.submit_files(FileBatch {
+        files: vec![FileChange {
+            uri: uri.into(),
+            contents: Err("unreadable".into()),
+        }],
+        diagnostics: Vec::new(),
+    });
+    session.reapply_document(uri).unwrap();
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(&*value.borrow(), "<View Width=\"23\"/>");
+    assert!(matches!(
+        session.reapply_document("ferres://test/Missing.xaml"),
+        Err(ReloadError::RestartRequired(_))
+    ));
+}
+
+#[test]
+fn text_snapshots_skip_accepted_sources_and_preserve_other_failed_drafts() {
+    let mut session = session();
+    let (_target, value) = target(&mut session, false);
+    let view = "ferres://test/View.xaml";
+    let other = "ferres://test/Other.xaml";
+    session
+        .register_document(other.into(), "<Other/>".into())
+        .unwrap();
+    let accepted = session.sources();
+    let revision = session.applied_revision();
+    session.submit_texts((*accepted).clone());
+    assert!(!session.has_pending_changes());
+    assert!(session.apply_pending().is_none());
+    assert_eq!(session.applied_revision(), revision);
+    assert_eq!(&*value.borrow(), "before");
+
+    session.submit_texts([(view.into(), "<".into()), (other.into(), "<".into())]);
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    // Reverting one document must not discard its neighbor's invalid draft.
+    session.submit_texts([(view.into(), accepted[view].clone())]);
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(&*value.borrow(), "before");
+    session.submit_texts([(other.into(), accepted[other].clone())]);
+    assert!(!session.has_pending_changes());
+    assert!(session.apply_pending().is_none());
+
+    session.submit_texts([(view.into(), "<View Width=\"17\"/>".into())]);
+    let failed = session
+        .apply_pending_with(|| Err(ReloadError::Failed("patch failed".into())))
+        .unwrap();
+    assert_eq!(failed.status, ReloadStatus::Failed);
+    assert_eq!(&*value.borrow(), "before");
+    session.submit_texts([(view.into(), "<View Width=\"17\"/>".into())]);
+    let applied = session.apply_pending().unwrap();
+    assert_eq!(applied.status, ReloadStatus::Applied);
+    assert!(applied.revision > failed.revision);
+    assert_eq!(&*value.borrow(), "<View Width=\"17\"/>");
+}
+
+#[test]
+fn resource_owner_reload_notifies_dynamic_consumers_and_rolls_back_ownership() {
+    use ferroui_base::{
+        controls::{IResourceProvider, ResourceDictionary},
+        threading::Dispatcher,
+        Ref,
+    };
+    use ferroui_controls::Border;
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let load = |source: &str| {
+        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+            RuntimeXamlLoaderDocument::with_base_uri(None, source),
+            None,
+        )
+        .unwrap()
+    };
+    let view =
+        load(r#"<Border xmlns="https://github.com/ferroui" Width="{DynamicResource width}"/>"#);
+    let root = Ref::<Border>::from_xaml_object(&view).unwrap();
+    let resource_source = |value: i32| {
+        format!(
+            r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">{value}</x:Double></ResourceDictionary>"#
+        )
+    };
+    let container = root.resources();
+    container.add_value("application", 42_i32);
+    let application = container.get(&"application".into());
+    let other = ResourceDictionary::new();
+    other.add_value("untouched", 7_i32);
+    let other_provider: Rc<dyn IResourceProvider> = other.into();
+    container.add_merged_dictionary(other_provider.clone());
+    let initial = Ref::<ResourceDictionary>::from_xaml_object(&load(&resource_source(12))).unwrap();
+    container.add_merged_dictionary(Rc::<dyn IResourceProvider>::from(initial));
+    assert_eq!(root.width(), 12.0);
+    let uri = "ferres://resources/Values.xaml";
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), resource_source(12))
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        ResourceReloadTarget::merged(
+            &container,
+            1,
+            uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&target);
+    for number in 20..30 {
+        let old = container.merged_dictionaries().get(1);
+        let weak = Rc::downgrade(&old);
+        session.submit(uri.into(), resource_source(number));
+        let outcome = session.apply_pending().unwrap();
+        assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+        assert_eq!(root.width(), f64::from(number));
+        assert!(old.owner().is_none());
+        let new = container.merged_dictionaries().get(1);
+        assert!(new.owner() == Some(root.clone().into()));
+        drop(old);
+        assert!(
+            weak.upgrade().is_none(),
+            "detached resource provider retained"
+        );
+        assert_eq!(container.get(&"application".into()), application);
+        assert!(ferroui_base::controls::resource_provider_ptr_eq(
+            &container.merged_dictionaries().get(0),
+            &other_provider
+        ));
+    }
+    let old = container.merged_dictionaries().get(1);
+    let accepted = session.sources();
+    session.submit(uri.into(), resource_source(99));
+    let outcome = session
+        .apply_pending_with(|| Err(ReloadError::Failed("patch rejected".into())))
+        .unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Failed);
+    assert_eq!(root.width(), 29.0);
+    assert!(old.owner() == Some(root.clone().into()));
+    assert!(ferroui_base::controls::resource_provider_ptr_eq(
+        &container.merged_dictionaries().get(1),
+        &old
+    ));
+    assert_eq!(session.sources(), accepted);
+    session.submit(
+        uri.into(),
+        r#"<ResourceDictionary xmlns="https://github.com/ferroui"/>"#.into(),
+    );
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    assert!(
+        root.width().is_nan(),
+        "removed resource must not leave its old dynamic value"
+    );
+    assert_eq!(container.get(&"application".into()), application);
+}
+
+#[test]
+fn forward_static_resource_is_validated_after_candidate_construction() {
+    use ferroui_base::{threading::Dispatcher, Ref};
+    use ferroui_controls::{Border, ContentControl};
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let uri = "ferres://forward/View.xaml";
+    let source = r#"<Border xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Width="{StaticResource width}"><Border.Resources><x:Double x:Key="width">42</x:Double></Border.Resources></Border>"#;
+    let host = ContentControl::new();
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), source.into())
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &host,
+        uri.into(),
+        vec![],
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&target);
+    session.submit(uri.into(), source.into());
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    let child = Ref::<Border>::from_xaml_object(&host.content().unwrap()).unwrap();
+    child.initialize_if_needed();
+    assert_eq!(child.width(), 42.0);
+}
+
+#[test]
+fn resource_owner_and_static_consumer_accept_or_reject_one_dependency_revision() {
+    use ferroui_base::{
+        controls::{IResourceProvider, ResourceDictionary},
+        threading::Dispatcher,
+        Ref,
+    };
+    use ferroui_controls::{Border, ContentControl};
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let load = |source: &str| {
+        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+            RuntimeXamlLoaderDocument::with_base_uri(None, source),
+            None,
+        )
+        .unwrap()
+    };
+    let dynamic = Ref::<Border>::from_xaml_object(&load(
+        r#"<Border xmlns="https://github.com/ferroui" Width="{DynamicResource width}"/>"#,
+    ))
+    .unwrap();
+    let values = |number| {
+        format!(
+            r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">{number}</x:Double></ResourceDictionary>"#
+        )
+    };
+    let initial = Ref::<ResourceDictionary>::from_xaml_object(&load(&values(7))).unwrap();
+    dynamic
+        .resources()
+        .add_merged_dictionary(Rc::<dyn IResourceProvider>::from(initial));
+    let view = r#"<Border xmlns="https://github.com/ferroui"><Border.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="Values.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></Border.Resources><Border Width="{StaticResource width}"/></Border>"#;
+    let mut session = HotReloadSession::new();
+    let resource_uri = "ferres://owners/Values.xaml";
+    let view_uri = "ferres://owners/View.xaml";
+    session
+        .register_document(resource_uri.into(), values(7))
+        .unwrap();
+    session
+        .register_document(view_uri.into(), view.into())
+        .unwrap();
+    let owner: Rc<dyn ReloadTarget> = Rc::new(
+        ResourceReloadTarget::merged(
+            &dynamic.resources(),
+            0,
+            resource_uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    let host = ContentControl::new();
+    let consumer: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &host,
+        view_uri.into(),
+        vec![resource_uri.into()],
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&owner);
+    session.register_target(&consumer);
+    session.submit(view_uri.into(), view.into());
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    session.submit(resource_uri.into(), values(8));
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    let outer = Ref::<Border>::from_xaml_object(&host.content().unwrap()).unwrap();
+    let child = outer.child().unwrap().cast::<Border>().unwrap();
+    assert_eq!(child.width(), 8.0);
+    assert_eq!(dynamic.width(), 8.0);
+    let old_content = host.content();
+    let accepted = session.sources();
+    session.submit(
+        resource_uri.into(),
+        r#"<ResourceDictionary xmlns="https://github.com/ferroui"/>"#.into(),
+    );
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Failed, "{outcome:?}");
+    assert_eq!(host.content(), old_content);
+    assert_eq!(dynamic.width(), 8.0);
+    assert_eq!(session.sources(), accepted);
+}
+
+#[test]
+fn panel_reload_retains_root_and_application_children_and_rolls_back() {
+    use ferroui_base::{controls::NameScope, threading::Dispatcher, Ref};
+    use ferroui_controls::{Border, Panel, StackPanel, TextBox};
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let source = r#"<StackPanel xmlns="https://github.com/ferroui" Spacing="7"><TextBox Name="edit"/></StackPanel>"#;
+    let loaded = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_base_uri(None, source),
+        None,
+    )
+    .unwrap();
+    let root = Ref::<StackPanel>::from_xaml_object(&loaded).unwrap();
+    let panel: Ref<Panel> = root.clone().upcast();
+    let header = Border::new();
+    let footer = Border::new();
+    root.children().insert(0, header.clone());
+    root.children().add(footer.clone());
+    root.set_spacing(88.0); // An application assignment on the preserved root.
+    let model: ferroui_base::BoxedValue = Rc::new(42_i32);
+    root.set_data_context(Some(model.clone()));
+    let uri = "ferres://panel/View.xaml";
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), source.into())
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        PanelReloadTarget::new(
+            &panel,
+            1..2,
+            uri.into(),
+            source.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&target);
+    for index in 0..10 {
+        let old = root.children().get(1).cast::<TextBox>().unwrap();
+        old.set_text(Some("unsaved edit"));
+        let weak = old.downgrade();
+        drop(old);
+        let changed = source.replace("<TextBox", &format!("<TextBox Width=\"{}\"", index + 30));
+        session.submit(uri.into(), changed);
+        assert_eq!(
+            session.apply_pending().unwrap().status,
+            ReloadStatus::Applied
+        );
+        Dispatcher::ui_thread().run_jobs(None);
+        assert!(weak.upgrade().is_none(), "detached owned child retained");
+        assert_eq!(
+            root.children().get(0),
+            header.clone().upcast::<ferroui_controls::Control>()
+        );
+        assert_eq!(
+            root.children().get(2),
+            footer.clone().upcast::<ferroui_controls::Control>()
+        );
+        let edit = root.children().get(1).cast::<TextBox>().unwrap();
+        assert_eq!(edit.text().as_deref(), Some("unsaved edit"));
+        assert_eq!(edit.width(), f64::from(index + 30));
+        assert_eq!(root.spacing(), 88.0);
+        assert_eq!(root.data_context(), Some(model.clone()));
+        assert_eq!(
+            NameScope::get_name_scope(&root).unwrap().find("edit"),
+            Some(edit.upcast())
+        );
+    }
+    let children = root.children().to_vec();
+    let scope = NameScope::get_name_scope(&root);
+    let accepted = session.sources();
+    session.submit(
+        uri.into(),
+        source.replace("<TextBox", "<TextBox Width=\"99\""),
+    );
+    assert_eq!(
+        session
+            .apply_pending_with(|| Err(ReloadError::Failed("patch failed".into())))
+            .unwrap()
+            .status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(root.children().to_vec(), children);
+    assert!(NameScope::get_name_scope(&root) == scope);
+    assert_eq!(session.sources(), accepted);
+}
+
+#[test]
+fn panel_reload_rejects_externally_interleaved_owned_children() {
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_controls::{Border, Panel};
+    use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+    let _scope = Dispatcher::unit_test_scope();
+    let root = Panel::new();
+    root.children().add(Border::new());
+    root.children().add(Border::new());
+    let source = r#"<Panel xmlns="https://github.com/ferroui"><Border/><Border/></Panel>"#;
+    let uri = "ferres://panel/Interleaved.xaml";
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), source.into())
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        PanelReloadTarget::new(
+            &root,
+            0..2,
+            uri.into(),
+            source.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&target);
+    root.children().insert(1, Border::new());
+    let before = root.children().to_vec();
+    session.submit(
+        uri.into(),
+        source.replace("<Border/>", "<Border Width=\"2\"/>"),
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(root.children().to_vec(), before);
+}
+
+#[test]
+fn panel_owned_range_can_shrink_and_grow_without_removing_application_children() {
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_controls::{Border, Control, Panel};
+    use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let root = Panel::new();
+    let header = Border::new();
+    let footer = Border::new();
+    root.children().add(header.clone());
+    root.children().add(Border::new());
+    root.children().add(footer.clone());
+    let source =
+        |children: &str| format!(r#"<Panel xmlns="https://github.com/ferroui">{children}</Panel>"#);
+    let initial = source("<Border/>");
+    let uri = "ferres://panel/Range.xaml";
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), initial.clone())
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        PanelReloadTarget::new(
+            &root,
+            1..2,
+            uri.into(),
+            initial,
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&target);
+    for (text, count) in [("", 0), ("<Border/><Border/>", 2), ("<Border/>", 1)] {
+        session.submit(uri.into(), source(text));
+        let outcome = session.apply_pending().unwrap();
+        assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        assert_eq!(root.children().count(), count + 2);
+        assert_eq!(root.children().get(0), header.clone().upcast::<Control>());
+        assert_eq!(
+            root.children().get(count + 1),
+            footer.clone().upcast::<Control>()
+        );
+    }
+    let before = root.children().to_vec();
+    session.submit(
+        uri.into(),
+        source("<Border/>").replace("<Panel ", "<Panel Background=\"Red\" "),
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(root.children().to_vec(), before);
+}
+
+#[test]
+fn external_commit_failure_rolls_back_markup_and_does_not_publish_sources() {
+    let mut session = session();
+    let (_target, value) = target(&mut session, false);
+    let before = session.sources();
+    submit(&mut session, "<Border Width=\"91\"/>");
+    let outcome = session
+        .apply_pending_with(|| {
+            assert_eq!(&*value.borrow(), "<Border Width=\"91\"/>");
+            Err(ReloadError::Failed("patch could not load".into()))
+        })
+        .unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Failed);
+    assert_eq!(&*value.borrow(), "before");
+    assert_eq!(session.sources(), before);
+    assert_eq!(session.applied_revision(), 0);
+    let invoked = Cell::new(false);
+    assert!(session
+        .apply_pending_with(|| {
+            invoked.set(true);
+            Ok(())
+        })
+        .is_none());
+    assert!(!invoked.get());
+    submit(&mut session, "<Border Width=\"91\"/>");
+    let applied = session
+        .apply_pending_with(|| {
+            invoked.set(true);
+            Ok(())
+        })
+        .unwrap();
+    assert_eq!(applied.status, ReloadStatus::Applied);
+    assert!(invoked.get());
+    assert_eq!(
+        session.sources()["ferres://test/View.xaml"],
+        "<Border Width=\"91\"/>"
+    );
+}
+
+#[test]
+fn invalid_markup_or_failed_adapter_never_installs_external_update() {
+    for (source, fail) in [("<", false), ("<Border Width=\"2\"/>", true)] {
+        let mut session = session();
+        let (_target, value) = target(&mut session, fail);
+        submit(&mut session, source);
+        let invoked = Cell::new(false);
+        let outcome = session
+            .apply_pending_with(|| {
+                invoked.set(true);
+                Ok(())
+            })
+            .unwrap();
+        assert_eq!(outcome.status, ReloadStatus::Failed);
+        assert!(!invoked.get());
+        assert_eq!(&*value.borrow(), "before");
+    }
+}
+
+#[test]
+fn external_commit_panic_restores_all_target_graphs() {
+    let mut session = session();
+    let (_one, first) = target(&mut session, false);
+    let (_two, second) = target(&mut session, false);
+    submit(&mut session, "<Border Width=\"5\"/>");
+    let outcome = session
+        .apply_pending_with(|| panic!("before external state changes"))
+        .unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Failed);
+    assert_eq!(&*first.borrow(), "before");
+    assert_eq!(&*second.borrow(), "before");
+}
+
+#[test]
+fn manifest_directory_watcher_discovers_nested_files_and_survives_directory_replacement() {
+    use std::time::{Duration, SystemTime, UNIX_EPOCH};
+    let directory = std::env::temp_dir().join(format!(
+        "ferroui-discovery-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    std::fs::create_dir_all(directory.join("Includes")).unwrap();
+    let original = directory.join("View.xaml");
+    std::fs::write(&original, "<Border/>").unwrap();
+    let manifest = ReloadManifest::parse(
+        &serde_json::json!({
+            "version": 1, "documents": [{ "uri": "ferres://Example/Views/View.xaml",
+                "source_path": original, "source": "<Border/>", "includes": [] }]
+        })
+        .to_string(),
+    )
+    .unwrap();
+    let watcher = manifest.watcher(Duration::from_millis(10));
+    std::fs::write(
+        directory.join("Includes/New Theme.xaml"),
+        "<ResourceDictionary/>",
+    )
+    .unwrap();
+    let batch = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(2))
+        .unwrap();
+    assert!(batch.diagnostics.is_empty());
+    assert_eq!(batch.files.len(), 2);
+    let discovered = batch
+        .files
+        .iter()
+        .find(|file| file.uri.contains("New%20Theme"))
+        .unwrap();
+    assert_eq!(
+        discovered.uri,
+        "ferres://example/Views/Includes/New%20Theme.xaml"
+    );
+    assert_eq!(
+        discovered.contents.as_deref().unwrap(),
+        "<ResourceDictionary/>"
+    );
+    let mut session = manifest.session().unwrap();
+    session.submit_files(batch);
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    let moved = directory.with_extension("moved");
+    std::fs::rename(&directory, &moved).unwrap();
+    let failure = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(2))
+        .unwrap();
+    assert!(!failure.diagnostics.is_empty());
+    assert!(failure.files.iter().all(|file| file.contents.is_err()));
+    std::fs::rename(&moved, &directory).unwrap();
+    let recovered = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(2))
+        .unwrap();
+    assert!(recovered.diagnostics.is_empty());
+    assert!(recovered.files.iter().all(|file| file.contents.is_ok()));
+    drop(watcher);
+    std::fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn directory_scan_failure_blocks_pending_edits_until_recovery() {
+    let mut session = session();
+    let (_target, value) = target(&mut session, false);
+    session.submit(
+        "ferres://test/View.xaml".into(),
+        "<Border Width=\"2\"/>".into(),
+    );
+    session.submit_files(FileBatch {
+        files: Vec::new(),
+        diagnostics: vec!["directory unavailable".into()],
+    });
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(&*value.borrow(), "before");
+    session.submit_files(FileBatch {
+        files: Vec::new(),
+        diagnostics: Vec::new(),
+    });
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(&*value.borrow(), "<Border Width=\"2\"/>");
+}
+
+#[test]
+fn missing_file_blocks_entire_revision_and_recovery_keeps_neighbor_edits() {
+    let mut session = session();
+    session
+        .register_document("ferres://test/Other.xaml".into(), "<Other/>".into())
+        .unwrap();
+    let (_target, value) = target(&mut session, false);
+    let view = "ferres://test/View.xaml";
+    let other = "ferres://test/Other.xaml";
+    let batch = |other_contents| FileBatch {
+        diagnostics: Vec::new(),
+        files: vec![
+            FileChange {
+                uri: view.into(),
+                contents: Ok("<View Width=\"17\"/>".into()),
+            },
+            FileChange {
+                uri: other.into(),
+                contents: other_contents,
+            },
+        ],
+    };
+    let revision = session.submit_files(batch(Err("temporarily absent".into())));
+    let failure = session.apply_pending().unwrap();
+    assert_eq!(failure.revision, revision);
+    assert_eq!(failure.status, ReloadStatus::Failed);
+    assert_eq!(&*value.borrow(), "before");
+    assert!(session.apply_pending().is_none());
+    session.submit_files(batch(Ok("<Other/>".into())));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(&*value.borrow(), "<View Width=\"17\"/>");
+    assert_eq!(session.sources()[view], "<View Width=\"17\"/>");
+}
+
+#[test]
+fn watcher_delivers_complete_snapshots_including_missing_and_recovered_files() {
+    use std::time::Duration;
+    let directory = std::env::temp_dir().join(format!("ferroui-batch-{}", std::process::id()));
+    std::fs::create_dir_all(&directory).unwrap();
+    let a = directory.join("A.xaml");
+    let b = directory.join("B.xaml");
+    std::fs::write(&a, "new A").unwrap();
+    let watcher = FileWatcher::with_baseline(
+        BTreeMap::from([("a".into(), a), ("b".into(), b.clone())]),
+        Duration::from_millis(10),
+        BTreeMap::from([("a".into(), "old A".into()), ("b".into(), "old B".into())]),
+    );
+    let missing = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(2))
+        .unwrap();
+    assert_eq!(missing.files.len(), 2);
+    assert_eq!(missing.files[0].contents.as_deref().unwrap(), "new A");
+    assert!(missing.files[1].contents.is_err());
+    std::fs::write(&b, "new B").unwrap();
+    let recovery = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(2))
+        .unwrap();
+    assert_eq!(recovery.files.len(), 2);
+    assert_eq!(recovery.files[0].contents.as_deref().unwrap(), "new A");
+    assert_eq!(recovery.files[1].contents.as_deref().unwrap(), "new B");
+    drop(watcher);
+    std::fs::remove_dir_all(directory).unwrap();
+}
+struct Change {
+    value: Rc<RefCell<String>>,
+    before: String,
+    after: String,
+    fail: bool,
+}
+impl PreparedReload for Change {
+    fn commit(&mut self) -> Result<(), ReloadError> {
+        *self.value.borrow_mut() = self.after.clone();
+        if self.fail {
+            Err(ReloadError::Failed("injected commit failure".into()))
+        } else {
+            Ok(())
+        }
+    }
+    fn rollback(&mut self) {
+        *self.value.borrow_mut() = self.before.clone();
+    }
+}
+impl ReloadTarget for Target {
+    fn documents(&self) -> Vec<String> {
+        vec![
+            "ferres://test/View.xaml".into(),
+            "ferres://test/Other.xaml".into(),
+        ]
+    }
+    fn prepare(&self, sources: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError> {
+        self.prepares.set(self.prepares.get() + 1);
+        Ok(Box::new(Change {
+            value: self.value.clone(),
+            before: self.value.borrow().clone(),
+            after: sources["ferres://test/View.xaml"].clone(),
+            fail: self.fail.get(),
+        }))
+    }
+}
+fn session() -> HotReloadSession {
+    let mut session = HotReloadSession::new();
+    session
+        .register_document("ferres://test/View.xaml".into(), "<Border/>".into())
+        .unwrap();
+    session
+}
+fn target(
+    session: &mut HotReloadSession,
+    fail: bool,
+) -> (Rc<dyn ReloadTarget>, Rc<RefCell<String>>) {
+    let value = Rc::new(RefCell::new("before".into()));
+    let target: Rc<dyn ReloadTarget> = Rc::new(Target {
+        value: value.clone(),
+        fail: Rc::new(Cell::new(fail)),
+        prepares: Rc::new(Cell::new(0)),
+    });
+    session.register_target(&target);
+    (target, value)
+}
+fn submit(session: &mut HotReloadSession, text: &str) {
+    session.submit("ferres://test/View.xaml".into(), text.into());
+}
+#[test]
+fn rolls_back_partial_commit_and_keeps_source() {
+    let mut session = session();
+    let (_a, first) = target(&mut session, false);
+    let (_b, second) = target(&mut session, true);
+    submit(&mut session, "<Border Width=\"2\"/>");
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(&*first.borrow(), "before");
+    assert_eq!(&*second.borrow(), "before");
+    assert_eq!(session.sources()["ferres://test/View.xaml"], "<Border/>");
+    assert_eq!(session.applied_revision(), 0);
+}
+#[test]
+fn invalid_markup_does_not_replace_last_good() {
+    let mut session = session();
+    let (_target, value) = target(&mut session, false);
+    submit(&mut session, "<Border>");
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(&*value.borrow(), "before");
+}
+#[test]
+fn coalesces_to_latest_text() {
+    let mut session = session();
+    let (_target, value) = target(&mut session, false);
+    submit(&mut session, "<Border Width=\"1\"/>");
+    submit(&mut session, "<Border Width=\"2\"/>");
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied);
+    assert_eq!(outcome.revision, 2);
+    assert!(value.borrow().contains("2"));
+    assert!(session.apply_pending().is_none());
+}
+#[test]
+fn changed_named_contract_requires_restart() {
+    let mut session = session();
+    submit(&mut session, "<Border Name=\"new\"/>");
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+}
+#[test]
+fn targets_are_weak() {
+    let mut session = session();
+    let (target, value) = target(&mut session, false);
+    drop(target);
+    submit(&mut session, "<Border Width=\"2\"/>");
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(&*value.borrow(), "before");
+}
+#[test]
+fn scoped_sources_restore_after_panic() {
+    let sources = Rc::new(BTreeMap::from([(
+        "ferres://test/View.xaml".into(),
+        "<Border/>".into(),
+    )]));
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        with_sources(sources, || panic!("test"))
+    }));
+    assert!(result.is_err());
+    assert!(ferroui_markup_xaml::source_overlay::source("ferres://test/View.xaml").is_none());
+}
+
+#[test]
+fn runtime_content_replacement_retains_host_and_last_valid_control() {
+    use ferroui_base::{threading::Dispatcher, Ref};
+    use ferroui_controls::{Border, ContentControl};
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let host = ContentControl::new();
+    let model = Rc::new(42_i32) as ferroui_base::BoxedValue;
+    host.set_data_context(Some(model.clone()));
+    let mut session = session();
+    let target: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &host,
+        "ferres://test/View.xaml".into(),
+        vec![],
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&target);
+    submit(
+        &mut session,
+        "<Border xmlns=\"https://github.com/ferroui\" Width=\"42\"/>",
+    );
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    let content = host.content().unwrap();
+    let border = Ref::<Border>::from_xaml_object(&content).unwrap();
+    assert_eq!(border.width(), 42.0);
+    assert!(Rc::ptr_eq(&host.data_context().unwrap(), &model));
+    submit(
+        &mut session,
+        "<Border xmlns=\"https://github.com/ferroui\" Width=\"invalid\"/>",
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert!(Rc::ptr_eq(&host.content().unwrap(), &content));
+}
+
+#[test]
+fn runtime_selection_restores_the_item_after_markup_reorders_it() {
+    use ferroui_base::{threading::Dispatcher, Ref};
+    use ferroui_controls::{ContentControl, ListBox};
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let before = r#"<ListBox xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Name="choices"><x:String>a</x:String><x:String>b</x:String></ListBox>"#;
+    let after = before.replace(
+        "<x:String>a</x:String><x:String>b</x:String>",
+        "<x:String>b</x:String><x:String>a</x:String>",
+    );
+    let uri = "ferres://selection/View.xaml";
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), before.into())
+        .unwrap();
+    let host = ContentControl::new();
+    let target: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &host,
+        uri.into(),
+        vec![],
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&target);
+    session.submit(uri.into(), before.into());
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    Dispatcher::ui_thread().run_jobs(None);
+    let old = Ref::<ListBox>::from_xaml_object(&host.content().unwrap()).unwrap();
+    old.set_selected_index(1);
+    let selected = old.selected_item();
+    session.submit(uri.into(), after);
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    Dispatcher::ui_thread().run_jobs(None);
+    let new = Ref::<ListBox>::from_xaml_object(&host.content().unwrap()).unwrap();
+    assert_eq!(new.selected_index(), 0);
+    assert_eq!(new.selected_item(), selected);
+}
+
+#[test]
+fn failed_batch_retains_other_document_drafts_until_repaired() {
+    let mut session = session();
+    let (_target, _value) = target(&mut session, false);
+    session
+        .register_document("ferres://test/Other.xaml".into(), "<Border/>".into())
+        .unwrap();
+    submit(&mut session, "<Border Width=\"12\"/>");
+    session.submit("ferres://test/Other.xaml".into(), "<".into());
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert!(
+        session.apply_pending().is_none(),
+        "do not retry the same failed revision forever"
+    );
+    session.submit("ferres://test/Other.xaml".into(), "<Border/>".into());
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert!(session.sources()["ferres://test/View.xaml"].contains("12"));
+}
+
+#[test]
+fn included_resource_edit_rebuilds_static_resource_consumers() {
+    use ferroui_base::{threading::Dispatcher, Ref};
+    use ferroui_controls::{Border, ContentControl};
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let view = r#"<Border xmlns="https://github.com/ferroui"><Border.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="Values.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></Border.Resources><Border Width="{StaticResource width}"/></Border>"#;
+    let values = |number| {
+        format!(
+            r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">{number}</x:Double></ResourceDictionary>"#
+        )
+    };
+    let mut session = HotReloadSession::new();
+    session
+        .register_document("ferres://test/View.xaml".into(), view.into())
+        .unwrap();
+    session
+        .register_document("ferres://test/Values.xaml".into(), values(12))
+        .unwrap();
+    let host = ContentControl::new();
+    let target: Rc<dyn ReloadTarget> = Rc::new(ContentReloadTarget::new(
+        &host,
+        "ferres://test/View.xaml".into(),
+        vec!["ferres://test/Values.xaml".into()],
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&target);
+    session.submit("ferres://test/Values.xaml".into(), values(24));
+    let result = session.apply_pending().unwrap();
+    assert_eq!(result.status, ReloadStatus::Applied, "{result:?}");
+    assert_eq!(
+        Ref::<Border>::from_xaml_object(&host.content().unwrap())
+            .unwrap()
+            .child()
+            .unwrap()
+            .width(),
+        24.0
+    );
+}
+
+#[test]
+fn bound_class_uses_accepted_text_and_unhooks_on_drop() {
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_controls::Border;
+    use ferroui_markup_xaml::{FerroXamlLoader, RuntimeXamlLoaderConfiguration};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(
+            "ferres://test/Border.xaml".into(),
+            r#"<Border xmlns="https://github.com/ferroui" Width="31"/>"#.into(),
+        )
+        .unwrap();
+    session
+        .bind_class(
+            Border::TYPE,
+            "ferres://test/Border.xaml".into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap();
+    let border = Border::new();
+    FerroXamlLoader::load_object(&(Rc::new(border.clone()) as ferroui_base::BoxedValue)).unwrap();
+    assert_eq!(border.width(), 31.0);
+    FerroXamlLoader::track_instance(Border::TYPE, &border);
+    FerroXamlLoader::track_instance(Border::TYPE, &border);
+    assert_eq!(FerroXamlLoader::live_instances(Border::TYPE).len(), 1);
+    drop(border);
+    assert!(FerroXamlLoader::live_instances(Border::TYPE).is_empty());
+    drop(session);
+    assert!(FerroXamlLoader::populate_override(Border::TYPE).is_none());
+}
+
+#[test]
+fn watcher_observes_atomic_save_and_stops() {
+    use std::{
+        fs,
+        time::{Duration, SystemTime, UNIX_EPOCH},
+    };
+    let directory = std::env::temp_dir().join(format!(
+        "ferroui-watcher-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    fs::create_dir_all(&directory).unwrap();
+    let path = directory.join("View.xaml");
+    fs::write(&path, "<Border/>").unwrap();
+    let watcher = FileWatcher::with_baseline(
+        BTreeMap::from([("ferres://test/View.xaml".into(), path.clone())]),
+        Duration::from_millis(10),
+        BTreeMap::from([("ferres://test/View.xaml".into(), "<Border/>".into())]),
+    );
+    let temporary = directory.join("save.tmp");
+    fs::write(&temporary, "<Border Width=\"2\"/>").unwrap();
+    #[cfg(windows)]
+    fs::remove_file(&path).unwrap();
+    fs::rename(&temporary, &path).unwrap();
+    let change = watcher
+        .changes
+        .recv_timeout(Duration::from_secs(2))
+        .unwrap();
+    assert_eq!(
+        change.files.into_iter().next().unwrap().contents.unwrap(),
+        "<Border Width=\"2\"/>"
+    );
+    drop(watcher);
+    fs::remove_dir_all(directory).unwrap();
+}
+
+#[test]
+fn transitive_resource_revision_refreshes_all_instances_and_releases_old_trees() {
+    use ferroui_base::{threading::Dispatcher, Ref};
+    use ferroui_controls::{Border, ContentControl};
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let view = r#"<Border xmlns="https://github.com/ferroui"><Border.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="Theme.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary></Border.Resources><Border Width="{StaticResource width}"/></Border>"#;
+    let theme = r#"<ResourceDictionary xmlns="https://github.com/ferroui"><ResourceDictionary.MergedDictionaries><ResourceInclude Source="Values.xaml"/></ResourceDictionary.MergedDictionaries></ResourceDictionary>"#;
+    let values = |number: &str| {
+        format!(
+            r#"<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><x:Double x:Key="width">{number}</x:Double></ResourceDictionary>"#
+        )
+    };
+    let mut session = HotReloadSession::new();
+    for (name, text) in [
+        ("View.xaml", view.to_owned()),
+        ("Theme.xaml", theme.to_owned()),
+        ("Values.xaml", values("1")),
+    ] {
+        session
+            .register_document(format!("ferres://transitive/{name}"), text)
+            .unwrap();
+    }
+    let hosts = [ContentControl::new(), ContentControl::new()];
+    let targets: Vec<Rc<dyn ReloadTarget>> = hosts
+        .iter()
+        .map(|host| {
+            Rc::new(ContentReloadTarget::new(
+                host,
+                "ferres://transitive/View.xaml".into(),
+                vec![],
+                RuntimeXamlLoaderConfiguration::default(),
+            )) as Rc<dyn ReloadTarget>
+        })
+        .collect();
+    for target in &targets {
+        session.register_target(target);
+    }
+    let mut previous = Vec::new();
+    for number in 1..=20 {
+        session.submit(
+            "ferres://transitive/Values.xaml".into(),
+            values(&number.to_string()),
+        );
+        let outcome = session.apply_pending().unwrap();
+        assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        for weak in &previous {
+            let weak: &ferroui_base::WeakRef<Border> = weak;
+            assert!(
+                weak.upgrade().is_none(),
+                "detached root retained after reload"
+            );
+        }
+        previous.clear();
+        for host in &hosts {
+            let root = Ref::<Border>::from_xaml_object(&host.content().unwrap()).unwrap();
+            assert_eq!(root.child().unwrap().width(), number as f64);
+            previous.push(root.downgrade());
+        }
+    }
+    let last: Vec<_> = hosts.iter().map(|host| host.content().unwrap()).collect();
+    session.submit("ferres://transitive/Values.xaml".into(), values("invalid"));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    for (host, old) in hosts.iter().zip(&last) {
+        assert!(Rc::ptr_eq(&host.content().unwrap(), old));
+    }
+    assert!(session.sources()["ferres://transitive/Values.xaml"].contains(">20<"));
+}
+
+#[test]
+fn lazy_loads_observe_only_accepted_sources_and_session_drop_unpublishes_them() {
+    use ferroui_markup_xaml::source_overlay::source;
+    let mut session = session();
+    let (_target, _) = target(&mut session, false);
+    assert_eq!(
+        source("ferres://test/View.xaml").as_deref(),
+        Some("<Border/>")
+    );
+    submit(&mut session, "<Border Width=\"3\"/>");
+    assert_eq!(
+        source("ferres://test/View.xaml").as_deref(),
+        Some("<Border/>")
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(
+        source("ferres://test/View.xaml").as_deref(),
+        Some("<Border Width=\"3\"/>")
+    );
+    submit(&mut session, "<");
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(
+        source("ferres://test/View.xaml").as_deref(),
+        Some("<Border Width=\"3\"/>")
+    );
+    let mut competing = HotReloadSession::new();
+    assert!(competing
+        .register_document("ferres://test/View.xaml".into(), "<Border/>".into())
+        .is_err());
+    drop(session);
+    assert!(source("ferres://test/View.xaml").is_none());
+    competing
+        .register_document("ferres://test/View.xaml".into(), "<Border/>".into())
+        .unwrap();
+}
+
+#[test]
+fn manifest_dependency_lookup_normalizes_uri_authority_and_handles_cycles() {
+    let manifest = crate::ReloadManifest::parse(&serde_json::json!({
+        "version": 1, "documents": [
+            { "uri": "ferres://Fixture/View.xaml", "source_path": "View.xaml", "source": "<Border/>", "includes": ["Theme.xaml"] },
+            { "uri": "ferres://Fixture/Theme.xaml", "source_path": "Theme.xaml", "source": "<ResourceDictionary/>", "includes": ["View.xaml"] }
+        ]
+    }).to_string()).unwrap();
+    assert_eq!(
+        manifest.transitive_dependencies("ferres://FIXTURE/View.xaml"),
+        vec!["ferres://fixture/Theme.xaml"]
+    );
+}
+
+#[test]
+fn component_reload_preserves_root_model_and_installs_a_fresh_namescope() {
+    use ferroui_base::{controls::NameScope, threading::Dispatcher, Ref};
+    use ferroui_controls::{Border, ContentPage};
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderConfiguration};
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let text = |width: &str| {
+        format!(
+            r#"<ContentPage xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Class="Fixture.Page"><Border x:Name="Part" Width="{width}"/></ContentPage>"#
+        )
+    };
+    let root = ContentPage::new();
+    root.set_width(321.0); // Application-owned root assignment stays intact.
+    let model: ferroui_base::BoxedValue = Rc::new(42_i32);
+    root.set_data_context(Some(model.clone()));
+    let initial = Border::new();
+    initial.set_width(1.0);
+    root.set_content(Some(Rc::new(initial.clone())));
+    let mut session = HotReloadSession::new();
+    session
+        .register_document("ferres://component/View.xaml".into(), text("1"))
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::ComponentReloadTarget::content_page(
+        &root,
+        "ferres://component/View.xaml".into(),
+        text("1"),
+        RuntimeXamlLoaderConfiguration::default(),
+    ));
+    session.register_target(&target);
+    session.submit("ferres://component/View.xaml".into(), text("2"));
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+    assert_eq!(root.width(), 321.0);
+    assert!(Rc::ptr_eq(&root.data_context().unwrap(), &model));
+    let content = root.content().unwrap();
+    let child = Ref::<Border>::from_xaml_object(&content).unwrap();
+    assert_eq!(child.width(), 2.0);
+    let scope = NameScope::get_name_scope(&root).unwrap();
+    assert!(scope.find("Part").unwrap().ptr_eq(&child));
+    session.submit("ferres://component/View.xaml".into(), text("invalid"));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert!(Rc::ptr_eq(&root.content().unwrap(), &content));
+    assert!(NameScope::get_name_scope(&root).unwrap() == scope);
+    let root_change = text("3").replace("<ContentPage ", "<ContentPage Width=\"500\" ");
+    session.submit("ferres://component/View.xaml".into(), root_change);
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(root.width(), 321.0);
+}
+
+#[test]
+fn component_refresh_replaces_cached_controls_and_disposes_subscriptions_transactionally() {
+    use ferroui_base::{
+        controls::NameScopeRef, reactive::IDisposable, threading::Dispatcher, Ref, StyledElement,
+    };
+    use ferroui_controls::{Border, ContentPage};
+    use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+    use std::cell::Cell;
+    struct Refresh {
+        cached: Rc<RefCell<Option<Ref<Border>>>>,
+        subscription: Rc<RefCell<Option<Rc<dyn IDisposable>>>>,
+        events: Rc<Cell<usize>>,
+        fail: Rc<Cell<bool>>,
+    }
+    struct RefreshChange {
+        cached: Rc<RefCell<Option<Ref<Border>>>>,
+        subscription: Rc<RefCell<Option<Rc<dyn IDisposable>>>>,
+        before: Option<Ref<Border>>,
+        after: Ref<Border>,
+        old_subscription: Option<Rc<dyn IDisposable>>,
+        new_subscription: Option<Rc<dyn IDisposable>>,
+        events: Rc<Cell<usize>>,
+        fail: bool,
+    }
+    impl crate::ComponentRefresh for Refresh {
+        fn prepare(
+            &self,
+            _: &Ref<StyledElement>,
+            scope: Option<&NameScopeRef>,
+        ) -> Result<Box<dyn PreparedReload>, ReloadError> {
+            let after = scope
+                .and_then(|scope| scope.find("Part"))
+                .and_then(|part| part.cast::<Border>())
+                .ok_or_else(|| ReloadError::Failed("required Part is missing".into()))?;
+            Ok(Box::new(RefreshChange {
+                cached: self.cached.clone(),
+                subscription: self.subscription.clone(),
+                before: self.cached.borrow().clone(),
+                after,
+                old_subscription: self.subscription.borrow().clone(),
+                new_subscription: None,
+                events: self.events.clone(),
+                fail: self.fail.get(),
+            }))
+        }
+    }
+    impl PreparedReload for RefreshChange {
+        fn commit(&mut self) -> Result<(), ReloadError> {
+            let events = self.events.clone();
+            let subscription = self
+                .after
+                .property_changed(move |_| events.set(events.get() + 1));
+            self.new_subscription = Some(subscription.clone());
+            *self.subscription.borrow_mut() = Some(subscription);
+            *self.cached.borrow_mut() = Some(self.after.clone());
+            if self.fail {
+                Err(ReloadError::Failed("application refresh failed".into()))
+            } else {
+                Ok(())
+            }
+        }
+        fn rollback(&mut self) {
+            if let Some(subscription) = self.new_subscription.take() {
+                subscription.dispose();
+            }
+            *self.cached.borrow_mut() = self.before.clone();
+            *self.subscription.borrow_mut() = self.old_subscription.clone();
+        }
+        fn finish(&mut self) {
+            if let Some(subscription) = self.old_subscription.take() {
+                subscription.dispose();
+            }
+        }
+    }
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let source = |number| {
+        format!(
+            r#"<ContentPage xmlns="https://github.com/ferroui"><Border Name="Part" Width="{number}"/></ContentPage>"#
+        )
+    };
+    let root = ContentPage::new();
+    let refresh = Rc::new(Refresh {
+        cached: Rc::new(RefCell::new(None)),
+        subscription: Rc::new(RefCell::new(None)),
+        events: Rc::new(Cell::new(0)),
+        fail: Rc::new(Cell::new(false)),
+    });
+    let mut session = HotReloadSession::new();
+    session
+        .register_document("ferres://refresh/View.xaml".into(), source(0))
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        crate::ComponentReloadTarget::content_page(
+            &root,
+            "ferres://refresh/View.xaml".into(),
+            source(0),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .with_refresh(refresh.clone()),
+    );
+    session.register_target(&target);
+    for revision in 1..=10 {
+        let old = refresh.cached.borrow().clone();
+        session.submit("ferres://refresh/View.xaml".into(), source(revision));
+        assert_eq!(
+            session.apply_pending().unwrap().status,
+            ReloadStatus::Applied
+        );
+        Dispatcher::ui_thread().run_jobs(None);
+        let new = refresh.cached.borrow().clone().unwrap();
+        let before = refresh.events.get();
+        if let Some(old) = old {
+            old.set_width(999.0);
+        }
+        assert_eq!(
+            refresh.events.get(),
+            before,
+            "old child subscription survived reload"
+        );
+        new.set_width(1000.0);
+        assert_eq!(
+            refresh.events.get(),
+            before + 1,
+            "duplicate or missing new subscription"
+        );
+    }
+    let old_content = root.content().unwrap();
+    let old = refresh.cached.borrow().clone().unwrap();
+    refresh.fail.set(true);
+    session.submit("ferres://refresh/View.xaml".into(), source(11));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert!(Rc::ptr_eq(&root.content().unwrap(), &old_content));
+    assert!(refresh.cached.borrow().as_ref().unwrap().ptr_eq(&old));
+    let before = refresh.events.get();
+    old.set_width(1001.0);
+    assert_eq!(
+        refresh.events.get(),
+        before + 1,
+        "rollback lost the original subscription"
+    );
+    struct LaterFailure;
+    struct FailingChange;
+    impl ReloadTarget for LaterFailure {
+        fn documents(&self) -> Vec<String> {
+            vec!["ferres://refresh/View.xaml".into()]
+        }
+        fn prepare(&self, _: Rc<Sources>) -> Result<Box<dyn PreparedReload>, ReloadError> {
+            Ok(Box::new(FailingChange))
+        }
+    }
+    impl PreparedReload for FailingChange {
+        fn commit(&mut self) -> Result<(), ReloadError> {
+            Err(ReloadError::Failed("later target failed".into()))
+        }
+        fn rollback(&mut self) {}
+    }
+    let later: Rc<dyn ReloadTarget> = Rc::new(LaterFailure);
+    session.register_target(&later);
+    refresh.fail.set(false);
+    session.submit("ferres://refresh/View.xaml".into(), source(12));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert!(Rc::ptr_eq(&root.content().unwrap(), &old_content));
+    assert!(refresh.cached.borrow().as_ref().unwrap().ptr_eq(&old));
+    let before = refresh.events.get();
+    old.set_width(1002.0);
+    assert_eq!(
+        refresh.events.get(),
+        before + 1,
+        "later failure lost the original subscription"
+    );
+    assert_eq!(session.sources()["ferres://refresh/View.xaml"], source(10));
+    refresh.subscription.borrow_mut().take().unwrap().dispose();
+}
+
+#[test]
+fn style_owner_reloads_existing_controls_and_restores_after_partial_commit() {
+    use ferroui_base::{
+        styling::{style_ptr_eq, IStyle},
+        threading::Dispatcher,
+    };
+    use ferroui_controls::Border;
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let source = |width| {
+        format!(
+            r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="Border.active"><Setter Property="Width" Value="{width}"/></Style></Styles>"#
+        )
+    };
+    let load = |text: &str| {
+        Rc::<dyn IStyle>::from_xaml_object(
+            &ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+                RuntimeXamlLoaderDocument::with_base_uri(None, text),
+                None,
+            )
+            .unwrap(),
+        )
+        .unwrap()
+    };
+    let root = Border::new();
+    let child = Border::new();
+    root.set_child(child.clone());
+    child.classes().add("active");
+    let application = load(
+        r#"<Style xmlns="https://github.com/ferroui" Selector="Border"><Setter Property="Height" Value="33"/></Style>"#,
+    );
+    root.styles().add(load(&source(10)));
+    root.styles().add(application.clone());
+    root.apply_styling();
+    child.apply_styling();
+    assert_eq!(child.width(), 10.0);
+    assert_eq!(child.height(), 33.0);
+    let uri = "ferres://styleowner/Styles.xaml";
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), source(10)).unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        StyleReloadTarget::contribution(
+            &root.styles(),
+            0,
+            uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&target);
+    for width in 11..21 {
+        let old = Rc::downgrade(&root.styles().get(0));
+        session.submit(uri.into(), source(width));
+        let outcome = session.apply_pending().unwrap();
+        assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+        root.apply_styling();
+        child.apply_styling();
+        assert_eq!(child.width(), width as f64);
+        child.classes().remove("active");
+        assert!(child.width().is_nan());
+        child.classes().add("active");
+        assert_eq!(child.width(), width as f64);
+        assert_eq!(child.height(), 33.0);
+        assert!(style_ptr_eq(&root.styles().get(1), &application));
+        assert!(old.upgrade().is_none(), "detached style retained");
+    }
+    let old = root.styles().get(0);
+    session.submit(uri.into(), source(100).replace("\"100\"", "\"invalid\""));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert!(style_ptr_eq(&root.styles().get(0), &old));
+    assert_eq!(child.width(), 20.0);
+    let panic_once = Rc::new(Cell::new(true));
+    let subscription = root.styles().collection_changed(move |_| {
+        if panic_once.replace(false) {
+            panic!("observer rejected removal");
+        }
+    });
+    session.submit(uri.into(), source(100));
+    let outcome = session.apply_pending().unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Failed, "{outcome:?}");
+    subscription.dispose();
+    root.apply_styling();
+    child.apply_styling();
+    assert_eq!(root.styles().count(), 2);
+    assert!(style_ptr_eq(&root.styles().get(0), &old));
+    assert!(style_ptr_eq(&root.styles().get(1), &application));
+    assert_eq!(child.width(), 20.0);
+    assert_eq!(child.height(), 33.0);
+    assert_eq!(session.sources()[uri], source(20));
+    session.submit(
+        uri.into(),
+        r#"<Styles xmlns="https://github.com/ferroui"/>"#.into(),
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    root.apply_styling();
+    child.apply_styling();
+    assert!(child.width().is_nan());
+    assert_eq!(child.height(), 33.0);
+}
+
+#[test]
+fn style_reload_invalidates_templates_and_releases_detached_parts() {
+    use ferroui_base::{styling::IStyle, threading::Dispatcher};
+    use ferroui_controls::{Border, Button};
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let source = |width| {
+        format!(
+            r#"<Styles xmlns="https://github.com/ferroui"><Style Selector="Button"><Setter Property="Template"><ControlTemplate><Border Width="{width}"/></ControlTemplate></Setter></Style></Styles>"#
+        )
+    };
+    let loaded = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_base_uri(None, &source(1)),
+        None,
+    )
+    .unwrap();
+    let root = Button::new();
+    root.styles()
+        .add(Rc::<dyn IStyle>::from_xaml_object(&loaded).unwrap());
+    drop(loaded);
+    root.apply_styling();
+    root.apply_template();
+    let uri = "ferres://templates/Styles.xaml";
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), source(1)).unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        StyleReloadTarget::contribution(
+            &root.styles(),
+            0,
+            uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&target);
+    for width in 2..12 {
+        let old = root.visual_children().get(0).downgrade();
+        session.submit(uri.into(), source(width));
+        let outcome = session.apply_pending().unwrap();
+        assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+        root.apply_styling();
+        root.apply_template();
+        let part = root.visual_children().get(0).cast::<Border>().unwrap();
+        assert_eq!(part.width(), width as f64);
+        assert!(old.upgrade().is_none(), "previous template part retained");
+        assert_eq!(root.visual_children_count(), 1);
+    }
+    let part = root.visual_children().get(0);
+    session.submit(uri.into(), source(100));
+    let outcome = session
+        .apply_pending_with(|| Err(ReloadError::Failed("patch rejected".into())))
+        .unwrap();
+    assert_eq!(outcome.status, ReloadStatus::Failed);
+    root.apply_styling();
+    root.apply_template();
+    assert!(root.visual_children().get(0).ptr_eq(&part));
+    assert_eq!(session.sources()[uri], source(11));
+}
+
+#[test]
+fn style_resource_replacement_notifies_consumers_and_rolls_back_ownership() {
+    use ferroui_base::{styling::IStyle, threading::Dispatcher, Ref};
+    use ferroui_controls::Border;
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let load = |text: &str| {
+        ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+            RuntimeXamlLoaderDocument::with_base_uri(None, text),
+            None,
+        )
+        .unwrap()
+    };
+    let root = Ref::<Border>::from_xaml_object(&load(
+        r#"<Border xmlns="https://github.com/ferroui" Width="{DynamicResource metric}"/>"#,
+    ))
+    .unwrap();
+    let source = |width| {
+        format!(
+            r#"<Styles xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><Styles.Resources><x:Double x:Key="metric">{width}</x:Double></Styles.Resources></Styles>"#
+        )
+    };
+    root.styles()
+        .add(Rc::<dyn IStyle>::from_xaml_object(&load(&source(7))).unwrap());
+    assert_eq!(root.width(), 7.0);
+    let uri = "ferres://styleresources/Styles.xaml";
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), source(7)).unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        StyleReloadTarget::contribution(
+            &root.styles(),
+            0,
+            uri.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap(),
+    );
+    session.register_target(&target);
+    let old = root.styles().get(0);
+    session.submit(uri.into(), source(8));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert!(old.as_resource_provider().unwrap().owner().is_none());
+    assert!(root
+        .styles()
+        .get(0)
+        .as_resource_provider()
+        .unwrap()
+        .owner()
+        .is_some());
+    assert_eq!(root.width(), 8.0);
+    session.submit(uri.into(), source(9));
+    assert_eq!(
+        session
+            .apply_pending_with(|| Err(ReloadError::Failed("later step failed".into())))
+            .unwrap()
+            .status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(root.width(), 8.0);
+    assert!(root
+        .styles()
+        .get(0)
+        .as_resource_provider()
+        .unwrap()
+        .owner()
+        .is_some());
+    session.submit(
+        uri.into(),
+        r#"<Styles xmlns="https://github.com/ferroui"/>"#.into(),
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert!(root.width().is_nan());
+}
+
+#[test]
+fn component_owned_root_values_remove_restore_and_protect_application_overrides() {
+    use ferroui_base::{
+        styling::{Selectors, Setter, Style},
+        threading::Dispatcher,
+        Ref,
+    };
+    use ferroui_controls::ContentControl;
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let source = |width: &str, child: u32| {
+        format!(
+            r#"<ContentControl xmlns="https://github.com/ferroui" {width}><Border Height="{child}"/></ContentControl>"#
+        )
+    };
+    let initial = source("Width=\"20\"", 1);
+    let loaded = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_base_uri(None, &initial),
+        None,
+    )
+    .unwrap();
+    let root = Ref::<ContentControl>::from_xaml_object(&loaded).unwrap();
+    root.styles().add(Style::with_setters(
+        Selectors::of_type::<ContentControl>(),
+        [Setter::new(
+            ferroui_base::layout::Layoutable::width_property(),
+            10.0,
+        )],
+    ));
+    root.apply_styling();
+    root.set_height(88.0);
+    let vm: ferroui_base::BoxedValue = Rc::new("same model");
+    root.set_data_context(Some(vm.clone()));
+    let uri = "ferres://rootvalues/View.xaml";
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), initial.clone())
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        ComponentReloadTarget::content_control(
+            &root,
+            uri.into(),
+            initial,
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .with_owned_root_property(ferroui_base::layout::Layoutable::width_property()),
+    );
+    session.register_target(&target);
+    session.submit(uri.into(), source("Width=\"30\"", 2));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(root.width(), 30.0);
+    let old_content = root.content();
+    session.submit(uri.into(), source("", 3));
+    assert_eq!(
+        session
+            .apply_pending_with(|| Err(ReloadError::Failed("later target failed".into())))
+            .unwrap()
+            .status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(root.width(), 30.0);
+    assert_eq!(root.content(), old_content);
+    session.submit(uri.into(), source("", 4));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(
+        root.width(),
+        10.0,
+        "removed local value must expose its style"
+    );
+    assert_eq!(root.height(), 88.0);
+    assert!(Rc::ptr_eq(&root.data_context().unwrap(), &vm));
+    session.submit(uri.into(), source("Width=\"40\"", 5));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(root.width(), 40.0);
+    root.set_width(77.0);
+    let accepted = session.sources();
+    let old_content = root.content();
+    session.submit(uri.into(), source("", 6));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(root.width(), 77.0);
+    assert_eq!(root.content(), old_content);
+    assert_eq!(session.sources(), accepted);
+}
+
+#[test]
+fn panel_owned_root_properties_rollback_and_reject_binding_edits() {
+    use ferroui_base::{threading::Dispatcher, Ref};
+    use ferroui_controls::{Panel, StackPanel};
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let source = |spacing: &str| {
+        format!(
+            r#"<StackPanel xmlns="https://github.com/ferroui" {spacing}><Border/></StackPanel>"#
+        )
+    };
+    let initial = source("Spacing=\"5\"");
+    let loaded = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_base_uri(None, &initial),
+        None,
+    )
+    .unwrap();
+    let root = Ref::<StackPanel>::from_xaml_object(&loaded).unwrap();
+    let panel: Ref<Panel> = root.clone().upcast();
+    let uri = "ferres://rootpanel/View.xaml";
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), initial.clone())
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        PanelReloadTarget::new(
+            &panel,
+            0..1,
+            uri.into(),
+            initial,
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .unwrap()
+        .with_owned_root_property(StackPanel::spacing_property()),
+    );
+    session.register_target(&target);
+    session.submit(uri.into(), source("Spacing=\"15\""));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(root.spacing(), 15.0);
+    let child = root.children().get(0);
+    session.submit(uri.into(), source("Spacing=\"20\""));
+    assert_eq!(
+        session
+            .apply_pending_with(|| Err(ReloadError::Failed("late failure".into())))
+            .unwrap()
+            .status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(root.spacing(), 15.0);
+    assert!(root.children().get(0).ptr_eq(&child));
+    session.submit(uri.into(), source("Spacing=\"{Binding Spacing}\""));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::RestartRequired
+    );
+    assert_eq!(root.spacing(), 15.0);
+    assert!(root.children().get(0).ptr_eq(&child));
+    session.submit(uri.into(), source(""));
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Applied
+    );
+    assert_eq!(root.spacing(), 0.0);
+}
+
+#[test]
+fn partial_owned_root_assignment_failure_restores_every_value_and_graph() {
+    use ferroui_base::{layout::Layoutable, threading::Dispatcher, Ref};
+    use ferroui_controls::ContentControl;
+    use ferroui_markup_xaml::{
+        FromXamlObject, RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument,
+    };
+    let _scope = Dispatcher::unit_test_scope();
+    ferroui_controls::register_types();
+    ferroui_markup_xaml::register_types();
+    let initial = r#"<ContentControl xmlns="https://github.com/ferroui" Width="5" Height="10"><Border/></ContentControl>"#;
+    let loaded = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::with_base_uri(None, initial),
+        None,
+    )
+    .unwrap();
+    let root = Ref::<ContentControl>::from_xaml_object(&loaded).unwrap();
+    let old_content = root.content();
+    let uri = "ferres://rootfailure/View.xaml";
+    let mut session = HotReloadSession::new();
+    session
+        .register_document(uri.into(), initial.into())
+        .unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(
+        ComponentReloadTarget::content_control(
+            &root,
+            uri.into(),
+            initial.into(),
+            RuntimeXamlLoaderConfiguration::default(),
+        )
+        .with_owned_root_property(Layoutable::width_property())
+        .with_owned_root_property(Layoutable::height_property()),
+    );
+    session.register_target(&target);
+    let once = Rc::new(Cell::new(true));
+    let subscription = root.property_changed(move |event| {
+        if event.property().id() == Layoutable::height_property().id() && once.replace(false) {
+            panic!("application rejected height assignment");
+        }
+    });
+    session.submit(
+        uri.into(),
+        initial
+            .replace("Width=\"5\"", "Width=\"6\"")
+            .replace("Height=\"10\"", "Height=\"11\""),
+    );
+    assert_eq!(
+        session.apply_pending().unwrap().status,
+        ReloadStatus::Failed
+    );
+    assert_eq!(root.width(), 5.0);
+    assert_eq!(root.height(), 10.0);
+    assert_eq!(root.content(), old_content);
+    assert_eq!(session.sources()[uri], initial);
+    subscription.dispose();
+}
+
+#[test]
+fn opening_a_target_retries_a_draft_without_another_file_save() {
+    let mut session = session();
+    session.submit(
+        "ferres://test/View.xaml".into(),
+        "<Border Width=\"7\"/>".into(),
+    );
+    let unavailable = session.apply_pending().unwrap();
+    assert_eq!(unavailable.status, ReloadStatus::RestartRequired);
+    assert_eq!(session.sources()["ferres://test/View.xaml"], "<Border/>");
+    assert!(
+        session.apply_pending().is_none(),
+        "do not repeatedly retry an unchanged draft"
+    );
+    let (_target, value) = target(&mut session, false);
+    let accepted = session.apply_pending().unwrap();
+    assert_eq!(accepted.status, ReloadStatus::Applied);
+    assert!(accepted.revision > unavailable.revision);
+    assert_eq!(&*value.borrow(), "<Border Width=\"7\"/>");
+    assert_eq!(
+        session.sources()["ferres://test/View.xaml"],
+        "<Border Width=\"7\"/>"
+    );
+}

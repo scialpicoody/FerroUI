@@ -282,6 +282,7 @@ pub use ferroui_build_scan::export::Outcome;
 
 /// The build of the markup of a crate; see the crate documentation.
 pub struct Build {
+    hot_reload: bool,
     manifest_dir: PathBuf,
     out_dir: PathBuf,
     crate_name: String,
@@ -322,6 +323,7 @@ impl Build {
     /// with the `.xamlmeta` files of its direct dependencies.
     pub fn new(manifest_dir: PathBuf, out_dir: PathBuf, package_name: &str, dependencies: Vec<PathBuf>) -> Self {
         Self {
+            hot_reload: false,
             manifest_dir,
             out_dir,
             crate_name: package_name.replace('-', "_"),
@@ -340,6 +342,13 @@ impl Build {
             analyzer_config_files: Vec::new(),
             warnings_as_errors: false,
         }
+    }
+
+    /// Emits source metadata when enabled and the target has debug assertions enabled.
+    /// Requires Cargo 1.93 or newer to detect the target profile configuration.
+    pub fn hot_reload_manifest(mut self, enabled: bool) -> Self {
+        self.hot_reload = enabled;
+        self
     }
 
     /// The type system the documents are compiled against; [`TypeSystem::Runtime`] without
@@ -576,6 +585,12 @@ impl Build {
             model.metadata.iter().find(|(key, _)| key == ferroui_build_scan::CREATE_SOURCE_INFO).is_some_and(|(_, value)| value.trim().eq_ignore_ascii_case("true"))
         });
 
+        if hot_reload_profile::enabled(self.hot_reload) {
+            match hot_reload_manifest::write(&self.manifest_dir, &self.manifest_dir.join(&self.xaml_root), &self.out_dir, &assembly_name) {
+                Ok(path) => lines.push(format!("cargo::rustc-env=FERROUI_HOT_RELOAD_MANIFEST={}", path.display())),
+                Err(error) => errors.push(error),
+            }
+        }
         // The type system of the build.
         let mut model_host: Option<(Rc<dyn IXamlTypeSystem>, Rc<dyn IXamlTypeSystem>, ModelEmitTypes)> = None;
         if on_models {
@@ -1186,3 +1201,6 @@ mod tests {
         assert_eq!(outcome.lines, ["cargo::rerun-if-changed=/crate/build.rs", "cargo::rerun-if-changed=/crate/Cargo.toml"]);
     }
 }
+
+mod hot_reload_manifest;
+mod hot_reload_profile;

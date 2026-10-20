@@ -2751,3 +2751,10 @@ Status of the open technical issues: O1 (strong capture of the root by handler d
 ### 9.13 Asset scheme and file extension (owner ruling, 2026-10-05)
 
 The asset URI scheme of the port is `ferres://` everywhere (asset loader, includes, group transformers, error messages); the upstream scheme is not accepted. Markup files of the port have the extension `.xaml` only: the upstream-derived extension is not used or recognised anywhere (loader, build integration, asset and URI handling, tests, documentation). Files brought over from upstream are renamed. Earlier sections of this document were updated accordingly.
+
+### E6 implementation status (2026-10-19)
+
+The initial development session, populate hooks, source overlay, classless content
+replacement and conservative Rust patch admission are implemented. E6 is **not
+complete**: class-root ownership, general resource/style replacement and the catalog
+workflow still require work. See [the implementation status and acceptance gates](../development/hot-reload.md).
