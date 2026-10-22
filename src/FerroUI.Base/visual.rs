@@ -70,7 +70,17 @@ struct CompositionExtras {
     /// A composition visual shown above the children and the child composition visual: the
     /// layer of the connected animations on a top level.
     layer_visual: Option<Rc<CompositionVisual>>,
+    /// The other transform facades of `UIElement` (`Rotation`, `RotationAxis`, `Scale`,
+    /// `CenterPoint`, `TransformMatrix`) and the transitions (`OpacityTransition`,
+    /// `RotationTransition`, `ScaleTransition`, `TranslationTransition`).
+    facades: composition_facades::CompositionFacades,
 }
+
+mod composition_facades;
+#[cfg(test)]
+mod composition_facades_tests;
+
+pub use composition_facades::{ScalarTransition, Vector3Transition, Vector3TransitionComponents};
 
 ferro_class! {
     Visual: StyledElement, virtuals VisualImpl: StyledElementImpl {
@@ -437,6 +447,11 @@ impl VisualImpl for Visual {
         let Some(comp) = this.composition_visual() else { return };
         let bounds = this.bounds();
 
+        // The implicit animations of the transitions, installed before the properties are
+        // written (so that a change animates), except on the first synchronization of a new
+        // composition visual (so that the initial values do not).
+        this.apply_composition_transitions(&comp, false);
+
         // TODO: Introduce a dirty mask like WPF has, so we don't overwrite properties every time
         comp.set_offset(crate::Vector3D::new(bounds.x, bounds.y, 0.0));
         comp.set_size(crate::Vector::new(bounds.width, bounds.height));
@@ -485,11 +500,20 @@ impl VisualImpl for Visual {
             render_transform = render_transform * ((-offset) * transform.value() * offset);
         }
 
+        // The `TransformMatrix` facade follows the render transform (see
+        // `composition_facade_transform_matrix`).
+        if let Some(facade) = this.composition_facade_transform_matrix() {
+            render_transform = render_transform * facade;
+        }
+
         comp.set_transform_matrix(render_transform);
 
         if let Some(translation) = this.composition_translation() {
             comp.set_translation(translation);
         }
+
+        this.synchronize_composition_facades(&comp);
+        this.apply_composition_transitions(&comp, true);
     }
 
     fn invalidate_mirror_transform(this: &Self) {
@@ -1075,6 +1099,7 @@ impl Visual {
             _ => {
                 let created = self.create_composition_visual(compositor);
                 *self.composition_visual.borrow_mut() = Some(created.clone());
+                self.composition_visual_created(&created);
                 created
             }
         }
