@@ -76,6 +76,7 @@ One crate joins, `ferroui-diagnostics`. The additions since the preview are list
 - **Markup compiler**: a setter of a style class in a style (`<Setter Property="Classes.name" .../>`) compiles to Rust; it was refused (`FRN3000`).
 - **Markup**: `Binding` returns itself from `BindingBase::as_any`, as the other bindings do; `Window.Close()` can be called from markup.
 - **`ferroui-view`**: mounting is built on instances that the reconciler patches (`mount.rs`). A routed handler attached by an element is detached when the owner of the element ends. A dynamic list may give other dynamic lists.
+- **Performance of styling, layout and text** (`docs/porting/DEVIATIONS.md`): a text block keeps its text layout for a new width when the layout does not depend on it (no wrapping, no trimming, left aligned); the metadata of a property is looked up in a hash map, as upstream does; the renderer removes a visual from its sets in constant time; a name selector compares the name in place. Selecting a control in the developer tools creates about a quarter fewer text layouts (274 instead of 369).
 
 ## [0.4.0-preview.1] - 2026-10-20
 
