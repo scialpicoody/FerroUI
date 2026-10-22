@@ -373,6 +373,11 @@ DEFAULTS = {
     ("Matrix", "Matrix.Identity"): "Matrix::IDENTITY",
     ("Color", "Colors.Black"): "crate::media::Colors::BLACK",
     ("Vector3D", "Vector3D.UnitZ"): "Vector3D::new(0.0, 0.0, 1.0)",
+    # The defaults of the lights (phase 5).
+    ("Color", "Colors.White"): "crate::media::Colors::WHITE",
+    ("Vector3D", "Vector3D.NegativeUnitZ"): "Vector3D::new(0.0, 0.0, -1.0)",
+    ("float", "float.MaxValue"): "f32::MAX",
+    ("float", "0.7853982"): "std::f32::consts::FRAC_PI_4",
     ("CompositionStretch", "CompositionStretch.Fill"): "CompositionStretch::Fill",
     (
         "CompositionBitmapInterpolationMode",

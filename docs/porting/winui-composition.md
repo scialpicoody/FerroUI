@@ -144,9 +144,9 @@ it does not.
 
 | Type / member | Status | Notes | Phase |
 |---|---|---|---|
-| `DropShadow` (`BlurRadius`, `Color`, `Offset`, `Opacity`, `Mask`, `SourcePolicy`) | partial | `create_drop_shadow`; on sprite visuals, the box shadow of the rectangle of the visual (the bounds of the visual include it); `BlurRadius`, `Color`, `Offset`, `Opacity` animatable. `Mask` and `SourcePolicy` are stored and not used yet. | 1 (rectangular), 5 (masks) |
-| `CompositionLight` (`Targets`, `ExclusionsFromTargets`, `IsEnabled`) | missing | | 5 |
-| `AmbientLight`, `DistantLight`, `PointLight`, `SpotLight` | missing | Diffuse lighting of flat visuals. | 5 |
+| `DropShadow` (`BlurRadius`, `Color`, `Offset`, `Opacity`, `Mask`, `SourcePolicy`) | has | `create_drop_shadow`; `BlurRadius`, `Color`, `Offset`, `Opacity` animatable, a change of the mask brush redraws. On a sprite visual: without a mask the box shadow of the rectangle of the visual (the bounds of the visual include it); a colour or gradient `Mask` is the opacity mask of that box shadow; any other mask (surface, nine-grid, mask brush) is painted through a drop shadow effect in a layer and then removed with destination-out bitmap blending, so only its shadow stays; `InheritFromVisualContent` (which wins over the mask) draws the brush through a drop shadow effect. On a layer visual: the shadow of the composed children, or of the mask with the `Default` policy. Without effects in the drawing context the box shadow of the rectangle. `ShapeVisual` has no shadow in WinUI either. The Z of the offset is ignored. | 1 (rectangular), 5 (masks) |
+| `CompositionLight` (`Targets`, `ExclusionsFromTargets`, `IsEnabled`), `VisualUnorderedCollection` (`Add`, `Remove`, `RemoveAll`, `Count`) | has | `CompositionLight` with the typed handles of its classes; `targets()` and `exclusions_from_targets()` are `VisualUnorderedCollection`s created with the light (`add` keeps a visual once, `contains`, `items`). A light lights its targets and their subtrees minus the exclusions and their subtrees (an exclusion that is a target is excluded); a disabled or disposed light lights nothing. A change of the light or its collections, an animation included, redraws the subtrees of its old and new targets. | 5 |
+| `AmbientLight` (`Color`, `Intensity`), `DistantLight` (`Color`, `CoordinateSpace`, `Direction`, `Intensity`), `PointLight` (`Color`, attenuations, `CoordinateSpace`, `Offset`, `Intensity`, `Min/MaxAttenuationCutoff`), `SpotLight` (attenuations, `CoordinateSpace`, `Direction`, inner and outer cone angle, colour and intensity, `Offset`, cutoffs), `Compositor.Create*Light` | partial | `create_ambient_light`, `create_distant_light`, `create_point_light`, `create_spot_light`; every member but `CoordinateSpace` animatable; `*ConeAngleInDegrees` are views of the radians. Diffuse Lambert lighting of flat visuals facing +Z (`server_composition_light.rs`): the sum of colour times intensity, attenuation `1 / (c + l d + q d^2)` and `N.L` of the lights that reach a visual, evaluated in the coordinate space of each light (the target when none). The content of each lit visual is drawn into a layer and a light map (a bitmap of at most 128 x 128 samples) over it with source-atop blending: exact for white and grey light, a tint for coloured light on coloured content, never brighter than the content; a layer visual itself is not lit (its children are). | 5 |
 
 ### 3.7 Animations and easing
 
@@ -338,7 +338,7 @@ every layout move of the element, as in WinUI.
 | 2 | implemented | #304 |
 | 3 | implemented (springs, controller, properties, colour spaces, expressions, facades and transitions) | #304 |
 | 4 | implemented (the tracker on the UI thread) | #304 |
-| 5 | planned | |
+| 5 | implemented (drop shadow masks and source policy; ambient, distant, point and spot lights as a light map over the content) | #304 |
 | 6 | planned (scoped) | |
 
 ## 7. Deviations

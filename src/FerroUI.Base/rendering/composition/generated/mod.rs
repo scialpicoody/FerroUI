@@ -84,13 +84,14 @@
 //! What `scripts/composition-schema-winui.xml` adds to the upstream schema
 //! (see the docstring of the generator for the merge rules):
 //!
-//! * classes: `CompositionClip`, `InsetClip`, `RectangleClip`, `DropShadow`, `CompositionSurfaceBrush`, `CompositionVisualSurface`, `SpriteVisual`, `CompositionGeometry`, `CompositionRectangleGeometry`, `CompositionRoundedRectangleGeometry`, `CompositionEllipseGeometry`, `CompositionLineGeometry`, `CompositionPathGeometry`, `CompositionViewBox`, `CompositionShape`, `CompositionShapeCollection`, `CompositionSpriteShape`, `CompositionContainerShape`, `ShapeVisual`, `GeometricClip`, `LayerVisual`, `RedirectVisual`, `CompositionNineGridBrush`, `CompositionMaskBrush`;
+//! * classes: `CompositionClip`, `InsetClip`, `RectangleClip`, `DropShadow`, `CompositionSurfaceBrush`, `CompositionVisualSurface`, `SpriteVisual`, `CompositionGeometry`, `CompositionRectangleGeometry`, `CompositionRoundedRectangleGeometry`, `CompositionEllipseGeometry`, `CompositionLineGeometry`, `CompositionPathGeometry`, `CompositionViewBox`, `CompositionShape`, `CompositionShapeCollection`, `CompositionSpriteShape`, `CompositionContainerShape`, `ShapeVisual`, `GeometricClip`, `LayerVisual`, `RedirectVisual`, `CompositionNineGridBrush`, `CompositionMaskBrush`, `VisualUnorderedCollection`, `CompositionLight`, `AmbientLight`, `DistantLight`, `PointLight`, `SpotLight`;
 //! * properties of upstream classes: `CompositionVisual.CompositionClip`, `CompositionVisual.RotationAxis`, `CompositionVisual.RelativeOffsetAdjustment`, `CompositionVisual.RelativeSizeAdjustment`, `CompositionVisual.IsHitTestVisible`, `CompositionVisual.IsPixelSnappingEnabled`, `CompositionVisual.BorderMode`, `CompositionVisual.BackfaceVisibility`, `CompositionVisual.CompositeMode`, `CompositionVisual.ParentForTransform`, `CompositionConicGradientBrush.AnchorPoint`, `CompositionConicGradientBrush.CenterPoint`, `CompositionConicGradientBrush.Offset`, `CompositionConicGradientBrush.RotationAngle`, `CompositionConicGradientBrush.Scale`, `CompositionConicGradientBrush.TransformMatrix`, `CompositionRadialGradientBrush.AnchorPoint`, `CompositionRadialGradientBrush.CenterPoint`, `CompositionRadialGradientBrush.Offset`, `CompositionRadialGradientBrush.RotationAngle`, `CompositionRadialGradientBrush.Scale`, `CompositionRadialGradientBrush.TransformMatrix`, `CompositionLinearGradientBrush.AnchorPoint`, `CompositionLinearGradientBrush.CenterPoint`, `CompositionLinearGradientBrush.Offset`, `CompositionLinearGradientBrush.RotationAngle`, `CompositionLinearGradientBrush.Scale`, `CompositionLinearGradientBrush.TransformMatrix`.
 //!
 //! # Classes of the schema that are not generated
 //!
 //! Manual classes (written by hand): `CompositionSurface`, `CompositionDrawingSurface`, `CompositionDrawListVisual`, `CompositionSimpleGradientBrush`, `CompositionGradientBrush`.
 
+mod ambient_light;
 mod composition_animations;
 mod composition_bitmap_cache;
 mod composition_brush;
@@ -103,6 +104,7 @@ mod composition_ellipse_geometry;
 mod composition_experimental_acrylic_visual;
 mod composition_geometry;
 mod composition_gradient_stop;
+mod composition_light;
 mod composition_line_geometry;
 mod composition_linear_gradient_brush;
 mod composition_mask_brush;
@@ -133,15 +135,20 @@ mod composition_view_box;
 mod composition_visual;
 mod composition_visual_collection;
 mod composition_visual_surface;
+mod distant_light;
 mod drop_shadow;
 mod geometric_clip;
 mod inset_clip;
 mod layer_visual;
+mod point_light;
 mod rectangle_clip;
 mod redirect_visual;
 mod shape_visual;
+mod spot_light;
 mod sprite_visual;
+mod visual_unordered_collection;
 
+pub use ambient_light::*;
 pub use composition_animations::*;
 pub use composition_bitmap_cache::*;
 pub use composition_brush::*;
@@ -154,6 +161,7 @@ pub use composition_ellipse_geometry::*;
 pub use composition_experimental_acrylic_visual::*;
 pub use composition_geometry::*;
 pub use composition_gradient_stop::*;
+pub use composition_light::*;
 pub use composition_line_geometry::*;
 pub use composition_linear_gradient_brush::*;
 pub use composition_mask_brush::*;
@@ -184,14 +192,18 @@ pub use composition_view_box::*;
 pub use composition_visual::*;
 pub use composition_visual_collection::*;
 pub use composition_visual_surface::*;
+pub use distant_light::*;
 pub use drop_shadow::*;
 pub use geometric_clip::*;
 pub use inset_clip::*;
 pub use layer_visual::*;
+pub use point_light::*;
 pub use rectangle_clip::*;
 pub use redirect_visual::*;
 pub use shape_visual::*;
+pub use spot_light::*;
 pub use sprite_visual::*;
+pub use visual_unordered_collection::*;
 
 #[cfg(test)]
 mod tests;

@@ -16,6 +16,7 @@ mod server_composition_container_visual;
 mod server_composition_draw_list_visual;
 mod server_composition_drawing_surface;
 mod server_composition_geometry;
+mod server_composition_light;
 mod server_composition_experimental_acrylic_visual;
 mod server_composition_gradient_stop;
 mod server_composition_property_set;
@@ -123,6 +124,12 @@ pub use server_composition_view_box::{view_box_mapping, ServerCompositionViewBox
 pub use server_shape_visual::ServerShapeVisual;
 pub use server_composition_visual_surface::ServerCompositionVisualSurface;
 pub use server_drop_shadow::ServerDropShadow;
+pub use server_composition_light::{
+    distant_light_incidence, light_map_of, point_light_incidence, spot_light_cone, IServerCompositionLight,
+    LightAttenuation, LightColor, LightMap, LightSource, LitContent, ServerAmbientLight, ServerDistantLight,
+    ServerLightState, ServerPointLight, ServerSpotLight, ServerVisualUnorderedCollection, LIGHT_MAP_CELL,
+    LIGHT_MAP_MAX_CELLS,
+};
 pub use server_loaded_image_surface::ServerLoadedImageSurface;
 pub use server_sprite_visual::ServerSpriteVisual;
 pub use server_layer_visual::{drop_shadow_effect, ServerLayerVisual};
