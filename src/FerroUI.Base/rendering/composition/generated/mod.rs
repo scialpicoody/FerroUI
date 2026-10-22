@@ -84,8 +84,8 @@
 //! What `scripts/composition-schema-winui.xml` adds to the upstream schema
 //! (see the docstring of the generator for the merge rules):
 //!
-//! * classes: `CompositionClip`, `InsetClip`, `RectangleClip`, `DropShadow`, `CompositionSurfaceBrush`, `CompositionVisualSurface`, `SpriteVisual`, `CompositionGeometry`, `CompositionRectangleGeometry`, `CompositionRoundedRectangleGeometry`, `CompositionEllipseGeometry`, `CompositionLineGeometry`, `CompositionPathGeometry`, `CompositionViewBox`, `CompositionShape`, `CompositionShapeCollection`, `CompositionSpriteShape`, `CompositionContainerShape`, `ShapeVisual`, `GeometricClip`;
-//! * properties of upstream classes: `CompositionVisual.CompositionClip`.
+//! * classes: `CompositionClip`, `InsetClip`, `RectangleClip`, `DropShadow`, `CompositionSurfaceBrush`, `CompositionVisualSurface`, `SpriteVisual`, `CompositionGeometry`, `CompositionRectangleGeometry`, `CompositionRoundedRectangleGeometry`, `CompositionEllipseGeometry`, `CompositionLineGeometry`, `CompositionPathGeometry`, `CompositionViewBox`, `CompositionShape`, `CompositionShapeCollection`, `CompositionSpriteShape`, `CompositionContainerShape`, `ShapeVisual`, `GeometricClip`, `LayerVisual`, `RedirectVisual`, `CompositionNineGridBrush`, `CompositionMaskBrush`;
+//! * properties of upstream classes: `CompositionVisual.CompositionClip`, `CompositionVisual.RotationAxis`, `CompositionVisual.RelativeOffsetAdjustment`, `CompositionVisual.RelativeSizeAdjustment`, `CompositionVisual.IsHitTestVisible`, `CompositionVisual.IsPixelSnappingEnabled`, `CompositionVisual.BorderMode`, `CompositionVisual.BackfaceVisibility`, `CompositionVisual.CompositeMode`, `CompositionVisual.ParentForTransform`, `CompositionConicGradientBrush.AnchorPoint`, `CompositionConicGradientBrush.CenterPoint`, `CompositionConicGradientBrush.Offset`, `CompositionConicGradientBrush.RotationAngle`, `CompositionConicGradientBrush.Scale`, `CompositionConicGradientBrush.TransformMatrix`, `CompositionRadialGradientBrush.AnchorPoint`, `CompositionRadialGradientBrush.CenterPoint`, `CompositionRadialGradientBrush.Offset`, `CompositionRadialGradientBrush.RotationAngle`, `CompositionRadialGradientBrush.Scale`, `CompositionRadialGradientBrush.TransformMatrix`, `CompositionLinearGradientBrush.AnchorPoint`, `CompositionLinearGradientBrush.CenterPoint`, `CompositionLinearGradientBrush.Offset`, `CompositionLinearGradientBrush.RotationAngle`, `CompositionLinearGradientBrush.Scale`, `CompositionLinearGradientBrush.TransformMatrix`.
 //!
 //! # Classes of the schema that are not generated
 //!
@@ -105,6 +105,8 @@ mod composition_geometry;
 mod composition_gradient_stop;
 mod composition_line_geometry;
 mod composition_linear_gradient_brush;
+mod composition_mask_brush;
+mod composition_nine_grid_brush;
 mod composition_path_geometry;
 mod composition_radial_gradient_brush;
 mod composition_rectangle_geometry;
@@ -134,7 +136,9 @@ mod composition_visual_surface;
 mod drop_shadow;
 mod geometric_clip;
 mod inset_clip;
+mod layer_visual;
 mod rectangle_clip;
+mod redirect_visual;
 mod shape_visual;
 mod sprite_visual;
 
@@ -152,6 +156,8 @@ pub use composition_geometry::*;
 pub use composition_gradient_stop::*;
 pub use composition_line_geometry::*;
 pub use composition_linear_gradient_brush::*;
+pub use composition_mask_brush::*;
+pub use composition_nine_grid_brush::*;
 pub use composition_path_geometry::*;
 pub use composition_radial_gradient_brush::*;
 pub use composition_rectangle_geometry::*;
@@ -181,7 +187,9 @@ pub use composition_visual_surface::*;
 pub use drop_shadow::*;
 pub use geometric_clip::*;
 pub use inset_clip::*;
+pub use layer_visual::*;
 pub use rectangle_clip::*;
+pub use redirect_visual::*;
 pub use shape_visual::*;
 pub use sprite_visual::*;
 

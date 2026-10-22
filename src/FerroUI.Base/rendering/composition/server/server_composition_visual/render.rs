@@ -205,6 +205,9 @@ impl IServerTreeVisitor for RenderContext<'_> {
 
         // If we've used cache, those never got pushed in PreSubgraph
         if !self.used_cache {
+            // What the content pushed for its children (not from upstream).
+            visual.content.render_after_children(visual, &mut ServerVisualRenderContext::new(self.canvas));
+
             if visual.effect().is_some() && visual.sub_tree_bounds.get().is_some() {
                 if let Some(effects) = self.canvas.as_drawing_context_impl_with_effects() {
                     effects.pop_effect();

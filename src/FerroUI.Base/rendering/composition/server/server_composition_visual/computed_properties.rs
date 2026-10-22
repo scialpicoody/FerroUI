@@ -1,6 +1,5 @@
 use super::ServerCompositionVisual;
 use crate::platform::LtrbRect;
-use crate::rendering::composition::MatrixUtils;
 use crate::Matrix;
 
 impl ServerCompositionVisual {
@@ -144,16 +143,13 @@ impl ServerCompositionVisual {
         }
 
         if self.combined_transform_dirty.get() {
-            self.own_transform.set(MatrixUtils::compute_transform(
-                self.size(),
-                self.anchor_point(),
-                self.center_point(),
-                self.transform_matrix(),
-                self.scale(),
-                self.rotation_angle(),
-                self.orientation(),
-                self.offset() + self.translation(),
-            ));
+            // With the WinUI members (the relative adjustments, the rotation
+            // axis, pixel snapping) applied; a visual with a
+            // `ParentForTransform` is completed by the adorner pass.
+            self.own_transform.set(self.compute_own_transform_from_properties(self.transform_matrix()));
+            if self.parent_for_transform().is_some() {
+                self.adorner_helper_enqueue_for_adorner_update();
+            }
 
             set_dirty_for_render = true;
             set_dirty_bounds = true;

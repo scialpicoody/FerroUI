@@ -34,6 +34,12 @@ use crate::rendering::composition::generated::{
     ServerCompositionRadialGradientBrushProps, ServerCompositionSolidColorBrushProps,
     ServerCompositionSurfaceBrushProps,
 };
+use crate::rendering::composition::generated::{
+    CompositionMaskBrushHooks, CompositionMaskBrushProps, CompositionNineGridBrushHooks,
+    CompositionNineGridBrushProps, ServerCompositionMaskBrushProps, ServerCompositionNineGridBrushProps,
+};
+use crate::rendering::composition::animations::CompositionColorSpace;
+use crate::rendering::composition::CompositionMappingMode;
 use crate::rendering::composition::server::{CompositionProperty, IServerObject, ServerCompositor, ServerObjectId};
 use crate::rendering::composition::transport::{BatchResource, BatchStreamWriter, IRegisterForSerialization};
 use crate::rendering::composition::{
@@ -53,6 +59,10 @@ pub(crate) struct CompositionGradientBrushData {
     brush: CompositionBrushProps,
     gradient_stops: RefCell<FerroList<Rc<dyn IGradientStop>>>,
     spread_method: Cell<GradientSpreadMethod>,
+    /// The WinUI `MappingMode`: the unit of the points the WinUI members set.
+    pub(super) mapping_mode: Cell<CompositionMappingMode>,
+    /// The WinUI `InterpolationSpace`, stored only.
+    pub(super) interpolation_space: Cell<CompositionColorSpace>,
 }
 
 impl CompositionGradientBrushData {
@@ -61,6 +71,8 @@ impl CompositionGradientBrushData {
             brush: CompositionBrushProps::new(),
             gradient_stops: RefCell::new(FerroList::new()),
             spread_method: Cell::new(GradientSpreadMethod::default()),
+            mapping_mode: Cell::new(CompositionMappingMode::Relative),
+            interpolation_space: Cell::new(CompositionColorSpace::Auto),
         }
     }
 
@@ -101,19 +113,23 @@ pub(crate) enum CompositionBrushKind {
     RadialGradient(CompositionGradientBrushData, CompositionRadialGradientBrushProps),
     ConicGradient(CompositionGradientBrushData, CompositionConicGradientBrushProps),
     Surface(CompositionSurfaceBrushData),
+    /// The WinUI `CompositionNineGridBrush`.
+    NineGrid(CompositionNineGridBrushProps),
+    /// The WinUI `CompositionMaskBrush`.
+    Mask(CompositionMaskBrushProps),
 }
 
 /// A brush of the composition API.
 pub struct CompositionBrush {
     this: Weak<CompositionBrush>,
     object: CompositionObject,
-    kind: CompositionBrushKind,
+    pub(super) kind: CompositionBrushKind,
     transform: RefCell<Option<Rc<dyn ITransform>>>,
     relative_transform: RefCell<Option<Rc<dyn ITransform>>>,
 }
 
 impl CompositionBrush {
-    fn create(
+    pub(super) fn create(
         compositor: &Rc<Compositor>,
         kind: CompositionBrushKind,
         server: impl FnOnce(&Rc<ServerCompositor>) -> Rc<dyn IServerObject> + Send + 'static,
@@ -130,7 +146,7 @@ impl CompositionBrush {
 
     /// The constructor chain of the gradient brushes: `CompositionBrush`,
     /// then the class.
-    fn initialize_defaults(&self) {
+    pub(super) fn initialize_defaults(&self) {
         match &self.kind {
             CompositionBrushKind::SolidColor(props) => props.initialize_defaults(self),
             CompositionBrushKind::LinearGradient(data, props) => {
@@ -146,6 +162,8 @@ impl CompositionBrush {
                 props.initialize_defaults(self);
             }
             CompositionBrushKind::Surface(data) => data.props.initialize_defaults(self),
+            CompositionBrushKind::NineGrid(props) => props.initialize_defaults(self),
+            CompositionBrushKind::Mask(props) => props.initialize_defaults(self),
         }
     }
 
@@ -157,12 +175,17 @@ impl CompositionBrush {
             | CompositionBrushKind::RadialGradient(data, _)
             | CompositionBrushKind::ConicGradient(data, _) => &data.brush,
             CompositionBrushKind::Surface(data) => data.props.base(),
+            CompositionBrushKind::NineGrid(props) => props.base(),
+            CompositionBrushKind::Mask(props) => props.base(),
         }
     }
 
     fn gradient_data(&self) -> Option<&CompositionGradientBrushData> {
         match &self.kind {
-            CompositionBrushKind::SolidColor(_) | CompositionBrushKind::Surface(_) => None,
+            CompositionBrushKind::SolidColor(_)
+            | CompositionBrushKind::Surface(_)
+            | CompositionBrushKind::NineGrid(_)
+            | CompositionBrushKind::Mask(_) => None,
             CompositionBrushKind::LinearGradient(data, _)
             | CompositionBrushKind::RadialGradient(data, _)
             | CompositionBrushKind::ConicGradient(data, _) => Some(data),
@@ -195,6 +218,8 @@ impl CompositionBrush {
             CompositionBrushKind::RadialGradient(..) => "CompositionRadialGradientBrush",
             CompositionBrushKind::ConicGradient(..) => "CompositionConicGradientBrush",
             CompositionBrushKind::Surface(_) => "CompositionSurfaceBrush",
+            CompositionBrushKind::NineGrid(_) => "CompositionNineGridBrush",
+            CompositionBrushKind::Mask(_) => "CompositionMaskBrush",
         }
     }
 
@@ -265,6 +290,8 @@ impl CompositionBrush {
             CompositionBrushKind::RadialGradient(_, props) => props.serialize_changes_core(self, writer),
             CompositionBrushKind::ConicGradient(_, props) => props.serialize_changes_core(self, writer),
             CompositionBrushKind::Surface(data) => data.props.serialize_changes_core(self, writer),
+            CompositionBrushKind::NineGrid(props) => props.serialize_changes_core(self, writer),
+            CompositionBrushKind::Mask(props) => props.serialize_changes_core(self, writer),
         }
     }
 
@@ -283,6 +310,10 @@ impl CompositionBrushHooks for CompositionBrush {}
 impl CompositionSolidColorBrushHooks for CompositionBrush {}
 
 impl CompositionSurfaceBrushHooks for CompositionBrush {}
+
+impl CompositionNineGridBrushHooks for CompositionBrush {}
+
+impl CompositionMaskBrushHooks for CompositionBrush {}
 
 impl CompositionLinearGradientBrushHooks for CompositionBrush {
     fn base_serialize_changes_core(&self, writer: &mut BatchStreamWriter<'_>) {
@@ -360,6 +391,8 @@ impl ICompositionObjectAnimations for CompositionBrush {
             CompositionBrushKind::Surface(data) => {
                 data.props.start_animation(self, property_name, animation, final_value)
             }
+            CompositionBrushKind::NineGrid(props) => props.start_animation(self, property_name, animation, final_value),
+            CompositionBrushKind::Mask(props) => props.start_animation(self, property_name, animation, final_value),
         }
     }
 
@@ -379,6 +412,12 @@ impl ICompositionObjectAnimations for CompositionBrush {
             }
             CompositionBrushKind::Surface(_) => {
                 ServerCompositionSurfaceBrushProps::get_composition_property(property_name)
+            }
+            CompositionBrushKind::NineGrid(_) => {
+                ServerCompositionNineGridBrushProps::get_composition_property(property_name)
+            }
+            CompositionBrushKind::Mask(_) => {
+                ServerCompositionMaskBrushProps::get_composition_property(property_name)
             }
         }
         .or_else(|| ServerCompositionBrushProps::get_composition_property(property_name))

@@ -20,6 +20,7 @@ use super::generated::{
     CompositionSurfaceVisualProps, CompositionVisualHooks, CompositionVisualProps,
     ServerCompositionContainerVisualProps, ShapeVisualProps, SpriteVisualProps,
 };
+use super::generated::{LayerVisualProps, RedirectVisualProps};
 use super::hit_testing::CompositionHitTestAabbTree;
 use super::server::{
     CompositionProperty, IServerVisualContent, ReadbackData, ServerCompositionVisual,
@@ -51,6 +52,10 @@ pub(crate) enum CompositionVisualKind {
     Sprite(SpriteVisualProps),
     /// The WinUI `ShapeVisual`.
     Shape(ShapeVisualProps),
+    /// The WinUI `LayerVisual`.
+    Layer(LayerVisualProps),
+    /// The WinUI `RedirectVisual`.
+    Redirect(RedirectVisualProps),
 }
 
 /// A node of the composition visual tree.
@@ -161,6 +166,8 @@ impl CompositionVisual {
             CompositionVisualKind::Custom(data) => data.props().initialize_defaults(self),
             CompositionVisualKind::Sprite(props) => props.initialize_defaults(self),
             CompositionVisualKind::Shape(props) => props.initialize_defaults(self),
+            CompositionVisualKind::Layer(props) => props.initialize_defaults(self),
+            CompositionVisualKind::Redirect(props) => props.initialize_defaults(self),
         }
     }
 
@@ -173,6 +180,8 @@ impl CompositionVisual {
             CompositionVisualKind::Custom(data) => data.props(),
             CompositionVisualKind::Sprite(props) => props.base(),
             CompositionVisualKind::Shape(props) => props.base(),
+            CompositionVisualKind::Layer(props) => props.base(),
+            CompositionVisualKind::Redirect(props) => props.base(),
         }
     }
 
@@ -373,6 +382,8 @@ impl CompositionVisual {
             CompositionVisualKind::Custom(data) => data.props().serialize_changes_core(self, writer),
             CompositionVisualKind::Sprite(props) => props.serialize_changes_core(self, writer),
             CompositionVisualKind::Shape(props) => props.serialize_changes_core(self, writer),
+            CompositionVisualKind::Layer(props) => props.serialize_changes_core(self, writer),
+            CompositionVisualKind::Redirect(props) => props.serialize_changes_core(self, writer),
         }
     }
 }
@@ -468,6 +479,8 @@ impl ICompositionObjectAnimations for CompositionVisual {
             }
             CompositionVisualKind::Sprite(props) => props.start_animation(self, property_name, animation, final_value),
             CompositionVisualKind::Shape(props) => props.start_animation(self, property_name, animation, final_value),
+            CompositionVisualKind::Layer(props) => props.start_animation(self, property_name, animation, final_value),
+            CompositionVisualKind::Redirect(props) => props.start_animation(self, property_name, animation, final_value),
         }
     }
 
@@ -500,6 +513,8 @@ impl AsCompositionObject for CompositionVisual {
             CompositionVisualKind::Custom(_) => "CompositionCustomVisual",
             CompositionVisualKind::Sprite(_) => "SpriteVisual",
             CompositionVisualKind::Shape(_) => "ShapeVisual",
+            CompositionVisualKind::Layer(_) => "LayerVisual",
+            CompositionVisualKind::Redirect(_) => "RedirectVisual",
         }
     }
 }

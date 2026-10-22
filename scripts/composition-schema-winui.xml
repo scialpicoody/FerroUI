@@ -160,4 +160,81 @@
         <Property Name="Geometry" Type="CompositionGeometry?" />
         <Property Name="ViewBox" Type="CompositionViewBox?" />
     </Object>
+
+    <!-- The remaining members of Microsoft.UI.Composition.Visual (phase 2):
+         the rotation axis, the relative adjustments, hit testing, pixel
+         snapping, the 3D modes a 2D renderer stores only, and the visual the
+         transform is relative to. -->
+    <Object Name="CompositionVisual">
+        <Property Name="RotationAxis" Type="Vector3D" Animated="true" DefaultValue="Vector3D.UnitZ"/>
+        <Property Name="RelativeOffsetAdjustment" Type="Vector3D" Animated="true"/>
+        <Property Name="RelativeSizeAdjustment" Type="Vector" Animated="true"/>
+        <Property Name="IsHitTestVisible" Type="bool" DefaultValue="true"/>
+        <Property Name="IsPixelSnappingEnabled" Type="bool"/>
+        <Property Name="BorderMode" Type="CompositionBorderMode"/>
+        <Property Name="BackfaceVisibility" Type="CompositionBackfaceVisibility"/>
+        <Property Name="CompositeMode" Type="CompositionCompositeMode"/>
+        <Property Name="ParentForTransform" Type="CompositionVisual?"/>
+    </Object>
+
+    <!-- Microsoft.UI.Composition.LayerVisual. The Effect member comes with the
+         effect brushes (phase 6). -->
+    <Object Name="LayerVisual" Inherits="CompositionContainerVisual" ServerBase="ServerSizeDependantVisual">
+        <Property Name="Shadow" Type="DropShadow?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.RedirectVisual. SourceSurface is the hidden
+         visual surface that follows the source for the redirect visual. -->
+    <Object Name="RedirectVisual" Inherits="CompositionContainerVisual" ServerBase="ServerSizeDependantVisual">
+        <Property Name="Source" Type="CompositionVisual?" />
+        <Property Name="SourceSurface" Type="CompositionVisualSurface?" Internal="true" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionNineGridBrush. -->
+    <Object Name="CompositionNineGridBrush" Inherits="CompositionBrush" ServerBase="ServerCompositionBrush">
+        <Property Name="Source" Type="CompositionBrush?" />
+        <Property Name="LeftInset" Type="float" Animated="true"/>
+        <Property Name="TopInset" Type="float" Animated="true"/>
+        <Property Name="RightInset" Type="float" Animated="true"/>
+        <Property Name="BottomInset" Type="float" Animated="true"/>
+        <Property Name="LeftInsetScale" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="TopInsetScale" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="RightInsetScale" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="BottomInsetScale" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="IsCenterHollow" Type="bool" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionMaskBrush. -->
+    <Object Name="CompositionMaskBrush" Inherits="CompositionBrush" ServerBase="ServerCompositionBrush">
+        <Property Name="Source" Type="CompositionBrush?" />
+        <Property Name="Mask" Type="CompositionBrush?" />
+    </Object>
+
+    <!-- The brush transform of Microsoft.UI.Composition.CompositionGradientBrush,
+         on each gradient class of the upstream schema (their common base is a
+         manual class). -->
+    <Object Name="CompositionLinearGradientBrush">
+        <Property Name="AnchorPoint" Type="Vector" Animated="true"/>
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+    </Object>
+    <Object Name="CompositionRadialGradientBrush">
+        <Property Name="AnchorPoint" Type="Vector" Animated="true"/>
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+    </Object>
+    <Object Name="CompositionConicGradientBrush">
+        <Property Name="AnchorPoint" Type="Vector" Animated="true"/>
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+    </Object>
 </NComposition>
