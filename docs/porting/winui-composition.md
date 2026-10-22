@@ -354,17 +354,6 @@ every layout move of the element, as in WinUI.
 | 5 | implemented (drop shadow masks and source policy; ambient, distant, point and spot lights as a light map over the content) | #304 |
 | 6 | implemented (scoped: blur, opacity, cross-fade, composite and colour source effect brushes, the layer visual effect; the backdrop brush draws nothing) | #304 |
 
-## 8. Verification in the catalog
-
-The page "Composition (WinUI)" of the ControlCatalog (`samples/ControlCatalog/Pages/winui_composition_page.rs`) shows a connected animation between a list of cards and a detail view, the implicit show and hide animations, a light that follows the pointer (the pointer position property set) and a parallax header (the manipulation property set of a scroll viewer). A screenshot run of the desktop entry point drives it without a person and saves the frames the compositor draws:
-
-```sh
-FERROUI_SMOKE_SCREENSHOTS=<directory> FERROUI_SMOKE_SCREENSHOT_PAGES="Composition (WinUI)" \
-FERROUI_SMOKE_PAGES=6000 FERROUI_SMOKE_WINUI_FLIGHT=0 cargo run -p control-catalog-desktop --features vello
-```
-
-`FERROUI_SMOKE_WINUI_FLIGHT` chooses the configuration (0 gravity, 1 direct, 2 basic); the run opens the first card (`flight-NN-<ms>.png` during the flight there and back), then hides and shows the box of the implicit animations and scrolls the parallax scroller (`steps-<ms>.png`). `FERROUI_RENDERER=vello` selects the Vello backend; with a debug build `FERROUI_SMOKE_WINUI_FLIGHT_FEW=1` saves fewer frames, because the encoding of a picture blocks the thread of the compositor for long enough to shift the later frames. The flights, the implicit animations and the parallax were checked this way with Skia and Vello on macOS.
-
 ## 7. Deviations
 
 Every difference from WinUI, in the format of `DEVIATIONS.md` (Representation, Behaviour,
@@ -466,3 +455,14 @@ Missing). `DEVIATIONS.md` points here for this area.
 | A facade transition and an animation of the same property of the handoff visual cannot be combined. | While any transition is set, the implicit animations of the facades replace those the application set on the element visual. | Behaviour | A visual has one implicit animation collection. | phase 3 |
 | `Vector3Transition.Components` is not documented in detail; the easing of transitions is not documented. | Excluded components jump to their final value at the start; a transition with no components does nothing. The transitions use the default easing of the compositor. | Behaviour | The port had to choose. | phase 3 |
 | `SetImplicitHideAnimation` keeps an element removed from the tree in unloading storage until the animation completes. | The animation runs on an image of the element taken when it is removed. | Behaviour | A detached element loses its composition visual and its content in the same batch. | phase 1 |
+
+## 8. Verification in the catalog
+
+The page "Composition (WinUI)" of the ControlCatalog (`samples/ControlCatalog/Pages/winui_composition_page.rs`) shows a connected animation between a list of cards and a detail view, the implicit show and hide animations, a light that follows the pointer (the pointer position property set) and a parallax header (the manipulation property set of a scroll viewer). A screenshot run of the desktop entry point drives it without a person and saves the frames the compositor draws:
+
+```sh
+FERROUI_SMOKE_SCREENSHOTS=<directory> FERROUI_SMOKE_SCREENSHOT_PAGES="Composition (WinUI)" \
+FERROUI_SMOKE_PAGES=6000 FERROUI_SMOKE_WINUI_FLIGHT=0 cargo run -p control-catalog-desktop --features vello
+```
+
+`FERROUI_SMOKE_WINUI_FLIGHT` chooses the configuration (0 gravity, 1 direct, 2 basic); the run opens the first card (`flight-NN-<ms>.png` during the flight there and back), then hides and shows the box of the implicit animations and scrolls the parallax scroller (`steps-<ms>.png`). `FERROUI_RENDERER=vello` selects the Vello backend; with a debug build `FERROUI_SMOKE_WINUI_FLIGHT_FEW=1` saves fewer frames, because the encoding of a picture blocks the thread of the compositor for long enough to shift the later frames. The flights, the implicit animations and the parallax were checked this way with Skia and Vello on macOS.
