@@ -265,8 +265,8 @@ separately.
   restored onto themselves. Newly assigned focus, including on an unnamed control,
   takes precedence. Unknown template provenance is skipped.
   Development keys take precedence over names, and stable named/keyed scope owners
-  qualify descendants. Initial compiled/runtime loading of unnamed development
-  keys still needs integration; replacement preparation already supplies identities.
+  qualify descendants. Keys are recorded on initial compiled/runtime population
+  and on replacement, including template instances, without adding public names.
   Ambiguous matches and anonymous nested namescope owners are skipped.
 - Content, component and panel adapters accept `with_state_adapter` for
   application-defined control state. `ControlStateAdapter::capture` returns an
@@ -458,9 +458,12 @@ name (the prefix is arbitrary):
 </StackPanel>
 ```
 
-Ordinary compiled markup ignores this metadata. Development runtime preparation
-gives an unnamed keyed control a reserved `__ferroui_reload_...` name; applications
-must not use that prefix themselves. Existing names remain unchanged. State belongs
+Both compilers preserve the literal key as development metadata. Enabled debug
+runtimes store it against the object's weak identity, including on initial loading;
+release runtimes retain no key registry. A key neither assigns Name nor registers
+an extra namescope entry. Empty keys and markup expressions are rejected. The
+`__ferroui_reload_...` prefix remains reserved for internal source matching and
+must not be used as an application name. State belongs
 to one document/component adapter, then to the chain of stable namescope owners,
 then to its explicit key or name. Differing declarations behind duplicate source
 names are conservatively excluded from property restoration. Authored changes and
@@ -939,8 +942,7 @@ to their recorded fixtures, platforms, sampling methods and sample counts.
 
 The [completion audit](hot-reload-completion-audit.md) separates requirements from
 optional extensions and supersedes this section's former expanding checklist.
-Remaining work is to integrate unnamed development keys into initial population,
-then validate and document the final implementation on
+Remaining work is to validate and document the final implementation on
 all three desktop platforms. Existing native runs are evidence for their recorded
 source revisions, not missing work to be started from scratch.
 

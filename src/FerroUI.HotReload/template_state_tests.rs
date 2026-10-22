@@ -424,3 +424,36 @@ fn template_locations_use_utf16_columns_and_xml_line_endings() {
         );
     }
 }
+
+#[test]
+fn unnamed_development_keys_work_on_initial_template_population() {
+    let _application = UnitTestApplication::start(TestServices::styled_window());
+    let document = |width| {
+        source(width, "")
+            .replace(
+                "xmlns:x=",
+                "xmlns:hr=\"https://github.com/ferroui/hot-reload\" xmlns:x=",
+            )
+            .replace("Name=\"entry\"", "hr:Key=\"draft\"")
+    };
+    let mut fixture = Fixture::new(&document(200), "ferres://template-keys/View.xaml");
+    let find = |root: &ContentControl| {
+        root.get_visual_descendants()
+            .find_map(|node| node.cast::<TextBox>())
+            .unwrap()
+    };
+    let old = find(&fixture.root);
+    assert!(old.name().is_none());
+    assert_eq!(
+        ferroui_markup_xaml::reload_identity::key(&old).as_deref(),
+        Some("draft")
+    );
+    let weak = old.downgrade();
+    old.set_text(Some("typed"));
+    fixture.apply(document(220));
+    let new = find(&fixture.root);
+    assert!(new.name().is_none());
+    assert_eq!(new.text().as_deref(), Some("typed"));
+    drop(old);
+    assert!(weak.upgrade().is_none());
+}

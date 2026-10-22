@@ -140,11 +140,11 @@ impl ViewState {
         adapters: &[std::rc::Rc<dyn crate::ControlStateAdapter>],
     ) -> Self {
         let mut state = Self(BTreeMap::new(), uri.map(str::to_owned));
-        for crate::state_scope::Control { identity, element, source } in root.map(|root| crate::state_scope::controls(root, uri, source)).unwrap_or_default() {
+        for crate::state_scope::Control { identity, name, element, source } in root.map(|root| crate::state_scope::controls(root, uri, source)).unwrap_or_default() {
             let entry = Entry {
                 source,
                 original: element.downgrade(),
-                name: element.name().unwrap_or_default(),
+                name,
                 kind: element.get_type(),
                 focused: element
                     .cast::<ferroui_base::input::InputElement>()
@@ -178,8 +178,7 @@ impl ViewState {
         for record in &elements {
             *counts.entry(record.identity.clone()).or_insert(0) += 1;
         }
-        for crate::state_scope::Control { identity, element, source } in elements {
-            let Some(name) = element.name() else { continue };
+        for crate::state_scope::Control { identity, name, element, source } in elements {
             if counts.get(&identity) != Some(&1) {
                 continue;
             }
@@ -350,9 +349,8 @@ mod tests {
     fn load(source: &str) -> (BoxedValue, Ref<TextBox>) {
         ferroui_controls::register_types();
         ferroui_markup_xaml::register_types();
-        let prepared = crate::identity::runtime_source(source).unwrap();
         let root = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
-            RuntimeXamlLoaderDocument::with_base_uri(None, &prepared),
+            RuntimeXamlLoaderDocument::with_base_uri(None, source),
             None,
         )
         .unwrap();
@@ -360,10 +358,51 @@ mod tests {
         (root, control)
     }
     #[test]
+    fn initial_development_keys_require_literals() {
+        let _scope = Dispatcher::unit_test_scope();
+        ferroui_controls::register_types(); ferroui_markup_xaml::register_types();
+        for key in ["", "{Binding Text}"] {
+            let source = source("").replace("hr:Key=\"draft\"", &format!("hr:Key=\"{key}\""));
+            let result = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+                RuntimeXamlLoaderDocument::new(&source), None);
+            assert!(result.is_err(), "key {key:?} must fail before population");
+        }
+    }
+    #[test]
+    fn duplicate_unnamed_keys_are_ambiguous_without_duplicate_public_names() {
+        let _scope = Dispatcher::unit_test_scope();
+        ferroui_controls::register_types(); ferroui_markup_xaml::register_types();
+        let source = r#"<StackPanel xmlns="https://github.com/ferroui" xmlns:hr="https://github.com/ferroui/hot-reload"><TextBox hr:Key="same"/><TextBox hr:Key="same"/></StackPanel>"#;
+        let load = || {
+            let value = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(RuntimeXamlLoaderDocument::new(source), None).unwrap();
+            let panel = Ref::<ferroui_controls::StackPanel>::from_xaml_object(&value).unwrap();
+            (value, panel.children().to_vec().iter().map(|control| control.cast::<TextBox>().unwrap()).collect::<Vec<_>>())
+        };
+        let (old, controls) = load();
+        controls[0].set_text(Some("left")); controls[1].set_text(Some("right"));
+        let state = ViewState::capture(Some(&old), source);
+        let (new, controls) = load(); state.restore(&new, source, source);
+        assert!(controls.iter().all(|control| control.name().is_none() && control.text().is_none()));
+    }
+    #[test]
+    fn development_key_precedes_an_application_assigned_name() {
+        let _scope = Dispatcher::unit_test_scope();
+        let source = source("").replace("hr:Key=\"draft\"", "hr:Key=\"{}draft\"");
+        let (before, old) = load(&source);
+        old.set_name(Some("application-old".into())); old.set_text(Some("draft"));
+        let state = ViewState::capture(Some(&before), &source);
+        let (after, new) = load(&source);
+        new.set_name(Some("application-new".into()));
+        state.restore(&after, &source, &source);
+        assert_eq!(new.text().as_deref(), Some("draft"));
+        assert_eq!(new.name().as_deref(), Some("application-new"));
+    }
+    #[test]
     fn unnamed_development_key_restores_text_and_selection() {
         let _scope = Dispatcher::unit_test_scope();
         let source = source("");
         let (before, old) = load(&source);
+        assert!(old.name().is_none(), "development keys must not become public names");
         old.set_text(Some("draft text"));
         old.set_selection_start(2);
         old.set_selection_end(5);

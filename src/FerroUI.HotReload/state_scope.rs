@@ -8,6 +8,7 @@ use std::{
 
 pub(crate) struct Control {
     pub identity: Vec<String>,
+    pub name: String,
     pub element: Ref<StyledElement>,
     pub source: Rc<str>,
 }
@@ -199,9 +200,10 @@ impl Walk {
                 continue;
             }
             let own_scope = NameScope::get_name_scope(&element);
-            let identity = element
-                .name()
-                .and_then(|name| crate::identity::identity(&source, &name));
+            let name = crate::identity::control_name(&element);
+            let identity = name
+                .as_ref()
+                .and_then(|name| crate::identity::identity(&source, name));
             if !is_root && own_scope.is_some() && own_scope != parent_scope {
                 let Some(owner) = &identity else {
                     continue;
@@ -219,6 +221,7 @@ impl Walk {
                 self.owners.insert(id, scope_path.clone());
                 self.result.push(Control {
                     identity: scope_path,
+                    name: name.unwrap(),
                     element,
                     source: source.clone(),
                 });

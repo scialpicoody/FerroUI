@@ -1,10 +1,10 @@
-//! Development keys are inert XML metadata in ordinary compiled markup.
+//! Stable development identities and authored-value lookup.
 use crate::ReloadError;
 pub const KEY_NAMESPACE: &str = "https://github.com/ferroui/hot-reload";
 const XAML_NAMESPACE: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 const PREFIX: &str = "__ferroui_reload_";
 fn explicit_key<'a, 'input>(node: roxmltree::Node<'a, 'input>) -> Option<&'a str> {
-    node.attribute((KEY_NAMESPACE, "Key"))
+    node.attribute((KEY_NAMESPACE, "Key")).map(|key| key.strip_prefix("{}").unwrap_or(key))
 }
 fn declared_name<'a, 'input>(node: roxmltree::Node<'a, 'input>) -> Option<&'a str> {
     node.attribute((XAML_NAMESPACE, "Name"))
@@ -19,16 +19,20 @@ fn generated_name(key: &str) -> String {
     name
 }
 fn runtime_name(node: roxmltree::Node<'_, '_>) -> Option<String> {
-    declared_name(node)
-        .map(str::to_owned)
-        .or_else(|| explicit_key(node).map(generated_name))
+    explicit_key(node)
+        .map(generated_name)
+        .or_else(|| declared_name(node).map(str::to_owned))
 }
-/// Give unnamed keyed controls a reserved development name so the normal runtime namescope
-/// tracks them. Existing names are untouched. Source contracts are checked before this step.
+pub(crate) fn control_name(element: &ferroui_base::StyledElement) -> Option<String> {
+    ferroui_markup_xaml::reload_identity::key(element)
+        .map(|key| generated_name(&key))
+        .or_else(|| element.name())
+}
+/// Validate development identity syntax. Compiler/runtime metadata supplies keys
+/// without injecting public Name assignments or changing parser coordinates.
 pub(crate) fn runtime_source(source: &str) -> Result<String, ReloadError> {
     let document =
         roxmltree::Document::parse(source).map_err(|e| ReloadError::Failed(e.to_string()))?;
-    let mut edits = Vec::new();
     for node in document.descendants().filter(|node| node.is_element()) {
         if declared_name(node).is_some_and(|name| name.starts_with(PREFIX)) {
             return Err(ReloadError::Failed(
@@ -41,21 +45,9 @@ pub(crate) fn runtime_source(source: &str) -> Result<String, ReloadError> {
                     "Development key must not be empty".into(),
                 ));
             }
-            if declared_name(node).is_none() {
-                let start = node.range().start + 1;
-                let end = source[start..]
-                    .find(|c: char| c.is_whitespace() || c == '/' || c == '>')
-                    .map(|offset| start + offset)
-                    .ok_or_else(|| ReloadError::Failed("Malformed element".into()))?;
-                edits.push((end, format!(" Name=\"{}\"", generated_name(key))));
-            }
         }
     }
-    let mut result = source.to_owned();
-    for (offset, text) in edits.into_iter().rev() {
-        result.insert_str(offset, &text);
-    }
-    Ok(result)
+    Ok(source.to_owned())
 }
 pub(crate) fn identity(source: &str, name: &str) -> Option<String> {
     let document = roxmltree::Document::parse(source).ok()?;

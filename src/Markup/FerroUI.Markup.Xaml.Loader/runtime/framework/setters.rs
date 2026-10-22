@@ -279,7 +279,9 @@ fn add_handler(
     })?;
     let routes = enum_constant(&routes_type, 5, line_info)?;
     #[cfg(all(feature = "hot-reload", debug_assertions))]
-    {
+    // Only an owned population intercepts the metadata call. Other interpreter
+    // hosts (including recording/evaluation back ends) retain method dispatch.
+    if context.runtime_context()?.extension::<ferroui_markup_xaml::reload_events::EventGeneration>().is_some() {
         use ferroui_base::{interactivity::{Interactive, RoutedEvent, RoutingStrategies}, metadata::from_markup_value};
         let object = object_of(target, line_info)?;
         let object = object.cast::<Interactive>().ok_or_else(|| XamlError::load_exception("Event target is not Interactive", Some(line_info)))?;
@@ -287,9 +289,9 @@ fn add_handler(
         let handler = from_markup_value::<ferroui_base::metadata::MarkupDelegate>(&handler).ok_or_else(|| XamlError::load_exception("Invalid event delegate", Some(line_info)))?;
         let routes = from_markup_value::<RoutingStrategies>(&routes).ok_or_else(|| XamlError::load_exception("Invalid event routes", Some(line_info)))?;
         ferroui_markup_xaml::reload_events::add_handler(context.runtime_context()?, &object, &event, handler, routes, false);
-        Ok(())
+        return Ok(());
     }
-    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+
     context
         .call_method(&setter.add_method, &[target.clone(), event, handler, routes, boxed(false)], line_info)
         .map(|_| ())

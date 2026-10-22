@@ -84,9 +84,9 @@ jobs:
       - name: Development manifest profile boundaries
         run: python scripts/hot-reload/profile_probe.py
       - name: Runtime markup, resources and populate hooks
-        run: cargo test --locked -p ferroui-markup-xaml --features hot-reload --lib
+        run: cargo test --locked -p ferroui-markup -p ferroui-markup-xaml -p ferroui-markup-xaml-tests --features ferroui-markup-xaml-loader/hot-reload --lib
       - name: Runtime compiler and prepared-document cache
-        run: cargo test --locked -p ferroui-markup-xaml-loader --lib
+        run: cargo test --locked -p ferroui-markup-xaml-loader --features hot-reload --lib
       # This must be a separate invocation without runtime-markup: that feature
       # deliberately excludes compiled_markup tests and would silently skip parity.
       - name: Compiled and runtime catalog parity

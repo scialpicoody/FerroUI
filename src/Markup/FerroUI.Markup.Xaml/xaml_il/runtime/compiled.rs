@@ -1593,3 +1593,16 @@ mod tests {
         assert!(!uri_equals("ferres://Other/Views/Main.xaml", root, "Views/Main.xaml"));
     }
 }
+
+/// Generated code retains development keys only in an enabled debug runtime.
+#[inline]
+pub const fn development_keys_enabled() -> bool {
+    cfg!(all(feature = "hot-reload", debug_assertions))
+}
+#[inline]
+pub fn set_development_key(value: &MarkupValue, key: &str) {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    crate::reload_identity::record(value, key);
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+    let _ = (value, key);
+}

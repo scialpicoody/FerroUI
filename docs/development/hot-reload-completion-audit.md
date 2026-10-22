@@ -20,24 +20,13 @@ retain their original source revisions.
 
 ## Required completion work
 
-1. **Close standard component integration gaps.** Inline Resources and Styles now
-   have explicit ownership adapters, including deferred template context transfer,
-   application-style ordering, and composed previews for mixed application/XAML
-   dictionary providers. Routed handler ownership now covers compiled/runtime
-   population and the catalog's AdornerLayerPage, including rollback and cached
-   reference refresh. Template-part state now follows declaration and instance
-   scopes across compiled/runtime replacement. Close initial-load integration for
-   unnamed development keys: replacement preparation currently assigns their
-   identities, but ordinary initial compiled/runtime population does not. Preserve
-   the documented restart boundary for
-   unsupported custom mutations and irreversible user code.
-2. **Freeze a final implementation revision and close acceptance.** Reuse existing
+1. **Freeze a final implementation revision and close acceptance.** Reuse existing
    evidence where behavior and inputs are unchanged, but run the final relevant
    native XAML, Rust, combined, restart, lifecycle and release-boundary gates on
    macOS, Windows and Linux. Fix failures without treating another incomplete
    moving revision as final acceptance. Keep recorded Windows results with their revisions, and verify a final
    revision once the implementation gaps are closed.
-3. **Publish the supported contract and results.** Reconcile the existing design
+2. **Publish the supported contract and results.** Reconcile the existing design
    documentation and issues #233/#234 with actual supported edits, restart
    boundaries, extension APIs and measured baselines. Do not claim untested paths.
 
@@ -164,3 +153,43 @@ included theme twice with interpreted markup, preserving its named page scroll
 part's offset and releasing retired parts. The macOS markup suites pass 271 markup,
 206 XAML runtime and 598 compiler/integration tests (17 existing ignored tests).
 Final native/Windows acceptance and initial unnamed-key integration remain open.
+
+The template increment's Linux markup suites also pass 271 markup, 206 XAML
+runtime and 598 compiler/integration tests, with the same 17 ignored tests. The
+Linux release check passes with the development features requested. These are
+checks of the template increment; later key integration requires its own verification below.
+
+## Initial development keys (2026-10-22)
+
+The remaining standard integration item is implemented: both compiler back ends
+record explicit development keys during initial population and template creation.
+The registry uses weak object identities and exists only in an enabled debug
+runtime. Keys do not assign public names or add namescope entries. State matching
+prefers the key even when application code changes Name, and understands escaped
+literal keys. Duplicate keys within one scope remain ambiguous rather than
+causing duplicate namescope registration. Empty keys and expressions are rejected.
+
+The catalog's included page-scroll template now uses an unnamed `hr:Key`; its
+compiled-to-runtime state test verifies the initial compiled metadata as well as
+replacement. The original initial-load key regression failed before this change.
+The engine suite now has 132 passing tests on macOS. All 11 catalog integration
+tests and all 404 loader tests pass there (one existing ignored loader test).
+The broader markup suites passed 271 + 206 + 598 tests on both macOS and Linux,
+with 17 existing ignored tests. The loader pipeline assertion now includes the
+new transformer. Enabling development tracking also exposed an evaluator-host
+regression: only a population with an event generation may intercept routed
+handler registration; ordinary evaluator hosts keep metadata method dispatch.
+The regression and owned-handler engine tests pass together on macOS.
+
+The workflow now requests development-enabled loader tests and the full markup
+parity suite. Python harness tests pass on macOS (27 run, two platform skips),
+and the pinned Rust 1.93.0 profile probe and thread-local portability check pass.
+Native acceptance of a frozen current candidate, including Windows, is still
+required before release. Historical runs retain their original pins.
+
+The current Linux snapshot passes all 404 loader tests and 132 engine tests as
+well. A stale snapshot timestamp initially reused a binary missing the new table
+row; verification copied and compared the changed files and refreshed timestamps
+before rebuilding. Future snapshot syncs must not preserve mtimes older than a
+previous failed build. These reruns include the owned-handler dispatch correction
+and escaped-key/name-precedence regression.

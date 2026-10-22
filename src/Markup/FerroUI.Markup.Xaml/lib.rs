@@ -91,3 +91,6 @@ mod test_support;
 
 #[cfg(all(feature = "hot-reload", debug_assertions))]
 pub mod reload_templates;
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod reload_identity;

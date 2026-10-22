@@ -502,8 +502,8 @@ fn compiled_catalog_template_scroll_survives_included_theme_replacement() {
     window.set_content(Some(Control::boxed(&root.clone().upcast::<Control>())));
     window.show(); Dispatcher::ui_thread().run_jobs(None);
     let find = || root.get_visual_descendants().find_map(|node| node.cast::<ScrollViewer>()
-        .filter(|scroll| scroll.name().as_deref() == Some("PART_PageScroll"))).unwrap();
-    let old = find(); old.set_offset(Vector::new(0.0, 80.0));
+        .filter(|scroll| ferroui_markup_xaml::reload_identity::key(scroll).as_deref() == Some("PageScroll"))).unwrap();
+    let old = find(); assert!(old.name().is_none(), "development keys are not public names"); old.set_offset(Vector::new(0.0, 80.0));
     assert_eq!(old.offset().y, 80.0, "fixture must actually scroll");
     let view_uri = "ferres://controlcatalog/Pages/BorderPage.xaml";
     let theme_uri = "ferres://controlcatalog/CustomThemes.xaml";
@@ -521,7 +521,7 @@ fn compiled_catalog_template_scroll_survives_included_theme_replacement() {
     session.track_resource_includes(&Application::current().unwrap().resources(), configuration);
     for padding in [21, 22] {
         let previous = find(); let weak = previous.downgrade();
-        session.submit(theme_uri.into(), theme.replace("Name=\"PART_PageScroll\" Padding=\"20\"", &format!("Name=\"PART_PageScroll\" Padding=\"{padding}\"")));
+        session.submit(theme_uri.into(), theme.replace("hr:Key=\"PageScroll\" Padding=\"20\"", &format!("hr:Key=\"PageScroll\" Padding=\"{padding}\"")));
         let result = session.apply_pending().unwrap();
         assert_eq!(result.status, ReloadStatus::Applied, "{result:?}");
         Dispatcher::ui_thread().run_jobs(None);

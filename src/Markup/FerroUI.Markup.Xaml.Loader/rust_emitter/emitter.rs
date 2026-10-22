@@ -38,7 +38,7 @@ use crate::compiler_extensions::transformers::{
     XamlIlNthChildSelector, XamlIlNthChildSelectorType, XamlIlOrSelectorNode, XamlIlPropertyEqualsSelector,
     XamlDirectCallAddHandler, XamlIlSelectorInitialNode, XamlIlSelectorNode, XamlIlStringSelector, XamlIlStringSelectorType, XamlIlTypeSelector,
     XamlIlAndQueryNode, XamlIlHeightQuery, XamlIlOrQueryNode, XamlIlQueryInitialNode, XamlIlQueryNode, XamlIlWidthQuery,
-    XamlSourceInfoValueManipulation,
+    XamlSourceInfoValueManipulation, DevelopmentKeyNode,
 };
 use crate::compiler_extensions::{
     BindingSetter, BindingWithPrioritySetter, SetValueWithPrioritySetter, UnsetValueSetter, XamlIlBindingPathElementNode, XamlIlBindingPathNode,
@@ -1538,6 +1538,10 @@ impl<'a> Emitter<'a> {
         }
         if let Some(n) = node.cast::<EnsureCapacityNode>() {
             return self.ensure_capacity(node, &n, target);
+        }
+        if let Some(n) = node.cast::<DevelopmentKeyNode>() {
+            self.line(format!("if rt::development_keys_enabled() {{ rt::set_development_key(&rt::boxed(::core::clone::Clone::clone(&{})), {}); }}", target.expr, rust_string_literal(&n.key)));
+            return Ok(());
         }
         if let Some(n) = node.cast::<XamlSourceInfoValueManipulation>() {
             // `XamlSourceInfo.SetXamlSourceInfo(target, new XamlSourceInfo(line, position, document))`.
