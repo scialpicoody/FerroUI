@@ -29,11 +29,16 @@ pub(crate) fn prepare(
     candidate: &Ref<StyledElement>,
     root: &Ref<StyledElement>,
     resources: bool,
+    styles: bool,
 ) -> Box<dyn PreparedReload> {
     let mut mappings: Vec<(BoxedValue, BoxedValue)> =
         vec![(Rc::new(candidate.clone()), Rc::new(root.clone()))];
     if resources {
         mappings.push((Rc::new(candidate.resources()), Rc::new(root.resources())));
+    }
+    if styles {
+        mappings.push((Rc::new(candidate.styles()), Rc::new(root.styles())));
+        mappings.push((Rc::new(candidate.styles().resources()), Rc::new(root.styles().resources())));
     }
     Box::new(Change(scope.prepare_rebase(&mappings)))
 }

@@ -8,6 +8,58 @@ use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
 use std::rc::Rc;
 
 #[test]
+fn catalog_inline_styles_refresh_existing_page_and_preserve_application_styles() {
+    use ferroui_controls::Border;
+    use ferroui_base::styling::{IStyle, style_ptr_eq};
+    use ferroui_markup_xaml::{FromXamlObject, RuntimeXamlLoaderDocument};
+    let _application = super::support::start_catalog_application();
+    let page = crate::pages::BorderPage::new();
+    let root: Ref<ContentPage> = page.clone().upcast();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&page.clone().upcast::<Control>())));
+    window.show();
+    let uri = "ferres://controlcatalog/reload-tests/InlineStyles.xaml";
+    let baseline = include_str!("../Pages/BorderPage.xaml");
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::hot_reload::component_target(
+        &root, uri.into(), baseline.into(), Vec::new(),
+    ));
+    let app_style = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
+        RuntimeXamlLoaderDocument::new(
+            r#"<Style xmlns="https://github.com/ferroui" Selector="Border"><Setter Property="MinHeight" Value="23"/></Style>"#,
+        ), None,
+    ).unwrap();
+    let app_style = Rc::<dyn IStyle>::from_xaml_object(&app_style).unwrap();
+    let styles = root.styles();
+    styles.add(app_style.clone());
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), baseline.into()).unwrap();
+    session.register_target(&target);
+    for width in [240, 280] {
+        let update = baseline.replace("  <ScrollViewer", &format!(r#"<ContentPage.Styles><Styles>
+<Styles.Resources><x:Double x:Key="InlineWidth">{width}</x:Double></Styles.Resources>
+<Style Selector="Border"><Setter Property="Width" Value="{{StaticResource InlineWidth}}"/></Style>
+</Styles></ContentPage.Styles>
+  <ScrollViewer"#));
+        session.submit(uri.into(), update);
+        let result = session.apply_pending().unwrap();
+        assert_eq!(result.status, ReloadStatus::Applied, "{result:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        let border = page.get_logical_descendants().find_map(|control| control.cast::<Border>()).unwrap();
+        assert_eq!(border.width(), width as f64);
+        assert_eq!(border.min_height(), 23.0);
+        assert!(root.styles().ptr_eq(&styles));
+        assert!(style_ptr_eq(&styles.get(1), &app_style));
+    }
+    session.submit(uri.into(), baseline.into());
+    let result = session.apply_pending().unwrap();
+    assert_eq!(result.status, ReloadStatus::Applied, "{result:?}");
+    assert_eq!(styles.count(), 1);
+    assert!(style_ptr_eq(&styles.get(0), &app_style));
+    assert!(styles.try_get_resource(&"InlineWidth".into(), None).is_none());
+    window.close();
+}
+
+#[test]
 fn catalog_root_resources_reload_without_replacing_page_dictionary_or_application_keys() {
     use ferroui_controls::Border;
     let _application = super::support::start_catalog_application();

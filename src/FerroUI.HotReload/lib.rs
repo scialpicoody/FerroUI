@@ -16,6 +16,8 @@ mod resources;
 pub use resource_preparation::ResourcePreparation;
 mod root_properties;
 mod root_resources;
+mod root_styles;
+mod root_preview;
 #[cfg(test)]
 mod root_binding_tests;
 mod styles;

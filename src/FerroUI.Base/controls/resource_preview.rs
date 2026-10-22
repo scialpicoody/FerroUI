@@ -48,6 +48,41 @@ mod development {
             drop(retired);
         }
     }
+    /// Overrides one detached candidate node while retaining the enclosing
+    /// transaction's previews. Guards must be dropped in lexical scope order.
+    pub struct ResourcePreviewGuard {
+        key: usize,
+        previous: Option<Factory>,
+        created_scope: bool,
+    }
+    impl ResourcePreviewGuard {
+        pub fn new(original: &dyn IResourceNode, factory: Factory) -> Self {
+            CURRENT.with(|current| {
+                let mut current = current.borrow_mut();
+                let created_scope = current.is_none();
+                let key = original.reference_id() as usize;
+                let previous = current.get_or_insert_with(HashMap::new).insert(key, factory);
+                Self { key, previous, created_scope }
+            })
+        }
+    }
+    impl Drop for ResourcePreviewGuard {
+        fn drop(&mut self) {
+            let retired = CURRENT.with(|current| {
+                let mut current = current.borrow_mut();
+                if self.created_scope {
+                    return current.take().map(|entries| Box::new(entries) as Box<dyn std::any::Any>);
+                }
+                let entries = current.as_mut().expect("enclosing preview scope is active");
+                let retired = match self.previous.take() {
+                    Some(previous) => entries.insert(self.key, previous),
+                    None => entries.remove(&self.key),
+                };
+                retired.map(|factory| Box::new(factory) as Box<dyn std::any::Any>)
+            });
+            drop(retired);
+        }
+    }
     pub(super) fn candidate(original: &dyn IResourceNode) -> Option<Rc<dyn IResourceNode>> {
         let factory = CURRENT.with(|current| {
             current
@@ -60,7 +95,7 @@ mod development {
     }
 }
 #[cfg(all(debug_assertions, feature = "hot-reload"))]
-pub use development::ResourcePreviewScope;
+pub use development::{ResourcePreviewGuard, ResourcePreviewScope};
 
 /// Resolves a resource against the active candidate, or the original provider.
 #[inline]

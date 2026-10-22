@@ -31,7 +31,7 @@ separately.
   ContentControl and UserControl components. It retains the existing component,
   application-owned root values and view model, transfers a fresh namescope and
   rolls back content/scope on failure. Implicit content and explicit framework
-  `Content` property elements use the same transaction. Opt-in inline `Resources`
+  `Content` property elements use the same transaction. Opt-in inline `Resources` and `Styles`
   ownership is described below. Unregistered root assignments, other root property elements,
   named roots and XAML handlers are conservatively rejected until their adapters
   support them. `with_refresh` accepts a `ComponentRefresh` implementation for
@@ -91,6 +91,28 @@ separately.
   Custom dictionaries and irreversible notification callbacks need a custom adapter;
   collection observers must not panic or mutate the collections during commit.
   This API does not claim inline `Styles` ownership.
+- `with_owned_styles` claims the initial inline style entries and the root
+  `Styles.Resources` contributions. Component and panel adapters replace only that
+  contiguous range, preserve later application styles, and transfer owners using
+  the framework's normal style removal/addition notifications. Removal detaches
+  old frames; addition invalidates styling and affected templates. A failed commit
+  restores the old entries and resources before the next layout.
+  Candidate resource lookup composes new XAML styles with application styles in
+  their eventual order, retains root-resource precedence, and excludes retired
+  XAML style resources. Scoped candidate previews preserve other documents'
+  dependency previews and restore them on unwind. Deferred declarations and
+  dynamic-resource bindings transfer their context with the same transaction.
+  The catalog's component adapter opts into both resource and style ownership.
+  Normal reflection/compiled one-way and two-way setter bindings are admitted
+  without starting their expressions. Source-only, delayed, direct-property,
+  observable and custom bindings require an explicit adapter; root DataContext
+  and direct-property style setters require an adapter. Validation includes the effective
+  root theme and its BasedOn chain. If a style selects another theme, preparation
+  validates and settles that theme before checking its template; unstable theme
+  selection fails before commit. Custom setters and irreversible observers also
+  require an adapter. External removal, duplication or interleaving of claimed
+  style entries requires restart. Do not mutate the contents of a claimed style
+  from application code; add separate application entries instead.
 - Component and panel adapters expose `with_owned_root_property` for literal styled
   properties. Register immediately after initial population to claim the attribute
   as XAML-owned. Edits use detached, converted candidate values; removal clears only

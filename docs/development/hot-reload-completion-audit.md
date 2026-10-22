@@ -21,12 +21,14 @@ retain their original source revisions.
 ## Required completion work
 
 1. **Close standard component integration gaps.** The shared component/panel
-   preparation currently rejects XAML event handlers and inline root Styles.
-   Inline Resources now have an explicit ownership adapter, including deferred
-   template context transfer; mixed application/XAML provider trees still require
+   preparation currently rejects XAML event handlers.
+   Inline Resources and Styles now have explicit ownership adapters, including deferred
+   template context transfer and application-style ordering; mixed application/XAML dictionary provider trees still require
    a composed preview adapter. Implement the remaining ownership
    adapters and exercise standard handlers and resource/style replacement through
-   actual component-loading paths. Preserve the documented restart boundary for
+   actual component-loading paths. Complete state transfer for compatible, uniquely
+   identified template parts; the current logical-child capture does not cover
+   replacement root-template parts. Preserve the documented restart boundary for
    unsupported custom mutations and irreversible user code.
 2. **Freeze a final implementation revision and close acceptance.** Reuse existing
    evidence where behavior and inputs are unchanged, but run the final relevant
@@ -77,8 +79,19 @@ The Linux release-mode check also passes with development features requested:
 cargo check --locked -p control-catalog -p ferroui-hot-reload -p ferroui-hot-patch --features control-catalog/hot-reload --release
 ```
 
-These checks do not close the separate handler/style or final
-native acceptance requirements.
+The inline-style increment passed 112 engine tests on macOS and Linux and eight
+ControlCatalog reload integration tests on macOS, using the engine/catalog commands
+above. Coverage includes repeated commit/rollback, application style ordering,
+resource precedence, retired style/template release, and rejecting source-writing
+setter bindings before preparation changes the model. A reproduced regression
+where a style-selected theme bypassed template validation is covered: invalid
+resources fail before commit, and a corrected template applies after layout.
+The catalog test exercises inline styles through its actual component adapter.
+The Linux release check above also passes for this increment with the development
+feature requested; active reload modules remain gated out by `debug_assertions`.
+
+These checks do not close the remaining handler, mixed-dictionary, template-state,
+or final native acceptance requirements.
 
 ## Follow-ups outside the first-release requirement
 

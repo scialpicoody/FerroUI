@@ -69,8 +69,8 @@ pub trait ComponentRefresh {
 /// Explicitly opt in for declarative content. Use `with_refresh` for cached references and
 /// application child subscriptions. The original component is never reconstructed. Root
 /// assignments can be claimed with the literal, static-resource and binding ownership
-/// methods. `with_owned_resources` claims inline Resources. Inline Styles and
-/// XAML handlers still need their own adapter.
+/// methods. `with_owned_resources` and `with_owned_styles` claim inline
+/// Resources and Styles. XAML handlers still need their own adapter.
 pub struct ComponentReloadTarget {
     root: Root,
     uri: String,
@@ -80,6 +80,7 @@ pub struct ComponentReloadTarget {
     refresh: Option<Rc<dyn ComponentRefresh>>,
     properties: Vec<Box<dyn crate::root_properties::OwnedRootProperty>>,
     resources: Option<crate::root_resources::OwnedResources>,
+    styles: Option<crate::root_styles::OwnedStyles>,
     state_adapters: Vec<Rc<dyn crate::ControlStateAdapter>>,
     restoration: crate::control_state::StateRestoration,
 }
@@ -110,6 +111,7 @@ impl ComponentReloadTarget {
             refresh: None,
             properties: Vec::new(),
             resources: None,
+            styles: None,
             state_adapters: Vec::new(),
             restoration: Default::default(),
         }
@@ -129,6 +131,7 @@ impl ComponentReloadTarget {
             refresh: None,
             properties: Vec::new(),
             resources: None,
+            styles: None,
             state_adapters: Vec::new(),
             restoration: Default::default(),
         }
@@ -139,9 +142,15 @@ impl ComponentReloadTarget {
     }
     /// Claims the current root Resources contributions immediately after population.
     /// Preserves later application keys; conflicting writes/provider ownership require restart.
-    /// Inline Styles and arbitrary custom resource side effects need separate adapters.
+    /// Use `with_owned_styles` for Styles; custom resource side effects need an adapter.
     pub fn with_owned_resources(mut self) -> Self {
         self.resources = self.root.upgrade().map(|root| crate::root_resources::OwnedResources::capture(&root.element()));
+        self
+    }
+    /// Claims the current inline styles and Styles.Resources after initial
+    /// population. Later application style entries retain their identity/order.
+    pub fn with_owned_styles(mut self) -> Self {
+        self.styles = self.root.upgrade().map(|root| crate::root_styles::OwnedStyles::capture(&root.element()));
         self
     }
     /// Add application state transfer for named/keyed replacement children.
@@ -393,7 +402,12 @@ impl ReloadTarget for ComponentReloadTarget {
                 .iter()
                 .map(|property| property.name())
                 .collect::<Vec<_>>(),
-            if self.resources.is_some() { &["Resources"] } else { &[] },
+            match (self.resources.is_some(), self.styles.is_some()) {
+                (true, true) => &["Resources", "Styles"],
+                (true, false) => &["Resources"],
+                (false, true) => &["Styles"],
+                _ => &[],
+            },
         )?;
         let uri = ferroui_base::utilities::Uri::try_create(
             &self.uri,
@@ -405,7 +419,12 @@ impl ReloadTarget for ComponentReloadTarget {
             self.properties.iter().filter_map(|property| property.binding_property()),
         );
         let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &prepared);
-        document.service_provider = self.resources.as_ref().map(|resources| resources.services()).transpose()?;
+        document.service_provider = Some(crate::root_resources::services(&root.element(), self.resources.as_ref(), self.styles.as_ref()));
+        let candidate_root = self.styles.as_ref().map(|_| crate::root_preview::create(&prepared)).transpose()?;
+        let _preview = candidate_root.as_ref().map(|candidate| crate::root_preview::install(
+            &root.element(), candidate, self.resources.as_ref(), self.styles.as_ref(),
+        ));
+        document.root_instance = candidate_root.map(|candidate| Rc::new(candidate) as BoxedValue);
         let deferred = ferroui_markup_xaml::xaml_il::runtime::DeferredContentReloadScope::new();
         let dynamic = ferroui_markup_xaml::reload_resources::DynamicResourceReloadScope::new();
         let candidate = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load_document(
@@ -422,9 +441,10 @@ impl ReloadTarget for ComponentReloadTarget {
             }
         }
         .ok_or_else(|| ReloadError::RestartRequired("Component content kind changed".into()))?;
-        if self.resources.is_some() {
+        if self.resources.is_some() || self.styles.is_some() {
             ferroui_markup_xaml::reload_validation::prepare_candidate(&candidate.element())
                 .map_err(|error| ReloadError::Failed(error.to_string()))?;
+            crate::root_styles::prepare_styling(&candidate.element(), &root.element())?;
             ferroui_markup_xaml::reload_validation::validate_root_template(&candidate.element())
                 .map_err(|error| ReloadError::Failed(error.to_string()))?;
         }
@@ -443,7 +463,7 @@ impl ReloadTarget for ComponentReloadTarget {
         // Map lazy declarations before detaching candidate resources. Publish
         // their new weak context before resource/style notifications can build them.
         properties.insert(0, crate::deferred_context::prepare(
-            &deferred, &candidate.element(), &root.element(), self.resources.is_some(),
+            &deferred, &candidate.element(), &root.element(), self.resources.is_some(), self.styles.is_some(),
         ));
         let new_content = candidate.content();
         let new_scope = NameScope::get_name_scope(&candidate.element());
@@ -452,7 +472,11 @@ impl ReloadTarget for ComponentReloadTarget {
         if let Some(resources) = &self.resources {
             properties.insert(1, resources.prepare(&candidate.element())?);
         }
-        let dynamic_index = if self.resources.is_some() { 2 } else { 1 };
+        let mut dynamic_index = if self.resources.is_some() { 2 } else { 1 };
+        if let Some(styles) = &self.styles {
+            properties.insert(dynamic_index, styles.prepare(&candidate.element())?);
+            dynamic_index += 1;
+        }
         properties.insert(dynamic_index, crate::deferred_context::prepare_dynamic(
             &dynamic, &candidate.element(), &root.element(),
         ));

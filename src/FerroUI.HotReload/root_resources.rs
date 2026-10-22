@@ -40,11 +40,10 @@ impl OwnedResources {
                 "Application replaced the component resource dictionary".into(),
             ));
         }
-        let fallback = XamlIlRuntimeHelpers::create_root_service_provider_v2();
-        Ok(Rc::new(Services {
-            resources: self.clone(),
-            fallback,
-        }))
+        Ok(services(&root, Some(self), None))
+    }
+    pub(crate) fn application_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
+        self.ownership.application_resource(key, theme)
     }
     pub(crate) fn prepare(
         &self,
@@ -90,8 +89,25 @@ impl PreparedReload for Change {
         self.change.finish();
     }
 }
+#[derive(Clone)]
+struct Ambient {
+    root: WeakRef<StyledElement>,
+    resources: Option<OwnedResources>,
+    styles: Option<crate::root_styles::OwnedStyles>,
+}
+pub(crate) fn services(
+    root: &Ref<StyledElement>, resources: Option<&OwnedResources>,
+    styles: Option<&crate::root_styles::OwnedStyles>,
+) -> Rc<dyn IServiceProvider> {
+    Rc::new(Services {
+        resources: Ambient {
+            root: root.downgrade(), resources: resources.cloned(), styles: styles.cloned(),
+        },
+        fallback: XamlIlRuntimeHelpers::create_root_service_provider_v2(),
+    })
+}
 struct Services {
-    resources: OwnedResources,
+    resources: Ambient,
     fallback: Rc<dyn IServiceProvider>,
 }
 impl IServiceProvider for Services {
@@ -106,7 +122,7 @@ impl IServiceProvider for Services {
     }
 }
 struct Parents {
-    resources: OwnedResources,
+    resources: Ambient,
     fallback: Option<Rc<dyn IFerroXamlIlParentStackProvider>>,
 }
 impl IFerroXamlIlParentStackProvider for Parents {
@@ -124,7 +140,7 @@ impl IFerroXamlIlParentStackProvider for Parents {
         result
     }
 }
-impl IResourceNode for OwnedResources {
+impl IResourceNode for Ambient {
     fn has_resources(&self) -> bool {
         true
     }
@@ -133,14 +149,18 @@ impl IResourceNode for OwnedResources {
         key: &ResourceKey,
         theme: Option<&ThemeVariant>,
     ) -> Option<ResourceValue> {
-        self.ownership.application_resource(key, theme).or_else(|| {
-            self.root
-                .upgrade()
-                .and_then(|root| root.styles().try_get_resource(key, theme))
+        let root = self.root.upgrade()?;
+        let resources = match &self.resources {
+            Some(resources) => resources.application_resource(key, theme),
+            None => root.resources().try_get_resource(key, theme),
+        };
+        resources.or_else(|| match &self.styles {
+            Some(styles) => styles.application_resource(key, theme),
+            None => root.styles().try_get_resource(key, theme),
         })
     }
 }
-impl IResourceHost for OwnedResources {
+impl IResourceHost for Ambient {
     fn resources_changed(&self, _: Rc<dyn Fn(&ResourcesChangedEventArgs)>) -> Rc<dyn IDisposable> {
         Disposable::empty()
     }
