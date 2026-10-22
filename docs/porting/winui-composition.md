@@ -192,18 +192,18 @@ it does not.
 
 | Type / member | Status | Notes | Phase |
 |---|---|---|---|
-| `ConnectedAnimationService.GetForCurrentView` | partial | The upstream service has `get_for_top_level`; `get_for_current_view` is added (the service of the thread's active top level). | 1 |
-| `ConnectedAnimationService.DefaultDuration`, `DefaultEasingFunction` | partial | Present; the easing default becomes WinUI's cubic Bezier (0.8, 0), (0.2, 1). | 1 |
-| `ConnectedAnimationService.PrepareToAnimate`, `GetAnimation` | has | Upstream members; the engine behind them changes. | 1 |
-| `ConnectedAnimation.TryStart(destination)`, `TryStart(destination, coordinatedElements)` | partial | Upstream: a control flown over the overlay layer by UI-thread animations, coordinated elements faded in. WinUI: snapshot brushes on sprite visuals animated by the compositor, coordinated elements entering from where they would be relative to the source. | 1 |
-| `ConnectedAnimation.Cancel`, `IsScaleAnimationEnabled`, `SetAnimationComponent`, `Configuration`, `Completed` | partial | `Configuration`, `Completed` exist; the others are added. | 1 |
-| `ConnectedAnimationConfiguration`, `GravityConnectedAnimationConfiguration` (`IsShadowEnabled`), `DirectConnectedAnimationConfiguration`, `BasicConnectedAnimationConfiguration` | partial | The classes exist; the WinUI behaviour of each (the gravity dip and shadow, the 200 ms decelerating direct animation, the basic animation without effect) is ported. | 1 |
-| `ConnectedAnimationComponent` (`OffsetX`, `OffsetY`, `CrossFade`, `Scale`) | missing | | 1 |
-| `ElementCompositionPreview.GetElementVisual`, `GetElementChildVisual`, `SetElementChildVisual` | has | `ElementComposition`; the WinUI-named facade is added. | 1 |
-| `ElementCompositionPreview.SetImplicitShowAnimation`, `SetImplicitHideAnimation` | missing | | 1 |
-| `ElementCompositionPreview.SetIsTranslationEnabled` | missing | | 1 |
-| `ElementCompositionPreview.GetScrollViewerManipulationPropertySet` | missing | | 1 |
-| `ElementCompositionPreview.GetPointerPositionPropertySet` | missing | | 1 |
+| `ConnectedAnimationService.GetForCurrentView` | has | `get_for_current_view`: the service of the thread; `get_for_top_level` (upstream) stays. | 1 |
+| `ConnectedAnimationService.DefaultDuration`, `DefaultEasingFunction` | has | 300 ms; without a default easing the composition engine uses WinUI's cubic Bezier (0.8, 0), (0.2, 1). | 1 |
+| `ConnectedAnimationService.PrepareToAnimate`, `GetAnimation` | has | Upstream members; the engine behind them is WinUI's (`connected_animation_flight.rs`). | 1 |
+| `ConnectedAnimation.TryStart(destination)`, `TryStart(destination, coordinatedElements)` | has | The port of `CConnectedAnimation`: a frozen image of the source and a live visual surface of the destination on sprite visuals in the connected animation layer of the window, cross-faded, with offset, scale and inset clip animations in a scoped batch; coordinated elements enter from where they would be relative to the source. The flight of the upstream service over the overlay layer remains for a window without a compositor. | 1 |
+| `ConnectedAnimation.Cancel`, `IsScaleAnimationEnabled`, `SetAnimationComponent`, `Configuration`, `Completed` | has | `Completed` carries the upstream `cancelled` flag. | 1 |
+| `ConnectedAnimationConfiguration`, `GravityConnectedAnimationConfiguration` (`IsShadowEnabled`), `DirectConnectedAnimationConfiguration`, `BasicConnectedAnimationConfiguration` | has | The gravity dip (`GetEffectPropertySet`: offset and scale key frames combined with the primary animation by expressions) and its shadow; the direct configuration with 200 ms and its decelerating curve; the basic one without effect. | 1 |
+| `ConnectedAnimationComponent` (`OffsetX`, `OffsetY`, `CrossFade`, `Scale`) | has | `ferroui_controls::animation::ConnectedAnimationComponent`. | 1 |
+| `ElementCompositionPreview.GetElementVisual`, `GetElementChildVisual`, `SetElementChildVisual` | has | `ferroui_controls::hosting::ElementCompositionPreview` over `ElementComposition`. | 1 |
+| `ElementCompositionPreview.SetImplicitShowAnimation`, `SetImplicitHideAnimation` | has | Show when the element is attached or becomes visible; hide when it becomes invisible (the element stays visible until the animation completes) or is removed from the tree (on an image of it). | 1 |
+| `ElementCompositionPreview.SetIsTranslationEnabled` | has | Recorded; translation is always enabled. | 1 |
+| `ElementCompositionPreview.GetScrollViewerManipulationPropertySet` | has | `Translation`, `Pan`, `Scale`, `CenterPoint`, `Matrix`; updated with the offset of the scroll viewer. | 1 |
+| `ElementCompositionPreview.GetPointerPositionPropertySet` | has | `Position`, updated by the pointer moves of the window. | 1 |
 | `UIElement.Translation`, `TranslationTransition` (`Vector3Transition`) | has | `Visual::translation` (a `Vector3D`) writes the `Translation` of the element's composition visual; `translation_transition` animates it (see the transitions row). | 1 (`Translation`), 3 (transitions) |
 | `UIElement.Rotation`, `RotationAxis`, `Scale`, `CenterPoint`, `TransformMatrix` | partial | Plain properties of `Visual` (`rotation`, `rotation_axis`, `scale`, `center_point`, `transform_matrix`, with the `numerics` types), written to the element's composition visual whenever the element is rendered again; a facade never set leaves its composition property to the application. `Rotation` around the Z axis is `RotationAngle` (radians), around another axis `Orientation` (a quaternion), of which the 2D renderers show only the projection; a zero axis is the Z axis. `TransformMatrix`: its 2D affine part (`M11`, `M12`, `M21`, `M22`, `M41`, `M42`) follows the render transform in the composition `TransformMatrix`, which the composition visual applies before `Scale`, the rotation and `Translation` (WinUI applies it after the other facades). | 3 |
 | `UIElement.OpacityTransition`, `RotationTransition`, `ScaleTransition`; `ScalarTransition` (`Duration`), `Vector3Transition` (`Duration`, `Components`), `Vector3TransitionComponents` | has | `ferroui_base::{ScalarTransition, Vector3Transition, Vector3TransitionComponents}` (values, copied when assigned; 300 ms and all components by default) and `Visual::set_opacity_transition`, `set_rotation_transition`, `set_scale_transition`, `set_translation_transition`. An implicit animation collection on the element's composition visual (`Opacity`, `RotationAngle` and `Orientation`, `Scale`, `Translation`): a key frame animation to `this.FinalValue` over the duration with the compositor's default easing. A `Vector3Transition` of some components starts with a key frame at 0 that holds the animated components at `this.StartingValue` and sets the others to `this.FinalValue`, so those jump at once; one of no component installs nothing. The collection is installed after the first synchronization of a new composition visual (the initial values do not animate) and before the properties are written afterwards, and replaces implicit animations the application set on the element's visual. | 3 |
@@ -330,10 +330,10 @@ every layout move of the element, as in WinUI.
 
 | Phase | State | Pull request |
 |---|---|---|
-| 1 | in progress | draft |
-| 2 | planned | |
-| 3 | planned | |
-| 4 | planned | |
+| 1 | implemented; catalog verification in progress | #304 |
+| 2 | in progress | #304 |
+| 3 | implemented (springs, controller, properties, colour spaces, expressions, facades and transitions) | #304 |
+| 4 | implemented (the tracker on the UI thread) | #304 |
 | 5 | planned | |
 | 6 | planned (scoped) | |
 
@@ -366,6 +366,16 @@ Missing). `DEVIATIONS.md` points here for this area.
 | Owner callbacks of the tracker are raised by the compositor; `IsFromBinding`. | Queued and delivered after the change, never nested; input-driven callbacks carry the last request id; `IsFromBinding` is always `false`. | Behaviour | No re-entrancy; tracker binding is not ported. | phase 4 |
 | `VisualInteractionSource` receives input from the compositor after `TryRedirectForManipulation`. | It follows the routed pointer events of the element of the visual (handled ones too), captured to the element, for any pointer type; the element is found from the visual or given to `create_for_element`. The mouse wheel scrolls 50 px per notch and Ctrl+wheel scales by 1.1. Chaining modes are stored only; the input values of a source cannot be referenced from expressions. | Behaviour | The compositor of FerroUI has no input. | phase 4 |
 | `InteractionTrackerInertiaNaturalMotion`, `ConfigureVector2PositionInertiaModifiers`, tracker binding, `InteractionTrackerPositionUpdateOption`, `AdjustPositionX/YIfGreaterThanThreshold`, pinch and touchpad redirection. | Not ported. | Missing | Natural motion animations come with phase 3; FerroUI has no touchpad input and no two-pointer recognizer. | phase 4 |
+| `CConnectedAnimation` waits for a layout transition element of an ancestor of the destination to end its animation before it completes (`ReadyToComplete`), and adjusts the rectangles of a right-to-left element (`GetTightInnerBounds`). | Neither: FerroUI has no layout transition elements; the rectangles are the bounds of the element in the window, and the content of a right-to-left element is placed by its own transform. | Missing | No counterpart. | phase 1 |
+| The rectangles of a connected animation include the parent scale and a flip of the element (the brush is mirrored for a negative scale). | The rectangles are the axis-aligned bounds in the window; the images are not mirrored. | Missing | Rare; the images follow the element's own rendering. | phase 1 |
+| The cross-fade of a connected animation is a `CrossFadeEffect` brush with the weight `Crossfade.Weight`. | Two sprites in the host whose opacities are bound by expressions to the `Weight` entry of a property set, animated from 0 to 1 (a custom `CrossFade` component animates that entry). | Representation | No effect brushes yet (phase 6). | phase 1 |
+| The shadow of the gravity configuration is a `ThemeShadow` cast by the host, whose depth follows the Z of the dip. | A drop shadow under the images whose blur radius, opacity and offset are bound by expressions to the Z of the dip. | Behaviour | No theme shadows; the shadow grows and fades with the dip. | phase 1 |
+| The coordinated elements of a connected animation cast the shadow of the gravity configuration, shaped by the alpha of their images. | Coordinated elements cast none. | Behaviour | The shadow of the port is the rectangle of the host; around a text element it would show as a band. | phase 1 |
+| A prepared connected animation times out after 2 s; the upstream service disposes an unconsumed animation after 3 s. | The composition engine times out after 2 s (WinUI); the flight over the overlay layer keeps the 3 s of upstream. | Behaviour | Each engine keeps its source's timing. | phase 1 |
+| `PrepareToAnimate` throws for a source that is not in the tree. | The animation is returned and its flight is the upstream one (which does nothing without bounds). | Behaviour | The upstream API returns an animation. | phase 1 |
+| Connected animations use 1 ms when animations are disabled in the system settings. | The system setting is not consulted. | Missing | FerroUI has no such platform setting. | phase 1 |
+| The pointer position property set of the root scroll viewer is that of the root visual. | The set of any element follows the pointer over the whole window. | Behaviour | The same coverage, without the special case. | phase 1 |
+| The manipulation property set of a scroll viewer is updated by the compositor during a manipulation. | It is updated on the UI thread when the offset changes, in the frame in which the content moves. | Behaviour | Scrolling of FerroUI runs on the UI thread. | phase 1 |
 | `Visual.Clip` takes a `CompositionClip`. | `composition_clip` / `set_composition_clip`; it may be set together with the geometry clip of the upstream compositor (`clip`), and the two intersect. | Representation | `clip` is the upstream geometry clip already. | phase 1 |
 | The reference box of `CompositionClip.AnchorPoint` is not documented. | Relative to the size of the visual. | Behaviour | The port had to choose. | phase 1 |
 | `RotationAngleInDegrees` of clips and of the surface brush is an animatable property. | A view of `RotationAngle`, not an animation target. | Missing | Only the radians are stored. | phase 1 |

@@ -1580,8 +1580,10 @@ fn variant_addition_and_subtraction() {
         assert_eq!(v - v, V::Invalid);
     }
     assert_eq!(d(1.0) + v2(1.0, 2.0), V::Invalid);
-    assert_eq!(v2(1.0, 2.0) + vd(1.0, 2.0), V::Invalid);
-    assert_eq!(v3(1.0, 2.0, 3.0) - v3d(1.0, 2.0, 3.0), V::Invalid);
+    // Not from upstream: the single- and double-precision forms of a vector combine, in the
+    // double-precision form (`mixed_precision_vectors_combine`).
+    assert_eq!(v2(1.0, 2.0) + vd(1.0, 2.0), vd(2.0, 4.0));
+    assert_eq!(v3(1.0, 2.0, 3.0) - v3d(1.0, 2.0, 3.0), v3d(0.0, 0.0, 0.0));
 }
 
 #[test]
@@ -1655,7 +1657,8 @@ fn variant_multiplication() {
     assert_eq!(d(2.0) * vd(1.0, 2.0), V::Invalid);
     assert_eq!(d(2.0) * v3(1.0, 2.0, 3.0), V::Invalid);
     assert_eq!(d(2.0) * V::from(Quaternion::IDENTITY), V::Invalid);
-    assert_eq!(v2(1.0, 2.0) * vd(1.0, 2.0), V::Invalid);
+    // Not from upstream: the single- and double-precision forms of a vector combine.
+    assert_eq!(v2(1.0, 2.0) * vd(1.0, 2.0), vd(1.0, 4.0));
     assert_eq!(V::Invalid * d(1.0), V::Invalid);
     assert_eq!(d(1.0) * V::Invalid, V::Invalid);
     assert_eq!(V::Boolean(true) * V::Boolean(true), V::Invalid);
@@ -1719,11 +1722,15 @@ fn variant_comparisons() {
         };
         assert_eq!(v.not_equals_to(v), expected_not, "{v:?}");
     }
-    // Values of different types are not comparable.
+    // Values of different types are not comparable, except the single- and double-precision
+    // forms of a vector (not from upstream).
     let all = samples();
+    let same_vector = |a: &ExpressionVariant, b: &ExpressionVariant| {
+        matches!((a, b), (V::Vector2(_), V::Vector(_)) | (V::Vector(_), V::Vector2(_)) | (V::Vector3(_), V::Vector3D(_)) | (V::Vector3D(_), V::Vector3(_)))
+    };
     for (i, a) in all.iter().enumerate() {
         for (j, b) in all.iter().enumerate() {
-            if i != j {
+            if i != j && !same_vector(a, b) {
                 assert_eq!(a.equals_to(*b), V::Invalid);
                 assert_eq!(a.not_equals_to(*b), V::Invalid);
             }
@@ -1964,4 +1971,21 @@ fn variant_to_string() {
     assert_eq!(V::from(REL).to_string(), "Relative");
     assert_eq!(V::from(ABS).to_string(), "Absolute");
     assert_eq!(V::Invalid.to_string(), "Invalid");
+}
+
+/// Not from upstream: the single- and double-precision forms of a vector combine.
+#[test]
+fn mixed_precision_vectors_combine() {
+    use crate::numerics::{Vector2, Vector3};
+    use crate::{Vector, Vector3D};
+    let a = ExpressionVariant::create(Vector3::new(1.0, 2.0, 3.0));
+    let b = ExpressionVariant::create(Vector3D::new(10.0, 20.0, 30.0));
+    assert_eq!(a + b, ExpressionVariant::create(Vector3D::new(11.0, 22.0, 33.0)));
+    assert_eq!(b - a, ExpressionVariant::create(Vector3D::new(9.0, 18.0, 27.0)));
+    assert_eq!(a * b, ExpressionVariant::create(Vector3D::new(10.0, 40.0, 90.0)));
+    assert_eq!(b / a, ExpressionVariant::create(Vector3D::new(10.0, 10.0, 10.0)));
+    assert_eq!(a.equals_to(ExpressionVariant::create(Vector3D::new(1.0, 2.0, 3.0))), ExpressionVariant::Boolean(true));
+    let c = ExpressionVariant::create(Vector2::new(1.0, 2.0));
+    let d = ExpressionVariant::create(Vector::new(3.0, 4.0));
+    assert_eq!(c + d, ExpressionVariant::create(Vector::new(4.0, 6.0)));
 }

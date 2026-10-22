@@ -1001,6 +1001,10 @@ fn screenshot_run(directory: PathBuf) {
     let interval = Duration::from_millis(environment_milliseconds("FERROUI_SMOKE_PAGES").unwrap_or(1500));
     println!("Screenshots of {headers:?} to {}, {interval:?} a page", directory.display());
     open_popups_of_pages(interval);
+    if std::env::var_os("FERROUI_SMOKE_WINUI_FLIGHT").is_some() {
+        // The first page is selected one interval after the start.
+        winui_flight_run(&directory, interval);
+    }
     // Before the first page is shown: the window is made to fit its screen.
     // The timer stops itself after its only tick.
     let _timer = DispatcherTimer::run_once(
@@ -1047,6 +1051,61 @@ fn screenshot_run(directory: PathBuf) {
             }
         },
     );
+}
+
+/// With `FERROUI_SMOKE_WINUI_FLIGHT` on a screenshot run whose first page is "Composition
+/// (WinUI)": the first card is opened, which starts its connected animation, and the frames of
+/// the compositor are saved during the flight to the detail view and during the flight back
+/// (`flight-NN-<ms>.png`, the time from the selection of the page). Not in the original. The
+/// page should be shown for 3 s at least (`FERROUI_SMOKE_PAGES=3000`).
+fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
+    let open_at = selected_at + Duration::from_millis(400);
+    let back_at = selected_at + Duration::from_millis(2000);
+    let _ = DispatcherTimer::run_once(
+        || {
+            // `FERROUI_SMOKE_WINUI_FLIGHT=1` (direct) or `2` (basic) chooses the configuration;
+            // any other value keeps the gravity one.
+            let configuration = std::env::var("FERROUI_SMOKE_WINUI_FLIGHT").ok().and_then(|value| value.parse().ok());
+            if let Some(configuration @ 1..=2) = configuration {
+                control_catalog::pages::smoke_set_configuration(configuration);
+            }
+            println!("Flight: open the first card: {}", control_catalog::pages::smoke_open_card(0));
+        },
+        open_at,
+        DispatcherPriority::NORMAL,
+    );
+    let _ = DispatcherTimer::run_once(
+        || {
+            println!("Flight: back to the list: {}", control_catalog::pages::smoke_close_card());
+        },
+        back_at,
+        DispatcherPriority::NORMAL,
+    );
+    let mut index = 0;
+    // `FERROUI_SMOKE_WINUI_FLIGHT_FEW`: two frames of each flight, for a build whose encoding of
+    // a picture takes long (the debug build with Vello).
+    let few = std::env::var_os("FERROUI_SMOKE_WINUI_FLIGHT_FEW").is_some();
+    let plan: [(Duration, &[u64]); 2] = if few {
+        [(open_at, &[130, 600]), (back_at, &[70, 500])]
+    } else {
+        [(open_at, &[30, 80, 130, 180, 230, 280, 340, 600]), (back_at, &[30, 70, 110, 150, 190, 240, 300, 500])]
+    };
+    for (start, offsets) in plan {
+        for &offset in offsets {
+            index += 1;
+            let at = start + Duration::from_millis(offset);
+            let path = directory.join(format!("flight-{index:02}-{}.png", (at - selected_at).as_millis()));
+            let _ = DispatcherTimer::run_once(
+                move || {
+                    if let Some(window) = main_window() {
+                        save_composed(&window, path.clone(), format!("flight at {} ms", (at - selected_at).as_millis()));
+                    }
+                },
+                at,
+                DispatcherPriority::NORMAL,
+            );
+        }
+    }
 }
 
 /// `FERROUI_SMOKE_A11Y_TREE=<file>` (on Windows): once the window is up, a

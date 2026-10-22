@@ -764,7 +764,10 @@ impl ConnectedAnimationFlight {
                 host.start_animation("Scale", &*scale_expression);
                 scale_on_primary = true;
             }
-            if shadow {
+            // Deviation (winui-composition.md): WinUI casts the shadow of a coordinated element
+            // too, shaped by the alpha of its image; the shadow here is the rectangle of the
+            // host, which a text element would show as a band, so coordinated flights have none.
+            if shadow && self.base.is_none() {
                 self.add_shadow(&host, &effect);
             }
             *self.effect_property_set.borrow_mut() = Some(effect);
@@ -782,7 +785,7 @@ impl ConnectedAnimationFlight {
             _ => &*host,
         };
         if offset_x.is_none() && offset_y.is_none() {
-            self.start_vector3_animation(offset_target, "Offset", source_offset, destination_offset, duration, &easing);
+            self.start_vector3_animation(offset_target, "Offset", source_offset, destination_offset, duration, &easing, offset_on_primary);
         } else {
             self.start_custom_animation(offset_target, "Offset.X", ConnectedAnimationComponent::OffsetX, source_offset.x, destination_offset.x, duration, &easing);
             self.start_custom_animation(offset_target, "Offset.Y", ConnectedAnimationComponent::OffsetY, source_offset.y, destination_offset.y, duration, &easing);
@@ -795,7 +798,7 @@ impl ConnectedAnimationFlight {
                 _ => &*host,
             };
             if self.components.borrow()[ConnectedAnimationComponent::Scale as usize].is_none() {
-                self.start_vector3_animation(scale_target, "Scale", Vector3D::new(1.0, 1.0, 1.0), scale, duration, &easing);
+                self.start_vector3_animation(scale_target, "Scale", Vector3D::new(1.0, 1.0, 1.0), scale, duration, &easing, scale_on_primary);
             } else {
                 self.start_custom_animation(scale_target, "Scale.X", ConnectedAnimationComponent::Scale, 1.0, scale.x, duration, &easing);
                 self.start_custom_animation(scale_target, "Scale.Y", ConnectedAnimationComponent::Scale, 1.0, scale.y, duration, &easing);
@@ -944,7 +947,9 @@ impl ConnectedAnimationFlight {
         target.start_animation(property, &*animation);
     }
 
-    /// `StartVector3Animation`.
+    /// `StartVector3Animation`. The entries of a property set are `Vector3` (the type of WinUI),
+    /// the properties of a visual `Vector3D`.
+    #[allow(clippy::too_many_arguments)]
     fn start_vector3_animation(
         &self,
         target: &dyn ICompositionObjectAnimations,
@@ -953,8 +958,17 @@ impl ConnectedAnimationFlight {
         to: Vector3D,
         duration: Duration,
         easing: &Easing,
+        on_property_set: bool,
     ) {
         if from.x == to.x && from.y == to.y {
+            return;
+        }
+        if on_property_set {
+            let animation = self.compositor.create_vector3_key_frame_animation();
+            animation.set_duration(duration);
+            animation.insert_key_frame(0.0, from.into());
+            animation.insert_key_frame_with_easing(1.0, to.into(), easing.as_rc().clone());
+            target.start_animation(property, &*animation);
             return;
         }
         let animation = self.compositor.create_vector3d_key_frame_animation();

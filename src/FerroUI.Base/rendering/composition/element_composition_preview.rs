@@ -251,7 +251,7 @@ impl ImplicitEntry {
         let Some(visual) = self.visual.upgrade() else { return };
         self.end_hiding(&visual);
         let Some(animation) = self.hide.borrow().clone() else { return };
-        let Some(parent) = e.parent().cloned() else { return };
+        let Some(parent) = e.attachment_point().cloned() else { return };
         if visual.visual_parent().is_some_and(|own| !std::ptr::eq(&*own, &*parent)) {
             return;
         }
