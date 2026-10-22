@@ -9,6 +9,7 @@
 
 mod act;
 mod adorners;
+mod composition_clip;
 mod computed_properties;
 mod dirty_inputs;
 mod readback;
@@ -422,6 +423,14 @@ impl ServerCompositionVisualHooks for ServerCompositionVisual {
         }
     }
 
+    fn on_composition_clip_changing(&self) {
+        self.observe_composition_clip(false);
+    }
+
+    fn on_composition_clip_changed(&self) {
+        self.observe_composition_clip(true);
+    }
+
     fn on_cache_mode_changed(&self) {
         let cache_mode = self.cache_mode();
         *self.cache.borrow_mut() =
@@ -486,7 +495,13 @@ impl IExpressionObject for ServerCompositionVisual {
 }
 
 impl IServerRenderResourceObserver for ServerCompositionVisual {
-    fn dependency_queued_invalidate(&self, _sender: &dyn IServerRenderResource) {
+    fn dependency_queued_invalidate(&self, sender: &dyn IServerRenderResource) {
+        // The WinUI clip object is observed by the visual itself; every
+        // other render resource by its content.
+        if self.is_composition_clip(sender) {
+            self.composition_clip_changed();
+            return;
+        }
         self.content.dependency_queued_invalidate(self);
     }
 }
@@ -511,6 +526,7 @@ impl IServerObject for ServerCompositionVisual {
         if let (Some(cache_mode), Some(this)) = (self.cache_mode(), self.rc()) {
             cache_mode.unsubscribe(&this);
         }
+        self.observe_composition_clip(false);
         // Deviation (DEVIATIONS.md, Server composition visuals): an adorner
         // is subscribed to the transforms of the visual it adorns; upstream's
         // delegate keeps the adorner with the adorned visual until the
@@ -535,6 +551,7 @@ impl IServerObject for ServerCompositionVisual {
         ServerCompositionVisualProps::id_of_parent_property().set_field(self, None);
         ServerCompositionVisualProps::id_of_adorned_visual_property().set_field(self, None);
         ServerCompositionVisualProps::id_of_cache_mode_property().set_field(self, None);
+        ServerCompositionVisualProps::id_of_composition_clip_property().set_field(self, None);
     }
 
     fn get_props(&self, type_id: TypeId) -> Option<&dyn Any> {

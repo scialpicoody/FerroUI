@@ -127,6 +127,12 @@ impl<'a> RenderContext<'a> {
             self.canvas.push_geometry_clip(&*clip);
         }
 
+        // The WinUI clip object (not from upstream), in the space of the
+        // visual.
+        if let Some(shape) = visual.composition_clip_shape() {
+            shape.push(self.canvas);
+        }
+
         true
     }
 
@@ -227,6 +233,10 @@ impl IServerTreeVisitor for RenderContext<'_> {
         if !bitmap_cache_root {
             if visual.adorned_visual().is_some() {
                 self.adorner_helper_render_post_graph_push_adorner_clip(visual);
+            }
+
+            if visual.composition_clip_shape().is_some() {
+                self.canvas.pop_clip();
             }
 
             if visual.clip().is_some() {

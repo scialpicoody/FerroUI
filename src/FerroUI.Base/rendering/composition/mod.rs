@@ -56,6 +56,7 @@ pub mod testing;
 pub mod transport;
 
 mod composition_cache_mode;
+mod composition_clip;
 mod composition_custom_visual;
 mod composition_custom_visual_handler;
 mod composition_draw_list_visual;
@@ -65,15 +66,22 @@ mod composition_interop;
 mod composition_experimental_acrylic_visual;
 mod composition_gradient_stop;
 mod composition_object;
+mod composition_object_impls;
 mod composition_options;
 mod composition_property_set;
 mod composition_solid_color_visual;
 mod composition_surface;
 mod composition_surface_visual;
 mod composition_target;
+mod composition_visual_surface;
+mod composition_winui_factories;
 mod compositing_renderer;
 mod compositor_factories;
 mod container_visual;
+mod drop_shadow;
+mod i_composition_surface;
+mod loaded_image_surface;
+mod sprite_visual;
 mod element_composition_preview;
 mod visual;
 mod visual_collection;
@@ -103,8 +111,14 @@ pub use composition_interop::{
 pub use composition_draw_list_visual::{CompositionDrawListVisual, ICompositionDrawListVisualExtension};
 pub use brushes::{
     CompositionBrush, CompositionConicGradientBrush, CompositionGradientBrush, CompositionLinearGradientBrush,
-    CompositionRadialGradientBrush, CompositionSolidColorBrush,
+    CompositionRadialGradientBrush, CompositionSolidColorBrush, CompositionSurfaceBrush,
 };
+pub use composition_clip::{CompositionClip, InsetClip, RectangleClip};
+pub use composition_visual_surface::CompositionVisualSurface;
+pub use drop_shadow::DropShadow;
+pub use i_composition_surface::ICompositionSurface;
+pub use loaded_image_surface::{LoadedImageSourceLoadStatus, LoadedImageSurface};
+pub use sprite_visual::SpriteVisual;
 pub use composition_experimental_acrylic_visual::CompositionExperimentalAcrylicVisual;
 pub use composition_gradient_stop::CompositionGradientStop;
 pub use composition_object::{AsCompositionObject, CompositionObject, ICompositionObjectAnimations};
@@ -124,7 +138,10 @@ pub use composition_transparency_level::CompositionTransparencyLevel;
 pub use compositor::{
     CompositionVisualSnapshotError, Compositor, ICompositorScheduler, LocalFuture, ServerJobError, ServerJobTask,
 };
-pub use enums::{CompositionBlendMode, CompositionGradientExtendMode, CompositionStretch, CompositionTileMode};
+pub use enums::{
+    CompositionBitmapInterpolationMode, CompositionBlendMode, CompositionDropShadowSourcePolicy,
+    CompositionGradientExtendMode, CompositionStretch, CompositionTileMode,
+};
 pub use i_composition_object_host::{ICompositionObject, ICompositionObjectHost, PendingAnimations};
 pub use i_composition_target_debug_events::ICompositionTargetDebugEvents;
 pub use i_compositor_serializable::ICompositorSerializable;

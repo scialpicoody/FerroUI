@@ -88,12 +88,12 @@ it does not.
 | `Visual.Offset`, `Size`, `Opacity`, `IsVisible`, `AnchorPoint`, `CenterPoint`, `RotationAngle`, `Orientation`, `Scale`, `Parent` | has | `CompositionVisual`; `IsVisible` is `visible`. | - |
 | `Visual.Translation` (property set entry in WinUI) | has | A real animatable property of every visual. | - |
 | `Visual.TransformMatrix` | partial | A 2D `Matrix`, not a `Matrix4x4`; the 3D part is ignored by a 2D renderer. | deviation |
-| `Visual.Clip` (`CompositionClip`) | partial | Only a geometry clip, internal. The WinUI clip objects are added. | 1 |
+| `Visual.Clip` (`CompositionClip`) | has | `composition_clip` / `set_composition_clip` on every visual (`clip` is the geometry clip of the upstream compositor); applied by the render walk in the space of the visual, after its transform, and part of the own clip of the visual (bounds, dirty rects). | 1 |
 | `Visual.RotationAngleInDegrees`, `RotationAxis` | missing | Degrees: a view of `RotationAngle`. Axis: only the Z axis rotates in 2D. | 2 |
 | `Visual.RelativeOffsetAdjustment`, `RelativeSizeAdjustment` | missing | Offset and size relative to the size of the parent. | 2 |
 | `Visual.IsHitTestVisible`, `IsPixelSnappingEnabled`, `BorderMode`, `BackfaceVisibility`, `CompositeMode`, `ParentForTransform` | missing | `ParentForTransform` is close to the existing adorned visual. Backface and 3D modes have no meaning in a 2D renderer. | 2 / deviation |
 | `ContainerVisual.Children` (`InsertAbove`, `InsertBelow`, `InsertAtTop`, `InsertAtBottom`, `Remove`, `RemoveAll`, `Count`) | has | `CompositionVisualCollection`. | - |
-| `SpriteVisual` (`Brush`, `Shadow`) | missing | The existing `CompositionSolidColorVisual` is a sprite with a colour. | 1 |
+| `SpriteVisual` (`Brush`, `Shadow`) | has | `SpriteVisual`, `create_sprite_visual`. The shadow of its rectangle, then the brush over `(0, 0, size)`, then the children; brush and shadow are observed render resources. Does not clip to its bounds when created, as a WinUI visual. | 1 |
 | `ShapeVisual` (`Shapes`, `ViewBox`) | missing | | 2 |
 | `LayerVisual` (`Effect`, `Shadow`) | missing | Children composed into a layer, then the effect or shadow. | 2 |
 | `RedirectVisual` (`Source`) | missing | Shows another visual's subtree. | 2 |
@@ -102,19 +102,19 @@ it does not.
 
 | Type / member | Status | Notes | Phase |
 |---|---|---|---|
-| `CompositionColorBrush` (`Color`) | has | `CompositionSolidColorBrush`; `create_color_brush` is added under the WinUI name. | 1 |
+| `CompositionColorBrush` (`Color`) | has | `CompositionSolidColorBrush`; `create_color_brush` and `create_color_brush_with_color` are the WinUI-named factories. | - |
 | `CompositionGradientBrush` (`ColorStops`, `ExtendMode`) | partial | Stops and spread method exist. Missing: `MappingMode`, `InterpolationSpace`, the brush transform (`AnchorPoint`, `CenterPoint`, `Offset`, `RotationAngle`, `Scale`, `TransformMatrix`). | 2 |
 | `CompositionLinearGradientBrush` (`StartPoint`, `EndPoint`) | partial | As relative points, not `Vector2` with a mapping mode. | 2 |
 | `CompositionRadialGradientBrush` (`EllipseCenter`, `EllipseRadius`, `GradientOriginOffset`) | partial | `Center`, `RadiusX/Y`, `GradientOrigin` of the upstream brush. | 2 |
-| `CompositionSurfaceBrush` (`Surface`, `Stretch`, alignment ratios, `BitmapInterpolationMode`, transform, `SnapToPixels`) | missing | | 1 |
+| `CompositionSurfaceBrush` (`Surface`, `Stretch`, alignment ratios, `BitmapInterpolationMode`, transform, `SnapToPixels`) | has | `CompositionSurfaceBrush`, `create_surface_brush`, `create_surface_brush_with_surface`. Painted by the visual that shows it (`paint_composition_brush` on the server), not a brush of the drawing context. `CompositionStretch` gains `Uniform` and `UniformToFill`. The interpolation mode maps to the one quality setting of the drawing context. | 1 |
 | `CompositionNineGridBrush` | missing | | 2 |
 | `CompositionMaskBrush` (`Source`, `Mask`) | missing | An opacity mask of the drawing context. | 2 |
 | `CompositionBackdropBrush`, `CompositionHostBackdropBrush` | missing | Needs the pixels behind the visual. | 6 |
 | `CompositionEffectBrush`, `CompositionEffectFactory`, `CompositionEffectSourceParameter` | missing | The Win2D effect graph. | 6 (scoped) |
-| `ICompositionSurface` | partial | `CompositionSurface` (bitmap surfaces of the upstream framework). | 1 |
-| `CompositionVisualSurface` (`SourceVisual`, `SourceOffset`, `SourceSize`) | missing | A live image of a visual subtree; the connected animation uses it. | 1 |
+| `ICompositionSurface` | has | `ICompositionSurface` (UI thread), implemented by `CompositionSurface` (and so the drawing surface), `CompositionVisualSurface` and `LoadedImageSurface`; on the server `IServerCompositionSurface` gains `natural_size` and `draw`, which the surface visual uses too. | 1 |
+| `CompositionVisualSurface` (`SourceVisual`, `SourceOffset`, `SourceSize`) | has | `create_visual_surface`. Live: the source subtree is rendered where the surface is drawn, ignoring the visibility, opacity, transform and clip of the source itself; changes of the subtree are followed while the source is attached to a target. A surface that shows an ancestor of its sprite is not drawn inside itself. `freeze()` (not public in WinUI) renders the source once into a layer. | 1 |
 | `CompositionDrawingSurface` | partial | The upstream class takes imported GPU images; WinUI draws with Direct2D interop, which has no counterpart. | deviation |
-| `LoadedImageSurface` (XAML) | missing | A surface from a bitmap; the connected animation uses it for the frozen source image. | 1 |
+| `LoadedImageSurface` (XAML) | partial | `LoadedImageSurface::from_bitmap` and `start_load_from_stream` (decoded at once, `load_status` instead of `LoadCompleted`); `natural_size`, `decoded_size`, `decoded_physical_size`. No URI loading and no decode size. | 1 |
 
 ### 3.4 Shapes and geometry
 
@@ -131,16 +131,16 @@ it does not.
 
 | Type / member | Status | Notes | Phase |
 |---|---|---|---|
-| `CompositionClip` (`AnchorPoint`, `CenterPoint`, `Offset`, `RotationAngle`, `Scale`, `TransformMatrix`) | missing | | 1 |
-| `InsetClip` (`LeftInset`, `TopInset`, `RightInset`, `BottomInset`) | missing | The connected animation animates one. | 1 |
-| `RectangleClip` (edges and corner radii) | missing | | 1 |
+| `CompositionClip` (`AnchorPoint`, `CenterPoint`, `Offset`, `RotationAngle`, `RotationAngleInDegrees`, `Scale`, `TransformMatrix`) | has | `CompositionClip`; the transform is animatable; `AnchorPoint` is relative to the size of the visual; `RotationAngleInDegrees` is a view of `RotationAngle` (not an animation target). | 1 |
+| `InsetClip` (`LeftInset`, `TopInset`, `RightInset`, `BottomInset`) | has | `create_inset_clip`, `create_inset_clip_with_insets`; the insets are animatable and their animations re-render the visual. | 1 |
+| `RectangleClip` (edges and corner radii) | has | `create_rectangle_clip`, `create_rectangle_clip_with`, `create_rectangle_clip_with_radii`; a rounded clip pushes a rounded rectangle. | 1 |
 | `GeometricClip` (`Geometry`, `ViewBox`) | missing | Needs the geometries of phase 2. | 2 |
 
 ### 3.6 Lights and shadows
 
 | Type / member | Status | Notes | Phase |
 |---|---|---|---|
-| `DropShadow` (`BlurRadius`, `Color`, `Offset`, `Opacity`, `Mask`, `SourcePolicy`) | missing | On sprite and layer visuals. The gravity configuration of a connected animation casts one. | 1 (rectangular), 5 (masks) |
+| `DropShadow` (`BlurRadius`, `Color`, `Offset`, `Opacity`, `Mask`, `SourcePolicy`) | partial | `create_drop_shadow`; on sprite visuals, the box shadow of the rectangle of the visual (the bounds of the visual include it); `BlurRadius`, `Color`, `Offset`, `Opacity` animatable. `Mask` and `SourcePolicy` are stored and not used yet. | 1 (rectangular), 5 (masks) |
 | `CompositionLight` (`Targets`, `ExclusionsFromTargets`, `IsEnabled`) | missing | | 5 |
 | `AmbientLight`, `DistantLight`, `PointLight`, `SpotLight` | missing | Diffuse lighting of flat visuals. | 5 |
 
