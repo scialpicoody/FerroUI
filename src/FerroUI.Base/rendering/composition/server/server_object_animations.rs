@@ -93,8 +93,27 @@ impl ServerObjectAnimations {
 
     pub fn activated(&self) {
         let animations = self.animations.borrow().clone();
+        let any = !animations.is_empty();
         for instance in animations {
             instance.animation.activate();
+            instance.is_dirty.set(true);
+            instance.needs_update.set(true);
+        }
+        if any {
+            self.schedule_evaluation();
+        }
+    }
+
+    /// Queues the object for the evaluation of its dirty animations with the next frame.
+    ///
+    /// Not from upstream, where an animation is first evaluated when something it reads
+    /// invalidates it, or its clock ticks: an animation that reads nothing (a constant
+    /// expression, `"0.25"`) never wrote its property. WinUI applies it, so a started or
+    /// activated animation is evaluated once (DEVIATIONS.md, WinUI composition).
+    fn schedule_evaluation(&self) {
+        let (Some(owner), Some(compositor)) = (self.owner.upgrade(), self.compositor.upgrade()) else { return };
+        if let Some(this) = owner.server_object().animations() {
+            compositor.animations().add_dirty_animated_object(this);
         }
     }
 
@@ -162,6 +181,9 @@ impl ServerObjectAnimations {
             animation.activate();
         }
         self.on_set_direct_value(property);
+        if is_active {
+            self.schedule_evaluation();
+        }
     }
 
     pub fn remove_animation_for_property(&self, property: &CompositionProperty) {

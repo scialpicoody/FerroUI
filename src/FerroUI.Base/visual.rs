@@ -70,6 +70,9 @@ struct CompositionExtras {
     /// A composition visual shown above the children and the child composition visual: the
     /// layer of the connected animations on a top level.
     layer_visual: Option<Rc<CompositionVisual>>,
+    /// Composition visuals shown after the children: the images of removed children that play
+    /// their implicit hide animations (WinUI's unloading storage).
+    unloading_visuals: Vec<Rc<CompositionVisual>>,
     /// The other transform facades of `UIElement` (`Rotation`, `RotationAxis`, `Scale`,
     /// `CenterPoint`, `TransformMatrix`) and the transitions (`OpacityTransition`,
     /// `RotationTransition`, `ScaleTransition`, `TranslationTransition`).
@@ -374,7 +377,14 @@ impl VisualImpl for Visual {
             layer_visual = None;
         }
 
-        let mut expected_count = visual_children.len();
+        let unloading_visuals: Vec<Rc<CompositionVisual>> = this
+            .read_composition_extras(|extras| extras.unloading_visuals.clone())
+            .unwrap_or_default()
+            .into_iter()
+            .filter(|unloading| Rc::ptr_eq(unloading.compositor(), composition_visual.compositor()))
+            .collect();
+
+        let mut expected_count = visual_children.len() + unloading_visuals.len();
         if child_visual.is_some() {
             expected_count += 1;
         }
@@ -400,6 +410,12 @@ impl VisualImpl for Visual {
             }
 
             let mut index = visual_children.len();
+            for unloading in &unloading_visuals {
+                if !Rc::ptr_eq(&composition_children.get(index), unloading) {
+                    mismatch = true;
+                }
+                index += 1;
+            }
             if let Some(child_visual) = &child_visual {
                 if !Rc::ptr_eq(&composition_children.get(index), child_visual) {
                     mismatch = true;
@@ -435,6 +451,9 @@ impl VisualImpl for Visual {
             }
         }
 
+        for unloading in unloading_visuals {
+            composition_children.add(unloading);
+        }
         if let Some(child_visual) = child_visual {
             composition_children.add(child_visual);
         }
@@ -1075,6 +1094,27 @@ impl Visual {
     /// `ConnectedAnimationRoot`).
     pub fn composition_layer_visual(&self) -> Option<Rc<CompositionVisual>> {
         self.read_composition_extras(|extras| extras.layer_visual.clone()).flatten()
+    }
+
+    /// Shows `visual` after the children of this visual until
+    /// [`remove_composition_unloading_visual`](Self::remove_composition_unloading_visual): the
+    /// image of a removed child that plays its implicit hide animation.
+    pub(crate) fn add_composition_unloading_visual(&self, visual: Rc<CompositionVisual>) {
+        self.with_composition_extras(|extras| extras.unloading_visuals.push(visual));
+        if let Some(source) = self.presentation_source() {
+            source.renderer().recalculate_children(self);
+        }
+    }
+
+    /// Ends [`add_composition_unloading_visual`](Self::add_composition_unloading_visual).
+    pub(crate) fn remove_composition_unloading_visual(&self, visual: &Rc<CompositionVisual>) {
+        self.with_composition_extras(|extras| extras.unloading_visuals.retain(|v| !Rc::ptr_eq(v, visual)));
+        if let Some(own) = self.composition_visual() {
+            own.children().remove(visual);
+        }
+        if let Some(source) = self.presentation_source() {
+            source.renderer().recalculate_children(self);
+        }
     }
 
     /// Sets the visual of [`composition_layer_visual`](Self::composition_layer_visual).
