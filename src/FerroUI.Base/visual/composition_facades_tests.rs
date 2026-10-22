@@ -161,6 +161,8 @@ fn transitions_replace_the_implicit_animations_of_the_application() {
     let own = services.compositor.create_implicit_animation_collection();
     let offset = services.compositor.create_vector3d_key_frame_animation();
     offset.insert_expression_key_frame(1.0, "this.FinalValue", None);
+    // An implicit animation names the property it animates.
+    offset.set_target(Some("Offset".to_owned()));
     own.set("Offset", offset);
     comp.set_implicit_animations(Some(own.clone()));
 

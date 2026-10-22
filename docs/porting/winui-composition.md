@@ -321,7 +321,9 @@ engine is WinUI's:
 The compositing renderer writes `Offset`, `Size`, `Opacity`, `IsVisible`, the clip and
 `TransformMatrix` of an element's visual whenever the element is rendered again, as WinUI's layout
 writes the handoff visual. `Translation`, `Scale`, `CenterPoint`, `RotationAngle`, `Orientation`
-and `AnchorPoint` are left to the application. An implicit animation on `Offset` therefore animates
+and `AnchorPoint` are left to the application, except those whose facade on the visual
+(`set_translation`, `set_scale`, `set_center_point`, `set_rotation`, `set_rotation_axis`) was set:
+the renderer then writes them too, as WinUI writes the handoff visual from the facades. An implicit animation on `Offset` therefore animates
 every layout move of the element, as in WinUI.
 
 ## 6. Status
@@ -364,3 +366,9 @@ Missing). `DEVIATIONS.md` points here for this area.
 | Owner callbacks of the tracker are raised by the compositor; `IsFromBinding`. | Queued and delivered after the change, never nested; input-driven callbacks carry the last request id; `IsFromBinding` is always `false`. | Behaviour | No re-entrancy; tracker binding is not ported. | phase 4 |
 | `VisualInteractionSource` receives input from the compositor after `TryRedirectForManipulation`. | It follows the routed pointer events of the element of the visual (handled ones too), captured to the element, for any pointer type; the element is found from the visual or given to `create_for_element`. The mouse wheel scrolls 50 px per notch and Ctrl+wheel scales by 1.1. Chaining modes are stored only; the input values of a source cannot be referenced from expressions. | Behaviour | The compositor of FerroUI has no input. | phase 4 |
 | `InteractionTrackerInertiaNaturalMotion`, `ConfigureVector2PositionInertiaModifiers`, tracker binding, `InteractionTrackerPositionUpdateOption`, `AdjustPositionX/YIfGreaterThanThreshold`, pinch and touchpad redirection. | Not ported. | Missing | Natural motion animations come with phase 3; FerroUI has no touchpad input and no two-pointer recognizer. | phase 4 |
+| `ScalarTransition` and `Vector3Transition` are classes: a change of `Duration` after the assignment reaches the element. | Copyable values, copied when assigned; a change is made by assigning again. | Representation | No identity or change notification is needed. | phase 3 |
+| `UIElement.RotationAxis` rotates in 3D. | An axis other than Z is written to `Orientation`, of which the 2D renderers show the projection; a zero axis counts as Z. | Behaviour | The renderers are 2D. | phase 3 |
+| `UIElement.TransformMatrix` is applied after the other facades. | Its 2D affine part (M11, M12, M21, M22, M41, M42) is applied after the render transform and before `Scale`, the rotation and `Translation`; the 3D part is ignored. | Behaviour | The composition visual applies its `TransformMatrix` first; folding `Scale` and the rotation into it would break their animations. | phase 3 |
+| A facade transition and an animation of the same property of the handoff visual cannot be combined. | While any transition is set, the implicit animations of the facades replace those the application set on the element visual. | Behaviour | A visual has one implicit animation collection. | phase 3 |
+| `Vector3Transition.Components` is not documented in detail; the easing of transitions is not documented. | Excluded components jump to their final value at the start; a transition with no components does nothing. The transitions use the default easing of the compositor. | Behaviour | The port had to choose. | phase 3 |
+| `SetImplicitHideAnimation` keeps an element removed from the tree in unloading storage until the animation completes. | The animation runs on an image of the element taken when it is removed. | Behaviour | A detached element loses its composition visual and its content in the same batch. | phase 1 |
