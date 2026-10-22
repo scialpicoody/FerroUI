@@ -82,6 +82,10 @@ impl ICompositionAnimation for ExpressionAnimation {
         self.base.target()
     }
 
+    fn composition_animation(&self) -> Option<&super::CompositionAnimation> {
+        Some(&self.base)
+    }
+
     fn create_instance(
         &self,
         target_object: ServerObjectId,

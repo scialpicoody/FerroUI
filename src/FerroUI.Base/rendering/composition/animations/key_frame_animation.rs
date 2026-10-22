@@ -246,6 +246,10 @@ macro_rules! key_frame_animation_classes {
                 self.base.target()
             }
 
+            fn composition_animation(&self) -> Option<&super::CompositionAnimation> {
+                Some(&*self.base)
+            }
+
             fn create_instance(
                 &self,
                 target_object: crate::rendering::composition::server::ServerObjectId,
