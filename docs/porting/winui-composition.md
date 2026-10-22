@@ -94,7 +94,7 @@ it does not.
 | `Visual.IsHitTestVisible`, `IsPixelSnappingEnabled`, `BorderMode`, `BackfaceVisibility`, `CompositeMode`, `ParentForTransform` | missing | `ParentForTransform` is close to the existing adorned visual. Backface and 3D modes have no meaning in a 2D renderer. | 2 / deviation |
 | `ContainerVisual.Children` (`InsertAbove`, `InsertBelow`, `InsertAtTop`, `InsertAtBottom`, `Remove`, `RemoveAll`, `Count`) | has | `CompositionVisualCollection`. | - |
 | `SpriteVisual` (`Brush`, `Shadow`) | has | `SpriteVisual`, `create_sprite_visual`. The shadow of its rectangle, then the brush over `(0, 0, size)`, then the children; brush and shadow are observed render resources. Does not clip to its bounds when created, as a WinUI visual. | 1 |
-| `ShapeVisual` (`Shapes`, `ViewBox`) | missing | | 2 |
+| `ShapeVisual` (`Shapes`, `ViewBox`) | has | `ShapeVisual`, `create_shape_visual`. Draws its shapes in order, through the view box, clipped to its size (a shape visual without a size shows nothing), then its children; its content bounds are its size. Does not clip its children when created. The shape collection and the view box are observed render resources: a change of a shape, its geometry or brushes, an animation included, redraws the visual. | 2 |
 | `LayerVisual` (`Effect`, `Shadow`) | missing | Children composed into a layer, then the effect or shadow. | 2 |
 | `RedirectVisual` (`Source`) | missing | Shows another visual's subtree. | 2 |
 
@@ -120,12 +120,13 @@ it does not.
 
 | Type / member | Status | Notes | Phase |
 |---|---|---|---|
-| `CompositionShape` (`CenterPoint`, `Offset`, `RotationAngle`, `RotationAngleInDegrees`, `Scale`, `TransformMatrix`) | missing | | 2 |
-| `CompositionSpriteShape` (`Geometry`, `FillBrush`, `StrokeBrush`, `StrokeThickness`, dash array, caps, join, miter limit, `IsStrokeNonScaling`) | missing | | 2 |
-| `CompositionContainerShape` (`Shapes`) | missing | | 2 |
-| `CompositionGeometry` (`TrimStart`, `TrimEnd`, `TrimOffset`) | missing | | 2 |
-| `CompositionRectangleGeometry`, `CompositionRoundedRectangleGeometry`, `CompositionEllipseGeometry`, `CompositionLineGeometry`, `CompositionPathGeometry` + `CompositionPath` | missing | | 2 |
-| `CompositionViewBox` | missing | | 2 |
+| `CompositionShape` (`CenterPoint`, `Offset`, `RotationAngle`, `RotationAngleInDegrees`, `Scale`, `TransformMatrix`) | has | `CompositionShape`; `Vector2` members as `Vector`, `Matrix3x2` as `Matrix`; the transform is animatable and composed as the one of a visual (matrix, scale and rotation about the center point, offset), in the space of the parent shape. `RotationAngleInDegrees` is a view of `RotationAngle` (not an animation target). | 2 |
+| `CompositionShapeCollection` | has | `CompositionShapeCollection` (`append`, `add`, `insert`, `remove`, `remove_at`, `get`, `set`, `clear`, `count`); a render resource on the server that observes its shapes. | 2 |
+| `CompositionSpriteShape` (`Geometry`, `FillBrush`, `StrokeBrush`, `StrokeThickness`, dash array, caps, join, miter limit, `IsStrokeNonScaling`) | partial | `create_sprite_shape`, `create_sprite_shape_with_geometry`. Colour and gradient brushes are brushes of the drawing context (`draw_geometry` with a brush and a pen); a surface brush fill is painted inside a geometry clip of the geometry, a surface brush stroke inside the widened outline. `StrokeThickness`, `StrokeDashOffset`, `StrokeMiterLimit` are animatable. `CompositionStrokeCap` and `CompositionStrokeLineJoin` map to the pen: one cap per pen (the start cap; end and dash caps are stored only), `Triangle` drawn as `Round`, `Miter` drawn as miter-or-bevel. The dash array is a plain `Vec<f32>` in multiples of the thickness. A non-scaling stroke divides the thickness by the scale of the transform (exact for uniform scales). | 2 |
+| `CompositionContainerShape` (`Shapes`) | has | `create_container_shape`; its shapes are drawn in order under its transform (nesting is limited to 256 levels). | 2 |
+| `CompositionGeometry` (`TrimStart`, `TrimEnd`, `TrimOffset`) | has | Animatable. The outline is cut with `try_get_segment` of the platform geometry (the fractions of `contour_length`), the offset wraps around (a wrapped part is two figures of a geometry group); the trim points are clamped to 0..1 and swapped when the start is after the end. A platform geometry that cannot be cut is drawn whole. Trimming applies to the fill and to a geometric clip too. | 2 |
+| `CompositionRectangleGeometry`, `CompositionRoundedRectangleGeometry`, `CompositionEllipseGeometry`, `CompositionLineGeometry`, `CompositionPathGeometry` + `CompositionPath` | has | `create_rectangle_geometry`, `create_rounded_rectangle_geometry`, `create_ellipse_geometry`, `create_line_geometry`, `create_path_geometry`, `create_path_geometry_with_path`. The server builds the platform geometry with the render interface of the compositor (rectangle, ellipse and line geometries; a stream geometry for rounded corners, whose radii are limited to half the size) and caches it until a member changes. `CompositionPath` is made from a FerroUI `Geometry` (`from_geometry`), a platform geometry (`new`) or path data (`parse`), not from a Win2D `IGeometrySource2D`. | 2 |
+| `CompositionViewBox` | has | `create_view_box`; `Offset`, `Size` and the alignment ratios are animatable, `Stretch` defaults to `Fill`. Laid out with the stretch and alignment math of the surface brush; what is outside the mapped view box is clipped; a view box with a zero size maps nothing. | 2 |
 
 ### 3.5 Clips
 
@@ -134,7 +135,7 @@ it does not.
 | `CompositionClip` (`AnchorPoint`, `CenterPoint`, `Offset`, `RotationAngle`, `RotationAngleInDegrees`, `Scale`, `TransformMatrix`) | has | `CompositionClip`; the transform is animatable; `AnchorPoint` is relative to the size of the visual; `RotationAngleInDegrees` is a view of `RotationAngle` (not an animation target). | 1 |
 | `InsetClip` (`LeftInset`, `TopInset`, `RightInset`, `BottomInset`) | has | `create_inset_clip`, `create_inset_clip_with_insets`; the insets are animatable and their animations re-render the visual. | 1 |
 | `RectangleClip` (edges and corner radii) | has | `create_rectangle_clip`, `create_rectangle_clip_with`, `create_rectangle_clip_with_radii`; a rounded clip pushes a rounded rectangle. | 1 |
-| `GeometricClip` (`Geometry`, `ViewBox`) | missing | Needs the geometries of phase 2. | 2 |
+| `GeometricClip` (`Geometry`, `ViewBox`) | has | `create_geometric_clip`, `create_geometric_clip_with_geometry`; pushes a geometry clip in the render walk, the view box maps the geometry onto the size of the visual before the transform of the clip; part of the own clip (bounds, dirty rects). A change of the geometry (its animations and trimming included) or of the view box changes the clip. A geometric clip without a geometry clips nothing. | 2 |
 
 ### 3.6 Lights and shadows
 

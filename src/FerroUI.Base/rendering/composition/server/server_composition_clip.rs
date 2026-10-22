@@ -1,22 +1,23 @@
 //! The server-side counterparts of the WinUI clip objects (`InsetClip`,
-//! `RectangleClip`) and the shape a clip cuts out of the visual it is set
-//! on.
+//! `RectangleClip`, `GeometricClip`) and the shape a clip cuts out of the
+//! visual it is set on.
 
 use super::{
-    impl_server_render_resource, IAnimatedServerObject, IServerObject, IServerRenderResource, ServerCompositor,
-    ServerRenderResource,
+    impl_server_render_resource, platform_geometry_of, IAnimatedServerObject, IServerObject, IServerRenderResource,
+    ServerCompositionViewBox, ServerCompositor, ServerRenderResource,
 };
 use crate::numerics::Quaternion;
-use crate::platform::{IDrawingContextImpl, LtrbRect};
+use crate::platform::{IDrawingContextImpl, IGeometryImpl, LtrbRect};
 use crate::rendering::composition::generated::{
-    ServerCompositionClipHooks, ServerCompositionClipProps, ServerInsetClipHooks, ServerInsetClipProps,
-    ServerRectangleClipHooks, ServerRectangleClipProps,
+    ServerCompositionClipHooks, ServerCompositionClipProps, ServerGeometricClipHooks, ServerGeometricClipProps,
+    ServerInsetClipHooks, ServerInsetClipProps, ServerRectangleClipHooks, ServerRectangleClipProps,
 };
 use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::MatrixUtils;
 use crate::{Matrix, Rect, RoundedRect, Vector, Vector3D};
 use std::any::{Any, TypeId};
 use std::rc::{Rc, Weak};
+use std::sync::Arc;
 use std::time::Duration;
 
 /// Declares a server-side clip class: the struct, its constructor, the
@@ -118,6 +119,14 @@ server_clip!(
     ServerRectangleClipHooks
 );
 
+server_clip!(
+    /// The server-side counterpart of a
+    /// [`GeometricClip`](crate::rendering::composition::GeometricClip).
+    ServerGeometricClip,
+    ServerGeometricClipProps,
+    ServerGeometricClipHooks
+);
+
 /// The transform of a WinUI clip or brush from its own properties, in the
 /// space of an area of `size`: the anchor point is relative to the size,
 /// then the transform matrix, the scale and the rotation about the center
@@ -145,26 +154,35 @@ pub fn composition_transform(
 }
 
 /// The area a composition clip leaves visible, in the coordinates of the
-/// visual it is set on: a rectangle (rounded for a rectangle clip) in the
-/// space of the clip, and the transform of the clip.
-#[derive(Clone, Copy, Debug, PartialEq)]
+/// visual it is set on: a rectangle (rounded for a rectangle clip) or, for
+/// a geometric clip, a geometry in the space of the clip, and the transform
+/// of the clip.
+#[derive(Clone)]
 pub struct CompositionClipShape {
-    /// The visible area in the space of the clip.
+    /// The visible area in the space of the clip; for a geometric clip the
+    /// bounds of its geometry.
     pub rect: RoundedRect,
     /// The transform from the space of the clip to the space of the visual,
-    /// `None` for the identity.
+    /// `None` for the identity. For a geometric clip it includes the
+    /// mapping of its view box.
     pub transform: Option<Matrix>,
+    /// The geometry of a geometric clip: the visible area is its inside.
+    pub geometry: Option<Arc<dyn IGeometryImpl>>,
 }
 
 impl CompositionClipShape {
     /// The shape of `clip`, a server-side clip object, on a visual of the
-    /// given size. `None` when `clip` is not a clip object.
+    /// given size. `None` when `clip` is not a clip object, or is a
+    /// geometric clip without a geometry (which clips nothing).
     ///
     /// Deviation (winui-composition.md): the anchor point of the clip is
     /// relative to the size of the visual, which is the reference box of
     /// both clip classes here.
     pub fn of(clip: &dyn IServerObject, size: Vector) -> Option<CompositionClipShape> {
         let any = clip.as_any();
+        if let Some(geometric) = any.downcast_ref::<ServerGeometricClip>() {
+            return Self::of_geometric(geometric, size);
+        }
         let (rect, base) = if let Some(inset) = any.downcast_ref::<ServerInsetClip>() {
             let props = inset.props();
             let rect = inset_rect(
@@ -200,7 +218,33 @@ impl CompositionClipShape {
             base.rotation_angle(),
             base.offset(),
         );
-        Some(CompositionClipShape { rect, transform })
+        Some(CompositionClipShape { rect, transform, geometry: None })
+    }
+
+    /// The shape of a geometric clip: its geometry, mapped onto the visual
+    /// by its view box, then transformed by the clip.
+    fn of_geometric(clip: &ServerGeometricClip, size: Vector) -> Option<CompositionClipShape> {
+        let geometry = platform_geometry_of(&clip.props().geometry()?)?;
+        let base = clip.clip_props();
+        let own = composition_transform(
+            size,
+            base.anchor_point(),
+            base.center_point(),
+            base.transform_matrix(),
+            base.scale(),
+            base.rotation_angle(),
+            base.offset(),
+        );
+        let view_box = clip
+            .props()
+            .view_box()
+            .and_then(|view_box| ServerCompositionViewBox::mapping_of(&view_box, size))
+            .map(|mapping| mapping.transform);
+        let transform = match (view_box, own) {
+            (Some(view_box), Some(own)) => Some(view_box * own),
+            (view_box, own) => view_box.or(own),
+        };
+        Some(CompositionClipShape { rect: RoundedRect::from_rect(geometry.bounds()), transform, geometry: Some(geometry) })
     }
 
     /// The bounds of the visible area in the space of the visual.
@@ -213,7 +257,7 @@ impl CompositionClipShape {
     }
 
     /// Pushes the clip onto `canvas`, whose transform is the one of the
-    /// visual; popped with `pop_clip`. The clip is taken in the space of
+    /// visual; popped with [`pop`](Self::pop). The clip is taken in the space of
     /// the clip: the transform of the canvas is changed for the push and
     /// restored after it.
     pub fn push(&self, canvas: &mut dyn IDrawingContextImpl) {
@@ -222,13 +266,24 @@ impl CompositionClipShape {
             canvas.set_transform(transform * saved);
             saved
         });
-        if self.rect.is_rounded() {
+        if let Some(geometry) = &self.geometry {
+            canvas.push_geometry_clip(&**geometry);
+        } else if self.rect.is_rounded() {
             canvas.push_clip_rounded(self.rect);
         } else {
             canvas.push_clip(self.rect.rect);
         }
         if let Some(saved) = saved {
             canvas.set_transform(saved);
+        }
+    }
+
+    /// Pops what [`push`](Self::push) pushed.
+    pub fn pop(&self, canvas: &mut dyn IDrawingContextImpl) {
+        if self.geometry.is_some() {
+            canvas.pop_geometry_clip();
+        } else {
+            canvas.pop_clip();
         }
     }
 }

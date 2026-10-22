@@ -1,5 +1,5 @@
-//! The WinUI clip objects: `CompositionClip` and its subclasses `InsetClip`
-//! and `RectangleClip`.
+//! The WinUI clip objects: `CompositionClip` and its subclasses `InsetClip`,
+//! `RectangleClip` and `GeometricClip`.
 //!
 //! As for the brushes, every clip is one [`CompositionClip`] behind an `Rc`,
 //! which holds what the concrete class adds in a kind; the concrete classes
@@ -9,11 +9,14 @@
 
 use super::composition_object_impls::composition_object_impls;
 use super::generated::{
-    CompositionClipHooks, CompositionClipProps, InsetClipHooks, InsetClipProps, RectangleClipHooks,
-    RectangleClipProps, ServerInsetClipProps, ServerRectangleClipProps,
+    CompositionClipHooks, CompositionClipProps, GeometricClipHooks, GeometricClipProps, InsetClipHooks,
+    InsetClipProps, RectangleClipHooks, RectangleClipProps, ServerGeometricClipProps, ServerInsetClipProps,
+    ServerRectangleClipProps,
 };
-use super::server::{IServerObject, ServerCompositor, ServerInsetClip, ServerObjectId, ServerRectangleClip};
-use super::{CompositionObject, Compositor};
+use super::server::{
+    IServerObject, ServerCompositor, ServerGeometricClip, ServerInsetClip, ServerObjectId, ServerRectangleClip,
+};
+use super::{CompositionGeometry, CompositionObject, CompositionViewBox, Compositor, ICompositionObject};
 use crate::{Matrix, Vector};
 use std::ops::Deref;
 use std::rc::{Rc, Weak};
@@ -22,6 +25,7 @@ use std::rc::{Rc, Weak};
 pub(crate) enum CompositionClipKind {
     Inset(InsetClipProps),
     Rectangle(RectangleClipProps),
+    Geometric(GeometricClipProps),
 }
 
 /// A clip of a visual (WinUI `Microsoft.UI.Composition.CompositionClip`):
@@ -53,6 +57,7 @@ impl CompositionClip {
         match &clip.kind {
             CompositionClipKind::Inset(props) => props.initialize_defaults(&*clip),
             CompositionClipKind::Rectangle(props) => props.initialize_defaults(&*clip),
+            CompositionClipKind::Geometric(props) => props.initialize_defaults(&*clip),
         }
         clip
     }
@@ -62,6 +67,7 @@ impl CompositionClip {
         match &self.kind {
             CompositionClipKind::Inset(props) => props.base(),
             CompositionClipKind::Rectangle(props) => props.base(),
+            CompositionClipKind::Geometric(props) => props.base(),
         }
     }
 
@@ -92,6 +98,7 @@ impl CompositionClip {
         match &self.kind {
             CompositionClipKind::Inset(_) => "InsetClip",
             CompositionClipKind::Rectangle(_) => "RectangleClip",
+            CompositionClipKind::Geometric(_) => "GeometricClip",
         }
     }
 
@@ -167,19 +174,24 @@ impl InsetClipHooks for CompositionClip {}
 
 impl RectangleClipHooks for CompositionClip {}
 
+impl GeometricClipHooks for CompositionClip {}
+
 composition_object_impls!(
     CompositionClip, "CompositionClip",
     serialize: |this, writer| match &this.kind {
         CompositionClipKind::Inset(props) => props.serialize_changes_core(this, writer),
         CompositionClipKind::Rectangle(props) => props.serialize_changes_core(this, writer),
+        CompositionClipKind::Geometric(props) => props.serialize_changes_core(this, writer),
     },
     start_animation: |this, name, animation, final_value| match &this.kind {
         CompositionClipKind::Inset(props) => props.start_animation(this, name, animation, final_value),
         CompositionClipKind::Rectangle(props) => props.start_animation(this, name, animation, final_value),
+        CompositionClipKind::Geometric(props) => props.start_animation(this, name, animation, final_value),
     },
     composition_property: |this, name| match &this.kind {
         CompositionClipKind::Inset(_) => ServerInsetClipProps::get_composition_property(name),
         CompositionClipKind::Rectangle(_) => ServerRectangleClipProps::get_composition_property(name),
+        CompositionClipKind::Geometric(_) => ServerGeometricClipProps::get_composition_property(name),
     },
 );
 
@@ -390,5 +402,72 @@ impl RectangleClip {
 
     pub fn set_bottom_right_radius(&self, value: Vector) {
         self.props().set_bottom_right_radius(&*self.0, value)
+    }
+}
+
+/// A clip that leaves visible the inside of a geometry (WinUI
+/// `Microsoft.UI.Composition.GeometricClip`), in the coordinates of the
+/// visual it is set on, or of its [`view_box`](Self::view_box) when it has
+/// one: the view box maps the geometry onto the size of the visual as for a
+/// shape visual. The transform of the clip applies after the view box. A
+/// change of the geometry (its trimming and animations included) or of the
+/// view box changes the clip.
+///
+/// Deviation (winui-composition.md): a geometric clip without a geometry
+/// clips nothing; the trimming of the geometry applies to the clip.
+#[derive(Clone)]
+pub struct GeometricClip(Rc<CompositionClip>);
+
+impl Deref for GeometricClip {
+    type Target = Rc<CompositionClip>;
+
+    fn deref(&self) -> &Rc<CompositionClip> {
+        &self.0
+    }
+}
+
+impl GeometricClip {
+    pub(crate) fn new(compositor: &Rc<Compositor>) -> GeometricClip {
+        GeometricClip(CompositionClip::create(
+            compositor,
+            CompositionClipKind::Geometric(GeometricClipProps::new()),
+            |c| ServerGeometricClip::new(c),
+        ))
+    }
+
+    pub(crate) fn with_geometry(compositor: &Rc<Compositor>, geometry: Option<Rc<CompositionGeometry>>) -> GeometricClip {
+        let clip = Self::new(compositor);
+        clip.set_geometry(geometry);
+        clip
+    }
+
+    /// The handle of `clip` as a geometric clip, if it is one.
+    pub fn from_clip(clip: &Rc<CompositionClip>) -> Option<GeometricClip> {
+        matches!(clip.kind, CompositionClipKind::Geometric(_)).then(|| GeometricClip(clip.clone()))
+    }
+
+    fn props(&self) -> &GeometricClipProps {
+        match &self.0.kind {
+            CompositionClipKind::Geometric(props) => props,
+            _ => unreachable!("a geometric clip handle wraps a geometric clip"),
+        }
+    }
+
+    /// The geometry whose inside stays visible.
+    pub fn geometry(&self) -> Option<Rc<CompositionGeometry>> {
+        self.props().geometry().and_then(|geometry| geometry.into_any_rc().downcast::<CompositionGeometry>().ok())
+    }
+
+    pub fn set_geometry(&self, value: Option<Rc<CompositionGeometry>>) {
+        self.props().set_geometry(&*self.0, value.map(|geometry| geometry as Rc<dyn ICompositionObject>))
+    }
+
+    /// The area of the geometry coordinates mapped onto the visual.
+    pub fn view_box(&self) -> Option<Rc<CompositionViewBox>> {
+        self.props().view_box().and_then(|view_box| view_box.into_any_rc().downcast::<CompositionViewBox>().ok())
+    }
+
+    pub fn set_view_box(&self, value: Option<Rc<CompositionViewBox>>) {
+        self.props().set_view_box(&*self.0, value.map(|view_box| view_box as Rc<dyn ICompositionObject>))
     }
 }
