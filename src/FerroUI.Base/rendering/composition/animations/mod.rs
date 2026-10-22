@@ -15,7 +15,7 @@ mod key_frames;
 mod property_set_snapshot;
 
 pub use animation_instance_base::AnimationInstanceBase;
-pub use composition_animation::CompositionAnimation;
+pub use composition_animation::{CompositionAnimation, InitialValueExpressionCollection};
 pub use composition_animation_group::CompositionAnimationGroup;
 pub use expression_animation::ExpressionAnimation;
 pub use expression_animation_instance::ExpressionAnimationInstance;
