@@ -34,7 +34,6 @@ use std::time::Duration;
 /// the UI-thread surface asks for the freeze with its next batch, and the
 /// compositor renders the image in the same pass ([`freeze`](Self::freeze)).
 pub struct ServerCompositionVisualSurface {
-    this: Weak<ServerCompositionVisualSurface>,
     base: ServerRenderResource,
     props: ServerCompositionVisualSurfaceProps,
     changed: ServerCompositionSurfaceChanged,
@@ -63,7 +62,6 @@ impl ServerCompositionVisualSurface {
     /// for the live updates.
     pub fn new(compositor: &Rc<ServerCompositor>) -> Rc<ServerCompositionVisualSurface> {
         let surface = Rc::new_cyclic(|this: &Weak<ServerCompositionVisualSurface>| ServerCompositionVisualSurface {
-            this: this.clone(),
             base: ServerRenderResource::new(
                 compositor,
                 this.clone() as Weak<dyn IAnimatedServerObject>,

@@ -7,7 +7,7 @@ use super::interaction_tracker::natural_resting_value;
 use super::*;
 use crate::animation::easings::LinearEasing;
 use crate::numerics::Vector3;
-use crate::rendering::composition::animations::{IAnimationInstance, ICompositionAnimation};
+use crate::rendering::composition::animations::ICompositionAnimation;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use crate::rendering::composition::generated::ServerCompositionVisualProps;
 use crate::rendering::composition::test_compositor::TestCompositor;

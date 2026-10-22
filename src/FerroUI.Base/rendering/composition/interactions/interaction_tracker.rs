@@ -1317,6 +1317,7 @@ impl InteractionTracker {
 
     /// Stops or resumes the requests of animation frames: a test drives the
     /// tracker with [`advance`](Self::advance) instead.
+    #[cfg(test)]
     pub(crate) fn set_frame_requests_enabled(&self, value: bool) {
         self.frame_requests_enabled.set(value);
     }

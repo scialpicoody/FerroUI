@@ -37,9 +37,6 @@ use std::time::Duration;
 /// this time is cancelled.
 const PREPARED_TIMEOUT: Duration = Duration::from_millis(2000);
 
-/// The default duration of the service (`s_DefaultDuration`, 300 ms).
-pub(crate) const DEFAULT_DURATION: Duration = Duration::from_millis(300);
-
 /// The control points of the default easing of the service (`s_ControlPoint1/2`).
 const DEFAULT_CONTROL_POINT_1: Vector2 = Vector2::new(0.8, 0.0);
 const DEFAULT_CONTROL_POINT_2: Vector2 = Vector2::new(0.2, 1.0);
@@ -263,11 +260,6 @@ impl ConnectedAnimationFlight {
             configuration: RefCell::new(None),
             on_finished: RefCell::new(None),
         })
-    }
-
-    /// The state of the flight.
-    pub(crate) fn state(&self) -> FlightState {
-        self.state.get()
     }
 
     pub(crate) fn set_on_finished(&self, on_finished: Box<dyn FnOnce(FlightEnd)>) {
