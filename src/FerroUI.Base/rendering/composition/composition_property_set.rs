@@ -200,17 +200,19 @@ impl CompositionPropertySet {
         self.variants.borrow_mut().remove(key);
     }
 
+    /// A snapshot read on the UI thread: a live property set it refers to is copied too, as the
+    /// UI thread cannot read its server counterpart.
     pub(crate) fn snapshot(&self) -> PropertySetSnapshot {
-        self.snapshot_source().build()
+        self.snapshot_core(1, true).build()
     }
 
     /// The snapshot in the form that is sent to the server, which builds
-    /// the snapshot from it.
+    /// the snapshot from it. A live property set it refers to is referred to by id.
     pub(crate) fn snapshot_source(&self) -> PropertySetSnapshotSource {
-        self.snapshot_core(1)
+        self.snapshot_core(1, false)
     }
 
-    fn snapshot_core(&self, allowed_nesting_level: i32) -> PropertySetSnapshotSource {
+    fn snapshot_core(&self, allowed_nesting_level: i32, copy_live_sets: bool) -> PropertySetSnapshotSource {
         let objects: Vec<(String, Rc<dyn AsCompositionObject>)> =
             self.objects.borrow().iter().map(|(k, v)| (k.clone(), v.clone())).collect();
         let variants = self.variants.borrow();
@@ -218,13 +220,13 @@ impl CompositionPropertySet {
         for (key, value) in objects {
             let type_name = value.composition_type_name();
             let server = value.as_composition_object().server();
-            if let Some(ps) = value.clone().as_property_set().filter(|ps| !ps.is_live()) {
+            if let Some(ps) = value.clone().as_property_set().filter(|ps| copy_live_sets || !ps.is_live()) {
                 if allowed_nesting_level <= 0 {
                     panic!("PropertySet depth limit reached");
                 }
                 dic.insert(
                     key,
-                    PropertySetSnapshotSourceValue::PropertySet(ps.snapshot_core(allowed_nesting_level - 1)),
+                    PropertySetSnapshotSourceValue::PropertySet(ps.snapshot_core(allowed_nesting_level - 1, copy_live_sets)),
                 );
             } else if let Some(server) = server {
                 dic.insert(key, PropertySetSnapshotSourceValue::Server(server));
