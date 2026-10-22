@@ -1236,11 +1236,23 @@ fn dev_tools_run(directory: PathBuf) {
                     .take(16)
                     .collect();
                 let mut times = Vec::new();
+                let counters_before = ferroui_base::diagnostics::perf_counters::snapshot();
                 for control in controls.iter().cycle().take(std::env::var("FERROUI_SMOKE_SELECTIONS").ok().and_then(|n| n.parse().ok()).unwrap_or(48)) {
                     let start = std::time::Instant::now();
                     view_model.combined_tree().select_control(control);
                     window.update_layout();
                     times.push(start.elapsed().as_secs_f64() * 1000.0);
+                }
+                if ferroui_base::diagnostics::perf_counters::ENABLED {
+                    // Per selection, with the build feature `perf-counters`.
+                    let counters = ferroui_base::diagnostics::perf_counters::snapshot().since(&counters_before);
+                    let selections = times.len().max(1) as u64;
+                    for counter in ferroui_base::diagnostics::perf_counters::PerfCounter::ALL {
+                        let value = counters.get(*counter);
+                        if value > 0 {
+                            println!("DevTools: per selection, {}: {}", counter.name(), value / selections);
+                        }
+                    }
                 }
                 times.sort_by(|a, b| a.total_cmp(b));
                 println!(
