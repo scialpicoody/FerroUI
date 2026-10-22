@@ -2641,7 +2641,7 @@ Loader (`ferroui-markup-xaml-loader`), phase E0:
 | **E3 Styles, resources, templates** | selectors and queries, setter transformer setter, `ResourceAdderSetter`, `EnsureCapacityNode`, deferred content, `XamlSourceInfoValueManipulation`, markup extensions with dynamic setters (`StaticResource`, `DynamicResource`), `OptionsMarkupExtensionMethod`, control themes; call form B | a styled, templated Button from XAML: equal dumps (phase 4 exit test of 7.1) |
 | **E4 Bindings** | binding path node and all elements, typed emission, `ClassBindingSetter`, `BindingWithPrioritySetter`, template bindings; R9 | ported upstream compiled-binding XAML tests pass through the emitter |
 | **E5 Includes and assets** | group transformers at build time, `compiled_xaml.rs`, loader table, cross-crate includes via `documents[]`, `embed_assets()` + R8, generated `register_types` | a two-crate fixture (theme library + application) loads `StyleInclude`, `ResourceInclude`, `MergeResourceInclude`; then the Fluent theme documents |
-| **E6 Hot reload** | R6, feature `hot-reload`, previewer hook calling the interpreter's `populate` through the override; rule for when a rebuild is required (set of names/handlers changed) | editing a document of a running application swaps content and refills the parts struct |
+| **E6 Hot reload** | Development session, source overlay, populate hooks and explicit transactional adapters; contract changes require restart | Supported edits preserve roots/view models and refresh registered cached references. |
 
 E0 and E1 are independent and can run in parallel; E2 needs both.
 
@@ -2790,7 +2790,18 @@ without retaining the root. Replacement handlers target the preserved component,
 activate after successful commit, and retire old subscriptions without removing
 application subscriptions. Non-routed metadata events require an explicit adapter.
 
-E6 is **not complete**: compatible template-part state transfer remains incomplete,
-and final acceptance must cover the finished revision. The [bounded completion audit](../development/hot-reload-completion-audit.md)
-and [implementation status](../development/hot-reload.md) distinguish these
-requirements from later designer tooling and optional extensions.
+Compatible template-part state transfer is implemented. Compiled and runtime
+factories record weak declaration provenance; restoration scopes identities by
+document, template declaration and owner. Explicit development keys are recorded
+during initial compiled and interpreted population without assigning public names.
+Keys precede `x:Name`; ambiguous matches and incompatible/authored/bound values are
+skipped. Tests cover repeated templates, rapid revisions and retired-part release.
+
+Cached named controls are refreshed through explicit `ComponentRefresh` adapters,
+including the sample-specific ControlCatalog loading paths. The engine does not
+assume every class has a generated parts struct; previewer/designer tooling is a
+later consumer.
+
+The [bounded completion audit](../development/hot-reload-completion-audit.md) and
+[implementation status](../development/hot-reload.md) distinguish current results
+from historical verification, later designer tooling and optional extensions.

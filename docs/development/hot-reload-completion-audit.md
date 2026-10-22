@@ -1,34 +1,37 @@
 # Hot reload completion audit
 
-Audited on 2026-10-22. The goal remains
-active. This checklist fixes the completion scope; historical validation notes
-retain their original source revisions.
+Audited on 2026-10-22. Implementation is complete; Windows verification of the
+final implementation is still open. Historical validation notes retain their
+original source revisions.
 
 ## Implemented, with recorded verification
 
 | Requirement | Current evidence and limits |
 | --- | --- |
 | Runtime XAML and last-good replacement | Session, overlay, detached preparation, reversible content/component/panel adapters and failure tests exist. Native catalog probes ran on all three platforms at recorded revisions. |
-| Sessions and build/loading integration | Manifest, persistent/scoped populate hooks, weak targets, document buffers, directory polling/debounce, superseded revisions, transformed-document cache and debug/release gates exist. Build handler contracts include signatures and conservative unresolved-type admission, verified by build/engine tests on macOS/Linux and generated-manifest catalog tests on macOS. |
+| Sessions and build/loading integration | Manifest, persistent/scoped populate hooks, weak targets, document buffers, directory polling/debounce, superseded revisions, transformed-document cache and debug/release gates exist. Build handler contracts include signatures and conservative unresolved-type admission, verified by build/engine tests on macOS/Linux and generated-manifest catalog tests on macOS/Linux. |
 | Stable windows, roots and view models | Native identity probes and lifecycle tests cover supported adapters. Root literal/static-resource/binding ownership supports removal and rollback. |
 | Compatible UI state | Focus, text/caret/selection, scroll and selection-model tests exist. Application state callbacks and queued-revision state preservation are implemented. |
 | Cached controls and subscriptions | Transactional refresh hooks and the Expander sample exercise rollback, disposal and retired-tree release. Eleven catalog pages are registered. This is representative integration, not all-page support. |
-| Included resources/styles and static consumers | Registered application containers discover direct live includes; dependency revisions prepare resources and consumers coherently. Resource/theme probes and include lifetime tests exist. Standard inline resource/style ownership and routed handler ownership are implemented; final acceptance remains below. |
+| Included resources/styles and static consumers | Registered application containers discover direct live includes; dependency revisions prepare resources and consumers coherently. Resource/theme probes and include lifetime tests exist. Standard inline resource/style ownership and routed handler ownership are implemented; see final acceptance below. |
 | Explicit Rust patching | Real Subsecond patches update existing callback subscriptions, with stable framework identity, conservative admission and controlled application. Native patch evidence exists for macOS, Linux and Windows at recorded revisions. |
 | Supervisor and restart | The dedicated sample owns admission/build/application, retains the old process on failed replacement builds and restores versioned application/window/navigation state. Native supervisor evidence exists. |
 | Combined updates and measurements | Combined XAML/Rust acceptance and stage/save-to-render measurements exist for a small fixture and representative catalog pages. These are functional baselines, not statistical performance guarantees. |
 
-## Required completion work
+## Final acceptance and remaining gate
 
-1. **Freeze a final implementation revision and close acceptance.** Reuse existing
-   evidence where behavior and inputs are unchanged, but run the final relevant
-   native XAML, Rust, combined, restart, lifecycle and release-boundary gates on
-   macOS, Windows and Linux. Fix failures without treating another incomplete
-   moving revision as final acceptance. Keep recorded Windows results with their revisions, and verify a final
-   revision once the implementation gaps are closed.
-2. **Publish the supported contract and results.** Reconcile the existing design
-   documentation and issues #233/#234 with actual supported edits, restart
-   boundaries, extension APIs and measured baselines. Do not claim untested paths.
+The engine, loader, markup parity, catalog lifecycle/integration, real patch,
+combined transaction, restart and release-exclusion checks pass on macOS and Linux.
+The implementation guide, README and XAML design document describe the supported
+contract, extension APIs and restart boundaries.
+
+The remaining release requirement is **Windows verification of the final
+implementation**; earlier Windows results apply to their recorded revisions only.
+
+## Historical increment evidence
+
+The notes below describe the state and test counts at each increment. References
+to work then outstanding are superseded by the section above.
 
 The Windows fixes are integrated. The full 21-command Windows acceptance run
 applies to an earlier revision; focused Windows checks followed the fixes, without

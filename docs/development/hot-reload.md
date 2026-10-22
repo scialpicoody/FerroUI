@@ -1,8 +1,10 @@
 # Hot reload development engine
 
-Status: experimental implementation; **not ready for the first release described by
-issues #233 and #234**. The dedicated sample has an operational owning supervisor;
-framework-wide integration and the three-platform release gate remain incomplete.
+Integration is explicit: supported adapters and registered functions define the
+contract; arbitrary application side effects are not reversible. The
+[completion audit](hot-reload-completion-audit.md) maps requirements to verification.
+Results below retain their original source scope. Designer tooling, every catalog
+page and a general supervisor for arbitrary applications remain later work.
 
 Native Windows verification passed all 21 acceptance commands and a focused
 catalog shutdown check. The [Windows report](hot-reload-windows-verification.md)
@@ -663,9 +665,10 @@ it to read an empty linker argument file and produce a symbol-less library.
 Cargo jobserver descriptors are likewise not valid in the new process.
 
 The unmodified CLI failed with both Rust 1.99.1 and 1.93.0. Rust 1.99.1 has not
-been revalidated with the workaround. The tested combination is Rust 1.93.0 and
-Subsecond/dx 0.7.10 on macOS arm64 only; Windows and Linux remain release gates.
-The acceptance fixture is not yet an application build/restart supervisor.
+been revalidated with the workaround. The tested patch combination is Rust 1.93.0
+and Subsecond/dx 0.7.10. Platform results and exact source revisions are recorded
+in the completion audit. This fixture tests patching; the owning sample supervisor
+described below provides application build/restart orchestration.
 The desktop demo has a separate `patch-control` feature for a trusted supervising
 parent. Its private stdin channel admits a source snapshot before a build, returns
 a request identity, rejects unmatched/cancelled applications, and pumps approved
@@ -675,8 +678,8 @@ the exact compiled baseline, isolated admitted inputs, pinned compiler and patch
 artifact provenance. The channel is not a sandbox or an independent file watcher.
 An admission command can also carry unsaved markup documents. Application prepares
 and commits that markup, installs the admitted patch through the external commit
-callback, then publishes the accepted markup. The automatic compiler/restart driver
-and file-watcher revision coordination remain unfinished. Test channel admission, cancellation, existing event subscriptions,
+callback, then publishes the accepted markup. The owning supervisor below connects
+this channel to compilation, watching and restart. Test channel admission, cancellation, existing event subscriptions,
 root/type identity and explicit state capture with `cargo build -p hot-reload-demo
 --features patch-control` followed by `python3 scripts/hot-reload/control_probe.py`.
 The channel probe does not apply machine code. The separate
@@ -691,8 +694,9 @@ The extended desktop probe also passed two combined Rust/unsaved-XAML revisions
 on macOS: invalid markup prevented patch installation, and a missing patch library
 rolled back the newly committed markup. After each rejection it invoked the old
 handler and checked the old live spacing, then applied the valid pair and checked
-the new spacing and increment. This verifies the explicit command transaction;
-automatic grouping of independently saved Rust/XAML files is still unfinished.
+the new spacing and increment. This verifies the explicit command transaction.
+The owning supervisor submits a coherent source snapshot; separate saves observed
+in different snapshots remain separate revisions.
 
 This desktop test exposed a second dx 0.7.10 replay problem: structured build output
 chooses the first captured binary invocation, which can be `build_script_build`
@@ -703,7 +707,7 @@ before patch application with a missing build-script object. The selection and
 process-local environment fixes have separate Python regression tests.
 A manual `Hot reload acceptance` workflow defines separate Rust patch and catalog
 XAML jobs on macOS, Windows and Linux. Catalog coverage includes manifest/runtime
-tests, compiled/runtime parity, the subscription-refresh adapter, shared-selection regression, all ten native
+tests, compiled/runtime parity, the subscription-refresh adapter, shared-selection regression, all eleven native
 page probes, and release compilation with development features selected. Parity
 runs without `runtime-markup`, which otherwise excludes those tests. The workflow
 has not been dispatched from this worktree. Adding it is not evidence of passing
@@ -938,18 +942,19 @@ These results do not establish complete support on all three desktop platforms, 
 or leak freedom. The XAML and Rust render-completion baselines above are limited
 to their recorded fixtures, platforms, sampling methods and sample counts.
 
-## Remaining release work
+## Release gate and historical implementation notes
 
 The [completion audit](hot-reload-completion-audit.md) separates requirements from
 optional extensions and supersedes this section's former expanding checklist.
-Remaining work is to validate and document the final implementation on
-all three desktop platforms. Existing native runs are evidence for their recorded
-source revisions, not missing work to be started from scratch.
+Windows verification of the final implementation is still open. Existing Windows
+runs are evidence for their recorded revisions only.
 
 Native filesystem notification backends, every ControlCatalog page, a general
 supervisor for arbitrary applications and restoration of ambiguous repeated
 template instances are follow-ups, not additional first-release requirements.
-Issues #233/#234 remain open pending the bounded acceptance work.
+Issues #233/#234 remain open pending the three-platform release gate. The dated
+implementation notes below preserve the findings and limitations of earlier pins;
+use the completion audit for current status.
 
 ### Shared selection during subtree replacement
 

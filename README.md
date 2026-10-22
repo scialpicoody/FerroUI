@@ -501,5 +501,7 @@ It is derived from other open source projects, and some files are carried under 
 
 The development reload engine and sample are described in
 [Hot reload development engine](docs/development/hot-reload.md), including the
-remaining release gates. Runtime XAML content reload is available for explicit
-adapters; Rust machine-code hot reload is not yet validated.
+supported edits and release gates. Runtime XAML reload preserves supported live
+components through transactional adapters. Explicit Rust functions can be patched
+with the pinned Subsecond toolchain; the sample supervisor coordinates combined
+updates and stateful restart.
