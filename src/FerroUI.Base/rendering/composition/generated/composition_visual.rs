@@ -2,6 +2,8 @@
 
 //! `CompositionVisual`.
 //!
+//! Properties added by the FerroUI overlay (scripts/composition-schema-winui.xml): `CompositionClip`.
+//!
 //! Schema attributes: abstract.
 
 use bitflags::bitflags;
@@ -82,6 +84,7 @@ bitflags! {
         const RENDER_OPTIONS = 2147483648;
         const TEXT_OPTIONS = 4294967296;
         const CACHE_MODE = 8589934592;
+        const COMPOSITION_CLIP = 17179869184;
     }
 }
 
@@ -189,6 +192,10 @@ pub trait CompositionVisualHooks: ICompositionObjectHost {
     fn validate_cache_mode_change(&self, _old_value: &Option<Rc<dyn ICompositionObject>>, _new_value: &Option<Rc<dyn ICompositionObject>>) {}
     fn on_cache_mode_changed(&self) {}
     fn on_cache_mode_changing(&self) {}
+
+    fn validate_composition_clip_change(&self, _old_value: &Option<Rc<dyn ICompositionObject>>, _new_value: &Option<Rc<dyn ICompositionObject>>) {}
+    fn on_composition_clip_changed(&self) {}
+    fn on_composition_clip_changing(&self) {}
 }
 
 /// The UI-thread properties of `CompositionVisual`.
@@ -216,6 +223,7 @@ pub struct CompositionVisualProps {
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     cache_mode: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    composition_clip: RefCell<Option<Rc<dyn ICompositionObject>>>,
 }
 
 impl Default for CompositionVisualProps {
@@ -253,6 +261,7 @@ impl CompositionVisualProps {
             render_options: Cell::new(Default::default()),
             text_options: Cell::new(Default::default()),
             cache_mode: RefCell::new(None),
+            composition_clip: RefCell::new(None),
         }
     }
 
@@ -1015,6 +1024,31 @@ impl CompositionVisualProps {
         }
     }
 
+    /// `CompositionClip` (FerroUI overlay).
+    pub fn composition_clip(&self) -> Option<Rc<dyn ICompositionObject>> {
+        self.composition_clip.borrow().clone()
+    }
+
+    /// Sets `CompositionClip` (FerroUI overlay).
+    pub fn set_composition_clip(&self, host: &dyn CompositionVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
+        let mut changed = false;
+        let old_value = self.composition_clip.borrow().clone();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_composition_clip_change(host, &old_value, &value);
+            CompositionVisualHooks::on_composition_clip_changing(host);
+            changed = true;
+            // Update the backing value
+            *self.composition_clip.borrow_mut() = value.clone();
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::COMPOSITION_CLIP);
+            host.register_for_serialization();
+        }
+        *self.composition_clip.borrow_mut() = value;
+        if changed {
+            CompositionVisualHooks::on_composition_clip_changed(host);
+        }
+    }
+
     /// Connects an animation with the named property. Returns `false` when
     /// neither this class nor its generated bases have an animated property
     /// of that name: the caller continues with its hand-written base.
@@ -1207,6 +1241,9 @@ impl CompositionVisualProps {
         if changed.contains(CompositionVisualChangedFields::CACHE_MODE) {
             writer.write_server_object(self.cache_mode.borrow().clone().map(|o| o.server()));
         }
+        if changed.contains(CompositionVisualChangedFields::COMPOSITION_CLIP) {
+            writer.write_server_object(self.composition_clip.borrow().clone().map(|o| o.server()));
+        }
         self.changed_fields_of_composition_visual.set(CompositionVisualChangedFields::empty());
     }
 }
@@ -1246,6 +1283,9 @@ pub trait ServerCompositionVisualHooks: IServerAnimatedPropertyHost {
 
     fn on_cache_mode_changed(&self) {}
     fn on_cache_mode_changing(&self) {}
+
+    fn on_composition_clip_changed(&self) {}
+    fn on_composition_clip_changing(&self) {}
 }
 
 /// The server-side properties of `ServerCompositionVisual`.
@@ -1272,6 +1312,7 @@ pub struct ServerCompositionVisualProps {
     render_options: Cell<RenderOptions>,
     text_options: Cell<TextOptions>,
     cache_mode: RefCell<Option<Rc<dyn IServerObject>>>,
+    composition_clip: RefCell<Option<Rc<dyn IServerObject>>>,
 }
 
 impl Default for ServerCompositionVisualProps {
@@ -1307,6 +1348,7 @@ impl ServerCompositionVisualProps {
             render_options: Cell::new(Default::default()),
             text_options: Cell::new(Default::default()),
             cache_mode: RefCell::new(None),
+            composition_clip: RefCell::new(None),
         }
     }
 
@@ -2029,6 +2071,47 @@ impl ServerCompositionVisualProps {
         }
     }
 
+    /// The composition property of `CompositionClip`.
+    pub fn id_of_composition_clip_property() -> &'static CompositionPropertyOf<Option<Rc<dyn IServerObject>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Rc<dyn IServerObject>>>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, Option<Rc<dyn IServerObject>>>(
+                "CompositionClip",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).composition_clip.borrow().clone(),
+                |obj, v| *props_of::<ServerCompositionVisualProps>(obj).composition_clip.borrow_mut() = v,
+                None,
+                None,
+            )
+        })
+    }
+
+    /// `CompositionClip`.
+    pub fn composition_clip(&self) -> Option<Rc<dyn IServerObject>> {
+        self.composition_clip.borrow().clone()
+    }
+
+    pub fn set_composition_clip(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Rc<dyn IServerObject>>) {
+        let old_value = self.composition_clip.borrow().clone();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_composition_clip_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_composition_clip_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: old_value.as_server_render_resource(),
+                new_resource: value.as_server_render_resource(),
+                assign: &mut || *self.composition_clip.borrow_mut() = value.clone(),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_composition_clip_changed(host);
+        }
+    }
+
     /// Reads the changes of the object: the base class first, then the
     /// changed-fields mask and the changed members of this class.
     pub fn deserialize_changes_core(
@@ -2247,6 +2330,10 @@ impl ServerCompositionVisualProps {
         if changed.contains(CompositionVisualChangedFields::CACHE_MODE) {
             let value = read_server_object(reader, compositor.as_ref());
             self.set_cache_mode(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::COMPOSITION_CLIP) {
+            let value = read_server_object(reader, compositor.as_ref());
+            self.set_composition_clip(host, value);
         }
         ServerCompositionVisualHooks::on_fields_deserialized(host, changed);
     }

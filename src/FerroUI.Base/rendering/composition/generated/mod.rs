@@ -79,6 +79,14 @@
 //! in the documentation of the generated items; everything is `pub` so the
 //! hand-written classes, which live in other modules, can reach it.
 //!
+//! # The FerroUI overlay
+//!
+//! What `scripts/composition-schema-winui.xml` adds to the upstream schema
+//! (see the docstring of the generator for the merge rules):
+//!
+//! * classes: `CompositionClip`, `InsetClip`, `RectangleClip`, `DropShadow`, `CompositionSurfaceBrush`, `CompositionVisualSurface`, `SpriteVisual`;
+//! * properties of upstream classes: `CompositionVisual.CompositionClip`.
+//!
 //! # Classes of the schema that are not generated
 //!
 //! Manual classes (written by hand): `CompositionSurface`, `CompositionDrawingSurface`, `CompositionDrawListVisual`, `CompositionSimpleGradientBrush`, `CompositionGradientBrush`.
@@ -87,6 +95,7 @@ mod composition_animations;
 mod composition_bitmap_cache;
 mod composition_brush;
 mod composition_cache_mode;
+mod composition_clip;
 mod composition_conic_gradient_brush;
 mod composition_container_visual;
 mod composition_experimental_acrylic_visual;
@@ -104,16 +113,23 @@ mod composition_simple_tile_brush;
 mod composition_simple_transform;
 mod composition_solid_color_brush;
 mod composition_solid_color_visual;
+mod composition_surface_brush;
 mod composition_surface_visual;
 mod composition_target;
 mod composition_tile_brush;
 mod composition_visual;
 mod composition_visual_collection;
+mod composition_visual_surface;
+mod drop_shadow;
+mod inset_clip;
+mod rectangle_clip;
+mod sprite_visual;
 
 pub use composition_animations::*;
 pub use composition_bitmap_cache::*;
 pub use composition_brush::*;
 pub use composition_cache_mode::*;
+pub use composition_clip::*;
 pub use composition_conic_gradient_brush::*;
 pub use composition_container_visual::*;
 pub use composition_experimental_acrylic_visual::*;
@@ -131,11 +147,17 @@ pub use composition_simple_tile_brush::*;
 pub use composition_simple_transform::*;
 pub use composition_solid_color_brush::*;
 pub use composition_solid_color_visual::*;
+pub use composition_surface_brush::*;
 pub use composition_surface_visual::*;
 pub use composition_target::*;
 pub use composition_tile_brush::*;
 pub use composition_visual::*;
 pub use composition_visual_collection::*;
+pub use composition_visual_surface::*;
+pub use drop_shadow::*;
+pub use inset_clip::*;
+pub use rectangle_clip::*;
+pub use sprite_visual::*;
 
 #[cfg(test)]
 mod tests;

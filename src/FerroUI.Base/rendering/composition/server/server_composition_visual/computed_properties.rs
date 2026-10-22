@@ -24,6 +24,16 @@ impl ServerCompositionVisual {
         self.combined_transform_matrix.get()
     }
 
+    /// Whether the visual or a visual of its subtree changed since the last
+    /// update pass of its target: what a visual surface showing the subtree
+    /// follows (not from upstream).
+    pub fn has_pending_render_changes(&self) -> bool {
+        self.is_dirty_for_render.get()
+            || self.is_dirty_for_render_in_subgraph.get()
+            || self.needs_bounding_box_update.get()
+            || self.needs_to_add_extra_dirty_rect_to_dirty_region.get()
+    }
+
     // WPF's cheatsheet
     //-----------------------------------------------------------------------------
     //  Node Operation   | NeedsToBe     | NeedsBBoxUpdate | HasNodeThat    | Visit
@@ -111,6 +121,15 @@ impl ServerCompositionVisual {
             if self.clip_to_bounds() {
                 let size = self.size();
                 let bounds = LtrbRect::new(0.0, 0.0, size.x, size.y);
+                clip = Some(match clip {
+                    Some(clip) => clip.intersect_or_empty(bounds),
+                    None => bounds,
+                });
+            }
+            // The WinUI clip object (not from upstream): the bounds of the
+            // area it leaves visible.
+            if let Some(shape) = self.composition_clip_shape() {
+                let bounds = shape.bounds();
                 clip = Some(match clip {
                     Some(clip) => clip.intersect_or_empty(bounds),
                     None => bounds,

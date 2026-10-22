@@ -11,6 +11,7 @@ mod drawing_context_proxy;
 pub use compositor_lock::{CompositorLock, CompositorLockGuard, LockBound, LockedServerCompositor};
 mod server_composition_bitmap_cache;
 mod server_composition_cache_mode;
+mod server_composition_clip;
 mod server_composition_container_visual;
 mod server_composition_draw_list_visual;
 mod server_composition_drawing_surface;
@@ -23,10 +24,14 @@ mod server_composition_surface_visual;
 mod server_composition_target;
 mod server_composition_visual;
 mod server_composition_visual_collection;
+mod server_composition_visual_surface;
 mod server_compositor_animations;
 mod server_custom_composition_visual;
+mod server_drop_shadow;
+mod server_loaded_image_surface;
 mod server_object_animations;
 mod server_size_dependant_visual;
+mod server_sprite_visual;
 mod server_visual_render_context;
 mod diagnostic_text_renderer;
 mod fps_counter;
@@ -96,6 +101,15 @@ pub use server_composition_visual::{
     ServerCompositionVisualCache, TreeWalkerFrame, VisualReadback,
 };
 pub use server_composition_visual_collection::ServerCompositionVisualCollection;
+pub use server_composition_clip::{
+    composition_transform, inset_rect, CompositionClipShape, ServerInsetClip, ServerRectangleClip,
+};
+pub use server_composition_visual_surface::ServerCompositionVisualSurface;
+pub use server_drop_shadow::ServerDropShadow;
+pub use server_loaded_image_surface::ServerLoadedImageSurface;
+pub use server_sprite_visual::ServerSpriteVisual;
+// The server-side surface brush lives with the composition brushes.
+pub use super::brushes::{paint_composition_brush, surface_brush_content_rect, ServerCompositionSurfaceBrush};
 pub use server_compositor_animations::ServerCompositorAnimations;
 pub use server_custom_composition_visual::ServerCompositionCustomVisual;
 pub use server_object::{

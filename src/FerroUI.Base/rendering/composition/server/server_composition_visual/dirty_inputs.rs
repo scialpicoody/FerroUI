@@ -12,14 +12,16 @@ const COMPOSITION_FIELDS_MASK: F = F::OPACITY
     .union(F::SIZE)
     .union(F::SIZE_ANIMATED)
     .union(F::RENDER_OPTIONS)
-    .union(F::EFFECT);
+    .union(F::EFFECT)
+    .union(F::COMPOSITION_CLIP);
 
 const OWN_BOUNDS_UPDATE_FIELDS_MASK: F = F::CLIP
     .union(F::CLIP_TO_BOUNDS)
     .union(F::CLIP_TO_BOUNDS_ANIMATED)
     .union(F::SIZE)
     .union(F::SIZE_ANIMATED)
-    .union(F::EFFECT);
+    .union(F::EFFECT)
+    .union(F::COMPOSITION_CLIP);
 
 const COMBINED_TRANSFORM_FIELDS_MASK: F = F::SIZE
     .union(F::SIZE_ANIMATED)
@@ -40,8 +42,12 @@ const COMBINED_TRANSFORM_FIELDS_MASK: F = F::SIZE
     .union(F::TRANSLATION)
     .union(F::TRANSLATION_ANIMATED);
 
-const CLIP_SIZE_DIRTY_MASK: F =
-    F::SIZE.union(F::SIZE_ANIMATED).union(F::CLIP_TO_BOUNDS).union(F::CLIP).union(F::CLIP_TO_BOUNDS_ANIMATED);
+const CLIP_SIZE_DIRTY_MASK: F = F::SIZE
+    .union(F::SIZE_ANIMATED)
+    .union(F::CLIP_TO_BOUNDS)
+    .union(F::CLIP)
+    .union(F::CLIP_TO_BOUNDS_ANIMATED)
+    .union(F::COMPOSITION_CLIP);
 
 const READBACK_DIRTY_MASK: F =
     COMBINED_TRANSFORM_FIELDS_MASK.union(F::ROOT).union(F::VISIBLE).union(F::VISIBLE_ANIMATED);

@@ -12,7 +12,7 @@
 
 use super::{
     ServerCompositionConicGradientBrush, ServerCompositionLinearGradientBrush, ServerCompositionRadialGradientBrush,
-    ServerCompositionSolidColorBrush,
+    ServerCompositionSolidColorBrush, ServerCompositionSurfaceBrush,
 };
 use crate::collections::FerroList;
 use crate::media::immutable::ImmutableGradientStop;
@@ -29,17 +29,19 @@ use crate::rendering::composition::generated::{
     CompositionBrushHooks, CompositionBrushProps, CompositionConicGradientBrushHooks,
     CompositionConicGradientBrushProps, CompositionLinearGradientBrushHooks, CompositionLinearGradientBrushProps,
     CompositionRadialGradientBrushHooks, CompositionRadialGradientBrushProps, CompositionSolidColorBrushHooks,
-    CompositionSolidColorBrushProps, ServerCompositionBrushProps, ServerCompositionConicGradientBrushProps,
-    ServerCompositionLinearGradientBrushProps, ServerCompositionRadialGradientBrushProps,
-    ServerCompositionSolidColorBrushProps,
+    CompositionSolidColorBrushProps, CompositionSurfaceBrushHooks, CompositionSurfaceBrushProps,
+    ServerCompositionBrushProps, ServerCompositionConicGradientBrushProps, ServerCompositionLinearGradientBrushProps,
+    ServerCompositionRadialGradientBrushProps, ServerCompositionSolidColorBrushProps,
+    ServerCompositionSurfaceBrushProps,
 };
 use crate::rendering::composition::server::{CompositionProperty, IServerObject, ServerCompositor, ServerObjectId};
 use crate::rendering::composition::transport::{BatchResource, BatchStreamWriter, IRegisterForSerialization};
 use crate::rendering::composition::{
-    AsCompositionObject, CompositionObject, Compositor, ICompositionObject, ICompositionObjectAnimations,
-    ICompositionObjectHost, ICompositorSerializable, PendingAnimations,
+    AsCompositionObject, CompositionBitmapInterpolationMode, CompositionObject, CompositionStretch, Compositor,
+    ICompositionObject, ICompositionObjectAnimations, ICompositionObjectHost, ICompositionSurface,
+    ICompositorSerializable, PendingAnimations,
 };
-use crate::{RelativePoint, RelativeScalar};
+use crate::{Matrix, RelativePoint, RelativeScalar, Vector};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::ops::Deref;
@@ -82,6 +84,15 @@ impl CompositionGradientBrushData {
     }
 }
 
+/// What the WinUI `CompositionSurfaceBrush` adds to the generated
+/// `CompositionBrush`: its generated properties, and the surface it shows as
+/// the caller gave it (the generated property holds it as a composition
+/// object).
+pub(crate) struct CompositionSurfaceBrushData {
+    props: CompositionSurfaceBrushProps,
+    surface: RefCell<Option<Rc<dyn ICompositionSurface>>>,
+}
+
 /// What the concrete class of a composition brush adds to
 /// [`CompositionBrush`].
 pub(crate) enum CompositionBrushKind {
@@ -89,6 +100,7 @@ pub(crate) enum CompositionBrushKind {
     LinearGradient(CompositionGradientBrushData, CompositionLinearGradientBrushProps),
     RadialGradient(CompositionGradientBrushData, CompositionRadialGradientBrushProps),
     ConicGradient(CompositionGradientBrushData, CompositionConicGradientBrushProps),
+    Surface(CompositionSurfaceBrushData),
 }
 
 /// A brush of the composition API.
@@ -133,6 +145,7 @@ impl CompositionBrush {
                 data.brush.initialize_defaults(self);
                 props.initialize_defaults(self);
             }
+            CompositionBrushKind::Surface(data) => data.props.initialize_defaults(self),
         }
     }
 
@@ -143,12 +156,13 @@ impl CompositionBrush {
             CompositionBrushKind::LinearGradient(data, _)
             | CompositionBrushKind::RadialGradient(data, _)
             | CompositionBrushKind::ConicGradient(data, _) => &data.brush,
+            CompositionBrushKind::Surface(data) => data.props.base(),
         }
     }
 
     fn gradient_data(&self) -> Option<&CompositionGradientBrushData> {
         match &self.kind {
-            CompositionBrushKind::SolidColor(_) => None,
+            CompositionBrushKind::SolidColor(_) | CompositionBrushKind::Surface(_) => None,
             CompositionBrushKind::LinearGradient(data, _)
             | CompositionBrushKind::RadialGradient(data, _)
             | CompositionBrushKind::ConicGradient(data, _) => Some(data),
@@ -180,6 +194,7 @@ impl CompositionBrush {
             CompositionBrushKind::LinearGradient(..) => "CompositionLinearGradientBrush",
             CompositionBrushKind::RadialGradient(..) => "CompositionRadialGradientBrush",
             CompositionBrushKind::ConicGradient(..) => "CompositionConicGradientBrush",
+            CompositionBrushKind::Surface(_) => "CompositionSurfaceBrush",
         }
     }
 
@@ -249,6 +264,7 @@ impl CompositionBrush {
             CompositionBrushKind::LinearGradient(_, props) => props.serialize_changes_core(self, writer),
             CompositionBrushKind::RadialGradient(_, props) => props.serialize_changes_core(self, writer),
             CompositionBrushKind::ConicGradient(_, props) => props.serialize_changes_core(self, writer),
+            CompositionBrushKind::Surface(data) => data.props.serialize_changes_core(self, writer),
         }
     }
 
@@ -265,6 +281,8 @@ impl CompositionBrush {
 impl CompositionBrushHooks for CompositionBrush {}
 
 impl CompositionSolidColorBrushHooks for CompositionBrush {}
+
+impl CompositionSurfaceBrushHooks for CompositionBrush {}
 
 impl CompositionLinearGradientBrushHooks for CompositionBrush {
     fn base_serialize_changes_core(&self, writer: &mut BatchStreamWriter<'_>) {
@@ -338,6 +356,10 @@ impl ICompositionObjectAnimations for CompositionBrush {
                 props.start_animation(self, property_name, animation, final_value)
                     || data.brush.start_animation(self, property_name, animation, final_value)
             }
+            // The generated base class is chained by the generated code.
+            CompositionBrushKind::Surface(data) => {
+                data.props.start_animation(self, property_name, animation, final_value)
+            }
         }
     }
 
@@ -354,6 +376,9 @@ impl ICompositionObjectAnimations for CompositionBrush {
             }
             CompositionBrushKind::ConicGradient(..) => {
                 ServerCompositionConicGradientBrushProps::get_composition_property(property_name)
+            }
+            CompositionBrushKind::Surface(_) => {
+                ServerCompositionSurfaceBrushProps::get_composition_property(property_name)
             }
         }
         .or_else(|| ServerCompositionBrushProps::get_composition_property(property_name))
@@ -801,5 +826,196 @@ impl CompositionConicGradientBrush {
 
     pub fn set_center(&self, value: RelativePoint) {
         self.props().set_center(self.host(), value)
+    }
+}
+
+/// A composition brush that paints a surface (WinUI
+/// `Microsoft.UI.Composition.CompositionSurfaceBrush`): a
+/// [`LoadedImageSurface`](crate::rendering::composition::LoadedImageSurface),
+/// a [`CompositionVisualSurface`](crate::rendering::composition::CompositionVisualSurface)
+/// or a [`CompositionSurface`](crate::rendering::composition::CompositionSurface).
+///
+/// The surface is laid out at its natural size in the area of the brush by
+/// `stretch` and the alignment ratios, transformed by the transform of the
+/// brush (`AnchorPoint`, `CenterPoint`, `Offset`, `RotationAngle`, `Scale`,
+/// `TransformMatrix`, relative to the area) and clipped to the area. The
+/// alignment ratios and the transform members are animatable.
+///
+/// It is painted by the visuals that show it (a sprite visual); it is not a
+/// brush of the drawing context, so it cannot fill the shapes of a drawing
+/// context. The `Opacity` of the composition brushes applies; their
+/// `Transform` and `RelativeTransform` do not.
+#[derive(Clone)]
+pub struct CompositionSurfaceBrush(Rc<CompositionBrush>);
+
+impl Deref for CompositionSurfaceBrush {
+    type Target = Rc<CompositionBrush>;
+
+    fn deref(&self) -> &Rc<CompositionBrush> {
+        &self.0
+    }
+}
+
+impl CompositionSurfaceBrush {
+    pub(crate) fn new(compositor: &Rc<Compositor>) -> CompositionSurfaceBrush {
+        let brush = CompositionBrush::create(
+            compositor,
+            CompositionBrushKind::Surface(CompositionSurfaceBrushData {
+                props: CompositionSurfaceBrushProps::new(),
+                surface: RefCell::new(None),
+            }),
+            |c| ServerCompositionSurfaceBrush::new(c),
+        );
+        brush.initialize_defaults();
+        CompositionSurfaceBrush(brush)
+    }
+
+    pub(crate) fn with_surface(compositor: &Rc<Compositor>, surface: Rc<dyn ICompositionSurface>) -> CompositionSurfaceBrush {
+        let brush = Self::new(compositor);
+        brush.set_surface(Some(surface));
+        brush
+    }
+
+    /// The handle of `brush` as a surface brush, if it is one.
+    pub fn from_brush(brush: &Rc<CompositionBrush>) -> Option<CompositionSurfaceBrush> {
+        matches!(brush.kind, CompositionBrushKind::Surface(_)).then(|| CompositionSurfaceBrush(brush.clone()))
+    }
+
+    fn data(&self) -> &CompositionSurfaceBrushData {
+        match &self.0.kind {
+            CompositionBrushKind::Surface(data) => data,
+            _ => unreachable!("a surface brush handle wraps a surface brush"),
+        }
+    }
+
+    fn host(&self) -> &CompositionBrush {
+        &self.0
+    }
+
+    /// The generated properties of the brush.
+    pub fn props(&self) -> &CompositionSurfaceBrushProps {
+        &self.data().props
+    }
+
+    /// The surface the brush paints.
+    pub fn surface(&self) -> Option<Rc<dyn ICompositionSurface>> {
+        self.data().surface.borrow().clone()
+    }
+
+    pub fn set_surface(&self, value: Option<Rc<dyn ICompositionSurface>>) {
+        *self.data().surface.borrow_mut() = value.clone();
+        self.props().set_surface(self.host(), value.map(|surface| surface as Rc<dyn ICompositionObject>))
+    }
+
+    /// How the surface is sized in the area of the brush (default `Fill`).
+    pub fn stretch(&self) -> CompositionStretch {
+        self.props().stretch()
+    }
+
+    pub fn set_stretch(&self, value: CompositionStretch) {
+        self.props().set_stretch(self.host(), value)
+    }
+
+    /// Where the surface is placed horizontally: 0 left, 0.5 centred
+    /// (default), 1 right.
+    pub fn horizontal_alignment_ratio(&self) -> f32 {
+        self.props().horizontal_alignment_ratio()
+    }
+
+    pub fn set_horizontal_alignment_ratio(&self, value: f32) {
+        self.props().set_horizontal_alignment_ratio(self.host(), value)
+    }
+
+    /// Where the surface is placed vertically: 0 top, 0.5 centred (default),
+    /// 1 bottom.
+    pub fn vertical_alignment_ratio(&self) -> f32 {
+        self.props().vertical_alignment_ratio()
+    }
+
+    pub fn set_vertical_alignment_ratio(&self, value: f32) {
+        self.props().set_vertical_alignment_ratio(self.host(), value)
+    }
+
+    /// How a bitmap surface is resampled (default `Linear`).
+    pub fn bitmap_interpolation_mode(&self) -> CompositionBitmapInterpolationMode {
+        self.props().bitmap_interpolation_mode()
+    }
+
+    pub fn set_bitmap_interpolation_mode(&self, value: CompositionBitmapInterpolationMode) {
+        self.props().set_bitmap_interpolation_mode(self.host(), value)
+    }
+
+    /// The point of the content, relative to the area of the brush, placed
+    /// at `offset`.
+    pub fn anchor_point(&self) -> Vector {
+        self.props().anchor_point()
+    }
+
+    pub fn set_anchor_point(&self, value: Vector) {
+        self.props().set_anchor_point(self.host(), value)
+    }
+
+    /// The point the content is scaled and rotated about.
+    pub fn center_point(&self) -> Vector {
+        self.props().center_point()
+    }
+
+    pub fn set_center_point(&self, value: Vector) {
+        self.props().set_center_point(self.host(), value)
+    }
+
+    /// The offset of the content.
+    pub fn offset(&self) -> Vector {
+        self.props().offset()
+    }
+
+    pub fn set_offset(&self, value: Vector) {
+        self.props().set_offset(self.host(), value)
+    }
+
+    /// The rotation of the content about its center point, in radians.
+    pub fn rotation_angle(&self) -> f32 {
+        self.props().rotation_angle()
+    }
+
+    pub fn set_rotation_angle(&self, value: f32) {
+        self.props().set_rotation_angle(self.host(), value)
+    }
+
+    /// The rotation in degrees: a view of
+    /// [`rotation_angle`](Self::rotation_angle) (not an animation target).
+    pub fn rotation_angle_in_degrees(&self) -> f32 {
+        self.rotation_angle().to_degrees()
+    }
+
+    pub fn set_rotation_angle_in_degrees(&self, value: f32) {
+        self.set_rotation_angle(value.to_radians())
+    }
+
+    /// The scale of the content about its center point (default `(1, 1)`).
+    pub fn scale(&self) -> Vector {
+        self.props().scale()
+    }
+
+    pub fn set_scale(&self, value: Vector) {
+        self.props().set_scale(self.host(), value)
+    }
+
+    /// The transform matrix of the content (WinUI `Matrix3x2`).
+    pub fn transform_matrix(&self) -> Matrix {
+        self.props().transform_matrix()
+    }
+
+    pub fn set_transform_matrix(&self, value: Matrix) {
+        self.props().set_transform_matrix(self.host(), value)
+    }
+
+    /// Whether the content is aligned to device pixels.
+    pub fn snap_to_pixels(&self) -> bool {
+        self.props().snap_to_pixels()
+    }
+
+    pub fn set_snap_to_pixels(&self, value: bool) {
+        self.props().set_snap_to_pixels(self.host(), value)
     }
 }

@@ -18,7 +18,7 @@ use super::expressions::ExpressionVariant;
 use super::generated::{
     CompositionContainerVisualHooks, CompositionContainerVisualProps, CompositionSolidColorVisualProps,
     CompositionSurfaceVisualProps, CompositionVisualHooks, CompositionVisualProps,
-    ServerCompositionContainerVisualProps,
+    ServerCompositionContainerVisualProps, SpriteVisualProps,
 };
 use super::hit_testing::CompositionHitTestAabbTree;
 use super::server::{
@@ -27,8 +27,9 @@ use super::server::{
 };
 use super::transport::{BatchStreamWriter, IRegisterForSerialization};
 use super::{
-    AsCompositionObject, CompositionBitmapCache, CompositionObject, CompositionTarget, CompositionVisualCollection, Compositor,
-    ICompositionObject, ICompositionObjectHost, ICompositorSerializable, PendingAnimations,
+    AsCompositionObject, CompositionBitmapCache, CompositionClip, CompositionObject, CompositionTarget,
+    CompositionVisualCollection, Compositor, ICompositionObject, ICompositionObjectHost, ICompositorSerializable,
+    PendingAnimations,
 };
 use crate::media::{BrushExtensions, Geometry, IBrush, IImmutableEffect, IntersectionResult, RenderOptions, TextOptions};
 use crate::numerics::Quaternion;
@@ -46,6 +47,8 @@ pub(crate) enum CompositionVisualKind {
     SolidColor(CompositionSolidColorVisualProps),
     Surface(CompositionSurfaceVisualProps),
     Custom(CustomVisualData),
+    /// The WinUI `SpriteVisual`.
+    Sprite(SpriteVisualProps),
 }
 
 /// A node of the composition visual tree.
@@ -154,6 +157,7 @@ impl CompositionVisual {
             CompositionVisualKind::SolidColor(props) => props.initialize_defaults(self),
             CompositionVisualKind::Surface(props) => props.initialize_defaults(self),
             CompositionVisualKind::Custom(data) => data.props().initialize_defaults(self),
+            CompositionVisualKind::Sprite(props) => props.initialize_defaults(self),
         }
     }
 
@@ -164,6 +168,7 @@ impl CompositionVisual {
             CompositionVisualKind::SolidColor(props) => props.base(),
             CompositionVisualKind::Surface(props) => props.base(),
             CompositionVisualKind::Custom(data) => data.props(),
+            CompositionVisualKind::Sprite(props) => props.base(),
         }
     }
 
@@ -243,6 +248,23 @@ impl CompositionVisual {
 
     pub fn set_cache_mode(&self, value: Option<Rc<CompositionBitmapCache>>) {
         self.visual_props().set_cache_mode(self, value.map(|v| v as Rc<dyn ICompositionObject>));
+    }
+
+    /// The WinUI clip of the visual (`Visual.Clip`): an
+    /// [`InsetClip`](super::InsetClip) or a
+    /// [`RectangleClip`](super::RectangleClip), applied in the coordinates
+    /// of the visual, after its transform, to its content and children.
+    ///
+    /// Deviation (winui-composition.md): WinUI names it `Clip`; here `clip`
+    /// is the geometry clip of the upstream compositor, so the WinUI member
+    /// is `composition_clip`. Both may be set; the visible area is their
+    /// intersection.
+    pub fn composition_clip(&self) -> Option<Rc<CompositionClip>> {
+        self.visual_props().composition_clip().and_then(|o| o.into_any_rc().downcast::<CompositionClip>().ok())
+    }
+
+    pub fn set_composition_clip(&self, value: Option<Rc<CompositionClip>>) {
+        self.visual_props().set_composition_clip(self, value.map(|v| v as Rc<dyn ICompositionObject>));
     }
 
     // --- Visual.cs ---------------------------------------------------------------
@@ -345,6 +367,7 @@ impl CompositionVisual {
             CompositionVisualKind::SolidColor(props) => props.serialize_changes_core(self, writer),
             CompositionVisualKind::Surface(props) => props.serialize_changes_core(self, writer),
             CompositionVisualKind::Custom(data) => data.props().serialize_changes_core(self, writer),
+            CompositionVisualKind::Sprite(props) => props.serialize_changes_core(self, writer),
         }
     }
 }
@@ -438,6 +461,7 @@ impl ICompositionObjectAnimations for CompositionVisual {
             CompositionVisualKind::Custom(data) => {
                 data.props().start_animation(self, property_name, animation, final_value)
             }
+            CompositionVisualKind::Sprite(props) => props.start_animation(self, property_name, animation, final_value),
         }
     }
 
@@ -468,6 +492,7 @@ impl AsCompositionObject for CompositionVisual {
             CompositionVisualKind::SolidColor(_) => "CompositionSolidColorVisual",
             CompositionVisualKind::Surface(_) => "CompositionSurfaceVisual",
             CompositionVisualKind::Custom(_) => "CompositionCustomVisual",
+            CompositionVisualKind::Sprite(_) => "SpriteVisual",
         }
     }
 }
