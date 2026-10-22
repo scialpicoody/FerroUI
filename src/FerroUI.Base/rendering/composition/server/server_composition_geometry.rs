@@ -74,6 +74,13 @@ pub fn platform_geometry_of(object: &Rc<dyn IServerObject>) -> Option<Arc<dyn IG
 /// `0..=1` and swapped when the start is after the end (the port's reading);
 /// a part that wraps around is two figures; when the platform cannot cut
 /// the outline (`try_get_segment` fails) the whole geometry is drawn.
+/// A fraction of the single-precision members as the decimal it was written as (`0.2`, not
+/// `0.20000000298`): the fractions select lengths of the outline, which would otherwise be off by
+/// the error of the single precision.
+fn widen(value: f32) -> f64 {
+    value.to_string().parse().unwrap_or(value as f64)
+}
+
 pub fn trim_geometry(
     geometry: Arc<dyn IGeometryImpl>,
     trim_start: f32,
@@ -81,8 +88,8 @@ pub fn trim_geometry(
     trim_offset: f32,
     render_interface: &dyn IPlatformRenderInterface,
 ) -> Option<Arc<dyn IGeometryImpl>> {
-    let mut start = (trim_start as f64).clamp(0.0, 1.0);
-    let mut end = (trim_end as f64).clamp(0.0, 1.0);
+    let mut start = widen(trim_start).clamp(0.0, 1.0);
+    let mut end = widen(trim_end).clamp(0.0, 1.0);
     if start > end {
         std::mem::swap(&mut start, &mut end);
     }
@@ -96,7 +103,7 @@ pub fn trim_geometry(
     if length.is_nan() || length <= 0.0 {
         return Some(geometry);
     }
-    let from = (start + trim_offset as f64).rem_euclid(1.0);
+    let from = (start + widen(trim_offset)).rem_euclid(1.0);
     let to = from + (end - start);
     let segment = |a: f64, b: f64| geometry.try_get_segment(a * length, b * length, true);
     let trimmed = if to <= 1.0 {

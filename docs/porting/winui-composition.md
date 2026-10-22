@@ -335,7 +335,7 @@ every layout move of the element, as in WinUI.
 | Phase | State | Pull request |
 |---|---|---|
 | 1 | implemented; catalog verification in progress | #304 |
-| 2 | in progress | #304 |
+| 2 | implemented | #304 |
 | 3 | implemented (springs, controller, properties, colour spaces, expressions, facades and transitions) | #304 |
 | 4 | implemented (the tracker on the UI thread) | #304 |
 | 5 | planned | |
@@ -399,6 +399,26 @@ Missing). `DEVIATIONS.md` points here for this area.
 | The entries of `CompositionObject.Properties` are readable as `obj.Name` in expressions. | They are read through a reference to the property set itself (`props.Name`). | Missing | Kept to the property set. | phase 3 |
 | An expression animation under an `AnimationController`. | Ignores the controller. | Behaviour | Not documented; an expression has no time. | phase 3 |
 | The `Bounce*NaturalMotionAnimation` classes. | Not ported. | Missing | Outside the requested surface. | phase 3 |
+| `CompositionPath` is made from an `IGeometrySource2D`. | Made from a FerroUI `Geometry`, a platform geometry or path data; it keeps the platform geometry it was made with. | Representation | There is no Win2D. | phase 2 |
+| `CompositionStrokeDashArray` is a `CompositionObject` (`IVector<float>`). | A `Vec<f32>` replaced as a whole; dashes and the offset are in multiples of the thickness. | Representation | It needs no identity; the units are the port's reading. | phase 2 |
+| Start, end and dash caps of a stroke are separate; `CompositionStrokeCap.Triangle`. | The pens have one cap: the start cap (the others are stored); a triangle cap is drawn round. | Missing | The pens of FerroUI have one line cap and no triangle. | phase 2 |
+| `Miter` and `MiterOrBevel` joins differ. | Both draw a miter that becomes a bevel past the limit. | Behaviour | The pens of the platform. | phase 2 |
+| `IsStrokeNonScaling`. | The thickness is divided by the square root of the determinant of the shape and view box transform. | Behaviour | Exact for uniform scales only. | phase 2 |
+| The edge cases of trimming are not documented. | Trim points are clamped to 0..1 and swapped when the start is after the end; a wrapped part is two figures; a geometry the platform cannot cut is drawn whole; trimming applies to fills and geometric clips too. | Behaviour | The port had to choose. | phase 2 |
+| The clipping of a `ShapeVisual` and a view box of zero size are not documented. | Shapes are clipped to the size of the visual (without a size nothing shows) and to the mapped view box; a view box of zero size maps nothing; its `Stretch` defaults to `Fill`. | Behaviour | The port's reading. | phase 2 |
+| `GeometricClip` without a geometry. | Clips nothing. | Behaviour | Not documented. | phase 2 |
+| `RotationAngleInDegrees` of shapes, visuals and gradient brushes is animatable. | A view of `RotationAngle`. | Missing | Only the radians are stored. | phase 2 |
+| `Visual.RotationAxis` rotates in 3D. | An axis other than Z is folded into `Orientation`, of which the 2D renderers show the projection. | Behaviour | 2D renderers. | phase 2 |
+| `IsPixelSnappingEnabled` snaps to device pixels in the window. | Rounds the translation relative to the parent. | Behaviour | No world transform at that point. | phase 2 |
+| `BorderMode`, `BackfaceVisibility`, `CompositeMode`. | Stored only. | Missing | 2D drawing contexts with source-over blending. | phase 2 |
+| `ParentForTransform` across trees. | Computed through the common ancestor; clips and opacity still come from the parent chain; without a common ancestor the parent is used. | Behaviour | The adorner pass of the compositor. | phase 2 |
+| `LayerVisual.Shadow` follows the alpha of the composed content. | Where the drawing context has effects; elsewhere the box shadow of the rectangle of the visual. | Behaviour | The capabilities of the drawing context. | phase 2 |
+| `RedirectVisual` shows its source as if it were its child. | It ignores the visibility, opacity, transform and clip of the source; it draws nothing inside its own source; when the source comes after it in the tree, a change of the extent of the source reaches its bounds one frame late. | Behaviour | It reuses the rendering of the visual surface; bounds follow the update pass. | phase 2 |
+| A nine-grid brush over a surface brush honours that brush's stretch, alignment and transform. | The surface is cut at its natural size; those members are ignored. | Behaviour | The nine rectangles are cut from the surface itself. | phase 2 |
+| A mask brush masks with any brush. | A colour or gradient mask works through an opacity mask; a surface (or other composition) mask masks through the bitmaps it draws, in a layer with destination-in blending. | Missing | The drawing contexts blend bitmaps only. | phase 2 |
+| The transform of a gradient brush. | Applied after the upstream `Transform`, about the upstream `TransformOrigin` (the top left corner by default, as in WinUI). | Representation | It goes through the `Transform` and `RelativeTransform` of the drawing context. | phase 2 |
+| The `Vector2` members of the gradient brushes (`StartPoint`, `EllipseCenter`, ...) are animatable; `EndPoint` defaults to (1, 0). | Animations target the upstream relative-point properties; `EndPoint` keeps the upstream default (0, 0). | Missing / Behaviour | The upstream properties are relative points. | phase 2 |
+| `CompositionGradientBrush.InterpolationSpace`. | Stored; the drawing contexts interpolate in RGB. | Missing | No other interpolation in the backends. | phase 2 |
 | `ScalarTransition` and `Vector3Transition` are classes: a change of `Duration` after the assignment reaches the element. | Copyable values, copied when assigned; a change is made by assigning again. | Representation | No identity or change notification is needed. | phase 3 |
 | `UIElement.RotationAxis` rotates in 3D. | An axis other than Z is written to `Orientation`, of which the 2D renderers show the projection; a zero axis counts as Z. | Behaviour | The renderers are 2D. | phase 3 |
 | `UIElement.TransformMatrix` is applied after the other facades. | Its 2D affine part (M11, M12, M21, M22, M41, M42) is applied after the render transform and before `Scale`, the rotation and `Translation`; the 3D part is ignored. | Behaviour | The composition visual applies its `TransformMatrix` first; folding `Scale` and the rotation into it would break their animations. | phase 3 |
