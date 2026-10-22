@@ -50,6 +50,7 @@ pub mod drawing;
 pub mod expressions;
 pub mod generated;
 pub mod hit_testing;
+pub mod interactions;
 pub mod server;
 #[cfg(any(test, feature = "testing"))]
 pub mod testing;

@@ -180,10 +180,10 @@ it does not.
 
 | Type / member | Status | Notes | Phase |
 |---|---|---|---|
-| `InteractionTracker` (position, scale, velocities, bounds, resting values, decay rates, `TryUpdate*`, states, owner callbacks) | missing | | 4 |
-| `IInteractionTrackerOwner` | missing | | 4 |
-| `InteractionTrackerInertiaRestingValue`, `InteractionTrackerInertiaMotion`, `InteractionTrackerInertiaNaturalMotion`, `Configure*InertiaModifiers` | missing | | 4 |
-| `VisualInteractionSource` (`TryRedirectForManipulation`, source modes, rails, chaining, wheel configuration) | missing | | 4 |
+| `InteractionTracker` (position, scale, velocities, bounds, resting values, decay rates, `TryUpdate*`, states, owner callbacks) | partial | `interactions::InteractionTracker`: `Create`, `CreateWithOwner`, every value property, `InteractionSources`, `TryUpdatePosition` (with `InteractionTrackerClampingOption`), `TryUpdatePositionBy`, `TryUpdatePositionWithAnimation`, `TryUpdatePositionWithAdditionalVelocity`, `TryUpdateScale`, `TryUpdateScaleWithAnimation`, `TryUpdateScaleWithAdditionalVelocity`, request ids, the four states with a rubber band past the boundaries while interacting. Runs on the UI thread with the animation frames of the media context and publishes its values into its property set (`properties`); a reference to the tracker in an expression is a reference to that set. Custom animations are evaluated on the UI thread. Missing: tracker binding (`SetBindingMode`, `IsFromBinding` is always `false`), `TryUpdatePosition` with `InteractionTrackerPositionUpdateOption`, `AdjustPositionXIfGreaterThanThreshold`/`Y`. | 4 |
+| `IInteractionTrackerOwner` | has | A trait with no-op defaults; callbacks are queued and delivered after the change, never nested. | 4 |
+| `InteractionTrackerInertiaRestingValue`, `InteractionTrackerInertiaMotion`, `InteractionTrackerInertiaNaturalMotion`, `Configure*InertiaModifiers` | partial | Resting value and motion modifiers for X, Y and scale, conditions evaluated with `this.Target` as the tracker. Missing: `InteractionTrackerInertiaNaturalMotion` and `ConfigureVector2PositionInertiaModifiers` (they need the natural motion animations of phase 3). | 4 |
+| `VisualInteractionSource` (`TryRedirectForManipulation`, source modes, rails, chaining, wheel configuration) | partial | `interactions::VisualInteractionSource`: `Create` (plus `create_for_element`), source modes, rails, `ManipulationRedirectionMode` and `PointerWheelConfig` (mouse wheel, Ctrl + wheel scales), the input values (`DeltaPosition`, `Position`, ...). `TryRedirectForManipulation` takes the pressed event args (or a pointer point and the element) and follows the routed pointer events of the element. Chaining modes are stored only; pinch input, touchpad redirection and expression references to a source are missing. | 4 |
 
 ### 3.10 XAML pieces
 
