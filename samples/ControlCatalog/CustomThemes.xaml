@@ -107,7 +107,7 @@
                               HorizontalContentAlignment="Stretch"
                               IsVisible="False" />
 
-            <ScrollViewer Padding="20"
+            <ScrollViewer Name="PART_PageScroll" Padding="20"
                           HorizontalScrollBarVisibility="Disabled">
               <ContentPresenter Name="PART_ContentPresenter"
                                 HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"

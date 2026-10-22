@@ -432,8 +432,8 @@ impl ReloadTarget for PanelReloadTarget {
         let value: BoxedValue = Rc::new(root.clone());
         Ok(Box::new(Change {
             restoration: self.restoration.clone(),
-            state: Rc::new(crate::state::ViewState::capture_with(
-                Some(&value), &before, &self.state_adapters,
+            state: Rc::new(crate::state::ViewState::capture_document(
+                Some(&value), Some(&self.uri), &before, &self.state_adapters,
             )),
             old_scope: NameScope::get_name_scope(&root),
             root,

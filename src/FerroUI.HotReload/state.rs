@@ -1,12 +1,17 @@
 //! Conservative state transfer for named, unambiguous controls in one reload boundary.
-use ferroui_base::{BoxedValue, Ref, StyledElement, Vector};
+use ferroui_base::{BoxedValue, StyledElement, Vector};
+#[cfg(test)]
+use ferroui_base::Ref;
 use ferroui_controls::{primitives::SelectingItemsControl, SelectionMode};
 use ferroui_controls::{ScrollViewer, TextBox};
+#[cfg(test)]
 use ferroui_markup_xaml::FromXamlObject;
 use std::collections::BTreeMap;
 #[derive(Default)]
-pub(crate) struct ViewState(BTreeMap<Vec<String>, Option<Entry>>);
+pub(crate) struct ViewState(BTreeMap<Vec<String>, Option<Entry>>, Option<String>);
 struct Entry {
+    source: std::rc::Rc<str>,
+    original: ferroui_base::WeakRef<StyledElement>,
     name: String,
     kind: &'static ferroui_base::TypeInfo,
     focused: bool,
@@ -111,37 +116,6 @@ impl SelectionState {
         }
     }
 }
-fn controls(root: &BoxedValue, source: &str) -> Vec<(Vec<String>, Ref<StyledElement>)> {
-    let Some(root) = Ref::<StyledElement>::from_xaml_object(root) else {
-        return Vec::new();
-    };
-    let mut result = Vec::new();
-    let mut pending = vec![(root, Vec::<String>::new(), None, true)];
-    while let Some((element, mut scope_path, parent_scope, is_root)) = pending.pop() {
-        let own_scope = ferroui_base::controls::NameScope::get_name_scope(&element);
-        let identity = element
-            .name()
-            .and_then(|name| crate::identity::identity(source, &name));
-        if !is_root && own_scope.is_some() && own_scope != parent_scope {
-            // An unnamed nested scope has no stable identity across reconstructions.
-            let Some(owner) = &identity else { continue };
-            scope_path.push(owner.clone());
-        }
-        let scope = own_scope.or(parent_scope);
-        pending.extend(
-            element
-                .logical_children()
-                .to_vec()
-                .into_iter()
-                .map(|child| (child, scope_path.clone(), scope.clone(), false)),
-        );
-        if let Some(identity) = identity {
-            scope_path.push(identity);
-            result.push((scope_path, element));
-        }
-    }
-    result
-}
 use crate::identity::authored;
 pub(crate) fn unchanged_unbound(before: &str, after: &str, old_name: &str, name: &str, property: &str) -> bool {
     let old = authored(before, old_name, property);
@@ -153,14 +127,23 @@ impl ViewState {
     pub(crate) fn capture(root: Option<&BoxedValue>, source: &str) -> Self {
         Self::capture_with(root, source, &[])
     }
+    #[cfg(test)]
     pub(crate) fn capture_with(
         root: Option<&BoxedValue>,
         source: &str,
         adapters: &[std::rc::Rc<dyn crate::ControlStateAdapter>],
     ) -> Self {
-        let mut state = Self::default();
-        for (identity, element) in root.map(|root| controls(root, source)).unwrap_or_default() {
+        Self::capture_document(root, None, source, adapters)
+    }
+    pub(crate) fn capture_document(
+        root: Option<&BoxedValue>, uri: Option<&str>, source: &str,
+        adapters: &[std::rc::Rc<dyn crate::ControlStateAdapter>],
+    ) -> Self {
+        let mut state = Self(BTreeMap::new(), uri.map(str::to_owned));
+        for crate::state_scope::Control { identity, element, source } in root.map(|root| crate::state_scope::controls(root, uri, source)).unwrap_or_default() {
             let entry = Entry {
+                source,
+                original: element.downgrade(),
                 name: element.name().unwrap_or_default(),
                 kind: element.get_type(),
                 focused: element
@@ -188,18 +171,14 @@ impl ViewState {
         }
         state
     }
-    pub(crate) fn restore(&self, root: &BoxedValue, before: &str, after: &str) {
-        let elements = controls(root, after);
-        let has_new_focus = elements.iter().any(|(_, element)| {
-            element
-                .cast::<ferroui_base::input::InputElement>()
-                .is_some_and(|input| input.is_focused())
-        });
+    pub(crate) fn restore(&self, root: &BoxedValue, _before: &str, after: &str) {
+        let elements = crate::state_scope::controls(root, self.1.as_deref(), after);
+        let has_new_focus = crate::state_scope::has_focus(root);
         let mut counts = BTreeMap::new();
-        for (identity, _) in &elements {
-            *counts.entry(identity.clone()).or_insert(0) += 1;
+        for record in &elements {
+            *counts.entry(record.identity.clone()).or_insert(0) += 1;
         }
-        for (identity, element) in elements {
+        for crate::state_scope::Control { identity, element, source } in elements {
             let Some(name) = element.name() else { continue };
             if counts.get(&identity) != Some(&1) {
                 continue;
@@ -207,6 +186,9 @@ impl ViewState {
             let Some(Some(entry)) = self.0.get(&identity) else {
                 continue;
             };
+            if entry.original.upgrade().is_some_and(|original| original.ptr_eq(&element)) { continue; }
+            let before = &*entry.source;
+            let after = &*source;
             if !std::ptr::eq(entry.kind, element.get_type()) {
                 continue;
             }

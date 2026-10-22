@@ -488,3 +488,47 @@ fn catalog_xaml_handlers_refresh_cached_adorner_and_retire_old_subscriptions() {
     assert_eq!(application.get(), 9);
     window.close();
 }
+
+#[test]
+fn compiled_catalog_template_scroll_survives_included_theme_replacement() {
+    use ferroui_base::Vector;
+    use ferroui_controls::{Application, ScrollViewer};
+    let _application = super::support::start_catalog_app();
+    let page = crate::pages::BorderPage::new();
+    // Use the real compiled page/theme, then own an isolated session explicitly.
+    crate::hot_reload::shutdown();
+    let root: Ref<ContentPage> = page.clone().upcast();
+    let window = Window::new(); window.set_width(640.0); window.set_height(180.0);
+    window.set_content(Some(Control::boxed(&root.clone().upcast::<Control>())));
+    window.show(); Dispatcher::ui_thread().run_jobs(None);
+    let find = || root.get_visual_descendants().find_map(|node| node.cast::<ScrollViewer>()
+        .filter(|scroll| scroll.name().as_deref() == Some("PART_PageScroll"))).unwrap();
+    let old = find(); old.set_offset(Vector::new(0.0, 80.0));
+    assert_eq!(old.offset().y, 80.0, "fixture must actually scroll");
+    let view_uri = "ferres://controlcatalog/Pages/BorderPage.xaml";
+    let theme_uri = "ferres://controlcatalog/CustomThemes.xaml";
+    let view = include_str!("../Pages/BorderPage.xaml");
+    let theme = include_str!("../CustomThemes.xaml");
+    let mut session = HotReloadSession::new();
+    session.register_document(view_uri.into(), view.into()).unwrap();
+    session.register_document(theme_uri.into(), theme.into()).unwrap();
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::hot_reload::component_target(
+        &root, view_uri.into(), view.into(), vec![theme_uri.into()],
+    ));
+    session.register_target(&target);
+    let mut configuration = RuntimeXamlLoaderConfiguration::default();
+    configuration.local_assembly = Some(&crate::register_types::ASSEMBLY);
+    session.track_resource_includes(&Application::current().unwrap().resources(), configuration);
+    for padding in [21, 22] {
+        let previous = find(); let weak = previous.downgrade();
+        session.submit(theme_uri.into(), theme.replace("Name=\"PART_PageScroll\" Padding=\"20\"", &format!("Name=\"PART_PageScroll\" Padding=\"{padding}\"")));
+        let result = session.apply_pending().unwrap();
+        assert_eq!(result.status, ReloadStatus::Applied, "{result:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        let current = find(); assert!(!current.ptr_eq(&previous));
+        assert_eq!(current.offset().y, 80.0);
+        drop(previous);
+        if padding == 22 { assert!(weak.upgrade().is_none()); }
+    }
+    drop(old); window.close();
+}

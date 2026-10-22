@@ -180,6 +180,8 @@ fn invoke_error(error: MarkupInvokeError, what: &str, line_info: &dyn IXamlLineI
 /// language maps one) and what the interpreter decided once about its
 /// nodes. It keeps the nodes of the document alive.
 pub struct RuntimeDocument {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    pub source_text: RefCell<Option<Rc<str>>>,
     pub base_uri: Option<Uri>,
     pub static_providers: Rc<[Rc<dyn IStaticServiceProvider>]>,
     /// The root node: the decisions below are remembered by node address,
@@ -196,6 +198,8 @@ impl RuntimeDocument {
         root: Option<Rc<dyn IXamlAstNode>>,
     ) -> Rc<Self> {
         Rc::new(Self {
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            source_text: RefCell::new(None),
             base_uri,
             static_providers: Rc::from(static_providers),
             root,

@@ -88,3 +88,6 @@ pub(crate) fn throw<T>(result: Result<T, XamlLoadException>) -> T {
 
 #[cfg(test)]
 mod test_support;
+
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod reload_templates;

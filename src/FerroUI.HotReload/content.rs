@@ -124,8 +124,8 @@ impl ReloadTarget for ContentReloadTarget {
                 .map_err(|error| ReloadError::Failed(error.to_string()))?;
         Ok(Box::new(ContentChange {
             restoration: self.restoration.clone(),
-            state: Rc::new(crate::state::ViewState::capture_with(
-                host.content().as_ref(),
+            state: Rc::new(crate::state::ViewState::capture_document(
+                host.content().as_ref(), Some(&self.uri),
                 &self.accepted_source.borrow(),
                 &self.state_adapters,
             )),

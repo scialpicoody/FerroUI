@@ -395,10 +395,14 @@ impl FerroXamlIlRuntimeCompiler {
         throw_exception_if_any_error(&diagnostics.borrow())?;
 
         // The counterpart of compiling each document into its builder type.
-        for (resource, provider) in parsed_documents.iter().zip(&providers) {
+        for ((resource, provider), source) in parsed_documents.iter().zip(&providers).zip(sources) {
             let xaml_document = resource.xaml_document();
             let xaml_document = xaml_document.borrow();
             let runtime_document = interpreter.document(&xaml_document, resource.uri().as_deref())?;
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            { *runtime_document.source_text.borrow_mut() = Some(Rc::from(source.xaml.as_str())); }
+            #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+            let _ = source;
             provider.set_body(DocumentBody {
                 interpreter: interpreter.clone(),
                 root: xaml_document.root()?,

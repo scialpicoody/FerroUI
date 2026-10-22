@@ -196,8 +196,8 @@ separately.
   removing the attribute clears its local contribution. Dynamic-resource bindings,
   animations, application overrides and unrelated root lifecycle properties are
   rejected. Property callbacks must support reversible assignment. ControlCatalog
-  claims its root Theme this way. Deferred-template validation and template-part
-  state transfer still require additional coverage.
+  claims its root Theme this way. Selected template validation and compatible
+  template-part state transfer are covered by the engine and catalog tests.
 - `ResourceReloadTarget::merged`: replaces an explicitly owned merged dictionary
   contribution while preserving its container, direct application resources and
   other merged entries. Normal owner notifications update dynamic consumers,
@@ -242,8 +242,9 @@ separately.
   application styles remain in place. Resources in the replaced styles transfer
   ownership and notify dynamic consumers. Rollback also handles an observer failure
   between removal and insertion. Template edits rebuild through the normal layout
-  lifecycle; detached template parts are released. Template-state transfer and
-  eager validation of every deferred template remain unfinished.
+  lifecycle; detached template parts are released. Registered component targets
+  capture compatible template-part state. Deferred templates are validated when
+  preparation instantiates them; this is not eager validation of every declaration.
 - Conservative transfer of uniquely identified text-control state, scroll offset and
   focus after updating layout, before the queued render phase. Existing property values
   and bindings take precedence. TextBox transfer retains the caret and both selection
@@ -255,10 +256,18 @@ separately.
   ambiguous items are skipped, as are custom models, authored/bound selection,
   changed selection modes and controls that already have a selection. Direct-property
   bindings are detected even when no styled-property value exists, preventing stale
-  writes through programmatic two-way selection bindings. Template-instance identity
-  across repeated items remains unfinished. Development keys take
-  precedence over names, and stable named/keyed scope owners qualify descendants.
-  Ambiguous matches and anonymous nested scope owners are skipped.
+  writes through programmatic two-way selection bindings. Template instances carry
+  their document/declaration identity and owner scope. The same part name in two
+  named owners remains distinct; repeated anonymous instances of the same template
+  are ambiguous and skipped. A single anonymous owner can use its component scope.
+  Nested template declarations have independent authored-value guards. Logical and
+  visual traversal captures each actual object once, and retained objects are not
+  restored onto themselves. Newly assigned focus, including on an unnamed control,
+  takes precedence. Unknown template provenance is skipped.
+  Development keys take precedence over names, and stable named/keyed scope owners
+  qualify descendants. Initial compiled/runtime loading of unnamed development
+  keys still needs integration; replacement preparation already supplies identities.
+  Ambiguous matches and anonymous nested namescope owners are skipped.
 - Content, component and panel adapters accept `with_state_adapter` for
   application-defined control state. `ControlStateAdapter::capture` returns an
   optional `CapturedControlState`; restoration receives the compatible control
@@ -930,8 +939,8 @@ to their recorded fixtures, platforms, sampling methods and sample counts.
 
 The [completion audit](hot-reload-completion-audit.md) separates requirements from
 optional extensions and supersedes this section's former expanding checklist.
-Remaining work is to close standard component handler ownership and compatible
-template-part state transfer, then validate and document the final implementation on
+Remaining work is to integrate unnamed development keys into initial population,
+then validate and document the final implementation on
 all three desktop platforms. Existing native runs are evidence for their recorded
 source revisions, not missing work to be started from scratch.
 

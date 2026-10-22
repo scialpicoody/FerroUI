@@ -786,5 +786,16 @@ fn deferred_content(node: &Rc<XamlDeferredContentNode>, context: &mut EvalContex
         }
         None => Some(factory),
     };
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    {
+        use ferroui_markup_xaml::{FromXamlObject, xaml_il::runtime::DeferredContent};
+        if let Some(content) = result.as_ref().and_then(Rc::<DeferredContent>::from_xaml_object) {
+            let document = context.document();
+            content.set_declaration(ferroui_markup_xaml::reload_templates::Declaration {
+                uri: document.base_uri.as_ref().map(|uri| uri.absolute_uri().to_owned()),
+                line: node.line(), column: node.position(), source: document.source_text.borrow().clone(),
+            });
+        }
+    }
     Ok(EvalResult::value(type_, result))
 }

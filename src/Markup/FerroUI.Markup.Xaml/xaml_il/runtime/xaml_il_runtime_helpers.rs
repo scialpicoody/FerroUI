@@ -119,6 +119,8 @@ pub struct DeferredContent {
     reload_context: RefCell<Option<Rc<reload::Context>>>,
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     event_context: crate::reload_events::DeferredEventContext,
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    declaration: RefCell<Option<crate::reload_templates::Declaration>>,
 }
 
 /// The resource nodes above a declaration, held weakly, shared by the
@@ -163,10 +165,24 @@ impl DeferredContent {
             reload_context: RefCell::new(None),
             #[cfg(all(feature = "hot-reload", debug_assertions))]
             event_context,
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            declaration: RefCell::new(None),
         });
         #[cfg(all(feature = "hot-reload", debug_assertions))]
         reload::record(&content);
         content
+    }
+
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    pub(crate) fn record_template(&self, value: &BoxedValue) {
+        if let Some(declaration) = self.declaration.borrow().as_ref() {
+            crate::reload_templates::record(value, declaration);
+        }
+    }
+
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    pub fn set_declaration(&self, declaration: crate::reload_templates::Declaration) {
+        *self.declaration.borrow_mut() = Some(declaration);
     }
 
     /// The type the built object is expected to be (the type argument of the

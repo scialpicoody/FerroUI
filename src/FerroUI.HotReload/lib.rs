@@ -1,9 +1,12 @@
 //! Development reload transactions. All targets and commits remain on the creating UI thread.
 #![cfg(debug_assertions)]
 mod component;
+mod state_scope;
 mod handlers;
 #[cfg(test)]
 mod handler_tests;
+#[cfg(test)]
+mod template_state_tests;
 mod detached_context;
 mod deferred_context;
 mod frame_timing;
@@ -138,6 +141,7 @@ impl HotReloadSession {
             .unwrap()
             .check_document(&uri)
             .map_err(ReloadError::Failed)?;
+        self.source_registration.as_ref().unwrap().register_compiled_source(&uri, &source);
         self.contracts.insert(uri.clone(), contract);
         Rc::make_mut(&mut self.accepted).insert(uri, source);
         *self.published.borrow_mut() = self.accepted.clone();

@@ -48,11 +48,14 @@ impl LiveRoot {
         }
     }
 }
-fn matches_replacement(root: &Ref<StyledElement>, scope: &Option<NameScopeRef>, content: &BoxedValue) -> bool {
-    NameScope::get_name_scope(root) == *scope
-        && root.cast::<ContentControl>().and_then(|root| root.content())
-            .or_else(|| root.cast::<ContentPage>().and_then(|root| root.content()))
-            .is_some_and(|current| Rc::ptr_eq(&current, content))
+fn matches_replacement(root: &Ref<StyledElement>, scope: &Option<NameScopeRef>, content: &Option<BoxedValue>) -> bool {
+    let current = root.cast::<ContentControl>().and_then(|root| root.content())
+        .or_else(|| root.cast::<ContentPage>().and_then(|root| root.content()));
+    NameScope::get_name_scope(root) == *scope && match (&current, content) {
+        (Some(current), Some(content)) => Rc::ptr_eq(current, content),
+        (None, None) => true,
+        _ => false,
+    }
 }
 /// Prepares application reference/subscription changes without mutating the live component.
 /// Commit runs after content and namescope replacement. Rollback runs after restoring the
@@ -373,14 +376,14 @@ impl PreparedReload for Change {
         let after = self.after.clone();
         self.restoration.schedule(
             move || {
-                if let (Some(root), Some(content)) = (root.upgrade(), content) {
+                if let Some(root) = root.upgrade() {
                     if matches_replacement(&root, &scope, &content) {
                         if let Some(layout) = root.cast::<ferroui_base::layout::Layoutable>() {
                             layout.update_layout();
                         }
                     }
                     if matches_replacement(&root, &scope, &content) {
-                        state.restore(&content, &before, &after);
+                        state.restore(&(Rc::new(root.clone()) as BoxedValue), &before, &after);
                     }
                 }
             },
@@ -507,8 +510,8 @@ impl ReloadTarget for ComponentReloadTarget {
         Ok(Box::new(Change {
             restoration: self.restoration.clone(),
             old_content: root.content(),
-            state: Rc::new(crate::state::ViewState::capture_with(
-                root.content().as_ref(),
+            state: Rc::new(crate::state::ViewState::capture_document(
+                Some(&(Rc::new(root.element()) as BoxedValue)), Some(&self.uri),
                 &before,
                 &self.state_adapters,
             )),

@@ -1,6 +1,6 @@
 # Hot reload completion audit
 
-Audited on 2026-10-20. The goal remains
+Audited on 2026-10-22. The goal remains
 active. This checklist fixes the completion scope; historical validation notes
 retain their original source revisions.
 
@@ -25,9 +25,11 @@ retain their original source revisions.
    application-style ordering, and composed previews for mixed application/XAML
    dictionary providers. Routed handler ownership now covers compiled/runtime
    population and the catalog's AdornerLayerPage, including rollback and cached
-   reference refresh. Complete state transfer for compatible, uniquely identified
-   template parts; the current logical-child capture does not cover replacement
-   root-template parts. Preserve the documented restart boundary for
+   reference refresh. Template-part state now follows declaration and instance
+   scopes across compiled/runtime replacement. Close initial-load integration for
+   unnamed development keys: replacement preparation currently assigns their
+   identities, but ordinary initial compiled/runtime population does not. Preserve
+   the documented restart boundary for
    unsupported custom mutations and irreversible user code.
 2. **Freeze a final implementation revision and close acceptance.** Reuse existing
    evidence where behavior and inputs are unchanged, but run the final relevant
@@ -139,3 +141,26 @@ requirements.
   XAML and Rust baselines.
 
 These follow-ups must not keep the original goal open after its required work passes.
+
+## Template state increment (2026-10-22)
+
+Compiled and runtime template factories now record weak declaration provenance.
+State capture traverses logical and template visual children once, with separate
+source fragments and document/declaration/owner identities. The compiled source
+baseline remains immutable across accepted and scoped edits. Preserved component
+roots with no Content participate, and unchanged objects are not restored onto
+themselves. Unknown provenance and ambiguous repeated instances are skipped.
+
+All 128 engine tests pass on macOS and Linux. Eight template regressions cover
+root templates, nested and repeated instances, data templates, unique anonymous
+owners, ambiguity, text/caret/focus, scroll, selection, two-way binding protection,
+authored changes, rollback, rapid revisions and retired-part release. Declaration
+locations use the parser's UTF-16 columns and XML line-ending rules; a Unicode
+regression failed before that correction and passes afterward.
+
+All 11 catalog reload integration tests pass on macOS. The added test starts from
+the actual compiled BorderPage and included CustomThemes.xaml, then replaces the
+included theme twice with interpreted markup, preserving its named page scroll
+part's offset and releasing retired parts. The macOS markup suites pass 271 markup,
+206 XAML runtime and 598 compiler/integration tests (17 existing ignored tests).
+Final native/Windows acceptance and initial unnamed-key integration remain open.
