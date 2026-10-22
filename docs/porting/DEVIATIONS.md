@@ -6,6 +6,7 @@ Other pages hold the entries of their own area, and this page does not repeat th
 
 - `browser-platform.md` section 14: the browser backend and the browser hosts of the samples (host-level differences, upstream quirks not copied).
 - `xaml.md`: the markup pipeline and the ahead-of-time compiler.
+- `winui-composition.md` section 7: the port of the WinUI 3 composition API on top of the compositor (differences from WinUI). The changes it makes to upstream behaviour are listed in the section "WinUI composition" below.
 - `PORTING-GUIDE.md`: the systematic mappings that apply everywhere (class model, nullability, events, generics, naming). An application of those rules is not a deviation and is not listed here.
 
 ## How to record a deviation
@@ -1333,6 +1334,15 @@ The references are `ReactiveDemo`, the getting-started sample of ReactiveUI (Rea
 | The tests of the example run their asynchronous assertions on a test executor, which `ExampleTestExecutorTests` checks; `CreateMetricsService_Matches_Platform(bool, Type)` is a test with arguments. | The tests have no executor: a test awaits on its own thread with `await_task`, which `example_test_executor_tests.rs` checks the same way. The test with arguments is one test per argument set. | Test | Rust's test harness has no executors and no parameterized tests. | #257 |
 | A headless test compares the command of the fail button with `FailWork` by reference. | The command of the button is an adapter of `FailWork` (`ReactiveCommandAdapter`): the test checks that the button has a command that can execute and that clicking it runs `FailWork`. | Test | The button holds an adapter, not the `ReactiveCommand` itself. | #257 |
 | A headless test publishes a measurement from a worker thread (`Task.Run(service.Publish)`) and checks that the change of `SampleCount` arrives on the UI thread. | The test publishes on its own thread and checks that the change arrives through the scheduler of the user-interface thread (`ObserveOn(MainThreadScheduler)`), in a job of the dispatcher, on the UI thread. | Test | The observables of the port belong to the thread that creates them (`reactive.md`, section 5.1). | #257 |
+
+### WinUI composition (`src/FerroUI.Base/rendering/composition/`, `src/FerroUI.Controls/animation/`, `src/FerroUI.Controls/hosting/`)
+
+The port of the WinUI 3 composition API (`winui-composition.md`) changes upstream behaviour where WinUI's differs. The differences from WinUI are in `winui-composition.md` section 7.
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| A `CompositionPropertySet` has no server counterpart; an expression that refers to one reads a copy of its values taken when the animation starts, and its entries cannot be animated. | A property set made with `CompositionPropertySet::new` is live: it has a server counterpart (`ServerCompositionPropertySet`) that receives its entries with each batch, its entries are animatable (`start_animation`), and a reference to it is resolved by id, so expressions read its current values. Its entries are dynamic composition properties, interned by name (`CompositionProperty::dynamic`). The parameters of an animation remain a set without a server counterpart. | Behaviour | WinUI's property sets are live; the property sets of `ElementCompositionPreview`, the effect property set of a connected animation and the interaction tracker depend on it. | #304 |
+| The expression functions `Matrix3x2.CreateTranslation` and `Matrix4x4.CreateTranslation` build a scale matrix; the 6- and 16-argument `Matrix3x2` and `Matrix4x4` constructors repeat the fifth argument in every later component; function names are matched with case. | Translation matrices, every argument in its component, and function names matched ignoring case, as WinUI. | Behaviour | Defects of upstream, and WinUI compatibility; expressions written for WinUI work unchanged. | #304 |
 
 ### Developer tools (`src/FerroUI.Diagnostics/`)
 
