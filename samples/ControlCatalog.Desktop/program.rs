@@ -86,6 +86,9 @@
 //! (`EmbedSample.Implementation`). The one for Linux is ported
 //! (`NativeControls/Gtk`).
 
+#[cfg(feature = "mcp")]
+mod mcp;
+
 #[cfg(windows)]
 mod window_capture;
 
@@ -117,7 +120,13 @@ use std::time::Duration;
 fn main() -> std::process::ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
 
+    // Reserve the protocol writer before builder configuration can print platform diagnostics.
+    #[cfg(feature = "mcp")]
+    let mcp_output = args.iter().any(|arg| arg == "--mcp-stdio")
+        .then(|| ferroui_mcp::reserve_stdout().expect("reserve stdout for MCP"));
     let builder = build_ferro_app();
+    #[cfg(feature = "mcp")]
+    let builder = mcp::configure(builder, &args, mcp_output);
 
     // As the desktop entry point of the reference: `--fbdev` and `--drm`
     // run the catalog on the Linux framebuffer platform, on a framebuffer
@@ -159,7 +168,9 @@ pub fn build_ferro_app() -> AppBuilder {
                 embed_sample_gtk::EmbedSampleGtk::default(),
             )));
             select_theme_of_the_environment();
-            smoke_run()
+            smoke_run();
+            #[cfg(feature = "cdp")]
+            start_cdp();
         })
         .after_setup(attach_dev_tools)
         .log_to_trace(LogEventLevel::Warning, &[])
@@ -1457,4 +1468,18 @@ mod tests {
         assert_eq!(client_size_that_fits(area, PixelPoint::new(0, 0), client, client, 1.0), Some(client));
         assert_eq!(client_size_that_fits(area, PixelPoint::new(60, 30), client, client, 1.0), None);
     }
+}
+
+#[cfg(feature = "cdp")]
+ferroui_base::ferro_thread_local! {
+    static CDP_SERVER: std::cell::RefCell<Option<ferroui_devtools::DevToolsServer>> = const { std::cell::RefCell::new(None) };
+}
+
+#[cfg(feature = "cdp")]
+fn start_cdp() {
+    let Ok(value) = std::env::var("FERROUI_CDP_PORT") else { return; };
+    let port: u16 = value.parse().expect("FERROUI_CDP_PORT must be a port number (0 selects a free port)");
+    let server = ferroui_devtools::DevToolsServer::start(port).expect("Could not start the CDP endpoint");
+    println!("FerroUI CDP: http://{}", server.local_addr());
+    CDP_SERVER.with(|slot| *slot.borrow_mut() = Some(server));
 }
