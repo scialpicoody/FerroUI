@@ -6,6 +6,8 @@ This document is the inventory and the plan of the port of the WinUI 3 compositi
 facade of `UIElement`) to FerroUI. It records what FerroUI already has, what the port adds, in which
 order, and every place where the result differs from WinUI.
 
+Tracking issue: [#303](https://github.com/wieslawsoltes/FerroUI/issues/303). Pull request: [#304](https://github.com/wieslawsoltes/FerroUI/pull/304).
+
 ## 1. Sources
 
 - **The compositor of FerroUI.** `src/FerroUI.Base/rendering/composition` is the port of the
