@@ -1,7 +1,7 @@
 //! Detached framework roots and composed resource lookup during population.
 use crate::{root_resources::OwnedResources, root_styles::OwnedStyles, ReloadError};
 use ferroui_base::{
-    controls::{resource_preview::ResourcePreviewGuard, IResourceNode, ResourceKey, ResourceValue},
+    controls::{resource_preview::{ResourcePreviewGuard, ResourcePreviewResolver}, IResourceNode, ResourceKey, ResourceValue},
     styling::ThemeVariant, Ref, StyledElement,
 };
 use std::rc::Rc;
@@ -36,10 +36,11 @@ struct Preview {
 }
 impl Preview {
     fn resources(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
-        self.candidate.resources().try_get_resource(key, theme).or_else(|| match &self.resources {
-            Some(resources) => resources.application_resource(key, theme),
-            None => self.root.resources().try_get_resource(key, theme),
-        })
+        match &self.resources {
+            Some(resources) => resources.preview_resource(&self.candidate.resources(), key, theme),
+            None => self.candidate.resources().try_get_resource(key, theme)
+                .or_else(|| self.root.resources().try_get_resource(key, theme)),
+        }
     }
     fn styles(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
         match &self.styles {
@@ -91,12 +92,35 @@ pub(crate) fn install(
             }
         });
     }
-    Scope(guards)
+    // An explicit dictionary is assigned after the loader constructs it. Follow
+    // the current containers so lazy values cannot bypass the composed preview
+    // by resolving through that newly assigned dictionary on their parent stack.
+    let root = root.clone();
+    let candidate = candidate.clone();
+    let resources = resources.cloned();
+    let styles = styles.cloned();
+    let resolver = ResourcePreviewResolver::new(Rc::new(move |node| {
+        use ferroui_base::controls::IResourceProvider;
+        let dictionary: Rc<dyn IResourceProvider> = candidate.resources().into();
+        let style_dictionary: Rc<dyn IResourceProvider> = candidate.styles().resources().into();
+        let kind = if node.reference_id() == dictionary.reference_id() { Kind::Resources }
+            else if node.reference_id() == style_dictionary.reference_id() { Kind::StyleResources }
+            else { return None; };
+        Some(Rc::new(Preview {
+            root: root.clone(), candidate: candidate.clone(),
+            resources: resources.clone(), styles: styles.clone(), kind,
+        }))
+    }));
+    Scope { guards, resolver: Some(resolver) }
 }
-pub(crate) struct Scope(Vec<ResourcePreviewGuard>);
+pub(crate) struct Scope {
+    guards: Vec<ResourcePreviewGuard>,
+    resolver: Option<ResourcePreviewResolver>,
+}
 impl Drop for Scope {
     fn drop(&mut self) {
-        while self.0.pop().is_some() {}
+        self.resolver.take();
+        while self.guards.pop().is_some() {}
     }
 }
 
@@ -112,6 +136,30 @@ mod tests {
     }
     fn value(node: &Rc<dyn IResourceNode>) -> i32 {
         *lookup(&**node, &"value".into(), None).unwrap().unwrap().downcast_ref::<i32>().unwrap()
+    }
+    #[test]
+    fn reassigned_candidate_dictionaries_use_composed_lookup_until_unwind() {
+        let _dispatcher = ferroui_base::threading::Dispatcher::unit_test_scope();
+        let root: Ref<StyledElement> = ferroui_controls::ContentControl::new().upcast();
+        let owned = OwnedResources::capture(&root);
+        root.resources().add_value("value", 1i32);
+        let candidate: Ref<StyledElement> = ferroui_controls::ContentControl::new().upcast();
+        let replacement = ResourceDictionary::new();
+        let merged = ResourceDictionary::new();
+        merged.add_value("value", 2i32);
+        replacement.merged_dictionaries().add(Rc::<dyn IResourceProvider>::from(merged));
+        let provider: Rc<dyn IResourceNode> = Rc::<dyn IResourceProvider>::from(replacement.clone());
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let _preview = install(&root, &candidate, Some(&owned), None);
+            candidate.set_resources(replacement.clone());
+            assert_eq!(value(&provider), 1, "new dictionary bypassed application direct-key precedence");
+            panic!("candidate failed");
+        }));
+        assert!(result.is_err());
+        assert_eq!(value(&provider), 2, "candidate resolver survived unwind");
+        let retired = candidate.downgrade();
+        drop(candidate);
+        assert!(retired.upgrade().is_none());
     }
     #[test]
     fn candidate_overrides_preserve_dependency_previews_and_restore_on_unwind() {

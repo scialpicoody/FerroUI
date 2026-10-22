@@ -87,7 +87,20 @@ separately.
   the capture scopes.
   External writes to owned keys, dictionary replacement, ambiguous provider
   ownership, and collisions with application keys require restart. Mixed application
-  and XAML merged/theme provider trees need an explicit composed-preview adapter.
+  and XAML merged/theme providers use a composed candidate preview: direct keys
+  precede theme dictionaries, theme variants preserve their inheritance/fallback
+  order, and new merged providers occupy the original XAML-owned range between
+  application providers. Application values retain their normal precedence.
+  Merged/theme providers claimed during initial population are replaced as whole
+  contributions; add application resources to the parent dictionary or separate
+  providers. Mutating the contents of a claimed provider requires an application
+  ownership adapter.
+  This lookup also follows explicitly assigned candidate dictionaries, so deferred
+  factories use the same resource order as the committed view. Preview scopes never
+  transfer provider ownership; failed preparation leaves live owners unchanged.
+  Lower-level adapters can pair `ResourceDictionaryOwnership::preview_resource`
+  with `prepare_with_preview`; the ordinary `prepare` entry point still rejects
+  mixed providers when the caller has not supplied that composed lookup.
   Custom dictionaries and irreversible notification callbacks need a custom adapter;
   collection observers must not panic or mutate the collections during commit.
   This API does not claim inline `Styles` ownership.
@@ -900,8 +913,8 @@ to their recorded fixtures, platforms, sampling methods and sample counts.
 
 The [completion audit](hot-reload-completion-audit.md) separates requirements from
 optional extensions and supersedes this section's former expanding checklist.
-Remaining work is to close the standard component handler/resource ownership
-gaps, then validate and document the final implementation on
+Remaining work is to close standard component handler ownership and compatible
+template-part state transfer, then validate and document the final implementation on
 all three desktop platforms. Existing native runs are evidence for their recorded
 source revisions, not missing work to be started from scratch.
 

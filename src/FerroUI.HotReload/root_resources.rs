@@ -45,6 +45,10 @@ impl OwnedResources {
     pub(crate) fn application_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
         self.ownership.application_resource(key, theme)
     }
+    pub(crate) fn preview_resource(&self, candidate: &ResourceDictionary, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
+        self.ownership.preview_resource(candidate, key, theme)
+            .unwrap_or_else(|error| std::panic::panic_any(ReloadError::RestartRequired(error)))
+    }
     pub(crate) fn prepare(
         &self,
         candidate: &Ref<StyledElement>,
@@ -53,7 +57,7 @@ impl OwnedResources {
         let resources = candidate.resources();
         let change = self
             .ownership
-            .prepare(&resources)
+            .prepare_with_preview(&resources)
             .map_err(ReloadError::RestartRequired)?;
         // Detach only candidate ownership. Existing resources remain live until commit.
         candidate.set_resources(ResourceDictionary::new());
@@ -388,6 +392,138 @@ mod tests {
                 .unwrap(),
             40.0
         );
+    }
+    #[test]
+    fn mixed_root_dictionaries_prepare_with_final_precedence_and_rollback() {
+        use ferroui_base::controls::IResourceProvider;
+        use ferroui_base::media::SolidColorBrush;
+        let _scope = ferroui_base::threading::Dispatcher::unit_test_scope();
+        let source = |width| format!(r#"<ContentControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ContentControl.Resources><ResourceDictionary>
+<ResourceDictionary.MergedDictionaries><ResourceDictionary>
+<x:Double x:Key="width">{width}</x:Double><Color x:Key="accent">Red</Color>
+</ResourceDictionary></ResourceDictionary.MergedDictionaries>
+<SolidColorBrush x:Key="brush" Color="{{StaticResource accent}}"/>
+</ResourceDictionary></ContentControl.Resources>
+<Border Width="{{StaticResource width}}" Background="{{StaticResource brush}}"/>
+</ContentControl>"#);
+        let baseline = source(10);
+        let root = load(&baseline);
+        let dictionary = root.resources();
+        let uri = "ferres://mixed-resources/View.xaml";
+        let target: Rc<dyn ReloadTarget> = Rc::new(ComponentReloadTarget::content_control(
+            &root, uri.into(), baseline.clone(), RuntimeXamlLoaderConfiguration::default(),
+        ).with_owned_resources());
+        let application = ResourceDictionary::new();
+        application.add_value("width", 91.0f64);
+        dictionary.merged_dictionaries().add(Rc::<dyn IResourceProvider>::from(application.clone()));
+        dictionary.add_value("accent", ferroui_base::media::Color::parse("Blue").unwrap());
+        let mut session = HotReloadSession::new();
+        session.register_document(uri.into(), baseline).unwrap();
+        session.register_target(&target);
+        for width in [20, 30] {
+            let old = root.content().unwrap();
+            let reached = std::cell::Cell::new(false);
+            session.submit(uri.into(), source(width));
+            let failed = session.apply_pending_with(|| {
+                reached.set(true);
+                let child = Ref::<Border>::from_xaml_object(&root.content().unwrap()).unwrap();
+                assert_eq!(child.width(), 91.0);
+                Err(ReloadError::Failed("rollback".into()))
+            }).unwrap();
+            assert!(reached.get(), "{failed:?}");
+            assert_eq!(failed.status, ReloadStatus::Failed);
+            assert!(Rc::ptr_eq(&old, &root.content().unwrap()));
+            assert!(dictionary.merged_dictionaries().get(1).as_ref() == Rc::<dyn IResourceProvider>::from(application.clone()).as_ref());
+            session.submit(uri.into(), source(width));
+            let outcome = session.apply_pending().unwrap();
+            assert_eq!(outcome.status, ReloadStatus::Applied, "{outcome:?}");
+            let child = Ref::<Border>::from_xaml_object(&root.content().unwrap()).unwrap();
+            assert_eq!(child.width(), 91.0);
+            let brush = Ref::<SolidColorBrush>::from_xaml_object(&dictionary.get(&"brush".into()).unwrap()).unwrap();
+            assert_eq!(brush.color(), ferroui_base::media::Color::parse("Blue").unwrap());
+            assert!(root.resources().ptr_eq(&dictionary));
+        }
+        // Removing the application override exposes the latest XAML provider,
+        // confirming it was committed even while its value was shadowed.
+        dictionary.merged_dictionaries().remove(&Rc::<dyn IResourceProvider>::from(application.clone()));
+        assert_eq!(*dictionary.try_get_resource(&"width".into(), None).unwrap().unwrap().downcast_ref::<f64>().unwrap(), 30.0);
+    }
+    #[test]
+    fn composed_dictionary_preview_matches_commit_for_themes_nulls_and_provider_order() {
+        use ferroui_base::controls::{IResourceProvider, IThemeVariantProvider};
+        let provider = |key: &str, value: i32| {
+            let dictionary = ResourceDictionary::new();
+            dictionary.add_value(key, value);
+            dictionary
+        };
+        let root = ContentControl::new();
+        let live = root.resources();
+        let old = provider("retired", 1);
+        live.merged_dictionaries().add(Rc::<dyn IResourceProvider>::from(old.clone()));
+        live.add_theme_dictionary(ThemeVariant::light(), Rc::<dyn IThemeVariantProvider>::from(provider("removed-theme", 2)));
+        let ownership = ResourceDictionaryOwnership::capture(&live);
+        let before = provider("order", 3);
+        let after = provider("order", 4);
+        live.merged_dictionaries().insert(0, Rc::<dyn IResourceProvider>::from(before.clone()));
+        live.merged_dictionaries().add(Rc::<dyn IResourceProvider>::from(after.clone()));
+        live.add_value("direct", 5);
+        let dark = provider("theme", 6);
+        dark.add_value("inherited", 7);
+        live.add_theme_dictionary(ThemeVariant::dark(), Rc::<dyn IThemeVariantProvider>::from(dark.clone()));
+        let candidate = ResourceDictionary::new();
+        let merged = provider("order", 20);
+        merged.add_value("direct", 21);
+        merged.add_value("theme", 22);
+        merged.add_value("new", 23);
+        candidate.merged_dictionaries().add(Rc::<dyn IResourceProvider>::from(merged.clone()));
+        candidate.add_value("own", 24);
+        candidate.add("null", None);
+        let default = provider("theme", 25);
+        candidate.add_theme_dictionary(ThemeVariant::default(), Rc::<dyn IThemeVariantProvider>::from(default));
+        let custom = ThemeVariant::new("Custom", Some(ThemeVariant::dark()));
+        let variants = [None, Some(ThemeVariant::light()), Some(ThemeVariant::dark()), Some(custom)];
+        let keys = ["direct", "order", "theme", "inherited", "new", "own", "null", "retired", "removed-theme"];
+        let mut expected = Vec::new();
+        for theme in &variants {
+            for key in &keys {
+                expected.push(ownership.preview_resource(&candidate, &(*key).into(), theme.as_ref()).unwrap());
+            }
+        }
+        assert!(ownership.prepare(&candidate).is_err(), "uncomposed callers must still reject this combination");
+        let mut change = ownership.prepare_with_preview(&candidate).unwrap();
+        for _ in 0..2 {
+            change.commit().unwrap();
+            let mut actual = Vec::new();
+            for theme in &variants {
+                for key in &keys { actual.push(live.try_get_resource(&(*key).into(), theme.as_ref())); }
+            }
+            assert_eq!(actual, expected);
+            let number = |key: &str, theme: Option<&ThemeVariant>| *live.try_get_resource(&key.into(), theme).unwrap().unwrap().downcast_ref::<i32>().unwrap();
+            assert_eq!(number("direct", None), 5);
+            assert_eq!(number("order", None), 4);
+            assert_eq!(number("theme", Some(&ThemeVariant::dark())), 6);
+            assert_eq!(number("theme", None), 25);
+            assert_eq!(live.try_get_resource(&"null".into(), None), Some(None));
+            assert!(old.owner().is_none());
+            assert!(before.owner().is_some() && after.owner().is_some() && dark.owner().is_some());
+            change.rollback();
+            assert!(old.owner().is_some());
+            assert!(merged.owner().is_none());
+            assert!(live.try_get_resource(&"retired".into(), None).is_some());
+        }
+        change.commit().unwrap();
+        change.finish();
+        let retired = old.downgrade();
+        drop(change); drop(old);
+        assert!(retired.upgrade().is_none());
+        let empty = ResourceDictionary::new();
+        let mut removal = ownership.prepare_with_preview(&empty).unwrap();
+        removal.commit().unwrap();
+        removal.finish();
+        assert_eq!(live.merged_dictionaries().count(), 2);
+        assert!(live.theme_dictionary(&ThemeVariant::dark()).is_some());
+        assert!(live.theme_dictionary(&ThemeVariant::default()).is_none());
     }
     #[test]
     fn external_owned_key_writes_and_new_key_collisions_require_restart() {

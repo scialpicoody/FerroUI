@@ -173,12 +173,79 @@ impl ResourceDictionaryOwnership {
         }
         None
     }
+    /// Resolves the composed dictionary without transferring owners. Application
+    /// entries remain in place, replacement themes keep per-variant precedence,
+    /// and replacement merged providers occupy the original owned range.
+    /// Call this throughout candidate population, including deferred factories.
+    pub fn preview_resource(
+        &self,
+        candidate: &ResourceDictionary,
+        key: &ResourceKey,
+        theme: Option<&ThemeVariant>,
+    ) -> Result<Option<ResourceValue>, String> {
+        let dictionary = self.dictionary.upgrade().ok_or("Resource owner closed")?;
+        let (index, old_merged, _) = self.validate(&dictionary)?;
+        let owned = self.owned.borrow().clone();
+        if let Some(value) = candidate.try_get_value(key) {
+            return Ok(Some(value));
+        }
+        if !owned.keys.contains_key(key) {
+            if let Some(value) = dictionary.try_get_value(key) {
+                return Ok(Some(value));
+            }
+        }
+        let mut variants = Vec::new();
+        let mut current = theme.cloned().filter(|variant| *variant != ThemeVariant::default());
+        while let Some(variant) = current {
+            current = variant.inherit_variant();
+            variants.push(variant);
+        }
+        if !variants.contains(&ThemeVariant::default()) {
+            variants.push(ThemeVariant::default());
+        }
+        for variant in variants {
+            let provider = candidate.theme_dictionary(&variant).or_else(|| {
+                if owned.themes.iter().any(|(key, _)| *key == variant) { None }
+                else { dictionary.theme_dictionary(&variant) }
+            });
+            if let Some(provider) = provider {
+                if let Some(value) = crate::controls::resource_preview::lookup(&*provider, key, theme) {
+                    return Ok(Some(value));
+                }
+            }
+        }
+        let current = dictionary.merged_dictionaries().to_vec();
+        let new = candidate.merged_dictionaries().to_vec();
+        for provider in current[index + old_merged.len()..].iter().rev()
+            .chain(new.iter().rev()).chain(current[..index].iter().rev()) {
+            if let Some(value) = crate::controls::resource_preview::lookup(&**provider, key, theme) {
+                return Ok(Some(value));
+            }
+        }
+        Ok(None)
+    }
+    /// Prepares replacement when every candidate lookup uses `preview_resource`.
+    /// Callers without a composed preview must use `prepare`, which conservatively
+    /// rejects provider combinations whose precedence it cannot validate.
+    pub fn prepare_with_preview(
+        &self,
+        candidate: &Ref<ResourceDictionary>,
+    ) -> Result<ResourceDictionaryChange, String> {
+        self.prepare_impl(candidate, true)
+    }
     /// Candidate must be detached from its temporary owner before commit.
     /// Commit/rollback operate on framework collections; custom notification
     /// observers must not panic, mutate those collections or perform irreversible work.
     pub fn prepare(
         &self,
         candidate: &Ref<ResourceDictionary>,
+    ) -> Result<ResourceDictionaryChange, String> {
+        self.prepare_impl(candidate, false)
+    }
+    fn prepare_impl(
+        &self,
+        candidate: &Ref<ResourceDictionary>,
+        composed_preview: bool,
     ) -> Result<ResourceDictionaryChange, String> {
         let dictionary = self.dictionary.upgrade().ok_or("Resource owner closed")?;
         if !std::ptr::eq(dictionary.get_type(), ResourceDictionary::TYPE)
@@ -205,39 +272,41 @@ impl ResourceDictionaryOwnership {
         }) {
             return Err("New XAML theme collides with an application theme".into());
         }
-        // Candidate resource lookup must have the same precedence as commit.
-        // Mixed application provider trees need an explicit composed preview.
-        let app_merged = dictionary.merged_dictionaries().count() != merged.len();
-        let app_themes = dictionary.theme_dictionaries_snapshot().len() != themes.len();
-        if (app_merged && !new_merged.is_empty())
-            || (app_themes && (!new_merged.is_empty() || !new_themes.is_empty()))
-        {
-            return Err(
-                "Mixed application/XAML provider trees require a resource preview adapter".into(),
-            );
-        }
-        let mut variants: Vec<_> = new_themes
-            .iter()
-            .map(|(variant, _)| Some(variant.clone()))
-            .collect();
-        variants.push(None);
-        for provider in [&dictionary, candidate] {
-            variants.push(provider.owner().and_then(|owner| {
-                owner
-                    .as_theme_variant_host()
-                    .and_then(|host| host.actual_theme_variant())
-            }));
-        }
-        for key in dictionary
-            .keys()
-            .iter()
-            .filter(|key| !owned.keys.contains_key(*key))
-        {
-            if variants
-                .iter()
-                .any(|variant| candidate.try_get_resource(key, variant.as_ref()).is_some())
+        if !composed_preview {
+            // Candidate resource lookup must have the same precedence as commit.
+            // Mixed application provider trees need an explicit composed preview.
+            let app_merged = dictionary.merged_dictionaries().count() != merged.len();
+            let app_themes = dictionary.theme_dictionaries_snapshot().len() != themes.len();
+            if (app_merged && !new_merged.is_empty())
+                || (app_themes && (!new_merged.is_empty() || !new_themes.is_empty()))
             {
-                return Err("XAML resource lookup conflicts with application precedence".into());
+                return Err(
+                    "Mixed application/XAML provider trees require a resource preview adapter".into(),
+                );
+            }
+            let mut variants: Vec<_> = new_themes
+                .iter()
+                .map(|(variant, _)| Some(variant.clone()))
+                .collect();
+            variants.push(None);
+            for provider in [&dictionary, candidate] {
+                variants.push(provider.owner().and_then(|owner| {
+                    owner
+                        .as_theme_variant_host()
+                        .and_then(|host| host.actual_theme_variant())
+                }));
+            }
+            for key in dictionary
+                .keys()
+                .iter()
+                .filter(|key| !owned.keys.contains_key(*key))
+            {
+                if variants
+                    .iter()
+                    .any(|variant| candidate.try_get_resource(key, variant.as_ref()).is_some())
+                {
+                    return Err("XAML resource lookup conflicts with application precedence".into());
+                }
             }
         }
         if *candidate.writes.borrow() != candidate_versions {

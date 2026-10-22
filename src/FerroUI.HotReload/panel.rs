@@ -350,7 +350,7 @@ impl ReloadTarget for PanelReloadTarget {
         );
         let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &prepared);
         document.service_provider = Some(crate::root_resources::services(&root.clone().upcast(), self.resources.as_ref(), self.styles.as_ref()));
-        let candidate_root = self.styles.as_ref().map(|_| crate::root_preview::create(&prepared)).transpose()?;
+        let candidate_root = (self.styles.is_some() || self.resources.is_some()).then(|| crate::root_preview::create(&prepared)).transpose()?;
         let _preview = candidate_root.as_ref().map(|candidate| crate::root_preview::install(
             &root.clone().upcast(), candidate, self.resources.as_ref(), self.styles.as_ref(),
         ));

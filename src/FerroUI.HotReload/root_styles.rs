@@ -142,11 +142,11 @@ impl OwnedStyles {
     }
     /// The resource lookup order after commit, without changing any live owner.
     pub(crate) fn preview_dictionary(&self, candidate: &ResourceDictionary, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
-        candidate.try_get_resource(key, theme).or_else(|| self.resources.application_resource(key, theme))
+        self.resources.preview_resource(candidate, key, theme)
+            .unwrap_or_else(|error| std::panic::panic_any(ReloadError::RestartRequired(error)))
     }
     pub(crate) fn preview_resource(&self, candidate: &Styles, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
-        candidate.resources().try_get_resource(key, theme)
-            .or_else(|| self.resources.application_resource(key, theme))
+        self.preview_dictionary(&candidate.resources(), key, theme)
             .or_else(|| {
                 let (container, index, old) = self.current().unwrap_or_else(|error| std::panic::panic_any(error));
                 let current = container.snapshot();
@@ -161,7 +161,7 @@ impl OwnedStyles {
         let (container, index, old) = self.current()?;
         let candidates = candidate.styles();
         let new = candidates.snapshot().to_vec();
-        let resources = self.resources.prepare(&candidates.resources()).map_err(ReloadError::RestartRequired)?;
+        let resources = self.resources.prepare_with_preview(&candidates.resources()).map_err(ReloadError::RestartRequired)?;
         // Remove ownership without attaching any candidate style to the live root.
         candidates.clear();
         candidates.set_resources(ResourceDictionary::new());

@@ -23,18 +23,18 @@ retain their original source revisions.
 1. **Close standard component integration gaps.** The shared component/panel
    preparation currently rejects XAML event handlers.
    Inline Resources and Styles now have explicit ownership adapters, including deferred
-   template context transfer and application-style ordering; mixed application/XAML dictionary provider trees still require
-   a composed preview adapter. Implement the remaining ownership
-   adapters and exercise standard handlers and resource/style replacement through
-   actual component-loading paths. Complete state transfer for compatible, uniquely
-   identified template parts; the current logical-child capture does not cover
+   template context transfer, application-style ordering, and composed previews for
+   mixed application/XAML dictionary providers. Implement standard handler ownership
+   and exercise it through actual component-loading paths. Complete state transfer
+   for compatible, uniquely identified template parts; the current logical-child capture does not cover
    replacement root-template parts. Preserve the documented restart boundary for
    unsupported custom mutations and irreversible user code.
 2. **Freeze a final implementation revision and close acceptance.** Reuse existing
    evidence where behavior and inputs are unchanged, but run the final relevant
    native XAML, Rust, combined, restart, lifecycle and release-boundary gates on
    macOS, Windows and Linux. Fix failures without treating another incomplete
-   moving revision as final acceptance.
+   moving revision as final acceptance. Keep recorded Windows results with their revisions, and verify a final
+   revision once the implementation gaps are closed.
 3. **Publish the supported contract and results.** Reconcile the existing design
    documentation and issues #233/#234 with actual supported edits, restart
    boundaries, extension APIs and measured baselines. Do not claim untested paths.
@@ -90,7 +90,18 @@ The catalog test exercises inline styles through its actual component adapter.
 The Linux release check above also passes for this increment with the development
 feature requested; active reload modules remain gated out by `debug_assertions`.
 
-These checks do not close the remaining handler, mixed-dictionary, template-state,
+The mixed-dictionary increment covers candidate/committed lookup parity for
+application direct keys, nulls, inherited/default themes, and merged providers on
+both sides of the replaced range. It retains owners across rollback and releases
+retired providers. Explicitly assigned candidate dictionaries participate in the
+preview, including deferred brush factories; unwind removes the scoped resolver.
+All 115 engine tests pass on macOS and Linux, and all nine ControlCatalog reload
+integration tests pass on macOS. The new catalog test exercises application merged
+provider precedence, repeated replacement, rollback and removal through the actual
+component adapter. The commands are the engine/catalog commands recorded above.
+The Linux release check also passes with the development feature requested.
+
+These checks do not close the remaining handler, template-state,
 or final native acceptance requirements.
 
 ## Follow-ups outside the first-release requirement

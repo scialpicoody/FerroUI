@@ -102,6 +102,58 @@ fn catalog_root_resources_reload_without_replacing_page_dictionary_or_applicatio
 }
 
 #[test]
+fn catalog_mixed_merged_resources_preserve_application_precedence_and_rollback() {
+    use ferroui_base::controls::{IResourceProvider, ResourceDictionary};
+    use ferroui_controls::Border;
+    let _application = super::support::start_catalog_application();
+    let page = crate::pages::BorderPage::new();
+    let root: Ref<ContentPage> = page.clone().upcast();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&page.clone().upcast::<Control>())));
+    window.show();
+    let uri = "ferres://controlcatalog/reload-tests/MixedResources.xaml";
+    let baseline = include_str!("../Pages/BorderPage.xaml");
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::hot_reload::component_target(
+        &root, uri.into(), baseline.into(), Vec::new(),
+    ));
+    let dictionary = root.resources();
+    let application = ResourceDictionary::new();
+    application.add_value("RootWidth", 333.0f64);
+    dictionary.merged_dictionaries().add(Rc::<dyn IResourceProvider>::from(application.clone()));
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), baseline.into()).unwrap();
+    session.register_target(&target);
+    for width in [240, 280] {
+        let update = baseline.replace("  <ScrollViewer", &format!(r#"<ContentPage.Resources><ResourceDictionary>
+<ResourceDictionary.MergedDictionaries><ResourceDictionary><x:Double x:Key="RootWidth">{width}</x:Double></ResourceDictionary></ResourceDictionary.MergedDictionaries>
+</ResourceDictionary></ContentPage.Resources>
+  <ScrollViewer"#)).replacen("<Border BorderBrush=", r#"<Border Width="{StaticResource RootWidth}" BorderBrush="#, 1);
+        let old = root.content();
+        session.submit(uri.into(), update.clone());
+        let reached = std::cell::Cell::new(false);
+        let result = session.apply_pending_with(|| {
+            reached.set(true);
+            Err(ReloadError::Failed("catalog rollback".into()))
+        }).unwrap();
+        assert!(reached.get(), "{result:?}");
+        assert_eq!(root.content(), old);
+        session.submit(uri.into(), update);
+        let result = session.apply_pending().unwrap();
+        assert_eq!(result.status, ReloadStatus::Applied, "{result:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        let border = page.get_logical_descendants().find_map(|control| control.cast::<Border>()).unwrap();
+        assert_eq!(border.width(), 333.0);
+        assert!(root.resources().ptr_eq(&dictionary));
+        assert!(application.owner().is_some());
+    }
+    session.submit(uri.into(), baseline.into());
+    assert_eq!(session.apply_pending().unwrap().status, ReloadStatus::Applied);
+    assert_eq!(dictionary.merged_dictionaries().count(), 1);
+    assert!(dictionary.merged_dictionaries().get(0).as_ref() == Rc::<dyn IResourceProvider>::from(application).as_ref());
+    window.close();
+}
+
+#[test]
 fn generated_manifest_allows_binding_element_path_edits() {
     use ferroui_controls::{CheckBox, ContentControl, TextBlock};
     use ferroui_markup_xaml::FromXamlObject;

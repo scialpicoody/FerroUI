@@ -8,8 +8,10 @@ mod development {
     use std::{cell::RefCell, collections::HashMap, rc::Rc};
     type Factory = Rc<dyn Fn() -> Rc<dyn IResourceNode>>;
     type Previews = HashMap<usize, Factory>;
+    type Resolver = Rc<dyn Fn(&dyn IResourceNode) -> Option<Rc<dyn IResourceNode>>>;
     crate::ferro_thread_local! {
         static CURRENT: RefCell<Option<Previews>> = const { RefCell::new(None) };
+        static RESOLVERS: RefCell<Vec<Resolver>> = const { RefCell::new(Vec::new()) };
     }
     /// A UI-thread candidate scope. It never installs owners or raises resource
     /// notifications. Factories may recursively resolve other prepared providers.
@@ -83,6 +85,23 @@ mod development {
             drop(retired);
         }
     }
+    /// Resolves detached nodes whose identities can change during population,
+    /// such as an explicitly assigned root ResourceDictionary. Resolvers run
+    /// newest first after exact previews, outside registry borrows. Drop in
+    /// lexical order and return None for nodes outside the candidate boundary.
+    pub struct ResourcePreviewResolver(std::marker::PhantomData<Rc<()>>);
+    impl ResourcePreviewResolver {
+        pub fn new(resolve: Resolver) -> Self {
+            RESOLVERS.with(|resolvers| resolvers.borrow_mut().push(resolve));
+            Self(std::marker::PhantomData)
+        }
+    }
+    impl Drop for ResourcePreviewResolver {
+        fn drop(&mut self) {
+            let retired = RESOLVERS.with(|resolvers| resolvers.borrow_mut().pop());
+            drop(retired);
+        }
+    }
     pub(super) fn candidate(original: &dyn IResourceNode) -> Option<Rc<dyn IResourceNode>> {
         let factory = CURRENT.with(|current| {
             current
@@ -91,11 +110,14 @@ mod development {
                 .and_then(|entries| entries.get(&(original.reference_id() as usize)))
                 .cloned()
         });
-        factory.map(|factory| factory())
+        factory.map(|factory| factory()).or_else(|| {
+            let resolvers = RESOLVERS.with(|resolvers| resolvers.borrow().clone());
+            resolvers.iter().rev().find_map(|resolve| resolve(original))
+        })
     }
 }
 #[cfg(all(debug_assertions, feature = "hot-reload"))]
-pub use development::{ResourcePreviewGuard, ResourcePreviewScope};
+pub use development::{ResourcePreviewGuard, ResourcePreviewResolver, ResourcePreviewScope};
 
 /// Resolves a resource against the active candidate, or the original provider.
 #[inline]
