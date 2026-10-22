@@ -120,8 +120,26 @@ impl ServerObjectAnimations {
     ) {
         let is_active = self.owner_is_active();
         let old = self.animation(property);
+        // An animation of components of the property (`Offset.Y`) joins the
+        // animation of other components that runs already (`Offset.X`).
+        if let Some(old) = &old {
+            if let (Some(running), Some(started)) = (old.animation.as_subchannel(), animation.as_subchannel()) {
+                if let Some(compositor) = self.compositor.upgrade() {
+                    animation.resolve(&compositor);
+                }
+                running.merge(started, committed_at, current_value);
+                self.on_set_direct_value(property);
+                return;
+            }
+        }
         if let (true, Some(old)) = (is_active, &old) {
             old.animation.deactivate();
+        }
+        // A replaced animation is over for the batches it belongs to; the
+        // new one starts from the current value (WinUI applies the stop
+        // behavior on `StopAnimation` only).
+        if let Some(old) = &old {
+            old.animation.release_completion();
         }
         {
             let mut animations = self.animations.borrow_mut();
@@ -156,8 +174,66 @@ impl ServerObjectAnimations {
             if self.owner_is_active() {
                 removed.animation.deactivate();
             }
+            removed.animation.release_completion();
         }
         self.on_set_direct_value(property);
+    }
+
+    /// `StopAnimation` of the property: removes its animation and applies
+    /// the stop behavior of the animation (WinUI `AnimationStopBehavior`;
+    /// upstream only removes the animation).
+    pub fn stop_animation_for_property(&self, property: &'static CompositionProperty) {
+        let removed = {
+            let mut animations = self.animations.borrow_mut();
+            let index = animations.iter().position(|a| a.property.id() == property.id());
+            index.map(|index| animations.remove(index))
+        };
+        let Some(removed) = removed else { return };
+        if self.owner_is_active() {
+            removed.animation.deactivate();
+        }
+        if let Some(owner) = self.owner.upgrade() {
+            let current = owner.read_property_variant(property);
+            if let Some(value) = removed.animation.value_on_stop(current) {
+                owner.write_property_variant(property, value);
+                owner.notify_animated_value_changed(property);
+            }
+        }
+        removed.animation.release_completion();
+        self.on_set_direct_value(property);
+    }
+
+    /// `StopAnimation` of a sub-channel of the property (`Offset.X`): stops
+    /// the animations of the sub-channels that share a component with
+    /// `components` and applies their stop behavior. An animation of the
+    /// whole property is left running.
+    pub fn stop_subchannel_animation(&self, property: &'static CompositionProperty, components: &[usize]) {
+        let Some(instance) = self.animation(property) else { return };
+        // Deviation (winui-composition.md): stopping a sub-channel of a
+        // property animated as a whole does nothing.
+        let Some(subchannels) = instance.animation.as_subchannel() else { return };
+        let Some(owner) = self.owner.upgrade() else { return };
+        let current = owner.read_property_variant(property);
+        let (value, empty) = subchannels.stop_components(components, current);
+        if empty {
+            self.animations.borrow_mut().retain(|a| a.property.id() != property.id());
+        }
+        if let Some(value) = value {
+            instance.cached_variant.set(value);
+            owner.write_property_variant(property, value);
+            owner.notify_animated_value_changed(property);
+        }
+        self.on_set_direct_value(property);
+    }
+
+    /// Releases the batches of every animation of the object: its
+    /// composition object is disposed, which stops its animations for the
+    /// batches (WinUI).
+    pub fn release_completions(&self) {
+        let animations = self.animations.borrow().clone();
+        for instance in animations {
+            instance.animation.release_completion();
+        }
     }
 
     pub fn subscribe_to_invalidation(&self, member: &CompositionProperty, animation: Rc<dyn IAnimationInstance>) {

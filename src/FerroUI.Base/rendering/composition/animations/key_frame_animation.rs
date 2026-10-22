@@ -125,6 +125,11 @@ impl KeyFrameAnimation {
         self.stop_behavior.set(value)
     }
 
+    /// The number of key frames in the animation (WinUI `KeyFrameCount`).
+    pub fn key_frame_count(&self) -> i32 {
+        self.key_frames.borrow().key_frame_count() as i32
+    }
+
     /// Inserts an expression keyframe.
     ///
     /// `normalized_progress_key` is the time the key frame should occur at,
@@ -261,8 +266,13 @@ macro_rules! key_frame_animation_classes {
                 let iteration_behavior = self.iteration_behavior();
                 let iteration_count = self.iteration_count();
                 let stop_behavior = self.stop_behavior();
+                // The animation belongs to the batches that are open now; an
+                // animation that loops forever counts as infinite.
+                let completion = self.compositor().acquire_animation_completion(
+                    iteration_behavior == AnimationIterationBehavior::Forever,
+                );
                 super::AnimationInstanceFactory::new(move || {
-                    super::KeyFrameAnimationInstance::<$ty>::new(
+                    let instance = super::KeyFrameAnimationInstance::<$ty>::new(
                         interpolator,
                         key_frames,
                         Rc::new(parameters.build()),
@@ -275,7 +285,9 @@ macro_rules! key_frame_animation_classes {
                         iteration_behavior,
                         iteration_count,
                         stop_behavior,
-                    )
+                    );
+                    instance.set_completion(completion);
+                    instance
                 })
             }
         }

@@ -99,3 +99,19 @@ fn the_parameters_of_an_animation_are_copied() {
     parameters.insert_scalar("a", 1.0);
     assert_eq!(parameters.snapshot().get_parameter("a"), ExpressionVariant::create(1.0f32));
 }
+
+#[test]
+fn sub_channels_of_an_entry_started_together_run_together() {
+    let fixture = TestCompositor::new();
+    let compositor = &fixture.compositor;
+    let set = CompositionPropertySet::new(compositor);
+    set.insert_vector3("Offset", Vector3::new(1.0, 2.0, 3.0));
+    let x = compositor.create_expression_animation_with("10");
+    let y = compositor.create_expression_animation_with("20");
+    set.start_animation("Offset.X", &*x);
+    set.start_animation("Offset.Y", &*y);
+    fixture.run_jobs();
+    fixture.run_jobs();
+    let server = fixture.server::<ServerCompositionPropertySet>(id(&set));
+    assert_eq!(server.get_value("Offset").cast_or_default::<Vector3>(), Vector3::new(10.0, 20.0, 3.0));
+}

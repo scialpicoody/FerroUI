@@ -70,14 +70,14 @@ it does not.
 | Type / member | Status | Notes | Phase |
 |---|---|---|---|
 | `CompositionObject.Compositor`, `Dispose`, `ImplicitAnimations` | has | `CompositionObject` | - |
-| `CompositionObject.StartAnimation`, `StopAnimation`, `StartAnimationGroup`, `StopAnimationGroup` | partial | Whole properties only; a sub-channel target (`Offset.X`, `Scale.XY`) is not accepted. | 1 |
+| `CompositionObject.StartAnimation`, `StopAnimation`, `StartAnimationGroup`, `StopAnimationGroup` | has | Sub-channel targets of vector properties (`Offset.X`, `Scale.XY`, components X, Y, Z, W in any case) animate those components only; sub-channels of one property run together, an animation of the whole property replaces them. `StopAnimation` applies the stop behavior. | 1 |
 | `CompositionObject.Properties` | missing | Every WinUI object has its own property set, reachable by expressions as `obj.Name`. | 3 |
 | `CompositionObject.Comment` | missing | | 3 |
 | `CompositionObject.TryGetAnimationController`, `AnimationController` | missing | Pause, resume, progress and playback rate of a running animation. | 3 |
 | `CompositionPropertySet` `Insert*`, `TryGet*` | has | Scalar, vector, matrix, quaternion, colour, boolean. | - |
 | `Compositor.Create*` for the types below | partial | The factories of the existing types exist; the new types bring theirs. | 1-6 |
-| `Compositor.CreatePropertySet` | partial | `CompositionPropertySet::new(compositor)`; the factory is added. | 1 |
-| `Compositor.CreateScopedBatch`, `GetCommitBatch`, `CompositionScopedBatch`, `CompositionCommitBatch` | missing | Completion of a group of animations: `End`, `Suspend`, `Resume`, `IsActive`, `IsEnded`, `Completed`. | 1 |
+| `Compositor.CreatePropertySet` | has | `create_property_set`. | 1 |
+| `Compositor.CreateScopedBatch`, `GetCommitBatch`, `CompositionScopedBatch`, `CompositionCommitBatch` | has | `create_scoped_batch`, `get_commit_batch`, `CompositionBatchTypes`. Key frame animations started while a batch is active take a completion guard that the server releases when the animation ends, is stopped or replaced, or its target is disposed; `Completed` is raised on the thread of the compositor. Expression animations belong to no batch. | 1 |
 | `Compositor.RequestCommitAsync` | has | `request_commit_async`. | - |
 | `Compositor.GlobalPlaybackRate`, `MinGlobalPlaybackRate`, `MaxGlobalPlaybackRate` | missing | | 3 |
 
@@ -150,8 +150,8 @@ it does not.
 |---|---|---|---|
 | `ScalarKeyFrameAnimation`, `Vector2/3/4KeyFrameAnimation`, `ColorKeyFrameAnimation`, `QuaternionKeyFrameAnimation`, `BooleanKeyFrameAnimation` | has | From the schema. | - |
 | `KeyFrameAnimation` `DelayBehavior`, `DelayTime`, `Direction`, `Duration`, `IterationBehavior`, `IterationCount`, `InsertExpressionKeyFrame` | has | | - |
-| `KeyFrameAnimation.StopBehavior` | partial | Stored and not applied, as upstream. Applied when an animation is stopped. | 1 |
-| `KeyFrameAnimation.KeyFrameCount` | missing | | 1 |
+| `KeyFrameAnimation.StopBehavior` | has | Applied by `StopAnimation` (upstream stores it and does not apply it); an animation that is replaced leaves the current value. | 1 |
+| `KeyFrameAnimation.KeyFrameCount` | has | `key_frame_count`. | 1 |
 | `ColorKeyFrameAnimation.InterpolationColorSpace` | missing | | 3 |
 | `PathKeyFrameAnimation` | missing | Needs `CompositionPath` (phase 2). | 3 |
 | `ExpressionAnimation` (`Expression`) | has | | - |
@@ -161,11 +161,11 @@ it does not.
 | `CompositionAnimationGroup` | has | | - |
 | `ImplicitAnimationCollection` | has | | - |
 | `NaturalMotionAnimation`, `SpringScalarNaturalMotionAnimation`, `SpringVector2/3NaturalMotionAnimation` | missing | Spring animations (`DampingRatio`, `Period`, `FinalValue`, `InitialValue`, `InitialVelocity`). | 3 |
-| `CompositionScopedBatch`, `CompositionCommitBatch` | missing | See 3.1. | 1 |
-| `CubicBezierEasingFunction` (`ControlPoint1`, `ControlPoint2`) | partial | `SplineEasing` is the same curve; the WinUI factory and members are added. | 1 |
-| `LinearEasingFunction` | has | `LinearEasing`. | 1 (factory) |
-| `StepEasingFunction` (`StepCount`, `InitialStep`, `FinalStep`, `IsInitialStepSingleFrame`, `IsFinalStepSingleFrame`) | missing | | 1 |
-| `BackEasingFunction` (`Mode`, `Amplitude`), `BounceEasingFunction` (`Mode`, `Bounces`, `Bounciness`), `CircleEasingFunction` (`Mode`), `ElasticEasingFunction` (`Mode`, `Oscillations`, `Springiness`), `ExponentialEasingFunction` (`Mode`, `Exponent`), `PowerEasingFunction` (`Mode`, `Power`), `SineEasingFunction` (`Mode`) | partial | FerroUI has the in, out and in-out variants of these curves with fixed parameters (`BackEaseIn`, ...). The parametric WinUI functions are added. | 1 |
+| `CompositionScopedBatch`, `CompositionCommitBatch` | has | See 3.1. | 1 |
+| `CubicBezierEasingFunction` (`ControlPoint1`, `ControlPoint2`) | has | The curve of `SplineEasing`. The easing functions are `IEasing` implementations, not composition objects; `CompositionEasingFunction` has the factories of WinUI 1.4+ and `Compositor` the `Create*EasingFunction` factories. | 1 |
+| `LinearEasingFunction` | has | `LinearEasingFunction` (the curve of `LinearEasing`). | 1 |
+| `StepEasingFunction` (`StepCount`, `InitialStep`, `FinalStep`, `IsInitialStepSingleFrame`, `IsFinalStepSingleFrame`) | has | The steps share the duration; a single-frame step is shown only at the start or the end. | 1 |
+| `BackEasingFunction` (`Mode`, `Amplitude`), `BounceEasingFunction` (`Mode`, `Bounces`, `Bounciness`), `CircleEasingFunction` (`Mode`), `ElasticEasingFunction` (`Mode`, `Oscillations`, `Springiness`), `ExponentialEasingFunction` (`Mode`, `Exponent`), `PowerEasingFunction` (`Mode`, `Power`), `SineEasingFunction` (`Mode`) | has | The parametric curves of the XAML easing functions, with `CompositionEasingFunctionMode`; read-only members as in WinUI. | 1 |
 
 ### 3.8 Expression language
 
@@ -349,3 +349,17 @@ Missing). `DEVIATIONS.md` points here for this area.
 | The case of member, swizzle and parameter names in expressions is not documented. | Function names are matched ignoring case (as the expression builder of the Windows Community Toolkit writes them in lower case); member, swizzle and parameter names are matched with case. | Behaviour | Function names follow the toolkit; the rest is unverified and left as it was. | phase 3 |
 | `Matrix4x4.CreateRotationX/Y/Z` and the `System.Numerics` overloads of `CreateScale`, `CreateTranslation`, `CreateRotation`, `CreateSkew` and `Lerp` of matrices are not in the expression reference. | Accepted. | Addition | They are the factories of the numeric types the expressions use; an expression valid in WinUI is valid here. | phase 3 |
 | A `CompositionPropertySet` is a live object of the compositor whose entries can be animated. | The same. The parameters of an animation are a property set without a server counterpart, copied when the animation starts (the upstream behaviour). | Representation | See `DEVIATIONS.md` for the difference from upstream. | phase 1 |
+| The `Completed` handler of a batch receives `(sender, args)`. | The args only. | Representation | The event convention of FerroUI; the batch need not be kept alive by the application. | phase 1 |
+| One commit batch per frame and batch type. | One per frame, which waits for the union of the requested types. | Behaviour | Animations started before `GetCommitBatch` must be included. | phase 1 |
+| Whether expression animations belong to a batch is not documented. | They belong to no batch, not even an `InfiniteAnimation` one: they never end. | Behaviour | Unverified against WinUI. | phase 1 |
+| The `Effect` batch type waits for effects. | Accepted and never waited on. | Missing | No effects yet (phase 6). | phase 1 |
+| A single-frame initial or final step of `StepEasingFunction` lasts one frame. | It lasts no time: it shows at the start or the end only. How the duration is split between steps is the port's reading. | Behaviour | An easing function does not know frames. | phase 1 |
+| Easing functions are `CompositionObject`s. | Plain `IEasing` values (`Easing`); the `owner` argument of the factories is not used. | Representation | Key frames take `Easing`. | phase 1 |
+| Stopping `Offset.X` while `Offset` is animated as a whole is not documented. | Does nothing. Starting `Offset.X` while `Offset.XY` runs replaces the whole `XY` channel. | Behaviour | Simplification of an undocumented case. | phase 1 |
+| Animations run on a visual that is not in a tree. | They wait until the server object is active (attached to a composition target), and so does the `Completed` of their batch. | Behaviour | The upstream compositor activates animations with the tree; a property set is always active. | phase 1 |
+| `InteractionTracker` runs in the compositor. | It runs on the UI thread and ticks with `MediaContext::request_animation_frame` while in inertia or a custom animation; custom animations and modifier expressions are evaluated there, and a reference parameter that is not a property set reads as missing. | Behaviour | The compositor of FerroUI has no input and no callbacks to the UI thread. Expressions that bind visuals to the tracker run on the compositor as usual. | phase 4 |
+| The values of an `InteractionTracker` are its properties; its `Properties` belongs to the application. | The values live in the tracker's property set under the WinUI names. | Representation | A reference to the tracker resolves to that live property set. | phase 4 |
+| The inertia decay rate and curve are not documented. | `v(t) = v0 * (1 - rate)^t`, resting at `p + v / ln(1 / (1 - rate))`; inertia motion `target + (start - target) * r^t`; `InteractionTrackerInertiaMotion.Motion` is the value of the axis each frame; overpan is a rubber band capped at 120 px; a custom animation that ends out of bounds returns through inertia; scale custom animations are clamped. | Behaviour | The port had to choose; the literal `rate^t` moves about 19.5 times the velocity. | phase 4 |
+| Owner callbacks of the tracker are raised by the compositor; `IsFromBinding`. | Queued and delivered after the change, never nested; input-driven callbacks carry the last request id; `IsFromBinding` is always `false`. | Behaviour | No re-entrancy; tracker binding is not ported. | phase 4 |
+| `VisualInteractionSource` receives input from the compositor after `TryRedirectForManipulation`. | It follows the routed pointer events of the element of the visual (handled ones too), captured to the element, for any pointer type; the element is found from the visual or given to `create_for_element`. The mouse wheel scrolls 50 px per notch and Ctrl+wheel scales by 1.1. Chaining modes are stored only; the input values of a source cannot be referenced from expressions. | Behaviour | The compositor of FerroUI has no input. | phase 4 |
+| `InteractionTrackerInertiaNaturalMotion`, `ConfigureVector2PositionInertiaModifiers`, tracker binding, `InteractionTrackerPositionUpdateOption`, `AdjustPositionX/YIfGreaterThanThreshold`, pinch and touchpad redirection. | Not ported. | Missing | Natural motion animations come with phase 3; FerroUI has no touchpad input and no two-pointer recognizer. | phase 4 |

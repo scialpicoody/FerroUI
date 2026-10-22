@@ -28,8 +28,11 @@ pub struct CompositionPropertySet {
     object: CompositionObject,
     variants: RefCell<HashMap<String, ExpressionVariant>>,
     objects: RefCell<HashMap<String, Rc<dyn AsCompositionObject>>>,
-    /// The changes of a live set that the next batch carries.
+    /// The values of a live set that the next batch carries.
     pending: RefCell<PropertySetChanges>,
+    /// The entries whose animations the next batch starts; the animations themselves wait in
+    /// the pending animations of the composition object, by entry.
+    pending_animation_names: RefCell<Vec<String>>,
 }
 
 /// The result of reading a value of a [`CompositionPropertySet`].
@@ -60,6 +63,7 @@ impl CompositionPropertySet {
             variants: RefCell::new(HashMap::new()),
             objects: RefCell::new(HashMap::new()),
             pending: RefCell::new(PropertySetChanges::default()),
+            pending_animation_names: RefCell::new(Vec::new()),
         })
     }
 
@@ -87,7 +91,7 @@ impl CompositionPropertySet {
                 let mut pending = self.pending.borrow_mut();
                 // A value set after an animation was started in the same frame replaces it, as
                 // the value of a declared property does.
-                pending.animations.retain(|(name, _)| name != key);
+                self.object.pending_animations().remove(CompositionProperty::dynamic(key));
                 pending.values.retain(|(name, _)| name != key);
                 pending.values.push((key.to_owned(), value));
             }
@@ -264,7 +268,12 @@ impl ICompositorSerializable for CompositionPropertySet {
 
     fn serialize_changes(&self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
         self.object.begin_serialize_changes(c);
-        let changes = std::mem::take(&mut *self.pending.borrow_mut());
+        let mut changes = std::mem::take(&mut *self.pending.borrow_mut());
+        for name in std::mem::take(&mut *self.pending_animation_names.borrow_mut()) {
+            if let Some(factory) = self.object.pending_animations().get_and_remove(CompositionProperty::dynamic(&name)) {
+                changes.animations.push((name, factory));
+            }
+        }
         writer.write_value(Some(changes));
     }
 }
@@ -283,10 +292,12 @@ impl ICompositionObjectAnimations for CompositionPropertySet {
             return false;
         }
         let factory = animation.create_instance(server, final_value);
+        self.object.pending_animations().set(CompositionProperty::dynamic(property_name), factory);
         {
-            let mut pending = self.pending.borrow_mut();
-            pending.animations.retain(|(name, _)| name != property_name);
-            pending.animations.push((property_name.to_owned(), factory));
+            let mut names = self.pending_animation_names.borrow_mut();
+            if !names.iter().any(|name| name == property_name) {
+                names.push(property_name.to_owned());
+            }
         }
         self.register_for_serialization();
         true

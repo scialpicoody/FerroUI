@@ -1,4 +1,7 @@
-use super::animations::{ICompositionAnimation, ICompositionAnimationBase, ImplicitAnimationCollection};
+use super::animations::{
+    extract_subchannel, parse_subchannel, ICompositionAnimation, ICompositionAnimationBase, ImplicitAnimationCollection,
+    SubchannelAnimation,
+};
 use super::expressions::ExpressionVariant;
 use super::server::{CompositionProperty, ServerObjectId};
 use super::{CompositionPropertySet, Compositor, ICompositorSerializable, PendingAnimations};
@@ -101,6 +104,22 @@ impl CompositionObject {
                 self.compositor.dispose_and_keep_on_next_batch(server);
             }
         }
+        // The animations of a disposed object are over for the batches they
+        // belong to (WinUI stops them).
+        if let (false, Some(server), true) =
+            (self.is_disposed.get(), self.server, self.compositor.animation_batches().used())
+        {
+            self.compositor.post_server_job(
+                move |compositor| {
+                    if let Some(object) = compositor.get_animated_object(server) {
+                        if let Some(animations) = object.server_object().animations() {
+                            animations.release_completions();
+                        }
+                    }
+                },
+                false,
+            );
+        }
         self.is_disposed.set(true);
     }
 
@@ -134,17 +153,34 @@ impl CompositionObject {
         self.registered_for_serialization.set(false);
     }
 
-    /// `StopAnimation`: removes the animation of a property on the server.
-    /// `property` is the composition property the class resolved from the
-    /// property name. The server object is reached through a job of the
-    /// next batch.
+    /// `StopAnimation`: removes the animation of a property on the server
+    /// and applies its stop behavior. `property` is the composition
+    /// property the class resolved from the property name. The server
+    /// object is reached through a job of the next batch.
     pub fn stop_animation(&self, property: &'static CompositionProperty) {
         let Some(server) = self.server else { return };
         self.compositor.post_server_job(
             move |compositor| {
                 if let Some(object) = compositor.get_animated_object(server) {
                     if let Some(animations) = object.server_object().animations() {
-                        animations.remove_animation_for_property(property);
+                        animations.stop_animation_for_property(property);
+                    }
+                }
+            },
+            false,
+        );
+    }
+
+    /// `StopAnimation` of a sub-channel (`Offset.X`): stops the animations
+    /// of the sub-channels of `property` that share a component with
+    /// `components` (indices, X = 0) on the server.
+    pub fn stop_subchannel_animation(&self, property: &'static CompositionProperty, components: Vec<usize>) {
+        let Some(server) = self.server else { return };
+        self.compositor.post_server_job(
+            move |compositor| {
+                if let Some(object) = compositor.get_animated_object(server) {
+                    if let Some(animations) = object.server_object().animations() {
+                        animations.stop_subchannel_animation(property, &components);
                     }
                 }
             },
@@ -206,19 +242,55 @@ pub trait ICompositionObjectAnimations {
         self.start_animation_with_final_value(property_name, animation, None)
     }
 
+    /// See [`start_animation`](Self::start_animation). `property_name` may
+    /// name a sub-channel of a vector property (`Offset.X`, `Scale.XY`,
+    /// components X, Y, Z, W in any case): the animation then animates a
+    /// value of the sub-channel's type (a scalar for one component, a
+    /// `Vector2` for two, ...) and leaves the other components alone. Several
+    /// sub-channels of one property run together; an animation of the whole
+    /// property replaces them.
     fn start_animation_with_final_value(
         &self,
         property_name: &str,
         animation: &dyn ICompositionAnimation,
         final_value: Option<ExpressionVariant>,
     ) {
+        if let Some((property, components)) = parse_subchannel(property_name) {
+            // The instance of the animation is wrapped in an animation of
+            // the whole property, which the start path of the property sends
+            // as usual.
+            let target = self.composition_object().required_server();
+            let channel_final_value = final_value.map(|value| extract_subchannel(value, &components));
+            let inner = animation.create_instance(target, channel_final_value);
+            // An animation of the property started earlier in this frame
+            // would be replaced by the start path: the wrapper takes it over,
+            // so sub-channels started in one frame run together.
+            let previous = self
+                .get_composition_property(property)
+                .and_then(|p| self.composition_object().pending_animations().get_and_remove(p));
+            let wrapper = SubchannelAnimation::new(components, inner, previous);
+            if !self.try_start_animation(property, &wrapper, None) {
+                panic!("Unknown property {property_name}");
+            }
+            return;
+        }
         if !self.try_start_animation(property_name, animation, final_value) {
             panic!("Unknown property {property_name}");
         }
     }
 
-    /// Disconnects an animation from the named property and stops it.
+    /// Disconnects an animation from the named property and stops it,
+    /// applying its stop behavior. `property_name` may name a sub-channel
+    /// (`Offset.X`): the animations of the sub-channels that share a
+    /// component with it are stopped.
     fn stop_animation(&self, property_name: &str) {
+        if let Some((property, components)) = parse_subchannel(property_name) {
+            let Some(property) = self.get_composition_property(property) else {
+                panic!("Unknown property {property_name}");
+            };
+            self.composition_object().stop_subchannel_animation(property, components);
+            return;
+        }
         let Some(property) = self.get_composition_property(property_name) else {
             panic!("Unknown property {property_name}");
         };
