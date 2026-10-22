@@ -1,0 +1,46 @@
+[package]
+name = "ferroui-xaml-interactivity"
+description = "The behaviors object model of FerroUI: attached behavior collections, behaviors, triggers and actions on objects and styled elements, their lifecycle, and the templates that let styles set them"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script exports the type model of the crate (its behaviors, triggers, actions,
+# collections and templates, for markup); Cargo hands the path of the file to the build scripts of
+# the crates that depend on this one (docs/porting/xaml.md, 9.5.13 and 9.6.3): a document that
+# declares `<Interaction.Behaviors>` names the types of this crate.
+links = "ferroui_xaml_interactivity_xaml"
+
+# Unit tests live next to the code (the `tests/` module of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+# The template content of the collection templates (`TemplateContent`).
+ferroui-markup-xaml = { workspace = true }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+# The binding of the condition tests (`Binding` with a path and a source).
+ferroui-markup = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"
