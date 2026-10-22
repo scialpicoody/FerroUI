@@ -200,6 +200,8 @@ fn an_inset_clip_pushes_its_rectangle_and_follows_its_animations() {
     animation.set_duration(Duration::from_millis(50));
     clip.start_animation("LeftInset", &*animation);
     log.clear();
+    // The animation is committed before its time is measured.
+    s.run_jobs();
     run_for(&s, Duration::from_millis(150));
     assert_eq!(40.0, server_clip.props().left_inset());
     assert!(has_entry(&log.entries(), "PushClip 40, 5, 40, 30"), "{:?}", log.entries());

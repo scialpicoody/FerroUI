@@ -215,7 +215,9 @@ impl ServerCompositionVisualSurface {
         if self.rendering.replace(true) {
             return;
         }
-        source.render(canvas, clip, None, true, true, true);
+        // The root of a bitmap-cache walk skips its own transform already; asking to skip it as
+        // well would leave the request to the first child.
+        source.render(canvas, clip, None, true, false, true);
         self.rendering.set(false);
     }
 
