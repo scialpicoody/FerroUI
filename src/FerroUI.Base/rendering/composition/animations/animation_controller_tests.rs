@@ -128,6 +128,8 @@ fn paused_controller_scrubs_a_key_frame_animation() {
 
     // The same progress again moves the animation back to it.
     controller.resume();
+    // The resume is committed before its time is measured.
+    fixture.test.run_jobs();
     fixture.run_for(Duration::from_millis(50));
     assert!(fixture.scalar(&set, "A") > 0.75);
     controller.pause();
@@ -345,6 +347,7 @@ fn initial_value_expression_that_cannot_be_parsed_fails_the_start() {
 fn color_animation_interpolates_in_its_color_space() {
     let red = Color::from_argb(255, 255, 0, 0);
     let blue = Color::from_argb(255, 0, 0, 255);
+    let fixture = Fixture::new();
     for (space, expected) in [
         (CompositionColorSpace::Auto, Color::from_argb(255, 127, 0, 127)),
         (CompositionColorSpace::Rgb, Color::from_argb(255, 127, 0, 127)),
@@ -352,7 +355,7 @@ fn color_animation_interpolates_in_its_color_space() {
         (CompositionColorSpace::HslLinear, Color::from_argb(255, 255, 0, 255)),
         (CompositionColorSpace::RgbLinear, Color::from_argb(255, 188, 0, 188)),
     ] {
-        let fixture = Fixture::new();
+        // One compositor per test: the fixture is shared by the colour spaces.
         let compositor = &fixture.test.compositor;
         let set = compositor.create_property_set();
         set.insert_color("C", red);

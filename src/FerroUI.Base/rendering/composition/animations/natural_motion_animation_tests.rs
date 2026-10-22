@@ -209,8 +209,9 @@ fn under_damped_spring_overshoots() {
 
 #[test]
 fn critically_and_over_damped_springs_do_not_overshoot() {
+    // One compositor per test: the fixture is shared by the damping ratios.
+    let fixture = Fixture::new();
     for damping in [1.0, 2.0] {
-        let fixture = Fixture::new();
         let set = fixture.test.compositor.create_property_set();
         set.insert_scalar("X", 0.0);
         let spring = fixture.test.compositor.create_spring_scalar_animation();
