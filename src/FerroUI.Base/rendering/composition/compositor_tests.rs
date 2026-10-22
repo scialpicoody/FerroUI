@@ -1591,3 +1591,7 @@ mod composition_shape_tests;
 // brushes and the remaining visual members use the fixture of this module.
 #[path = "composition_winui_layer_tests.rs"]
 mod composition_winui_layer_tests;
+// The tests of the WinUI effect and backdrop brushes and the effect of
+// layer visuals use the fixture of this module.
+#[path = "composition_winui_effect_tests.rs"]
+mod composition_winui_effect_tests;

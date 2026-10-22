@@ -222,8 +222,8 @@ pub fn surface_brush_content_rect(
 
 /// Paints a composition brush over `rect`, in the coordinates of `canvas`:
 /// what a sprite visual (and later a shape) does with its brush. A surface
-/// brush is painted by [`ServerCompositionSurfaceBrush::paint`], a nine-grid
-/// or mask brush by its own `paint`; a brush of
+/// brush is painted by [`ServerCompositionSurfaceBrush::paint`], a nine-grid,
+/// mask or effect brush by its own `paint` (a backdrop brush paints nothing); a brush of
 /// the drawing context (the colour and gradient brushes) fills the
 /// rectangle.
 pub fn paint_composition_brush(canvas: &mut dyn IDrawingContextImpl, brush: &Rc<dyn IServerObject>, rect: Rect) {
@@ -233,6 +233,10 @@ pub fn paint_composition_brush(canvas: &mut dyn IDrawingContextImpl, brush: &Rc<
         nine_grid.paint(canvas, rect);
     } else if let Some(mask) = brush.as_any().downcast_ref::<super::ServerCompositionMaskBrush>() {
         mask.paint(canvas, rect);
+    } else if let Some(effect) = brush.as_any().downcast_ref::<super::ServerCompositionEffectBrush>() {
+        effect.paint(canvas, rect);
+    } else if let Some(backdrop) = brush.as_any().downcast_ref::<super::ServerCompositionBackdropBrush>() {
+        backdrop.paint(canvas, rect);
     } else if let Some(platform_brush) = brush.clone().as_brush() {
         canvas.draw_rectangle(Some(&*platform_brush), None, RoundedRect::from_rect(rect), &BoxShadows::default());
     }

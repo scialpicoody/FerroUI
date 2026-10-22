@@ -1,9 +1,11 @@
 //! The composition brushes and their server-side counterparts.
 
 mod composition_brush;
+mod composition_effect_brush;
 mod composition_gradient_winui;
 mod composition_nine_grid_brush;
 mod server_composition_brush;
+mod server_composition_effect_brush;
 mod server_composition_nine_grid_brush;
 mod server_composition_surface_brush;
 mod server_simple_content_brush;
@@ -27,6 +29,9 @@ pub use composition_nine_grid_brush::{CompositionMaskBrush, CompositionNineGridB
 pub use server_composition_nine_grid_brush::{
     nine_grid_rects, NineGridEdges, ServerCompositionMaskBrush, ServerCompositionNineGridBrush, NINE_GRID_CENTER,
 };
+
+pub use composition_effect_brush::{CompositionBackdropBrush, CompositionEffectBrush};
+pub use server_composition_effect_brush::{ServerCompositionBackdropBrush, ServerCompositionEffectBrush};
 
 pub use server_simple_content_brush::ServerCompositionSimpleContentBrush;
 pub use server_simple_image_brush::ServerCompositionSimpleImageBrush;

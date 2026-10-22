@@ -26,13 +26,20 @@ use std::time::Duration;
 
 /// Splits a sub-channel target (`Offset.X`, `scale.xy`) into the property
 /// name and the indices of the components (X = 0, Y = 1, Z = 2, W = 3).
-/// Returns `None` for a name without a `.`. Panics when the part after the
-/// `.` is not one to four distinct components (WinUI throws).
+/// Returns `None` for a name without a `.`, and for one whose part after
+/// the `.` is not made of the letters X, Y, Z and W: a dotted property name
+/// of the class itself (the animatable properties of an effect brush,
+/// `Blur.BlurAmount`), which the class resolves as a whole. Panics when the
+/// part after the `.` is more than four or repeated components (WinUI
+/// throws).
 ///
 /// The components are case-insensitive; the property name is matched as
 /// given.
 pub(crate) fn parse_subchannel(property_name: &str) -> Option<(&str, Vec<usize>)> {
     let (property, channel) = property_name.split_once('.')?;
+    if channel.is_empty() || !channel.chars().all(|c| matches!(c.to_ascii_uppercase(), 'X' | 'Y' | 'Z' | 'W')) {
+        return None;
+    }
     let mut components = Vec::with_capacity(channel.len());
     for c in channel.chars() {
         let index = match c.to_ascii_uppercase() {

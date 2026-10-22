@@ -1,7 +1,7 @@
 use super::generated::{LayerVisualHooks, LayerVisualProps};
 use super::server::ServerLayerVisual;
 use super::visual::CompositionVisualKind;
-use super::{CompositionVisual, Compositor, DropShadow, ICompositionObject};
+use super::{CompositionBrush, CompositionEffectBrush, CompositionVisual, Compositor, DropShadow, ICompositionObject};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -16,8 +16,11 @@ impl LayerVisualHooks for CompositionVisual {}
 /// and Vello backends); elsewhere it is the box shadow of the rectangle of
 /// the visual, as the shadow of a sprite visual.
 ///
-/// Deviation (winui-composition.md): `Effect` is not ported yet (the effect
-/// brushes come with phase 6).
+/// The effect (an effect brush) is applied to the composed children: they
+/// are the first source parameter of its graph, and the rest of the graph
+/// is drawn around them (a blur pushes the blur effect of the drawing
+/// context around the layer, a composite draws its other sources under and
+/// over it).
 ///
 /// Like a sprite visual, a layer visual does not clip to its bounds when it
 /// is created (`clip_to_bounds` is `false`).
@@ -68,5 +71,22 @@ impl LayerVisual {
 
     pub fn set_shadow(&self, value: Option<Rc<DropShadow>>) {
         self.props().set_shadow(&*self.0, value.map(|shadow| shadow as Rc<dyn ICompositionObject>))
+    }
+
+    /// `Effect`: the effect brush applied to the composed children, which
+    /// are the first source parameter of its graph. (The upstream `effect`
+    /// of every visual, an image effect, is `visual().effect()`.)
+    pub fn effect(&self) -> Option<CompositionEffectBrush> {
+        self.props()
+            .effect_brush()
+            .and_then(|brush| brush.into_any_rc().downcast::<CompositionBrush>().ok())
+            .and_then(|brush| CompositionEffectBrush::from_brush(&brush))
+    }
+
+    pub fn set_effect(&self, value: Option<CompositionEffectBrush>) {
+        self.props().set_effect_brush(
+            &*self.0,
+            value.map(|brush| brush.brush().clone() as Rc<dyn ICompositionObject>),
+        )
     }
 }

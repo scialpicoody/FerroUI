@@ -38,7 +38,8 @@ use crate::rendering::composition::generated::{
     CompositionMaskBrushHooks, CompositionMaskBrushProps, CompositionNineGridBrushHooks,
     CompositionNineGridBrushProps, ServerCompositionMaskBrushProps, ServerCompositionNineGridBrushProps,
 };
-use crate::rendering::composition::animations::CompositionColorSpace;
+use crate::rendering::composition::animations::{parse_subchannel, CompositionColorSpace};
+use super::composition_effect_brush::CompositionEffectBrushData;
 use crate::rendering::composition::CompositionMappingMode;
 use crate::rendering::composition::server::{CompositionProperty, IServerObject, ServerCompositor, ServerObjectId};
 use crate::rendering::composition::transport::{BatchResource, BatchStreamWriter, IRegisterForSerialization};
@@ -117,6 +118,10 @@ pub(crate) enum CompositionBrushKind {
     NineGrid(CompositionNineGridBrushProps),
     /// The WinUI `CompositionMaskBrush`.
     Mask(CompositionMaskBrushProps),
+    /// The WinUI `CompositionEffectBrush`.
+    Effect(CompositionEffectBrushData),
+    /// The WinUI `CompositionBackdropBrush`.
+    Backdrop(CompositionBrushProps),
 }
 
 /// A brush of the composition API.
@@ -164,6 +169,8 @@ impl CompositionBrush {
             CompositionBrushKind::Surface(data) => data.props.initialize_defaults(self),
             CompositionBrushKind::NineGrid(props) => props.initialize_defaults(self),
             CompositionBrushKind::Mask(props) => props.initialize_defaults(self),
+            CompositionBrushKind::Effect(data) => data.brush.initialize_defaults(self),
+            CompositionBrushKind::Backdrop(props) => props.initialize_defaults(self),
         }
     }
 
@@ -177,6 +184,8 @@ impl CompositionBrush {
             CompositionBrushKind::Surface(data) => data.props.base(),
             CompositionBrushKind::NineGrid(props) => props.base(),
             CompositionBrushKind::Mask(props) => props.base(),
+            CompositionBrushKind::Effect(data) => &data.brush,
+            CompositionBrushKind::Backdrop(props) => props,
         }
     }
 
@@ -185,7 +194,9 @@ impl CompositionBrush {
             CompositionBrushKind::SolidColor(_)
             | CompositionBrushKind::Surface(_)
             | CompositionBrushKind::NineGrid(_)
-            | CompositionBrushKind::Mask(_) => None,
+            | CompositionBrushKind::Mask(_)
+            | CompositionBrushKind::Effect(_)
+            | CompositionBrushKind::Backdrop(_) => None,
             CompositionBrushKind::LinearGradient(data, _)
             | CompositionBrushKind::RadialGradient(data, _)
             | CompositionBrushKind::ConicGradient(data, _) => Some(data),
@@ -220,6 +231,8 @@ impl CompositionBrush {
             CompositionBrushKind::Surface(_) => "CompositionSurfaceBrush",
             CompositionBrushKind::NineGrid(_) => "CompositionNineGridBrush",
             CompositionBrushKind::Mask(_) => "CompositionMaskBrush",
+            CompositionBrushKind::Effect(_) => "CompositionEffectBrush",
+            CompositionBrushKind::Backdrop(_) => "CompositionBackdropBrush",
         }
     }
 
@@ -292,6 +305,8 @@ impl CompositionBrush {
             CompositionBrushKind::Surface(data) => data.props.serialize_changes_core(self, writer),
             CompositionBrushKind::NineGrid(props) => props.serialize_changes_core(self, writer),
             CompositionBrushKind::Mask(props) => props.serialize_changes_core(self, writer),
+            CompositionBrushKind::Effect(data) => data.serialize_changes_core(self, writer),
+            CompositionBrushKind::Backdrop(props) => props.serialize_changes_core(self, writer),
         }
     }
 
@@ -393,6 +408,13 @@ impl ICompositionObjectAnimations for CompositionBrush {
             }
             CompositionBrushKind::NineGrid(props) => props.start_animation(self, property_name, animation, final_value),
             CompositionBrushKind::Mask(props) => props.start_animation(self, property_name, animation, final_value),
+            // The animatable properties of the effect are entries of the
+            // property set of the brush, which animates them.
+            CompositionBrushKind::Effect(data) if data.graph.is_animatable(property_name) => {
+                self.object.properties().try_start_animation(property_name, animation, final_value)
+            }
+            CompositionBrushKind::Effect(data) => data.brush.start_animation(self, property_name, animation, final_value),
+            CompositionBrushKind::Backdrop(props) => props.start_animation(self, property_name, animation, final_value),
         }
     }
 
@@ -419,12 +441,41 @@ impl ICompositionObjectAnimations for CompositionBrush {
             CompositionBrushKind::Mask(_) => {
                 ServerCompositionMaskBrushProps::get_composition_property(property_name)
             }
+            // The animatable properties of an effect are properties of its
+            // property set, not of the brush.
+            CompositionBrushKind::Effect(_) | CompositionBrushKind::Backdrop(_) => None,
         }
         .or_else(|| ServerCompositionBrushProps::get_composition_property(property_name))
     }
 
     fn composition_object(&self) -> &CompositionObject {
         &self.object
+    }
+
+    /// `StopAnimation`: an animatable property of an effect brush is stopped
+    /// on the property set of the brush, which runs it; any other property
+    /// as for every composition object.
+    fn stop_animation(&self, property_name: &str) {
+        if let CompositionBrushKind::Effect(data) = &self.kind {
+            if data.graph.is_animatable(property_name) {
+                self.object.note_animation_stopped(property_name);
+                self.object.properties().stop_animation(property_name);
+                return;
+            }
+        }
+        // The default of `ICompositionObjectAnimations::stop_animation`.
+        self.object.note_animation_stopped(property_name);
+        if let Some((property, components)) = parse_subchannel(property_name) {
+            let Some(property) = self.get_composition_property(property) else {
+                panic!("Unknown property {property_name}");
+            };
+            self.object.stop_subchannel_animation(property, components);
+            return;
+        }
+        let Some(property) = self.get_composition_property(property_name) else {
+            panic!("Unknown property {property_name}");
+        };
+        self.object.stop_animation(property);
     }
 }
 

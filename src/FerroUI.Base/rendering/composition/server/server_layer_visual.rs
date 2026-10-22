@@ -1,6 +1,6 @@
 use super::{
-    CompositionProperty, IServerObject, IServerRenderResourceObserver, IServerVisualContent, ServerCompositionVisual,
-    ServerDropShadow, ServerSizeDependantVisual, ServerVisualRenderContext,
+    CompositionProperty, IServerObject, IServerRenderResourceObserver, IServerVisualContent, ServerCompositionEffectBrush,
+    ServerCompositionVisual, ServerDropShadow, ServerSizeDependantVisual, ServerVisualRenderContext,
 };
 use crate::media::{Color, EffectExtensions, IEffect, ImmutableDropShadowEffect};
 use crate::platform::{IDrawingContextImpl, LtrbRect};
@@ -65,6 +65,11 @@ enum LayerMode {
 /// the composed content; otherwise the box shadow of the rectangle of the
 /// visual is drawn under the layer.
 ///
+/// With an effect (an effect brush), the composed children are the first
+/// source parameter of its graph: what the graph draws under the layer and
+/// what wraps it are drawn and pushed before the children, inside the layer
+/// (or the shadow), and popped and drawn after them.
+///
 /// Deviation (winui-composition.md): without effect support in the drawing
 /// context the shadow is the box shadow of the rectangle of the visual, as
 /// for a sprite visual.
@@ -86,6 +91,14 @@ impl ServerLayerVisual {
     /// The shadow.
     pub fn shadow(&self) -> Option<Rc<ServerDropShadow>> {
         self.props.shadow().and_then(|shadow| shadow.into_any_rc().downcast::<ServerDropShadow>().ok())
+    }
+
+    /// The effect brush applied to the composed children (the WinUI
+    /// `Effect`).
+    pub fn effect_brush(&self) -> Option<Rc<ServerCompositionEffectBrush>> {
+        self.props
+            .effect_brush()
+            .and_then(|brush| brush.into_any_rc().downcast::<ServerCompositionEffectBrush>().ok())
     }
 
     /// The shadow, when it is visible.
@@ -130,6 +143,19 @@ impl ServerLayerVisualHooks for ServerCompositionVisual {
         }
         self.invalidate_content();
     }
+
+    fn on_effect_brush_changing(&self) {
+        if let Some(content) = self.content_as::<ServerLayerVisual>() {
+            observe_visual_resource(self, content.props.effect_brush(), false);
+        }
+    }
+
+    fn on_effect_brush_changed(&self) {
+        if let Some(content) = self.content_as::<ServerLayerVisual>() {
+            observe_visual_resource(self, content.props.effect_brush(), true);
+        }
+        self.invalidate_content();
+    }
 }
 
 impl IServerVisualContent for ServerLayerVisual {
@@ -155,16 +181,24 @@ impl IServerVisualContent for ServerLayerVisual {
     }
 
     /// The shadow of the composed children extends the subtree as the drop
-    /// shadow effect does.
+    /// shadow effect does, and the blurs of the effect around the layer as
+    /// the blur effect does.
     fn sub_tree_bounds_padding(&self, _visual: &ServerCompositionVisual) -> Option<Thickness> {
-        let shadow = self.visible_shadow()?;
-        let effect = drop_shadow_effect(&shadow);
-        Some(EffectExtensions::get_effect_output_padding(Some(&effect as &dyn IEffect)))
+        let shadow = self.visible_shadow().map(|shadow| {
+            let effect = drop_shadow_effect(&shadow);
+            EffectExtensions::get_effect_output_padding(Some(&effect as &dyn IEffect))
+        });
+        let effect = self.effect_brush().map(|effect| effect.layer_padding());
+        match (shadow, effect) {
+            (None, None) => None,
+            (shadow, effect) => Some(shadow.unwrap_or_default() + effect.unwrap_or_default()),
+        }
     }
 
-    /// A shadow depends on every change of the subtree, as an effect does.
+    /// A shadow or an effect depends on every change of the subtree, as an
+    /// effect does.
     fn has_effect(&self, visual: &ServerCompositionVisual) -> bool {
-        visual.effect().is_some() || self.visible_shadow().is_some()
+        visual.effect().is_some() || self.visible_shadow().is_some() || self.effect_brush().is_some()
     }
 
     fn render_core(
@@ -191,11 +225,19 @@ impl IServerVisualContent for ServerLayerVisual {
                 canvas.push_layer(bounds);
             }
         }
+        // The effect, inside the layer: the composed children are its first
+        // source parameter.
+        if let Some(effect) = self.effect_brush() {
+            effect.push_for_layer(canvas, bounds);
+        }
     }
 
     fn render_after_children(&self, visual: &ServerCompositionVisual, context: &mut ServerVisualRenderContext<'_>) {
         let canvas = context.canvas();
-        let Some((mode, _)) = self.layer_mode(visual, canvas) else { return };
+        let Some((mode, bounds)) = self.layer_mode(visual, canvas) else { return };
+        if let Some(effect) = self.effect_brush() {
+            effect.pop_for_layer(canvas, bounds);
+        }
         match mode {
             LayerMode::Shadow(_) => {
                 if let Some(effects) = canvas.as_drawing_context_impl_with_effects() {
@@ -206,13 +248,14 @@ impl IServerVisualContent for ServerLayerVisual {
         }
     }
 
-    /// The shadow changed.
+    /// The shadow or the effect changed.
     fn dependency_queued_invalidate(&self, visual: &ServerCompositionVisual) {
         visual.invalidate_content();
     }
 
     fn dispose(&self, visual: &ServerCompositionVisual) {
         observe_visual_resource(visual, self.props.shadow(), false);
+        observe_visual_resource(visual, self.props.effect_brush(), false);
     }
 
     fn find_props(&self, type_id: TypeId) -> Option<&dyn Any> {

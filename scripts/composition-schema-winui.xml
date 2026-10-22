@@ -177,10 +177,12 @@
         <Property Name="ParentForTransform" Type="CompositionVisual?"/>
     </Object>
 
-    <!-- Microsoft.UI.Composition.LayerVisual. The Effect member comes with the
-         effect brushes (phase 6). -->
+    <!-- Microsoft.UI.Composition.LayerVisual. EffectBrush is the WinUI Effect
+         (a CompositionEffectBrush, phase 6), named apart from the upstream
+         Effect of every visual. -->
     <Object Name="LayerVisual" Inherits="CompositionContainerVisual" ServerBase="ServerSizeDependantVisual">
         <Property Name="Shadow" Type="DropShadow?" />
+        <Property Name="EffectBrush" Type="CompositionBrush?" />
     </Object>
 
     <!-- Microsoft.UI.Composition.RedirectVisual. SourceSurface is the hidden
