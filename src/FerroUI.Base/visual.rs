@@ -64,6 +64,9 @@ struct CompositionExtras {
     /// The number of outstanding requests to hide the composition visual (a connected animation
     /// shows the element through a visual surface while it flies).
     hide_requests: u32,
+    /// The number of outstanding requests to keep the composition visual visible although the
+    /// visual is not (an implicit hide animation runs).
+    show_requests: u32,
     /// A composition visual shown above the children and the child composition visual: the
     /// layer of the connected animations on a top level.
     layer_visual: Option<Rc<CompositionVisual>>,
@@ -437,7 +440,7 @@ impl VisualImpl for Visual {
         // TODO: Introduce a dirty mask like WPF has, so we don't overwrite properties every time
         comp.set_offset(crate::Vector3D::new(bounds.x, bounds.y, 0.0));
         comp.set_size(crate::Vector::new(bounds.width, bounds.height));
-        comp.set_visible(this.is_visible() && !this.is_hidden_by_composition());
+        comp.set_visible((this.is_visible() || this.is_shown_by_composition()) && !this.is_hidden_by_composition());
         comp.set_opacity(this.opacity() as f32);
         comp.set_clip_to_bounds(this.clip_to_bounds());
         comp.set_clip(this.clip().and_then(|clip| clip.platform_impl()));
@@ -1018,6 +1021,28 @@ impl Visual {
     /// Ends a request of [`add_composition_hide_request`](Self::add_composition_hide_request).
     pub fn remove_composition_hide_request(&self) {
         self.with_composition_extras(|extras| extras.hide_requests = extras.hide_requests.saturating_sub(1));
+        self.invalidate_visual();
+    }
+
+    /// Whether the composition visual of the visual is kept visible by requests of the
+    /// composition API although `IsVisible` is `false` (see
+    /// [`add_composition_show_request`](Self::add_composition_show_request)).
+    pub fn is_shown_by_composition(&self) -> bool {
+        self.read_composition_extras(|extras| extras.show_requests > 0).unwrap_or(false)
+    }
+
+    /// Keeps the composition visual of the visual visible until the matching
+    /// [`remove_composition_show_request`](Self::remove_composition_show_request), whatever
+    /// `IsVisible` says. Requests are counted. An implicit hide animation keeps the element
+    /// visible this way until it completes. A hide request wins over a show request.
+    pub fn add_composition_show_request(&self) {
+        self.with_composition_extras(|extras| extras.show_requests += 1);
+        self.invalidate_visual();
+    }
+
+    /// Ends a request of [`add_composition_show_request`](Self::add_composition_show_request).
+    pub fn remove_composition_show_request(&self) {
+        self.with_composition_extras(|extras| extras.show_requests = extras.show_requests.saturating_sub(1));
         self.invalidate_visual();
     }
 
