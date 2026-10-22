@@ -235,8 +235,8 @@ impl IServerTreeVisitor for RenderContext<'_> {
                 self.adorner_helper_render_post_graph_push_adorner_clip(visual);
             }
 
-            if visual.composition_clip_shape().is_some() {
-                self.canvas.pop_clip();
+            if let Some(shape) = visual.composition_clip_shape() {
+                shape.pop(self.canvas);
             }
 
             if visual.clip().is_some() {

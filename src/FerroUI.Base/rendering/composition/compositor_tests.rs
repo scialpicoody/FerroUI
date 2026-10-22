@@ -1584,3 +1584,6 @@ fn an_id_released_twice_is_handed_out_once() {
 // module.
 #[path = "composition_winui_visual_tests.rs"]
 mod composition_winui_visual_tests;
+
+#[path = "composition_shape_tests.rs"]
+mod composition_shape_tests;

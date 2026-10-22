@@ -66,15 +66,19 @@ mod composition_drawing_surface;
 mod composition_external_memory;
 mod composition_interop;
 mod composition_experimental_acrylic_visual;
+mod composition_geometry;
 mod composition_gradient_stop;
 mod composition_object;
 mod composition_object_impls;
 mod composition_options;
 mod composition_property_set;
+mod composition_shape;
+mod composition_shape_factories;
 mod composition_solid_color_visual;
 mod composition_surface;
 mod composition_surface_visual;
 mod composition_target;
+mod composition_view_box;
 mod composition_visual_surface;
 mod composition_winui_factories;
 mod compositing_renderer;
@@ -83,6 +87,7 @@ mod container_visual;
 mod drop_shadow;
 mod i_composition_surface;
 mod loaded_image_surface;
+mod shape_visual;
 mod sprite_visual;
 mod element_composition_preview;
 mod visual;
@@ -119,7 +124,17 @@ pub use brushes::{
     CompositionBrush, CompositionConicGradientBrush, CompositionGradientBrush, CompositionLinearGradientBrush,
     CompositionRadialGradientBrush, CompositionSolidColorBrush, CompositionSurfaceBrush,
 };
-pub use composition_clip::{CompositionClip, InsetClip, RectangleClip};
+pub use composition_clip::{CompositionClip, GeometricClip, InsetClip, RectangleClip};
+pub use composition_geometry::{
+    CompositionEllipseGeometry, CompositionGeometry, CompositionLineGeometry, CompositionPath, CompositionPathGeometry,
+    CompositionRectangleGeometry, CompositionRoundedRectangleGeometry,
+};
+pub use composition_shape::{
+    CompositionContainerShape, CompositionShape, CompositionShapeCollection, CompositionSpriteShape, CompositionStrokeCap,
+    CompositionStrokeLineJoin,
+};
+pub use composition_view_box::CompositionViewBox;
+pub use shape_visual::ShapeVisual;
 pub use composition_visual_surface::CompositionVisualSurface;
 pub use drop_shadow::DropShadow;
 pub use i_composition_surface::ICompositionSurface;

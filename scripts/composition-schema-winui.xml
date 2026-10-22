@@ -84,4 +84,80 @@
         <Property Name="Brush" Type="CompositionBrush?" />
         <Property Name="Shadow" Type="DropShadow?" />
     </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionGeometry and its subclasses. -->
+    <Object Name="CompositionGeometry" Abstract="true" ServerBase="ServerRenderResource">
+        <Property Name="TrimEnd" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="TrimOffset" Type="float" Animated="true"/>
+        <Property Name="TrimStart" Type="float" Animated="true"/>
+    </Object>
+    <Object Name="CompositionRectangleGeometry" Inherits="CompositionGeometry">
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="Size" Type="Vector" Animated="true"/>
+    </Object>
+    <Object Name="CompositionRoundedRectangleGeometry" Inherits="CompositionGeometry">
+        <Property Name="CornerRadius" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="Size" Type="Vector" Animated="true"/>
+    </Object>
+    <Object Name="CompositionEllipseGeometry" Inherits="CompositionGeometry">
+        <Property Name="Center" Type="Vector" Animated="true"/>
+        <Property Name="Radius" Type="Vector" Animated="true"/>
+    </Object>
+    <Object Name="CompositionLineGeometry" Inherits="CompositionGeometry">
+        <Property Name="Start" Type="Vector" Animated="true"/>
+        <Property Name="End" Type="Vector" Animated="true"/>
+    </Object>
+    <Object Name="CompositionPathGeometry" Inherits="CompositionGeometry">
+        <Property Name="Path" Type="CompositionPath?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionViewBox. -->
+    <Object Name="CompositionViewBox" ServerBase="ServerRenderResource">
+        <Property Name="HorizontalAlignmentRatio" Type="float" Animated="true" DefaultValue="0.5"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="Size" Type="Vector" Animated="true"/>
+        <Property Name="Stretch" Type="CompositionStretch" DefaultValue="CompositionStretch.Fill"/>
+        <Property Name="VerticalAlignmentRatio" Type="float" Animated="true" DefaultValue="0.5"/>
+    </Object>
+
+    <!-- Microsoft.UI.Composition.CompositionShape, its subclasses and
+         CompositionShapeCollection. -->
+    <Object Name="CompositionShape" Abstract="true" ServerBase="ServerRenderResource">
+        <Property Name="CenterPoint" Type="Vector" Animated="true"/>
+        <Property Name="Offset" Type="Vector" Animated="true"/>
+        <Property Name="RotationAngle" Type="float" Animated="true"/>
+        <Property Name="Scale" Type="Vector" Animated="true" DefaultValue="Vector.One"/>
+        <Property Name="TransformMatrix" Type="Matrix" Animated="true" DefaultValue="Matrix.Identity"/>
+    </Object>
+    <List Name="CompositionShapeCollection" ItemType="CompositionShape"/>
+    <Object Name="CompositionSpriteShape" Inherits="CompositionShape">
+        <Property Name="FillBrush" Type="CompositionBrush?" />
+        <Property Name="Geometry" Type="CompositionGeometry?" />
+        <Property Name="IsStrokeNonScaling" Type="bool" />
+        <Property Name="StrokeBrush" Type="CompositionBrush?" />
+        <Property Name="StrokeDashArray" Type="CompositionStrokeDashArray?" />
+        <Property Name="StrokeDashCap" Type="CompositionStrokeCap" />
+        <Property Name="StrokeDashOffset" Type="float" Animated="true"/>
+        <Property Name="StrokeEndCap" Type="CompositionStrokeCap" />
+        <Property Name="StrokeLineJoin" Type="CompositionStrokeLineJoin" />
+        <Property Name="StrokeMiterLimit" Type="float" Animated="true" DefaultValue="2"/>
+        <Property Name="StrokeStartCap" Type="CompositionStrokeCap" />
+        <Property Name="StrokeThickness" Type="float" Animated="true" DefaultValue="1"/>
+    </Object>
+    <Object Name="CompositionContainerShape" Inherits="CompositionShape">
+        <Property Name="Shapes" Type="CompositionShapeCollection?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.ShapeVisual. -->
+    <Object Name="ShapeVisual" Inherits="CompositionContainerVisual" ServerBase="ServerSizeDependantVisual">
+        <Property Name="Shapes" Type="CompositionShapeCollection?" />
+        <Property Name="ViewBox" Type="CompositionViewBox?" />
+    </Object>
+
+    <!-- Microsoft.UI.Composition.GeometricClip. -->
+    <Object Name="GeometricClip" Inherits="CompositionClip">
+        <Property Name="Geometry" Type="CompositionGeometry?" />
+        <Property Name="ViewBox" Type="CompositionViewBox?" />
+    </Object>
 </NComposition>

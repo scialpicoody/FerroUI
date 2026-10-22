@@ -18,7 +18,7 @@ use super::expressions::ExpressionVariant;
 use super::generated::{
     CompositionContainerVisualHooks, CompositionContainerVisualProps, CompositionSolidColorVisualProps,
     CompositionSurfaceVisualProps, CompositionVisualHooks, CompositionVisualProps,
-    ServerCompositionContainerVisualProps, SpriteVisualProps,
+    ServerCompositionContainerVisualProps, ShapeVisualProps, SpriteVisualProps,
 };
 use super::hit_testing::CompositionHitTestAabbTree;
 use super::server::{
@@ -49,6 +49,8 @@ pub(crate) enum CompositionVisualKind {
     Custom(CustomVisualData),
     /// The WinUI `SpriteVisual`.
     Sprite(SpriteVisualProps),
+    /// The WinUI `ShapeVisual`.
+    Shape(ShapeVisualProps),
 }
 
 /// A node of the composition visual tree.
@@ -158,6 +160,7 @@ impl CompositionVisual {
             CompositionVisualKind::Surface(props) => props.initialize_defaults(self),
             CompositionVisualKind::Custom(data) => data.props().initialize_defaults(self),
             CompositionVisualKind::Sprite(props) => props.initialize_defaults(self),
+            CompositionVisualKind::Shape(props) => props.initialize_defaults(self),
         }
     }
 
@@ -169,6 +172,7 @@ impl CompositionVisual {
             CompositionVisualKind::Surface(props) => props.base(),
             CompositionVisualKind::Custom(data) => data.props(),
             CompositionVisualKind::Sprite(props) => props.base(),
+            CompositionVisualKind::Shape(props) => props.base(),
         }
     }
 
@@ -368,6 +372,7 @@ impl CompositionVisual {
             CompositionVisualKind::Surface(props) => props.serialize_changes_core(self, writer),
             CompositionVisualKind::Custom(data) => data.props().serialize_changes_core(self, writer),
             CompositionVisualKind::Sprite(props) => props.serialize_changes_core(self, writer),
+            CompositionVisualKind::Shape(props) => props.serialize_changes_core(self, writer),
         }
     }
 }
@@ -462,6 +467,7 @@ impl ICompositionObjectAnimations for CompositionVisual {
                 data.props().start_animation(self, property_name, animation, final_value)
             }
             CompositionVisualKind::Sprite(props) => props.start_animation(self, property_name, animation, final_value),
+            CompositionVisualKind::Shape(props) => props.start_animation(self, property_name, animation, final_value),
         }
     }
 
@@ -493,6 +499,7 @@ impl AsCompositionObject for CompositionVisual {
             CompositionVisualKind::Surface(_) => "CompositionSurfaceVisual",
             CompositionVisualKind::Custom(_) => "CompositionCustomVisual",
             CompositionVisualKind::Sprite(_) => "SpriteVisual",
+            CompositionVisualKind::Shape(_) => "ShapeVisual",
         }
     }
 }

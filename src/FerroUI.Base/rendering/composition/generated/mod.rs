@@ -84,7 +84,7 @@
 //! What `scripts/composition-schema-winui.xml` adds to the upstream schema
 //! (see the docstring of the generator for the merge rules):
 //!
-//! * classes: `CompositionClip`, `InsetClip`, `RectangleClip`, `DropShadow`, `CompositionSurfaceBrush`, `CompositionVisualSurface`, `SpriteVisual`;
+//! * classes: `CompositionClip`, `InsetClip`, `RectangleClip`, `DropShadow`, `CompositionSurfaceBrush`, `CompositionVisualSurface`, `SpriteVisual`, `CompositionGeometry`, `CompositionRectangleGeometry`, `CompositionRoundedRectangleGeometry`, `CompositionEllipseGeometry`, `CompositionLineGeometry`, `CompositionPathGeometry`, `CompositionViewBox`, `CompositionShape`, `CompositionShapeCollection`, `CompositionSpriteShape`, `CompositionContainerShape`, `ShapeVisual`, `GeometricClip`;
 //! * properties of upstream classes: `CompositionVisual.CompositionClip`.
 //!
 //! # Classes of the schema that are not generated
@@ -97,11 +97,20 @@ mod composition_brush;
 mod composition_cache_mode;
 mod composition_clip;
 mod composition_conic_gradient_brush;
+mod composition_container_shape;
 mod composition_container_visual;
+mod composition_ellipse_geometry;
 mod composition_experimental_acrylic_visual;
+mod composition_geometry;
 mod composition_gradient_stop;
+mod composition_line_geometry;
 mod composition_linear_gradient_brush;
+mod composition_path_geometry;
 mod composition_radial_gradient_brush;
+mod composition_rectangle_geometry;
+mod composition_rounded_rectangle_geometry;
+mod composition_shape;
+mod composition_shape_collection;
 mod composition_simple_brush;
 mod composition_simple_conic_gradient_brush;
 mod composition_simple_geometry;
@@ -113,16 +122,20 @@ mod composition_simple_tile_brush;
 mod composition_simple_transform;
 mod composition_solid_color_brush;
 mod composition_solid_color_visual;
+mod composition_sprite_shape;
 mod composition_surface_brush;
 mod composition_surface_visual;
 mod composition_target;
 mod composition_tile_brush;
+mod composition_view_box;
 mod composition_visual;
 mod composition_visual_collection;
 mod composition_visual_surface;
 mod drop_shadow;
+mod geometric_clip;
 mod inset_clip;
 mod rectangle_clip;
+mod shape_visual;
 mod sprite_visual;
 
 pub use composition_animations::*;
@@ -131,11 +144,20 @@ pub use composition_brush::*;
 pub use composition_cache_mode::*;
 pub use composition_clip::*;
 pub use composition_conic_gradient_brush::*;
+pub use composition_container_shape::*;
 pub use composition_container_visual::*;
+pub use composition_ellipse_geometry::*;
 pub use composition_experimental_acrylic_visual::*;
+pub use composition_geometry::*;
 pub use composition_gradient_stop::*;
+pub use composition_line_geometry::*;
 pub use composition_linear_gradient_brush::*;
+pub use composition_path_geometry::*;
 pub use composition_radial_gradient_brush::*;
+pub use composition_rectangle_geometry::*;
+pub use composition_rounded_rectangle_geometry::*;
+pub use composition_shape::*;
+pub use composition_shape_collection::*;
 pub use composition_simple_brush::*;
 pub use composition_simple_conic_gradient_brush::*;
 pub use composition_simple_geometry::*;
@@ -147,16 +169,20 @@ pub use composition_simple_tile_brush::*;
 pub use composition_simple_transform::*;
 pub use composition_solid_color_brush::*;
 pub use composition_solid_color_visual::*;
+pub use composition_sprite_shape::*;
 pub use composition_surface_brush::*;
 pub use composition_surface_visual::*;
 pub use composition_target::*;
 pub use composition_tile_brush::*;
+pub use composition_view_box::*;
 pub use composition_visual::*;
 pub use composition_visual_collection::*;
 pub use composition_visual_surface::*;
 pub use drop_shadow::*;
+pub use geometric_clip::*;
 pub use inset_clip::*;
 pub use rectangle_clip::*;
+pub use shape_visual::*;
 pub use sprite_visual::*;
 
 #[cfg(test)]

@@ -281,6 +281,18 @@ TYPES = {
         "CompositionDropShadowSourcePolicy",
         ["crate::rendering::composition::CompositionDropShadowSourcePolicy"],
     ),
+    "CompositionStrokeCap": ("value", "CompositionStrokeCap", ["crate::rendering::composition::CompositionStrokeCap"]),
+    "CompositionStrokeLineJoin": (
+        "value",
+        "CompositionStrokeLineJoin",
+        ["crate::rendering::composition::CompositionStrokeLineJoin"],
+    ),
+    "CompositionPath": (
+        "payload",
+        "Arc<CompositionPath>",
+        ["std::sync::Arc", "crate::rendering::composition::CompositionPath"],
+    ),
+    "CompositionStrokeDashArray": ("payload", "Arc<Vec<f32>>", ["std::sync::Arc"]),
     "Avalonia.Media.RenderOptions": ("value", "RenderOptions", ["crate::media::RenderOptions"]),
     "Avalonia.Media.TextOptions": ("value", "TextOptions", ["crate::media::TextOptions"]),
     "Avalonia.Media.PenLineCap": ("value", "PenLineCap", ["crate::media::PenLineCap"]),
@@ -345,6 +357,7 @@ DEFAULTS = {
     # The defaults of the FerroUI overlay (the WinUI defaults).
     ("float", "0.5"): "0.5",
     ("float", "9"): "9.0",
+    ("float", "2"): "2.0",
     ("Vector", "Vector.One"): "Vector::new(1.0, 1.0)",
     ("Matrix", "Matrix.Identity"): "Matrix::IDENTITY",
     ("Color", "Colors.Black"): "crate::media::Colors::BLACK",
