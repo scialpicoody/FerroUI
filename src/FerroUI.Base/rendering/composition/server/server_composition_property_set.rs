@@ -1,6 +1,6 @@
 use super::{
     CompositionProperty, IAnimatedServerObject, IServerAnimatedPropertyHost, IServerObject, IServerPropertyHost,
-    ServerCompositor, ServerObject, ServerValueChange,
+    ServerCompositionSurfaceChanged, ServerCompositor, ServerObject, ServerValueChange,
 };
 use crate::rendering::composition::animations::IAnimationInstance;
 use crate::rendering::composition::animations::AnimationInstanceFactory;
@@ -32,6 +32,10 @@ pub(crate) struct PropertySetChanges {
 pub struct ServerCompositionPropertySet {
     object: ServerObject,
     values: RefCell<HashMap<i32, ExpressionVariant>>,
+    /// Raised when an entry changed, directly or by an animation: what reads
+    /// the entries outside expressions follows them (the effect brushes,
+    /// whose `Properties` hold their animatable properties).
+    changed: ServerCompositionSurfaceChanged,
 }
 
 impl ServerCompositionPropertySet {
@@ -41,6 +45,7 @@ impl ServerCompositionPropertySet {
         let set = Rc::new_cyclic(|this: &Weak<ServerCompositionPropertySet>| ServerCompositionPropertySet {
             object: ServerObject::new(compositor, this.clone() as Weak<dyn IAnimatedServerObject>),
             values: RefCell::new(HashMap::new()),
+            changed: ServerCompositionSurfaceChanged::new(),
         });
         set.object.activate();
         set
@@ -54,6 +59,13 @@ impl ServerCompositionPropertySet {
 
     fn property(name: &str) -> &'static CompositionProperty {
         CompositionProperty::dynamic(name)
+    }
+
+    /// Raised when an entry of the set changed, by a batch or by an
+    /// animation (not from upstream; the effect brushes follow the entries
+    /// that are their animatable properties).
+    pub fn changed(&self) -> &ServerCompositionSurfaceChanged {
+        &self.changed
     }
 }
 
@@ -73,6 +85,7 @@ impl IServerObject for ServerCompositionPropertySet {
             let current = self.values.borrow().get(&property.id()).copied().unwrap_or_default();
             self.object.set_animated_value(property, current, committed_at, factory.create());
         }
+        self.changed.invoke();
     }
 
     fn as_animated(self: Rc<Self>) -> Option<Rc<dyn IAnimatedServerObject>> {
@@ -113,7 +126,9 @@ impl IServerAnimatedPropertyHost for ServerCompositionPropertySet {
         self.object.remove_animation_for_property(property);
     }
 
-    fn notify_animated_value_changed(&self, _property: &'static CompositionProperty) {}
+    fn notify_animated_value_changed(&self, _property: &'static CompositionProperty) {
+        self.changed.invoke();
+    }
 }
 
 impl IAnimatedServerObject for ServerCompositionPropertySet {

@@ -138,6 +138,9 @@ pub use server_redirect_visual::ServerRedirectVisual;
 pub use super::brushes::{paint_composition_brush, surface_brush_content_rect, ServerCompositionSurfaceBrush};
 // The server-side nine-grid and mask brushes live with the composition
 // brushes.
+// The server-side effect and backdrop brushes live with the composition
+// brushes.
+pub use super::brushes::{ServerCompositionBackdropBrush, ServerCompositionEffectBrush};
 pub use super::brushes::{
     nine_grid_rects, NineGridEdges, ServerCompositionMaskBrush, ServerCompositionNineGridBrush, NINE_GRID_CENTER,
 };
