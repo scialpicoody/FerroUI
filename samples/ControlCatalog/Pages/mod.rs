@@ -199,7 +199,10 @@ pub use radio_button_page::RadioButtonPage;
 pub use refresh_container_page::RefreshContainerPage;
 pub use relative_panel_page::RelativePanelPage;
 pub use screen_page::ScreenPage;
-pub use winui_composition_page::{smoke_close_card, smoke_open_card, smoke_set_configuration, winui_composition_page};
+pub use winui_composition_page::{
+    smoke_close_card, smoke_open_card, smoke_scroll_parallax, smoke_set_configuration, smoke_toggle_box,
+    winui_composition_page,
+};
 pub use scroll_viewer_page::{ScrollViewerPage, ScrollViewerPageViewModel};
 pub use section_page::SectionPage;
 pub use settings_page::SettingsPage;

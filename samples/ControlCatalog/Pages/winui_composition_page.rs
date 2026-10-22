@@ -109,6 +109,33 @@ fn hide_animation(compositor: &Rc<Compositor>) -> Rc<dyn ICompositionAnimationBa
 ferroui_base::ferro_thread_local! {
     /// The gallery of the page last created, for the smoke run of the desktop entry point.
     static GALLERY: RefCell<std::rc::Weak<Gallery>> = RefCell::new(std::rc::Weak::new());
+
+    /// The box of the implicit animations and the parallax scroller of the page last created,
+    /// for the smoke run.
+    static SMOKE_TARGETS: RefCell<(Option<ferroui_base::WeakRef<Border>>, Option<ferroui_base::WeakRef<ScrollViewer>>)> =
+        const { RefCell::new((None, None)) };
+}
+
+/// Toggles `IsVisible` of the box of the implicit animations of the page last created (for the
+/// smoke run of the desktop entry point).
+pub fn smoke_toggle_box() -> bool {
+    let Some(box_) = SMOKE_TARGETS.with(|targets| targets.borrow().0.as_ref().and_then(|weak| weak.upgrade())) else {
+        return false;
+    };
+    box_.set_is_visible(!box_.is_visible());
+    true
+}
+
+/// Scrolls the parallax scroller of the page last created, and brings it into view (for the
+/// smoke run of the desktop entry point).
+pub fn smoke_scroll_parallax(offset: f64) -> bool {
+    let Some(scroller) = SMOKE_TARGETS.with(|targets| targets.borrow().1.as_ref().and_then(|weak| weak.upgrade()))
+    else {
+        return false;
+    };
+    scroller.bring_into_view();
+    scroller.set_offset(Vector::new(0.0, offset));
+    true
 }
 
 /// Opens the detail view of card `index` of the page last created, as a click on it does (for
@@ -330,6 +357,7 @@ fn connected_animation_section() -> Ref<StackPanel> {
 
 fn implicit_animations_section() -> Ref<StackPanel> {
     let box_ = Border::new();
+    SMOKE_TARGETS.with(|targets| targets.borrow_mut().0 = Some(box_.downgrade()));
     box_.set_width(220.0);
     box_.set_height(60.0);
     box_.set_corner_radius(CornerRadius::uniform(8.0));
@@ -479,6 +507,7 @@ fn parallax_section() -> Ref<StackPanel> {
         lines.children().add(text(&format!("Line {line}: the header moves at half the speed of the content."), 13.0, FontWeight::Normal));
     }
     let scroller = ScrollViewer::new();
+    SMOKE_TARGETS.with(|targets| targets.borrow_mut().1 = Some(scroller.downgrade()));
     scroller.set_height(260.0);
     scroller.set_width(420.0);
     scroller.set_horizontal_alignment(HorizontalAlignment::Left);

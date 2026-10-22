@@ -1057,7 +1057,8 @@ fn screenshot_run(directory: PathBuf) {
 /// (WinUI)": the first card is opened, which starts its connected animation, and the frames of
 /// the compositor are saved during the flight to the detail view and during the flight back
 /// (`flight-NN-<ms>.png`, the time from the selection of the page). Not in the original. The
-/// page should be shown for 3 s at least (`FERROUI_SMOKE_PAGES=3000`).
+/// page should be shown for 5 s at least (`FERROUI_SMOKE_PAGES=5000`). The box of the implicit
+/// animations is then hidden and shown and the parallax scroller scrolled (`steps-<ms>.png`).
 fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
     let open_at = selected_at + Duration::from_millis(400);
     let back_at = selected_at + Duration::from_millis(2000);
@@ -1081,6 +1082,32 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
         back_at,
         DispatcherPriority::NORMAL,
     );
+    // Then the implicit hide and show animations of the box, and the parallax header.
+    let steps: [(u64, fn() -> bool, &str); 3] = [
+        (2900, control_catalog::pages::smoke_toggle_box, "hide the box"),
+        (3600, control_catalog::pages::smoke_toggle_box, "show the box"),
+        (4300, || control_catalog::pages::smoke_scroll_parallax(160.0), "scroll the parallax scroller"),
+    ];
+    for (at, step, name) in steps {
+        let _ = DispatcherTimer::run_once(
+            move || println!("Flight: {name}: {}", step()),
+            selected_at + Duration::from_millis(at),
+            DispatcherPriority::NORMAL,
+        );
+    }
+    for at in [2960u64, 3150, 3660, 3800, 4700] {
+        let at = selected_at + Duration::from_millis(at);
+        let path = directory.join(format!("steps-{}.png", (at - selected_at).as_millis()));
+        let _ = DispatcherTimer::run_once(
+            move || {
+                if let Some(window) = main_window() {
+                    save_composed(&window, path.clone(), format!("step at {} ms", (at - selected_at).as_millis()));
+                }
+            },
+            at,
+            DispatcherPriority::NORMAL,
+        );
+    }
     let mut index = 0;
     // `FERROUI_SMOKE_WINUI_FLIGHT_FEW`: two frames of each flight, for a build whose encoding of
     // a picture takes long (the debug build with Vello).
