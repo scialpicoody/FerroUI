@@ -1232,6 +1232,35 @@ fn dev_tools_run(directory: PathBuf) {
             let save = save.clone();
             Box::new(move || save("01-combined-tree"))
         },
+        // The time a selection takes until the details of the control are laid out: controls of the
+        // catalog selected in turn in the combined tree (the property grid, the layout and the value
+        // frames of each), as a developer clicks through the tree.
+        Box::new(|| {
+            if let (Some((window, view_model)), Some(catalog)) = (dev_tools(), main_window()) {
+                let controls: Vec<Ref<ferroui_controls::Control>> = catalog
+                    .upcast::<Visual>()
+                    .get_visual_descendants()
+                    .filter_map(|visual| visual.cast::<ferroui_controls::Control>())
+                    .step_by(7)
+                    .take(16)
+                    .collect();
+                let mut times = Vec::new();
+                for control in controls.iter().cycle().take(std::env::var("FERROUI_SMOKE_SELECTIONS").ok().and_then(|n| n.parse().ok()).unwrap_or(48)) {
+                    let start = std::time::Instant::now();
+                    view_model.combined_tree().select_control(control);
+                    window.update_layout();
+                    times.push(start.elapsed().as_secs_f64() * 1000.0);
+                }
+                times.sort_by(|a, b| a.total_cmp(b));
+                println!(
+                    "DevTools: selection to laid-out details, {} selections: median {:.1} ms, p90 {:.1} ms, max {:.1} ms",
+                    times.len(),
+                    times[times.len() / 2],
+                    times[times.len() * 9 / 10],
+                    times[times.len() - 1]
+                );
+            }
+        }),
         Box::new(|| {
             // A text block of the home page: the button above is part of a template, which the
             // logical tree does not show.
