@@ -6,14 +6,22 @@ use crate::media::Color;
 use crate::Vector3D;
 use std::rc::{Rc, Weak};
 
-/// The shadow of a sprite visual (WinUI
+/// The shadow of a sprite or layer visual (WinUI
 /// `Microsoft.UI.Composition.DropShadow`), with animatable `BlurRadius`,
 /// `Color`, `Offset` and `Opacity`.
 ///
-/// Deviation (winui-composition.md): the shadow is cast by the rectangle of
-/// the visual (a box shadow of the drawing context); `Mask` and
-/// `SourcePolicy` are stored and not used yet. WinUI's `CompositionShadow`
-/// base class has no members and is not a separate type.
+/// On a sprite visual the shadow is cast by the rectangle of the visual (a
+/// box shadow of the drawing context), by the alpha of its
+/// [`mask`](Self::mask), or, with the `InheritFromVisualContent`
+/// [`source_policy`](Self::source_policy), by the alpha of the brush of the
+/// visual. On a layer visual it is cast by the composed children, or by the
+/// mask. The shadow of a mask or of the content goes through a drop shadow
+/// effect, when the drawing context has effects.
+///
+/// Deviation (winui-composition.md): without effects in the drawing context
+/// the shadow is the box shadow of the rectangle; a colour or gradient mask
+/// scales the box shadow; the Z of the offset is ignored. WinUI's
+/// `CompositionShadow` base class has no members and is not a separate type.
 pub struct DropShadow {
     this: Weak<DropShadow>,
     object: CompositionObject,
@@ -96,7 +104,9 @@ impl DropShadow {
         self.props.set_opacity(self, value)
     }
 
-    /// The brush whose alpha shapes the shadow (stored; not used yet).
+    /// The brush whose alpha shapes the shadow, painted over the area of the
+    /// visual; `None` for the shape of the visual. Ignored with the
+    /// `InheritFromVisualContent` source policy.
     pub fn mask(&self) -> Option<Rc<CompositionBrush>> {
         self.props.mask().and_then(|mask| mask.into_any_rc().downcast::<CompositionBrush>().ok())
     }
@@ -105,7 +115,10 @@ impl DropShadow {
         self.props.set_mask(self, value.map(|mask| mask as Rc<dyn ICompositionObject>))
     }
 
-    /// What the shadow is cast from (stored; not used yet).
+    /// What the shadow is cast from: `Default` for the mask (or the shape of
+    /// the visual), `InheritFromVisualContent` for the alpha of the content
+    /// of the visual (the brush of a sprite visual, the children of a layer
+    /// visual).
     pub fn source_policy(&self) -> CompositionDropShadowSourcePolicy {
         self.props.source_policy()
     }

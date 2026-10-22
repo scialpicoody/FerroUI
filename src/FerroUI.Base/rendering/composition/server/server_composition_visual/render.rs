@@ -2,7 +2,7 @@ use super::walker::{walk, IServerTreeVisitor, TreeWalkContext};
 use super::ServerCompositionVisual;
 use crate::media::{RenderOptions, TextOptions};
 use crate::platform::{IDrawingContextImpl, LtrbRect};
-use crate::rendering::composition::server::{CompositorPools, IDirtyRectTracker, ServerVisualRenderContext};
+use crate::rendering::composition::server::{CompositorPools, IDirtyRectTracker, LitContent, ServerVisualRenderContext};
 use crate::Matrix;
 use std::rc::Rc;
 
@@ -190,7 +190,13 @@ impl IServerTreeVisitor for RenderContext<'_> {
         }
 
         let clip = self.walk_context.clip;
+        // The WinUI lights that reach the content (not from upstream): the
+        // content is drawn into a layer and the light map over it.
+        let lit = LitContent::begin(visual, self.canvas);
         visual.render_core(&mut ServerVisualRenderContext::new(self.canvas), clip);
+        if let Some(lit) = lit {
+            lit.end(self.canvas);
+        }
 
         self.render_children
     }

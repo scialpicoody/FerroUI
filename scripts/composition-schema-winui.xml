@@ -210,6 +210,56 @@
         <Property Name="Mask" Type="CompositionBrush?" />
     </Object>
 
+    <!-- Microsoft.UI.Composition.VisualUnorderedCollection: the targets and the
+         exclusions of a light (phase 5). -->
+    <List Name="VisualUnorderedCollection" ItemType="CompositionVisual"/>
+
+    <!-- Microsoft.UI.Composition.CompositionLight and its subclasses (phase 5).
+         Targets and ExclusionsFromTargets are the collections the light
+         creates with itself. -->
+    <Object Name="CompositionLight" Abstract="true" ServerBase="ServerRenderResource">
+        <Property Name="Targets" Type="VisualUnorderedCollection?" Internal="true"/>
+        <Property Name="ExclusionsFromTargets" Type="VisualUnorderedCollection?" Internal="true"/>
+        <Property Name="IsEnabled" Type="bool" DefaultValue="true"/>
+    </Object>
+    <Object Name="AmbientLight" Inherits="CompositionLight">
+        <Property Name="Color" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="Intensity" Type="float" Animated="true" DefaultValue="1"/>
+    </Object>
+    <Object Name="DistantLight" Inherits="CompositionLight">
+        <Property Name="Color" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="CoordinateSpace" Type="CompositionVisual?"/>
+        <Property Name="Direction" Type="Vector3D" Animated="true" DefaultValue="Vector3D.NegativeUnitZ"/>
+        <Property Name="Intensity" Type="float" Animated="true" DefaultValue="1"/>
+    </Object>
+    <Object Name="PointLight" Inherits="CompositionLight">
+        <Property Name="Color" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="ConstantAttenuation" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="LinearAttenuation" Type="float" Animated="true"/>
+        <Property Name="QuadraticAttenuation" Type="float" Animated="true"/>
+        <Property Name="CoordinateSpace" Type="CompositionVisual?"/>
+        <Property Name="Offset" Type="Vector3D" Animated="true"/>
+        <Property Name="Intensity" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="MinAttenuationCutoff" Type="float" Animated="true"/>
+        <Property Name="MaxAttenuationCutoff" Type="float" Animated="true" DefaultValue="float.MaxValue"/>
+    </Object>
+    <Object Name="SpotLight" Inherits="CompositionLight">
+        <Property Name="ConstantAttenuation" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="LinearAttenuation" Type="float" Animated="true"/>
+        <Property Name="QuadraticAttenuation" Type="float" Animated="true"/>
+        <Property Name="CoordinateSpace" Type="CompositionVisual?"/>
+        <Property Name="Direction" Type="Vector3D" Animated="true" DefaultValue="Vector3D.NegativeUnitZ"/>
+        <Property Name="InnerConeAngle" Type="float" Animated="true"/>
+        <Property Name="InnerConeColor" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="InnerConeIntensity" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="OuterConeAngle" Type="float" Animated="true" DefaultValue="0.7853982"/>
+        <Property Name="OuterConeColor" Type="Color" Animated="true" DefaultValue="Colors.White"/>
+        <Property Name="OuterConeIntensity" Type="float" Animated="true" DefaultValue="1"/>
+        <Property Name="Offset" Type="Vector3D" Animated="true"/>
+        <Property Name="MinAttenuationCutoff" Type="float" Animated="true"/>
+        <Property Name="MaxAttenuationCutoff" Type="float" Animated="true" DefaultValue="float.MaxValue"/>
+    </Object>
+
     <!-- The brush transform of Microsoft.UI.Composition.CompositionGradientBrush,
          on each gradient class of the upstream schema (their common base is a
          manual class). -->

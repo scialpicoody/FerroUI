@@ -8,7 +8,7 @@ use crate::rendering::composition::generated::{
     ServerCompositionContainerVisualProps, ServerLayerVisualHooks, ServerLayerVisualProps,
 };
 use crate::rendering::composition::transport::BatchStreamReader;
-use crate::{Rect, RoundedRect, Thickness};
+use crate::{Rect, Thickness};
 use std::any::{Any, TypeId};
 use std::rc::Rc;
 use std::time::Duration;
@@ -63,7 +63,10 @@ enum LayerMode {
 /// With a shadow, the children are composed through a drop shadow effect
 /// when the drawing context has effects, so the shadow follows the alpha of
 /// the composed content; otherwise the box shadow of the rectangle of the
-/// visual is drawn under the layer.
+/// visual is drawn under the layer. A shadow with a `Mask` (and the
+/// `Default` source policy) is the shadow of the mask over the rectangle of
+/// the visual, drawn under the layer
+/// ([`ServerDropShadow::render_under_rect`]).
 ///
 /// Deviation (winui-composition.md): without effect support in the drawing
 /// context the shadow is the box shadow of the rectangle of the visual, as
@@ -103,8 +106,12 @@ impl ServerLayerVisual {
     /// children, so what is pushed is popped.
     fn layer_mode(&self, visual: &ServerCompositionVisual, canvas: &mut dyn IDrawingContextImpl) -> Option<(LayerMode, Rect)> {
         let bounds = visual.sub_tree_bounds()?.to_rect();
+        // A shadow with a mask (and the `Default` source policy) is the
+        // shadow of the mask, drawn under a plain layer.
         let mode = match self.visible_shadow() {
-            Some(shadow) if canvas.as_drawing_context_impl_with_effects().is_some() => {
+            Some(shadow)
+                if shadow.effective_mask().is_none() && canvas.as_drawing_context_impl_with_effects().is_some() =>
+            {
                 LayerMode::Shadow(drop_shadow_effect(&shadow))
             }
             _ => LayerMode::Layer,
@@ -183,10 +190,7 @@ impl IServerVisualContent for ServerLayerVisual {
             }
             LayerMode::Layer => {
                 if let Some(shadow) = self.visible_shadow() {
-                    let rect = Self::rect(visual);
-                    if rect.width > 0.0 && rect.height > 0.0 {
-                        canvas.draw_rectangle(None, None, RoundedRect::from_rect(rect), &shadow.box_shadows());
-                    }
+                    shadow.render_under_rect(canvas, Self::rect(visual));
                 }
                 canvas.push_layer(bounds);
             }

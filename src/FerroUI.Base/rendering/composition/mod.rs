@@ -67,6 +67,7 @@ mod composition_external_memory;
 mod composition_interop;
 mod composition_experimental_acrylic_visual;
 mod composition_geometry;
+mod composition_light;
 mod composition_gradient_stop;
 mod composition_object;
 mod composition_object_impls;
@@ -148,6 +149,9 @@ pub use layer_visual::LayerVisual;
 pub use redirect_visual::RedirectVisual;
 pub use composition_visual_surface::CompositionVisualSurface;
 pub use drop_shadow::DropShadow;
+pub use composition_light::{
+    AmbientLight, CompositionLight, DistantLight, PointLight, SpotLight, VisualUnorderedCollection,
+};
 pub use i_composition_surface::ICompositionSurface;
 pub use loaded_image_surface::{LoadedImageSourceLoadStatus, LoadedImageSurface};
 pub use sprite_visual::SpriteVisual;
