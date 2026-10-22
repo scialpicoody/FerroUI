@@ -45,31 +45,11 @@ fn color_hsl(hue_radians: f32, saturation: f32, lightness: f32) -> Color {
 /// interpolated linearly; the hue takes the shorter way around the colour
 /// wheel, and the hue of an achromatic colour (no saturation: black, white,
 /// greys) is that of the other colour, so a grey turns into a colour without
-/// passing through other hues.
-//
-// Deviation (winui-composition.md): the reference does not say which way the
-// hue turns or what an achromatic colour's hue is; this is the choice of the port.
+/// passing through other hues. The interpolation is
+/// [`ColorInterpolator::lerp_hsl`], which the `Hsl` colour space of a colour
+/// animation uses too.
 fn color_lerp_hsl(color1: Color, color2: Color, progress: f32) -> Color {
-    let from = color1.to_hsl();
-    let to = color2.to_hsl();
-    let p = progress as f64;
-    let (from_hue, to_hue) = match (from.s == 0.0, to.s == 0.0) {
-        (true, false) => (to.h, to.h),
-        (false, true) => (from.h, from.h),
-        _ => (from.h, to.h),
-    };
-    let mut delta = to_hue - from_hue;
-    if delta > 180.0 {
-        delta -= 360.0;
-    } else if delta < -180.0 {
-        delta += 360.0;
-    }
-    HslColor::hsl_to_rgb(
-        from_hue + delta * p,
-        lerp_f64(from.s, to.s, p),
-        lerp_f64(from.l, to.l, p),
-        lerp_f64(from.a, to.a, p),
-    )
+    ColorInterpolator::lerp_hsl(color1, color2, progress)
 }
 
 fn smooth_step(edge0: f32, edge1: f32, x: f32) -> f32 {

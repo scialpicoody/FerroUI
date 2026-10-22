@@ -398,6 +398,14 @@ impl IAnimationInstance for SubchannelAnimationInstance {
         }
     }
 
+    /// Every running sub-channel is put under the controller.
+    fn attach_controller(&self, controller: ServerObjectId) {
+        let instances: Vec<_> = self.channels.borrow().iter().map(|c| c.instance.clone()).collect();
+        for instance in instances {
+            instance.attach_controller(controller);
+        }
+    }
+
     fn as_subchannel(&self) -> Option<&SubchannelAnimationInstance> {
         Some(self)
     }

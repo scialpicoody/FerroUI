@@ -143,6 +143,14 @@ pub use animations::{
     RelativePointKeyFrameAnimation, RelativeScalarKeyFrameAnimation, ScalarKeyFrameAnimation, Vector2KeyFrameAnimation,
     Vector3DKeyFrameAnimation, Vector3KeyFrameAnimation, Vector4KeyFrameAnimation, VectorKeyFrameAnimation,
 };
+// The WinUI animation types of `Microsoft.UI.Composition` that are not in the
+// schema: the natural motion animations, the animation controller and the
+// colour space of colour animations.
+pub use animations::{
+    AnimationController, AnimationControllerProgressBehavior, CompositionColorSpace, NaturalMotionAnimation,
+    ScalarNaturalMotionAnimation, SpringScalarNaturalMotionAnimation, SpringVector2NaturalMotionAnimation,
+    SpringVector3NaturalMotionAnimation, Vector2NaturalMotionAnimation, Vector3NaturalMotionAnimation,
+};
 
 #[cfg(test)]
 mod composition_property_set_tests;

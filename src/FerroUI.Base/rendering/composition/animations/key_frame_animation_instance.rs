@@ -1,10 +1,11 @@
+use super::animation_controller::{AnimationControllerClock, ProgressSpan};
 use super::{
     AnimationDelayBehavior, AnimationInstanceBase, AnimationIterationBehavior, AnimationStopBehavior,
     IAnimationInstance, IInterpolator, PropertySetSnapshot, ServerKeyFrame,
 };
 use crate::animation::PlaybackDirection;
 use crate::rendering::composition::expressions::{
-    BuiltInExpressionFfi, ExpressionEvaluationContext, ExpressionVariant, ExpressionVariantValue,
+    BuiltInExpressionFfi, Expression, ExpressionEvaluationContext, ExpressionVariant, ExpressionVariantValue,
 };
 use crate::rendering::composition::server::{CompositionProperty, IServerClockItem, ServerCompositor, ServerObjectId};
 use crate::rendering::composition::AnimationCompletion;
@@ -68,6 +69,11 @@ pub struct KeyFrameAnimationInstance<T: ExpressionVariantValue> {
     /// The batches the animation belongs to, released when it finishes or
     /// is dropped.
     completion: RefCell<AnimationCompletion>,
+    /// The initial value expressions, applied when the instance is
+    /// initialized.
+    initial_values: RefCell<Vec<(String, Expression)>>,
+    /// The time of the animation under its controller, if it has one.
+    clock: AnimationControllerClock,
 }
 
 impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
@@ -117,7 +123,26 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
             total_duration,
             finished: Cell::new(false),
             completion: RefCell::new(AnimationCompletion::none()),
+            initial_values: RefCell::new(Vec::new()),
+            clock: AnimationControllerClock::default(),
         })
+    }
+
+    /// Sets the initial value expressions of the animation (parsed by
+    /// [`InitialValueExpressionCollection::parse_all`](super::InitialValueExpressionCollection::parse_all)),
+    /// applied to the target when the instance is initialized.
+    pub fn set_initial_value_expressions(&self, expressions: Vec<(String, Expression)>) {
+        *self.initial_values.borrow_mut() = expressions;
+    }
+
+    /// What the progress of a controller covers: the delay and the
+    /// iterations (one iteration of an animation that loops forever).
+    fn progress_span(&self) -> ProgressSpan {
+        let active = match self.iteration_behavior {
+            AnimationIterationBehavior::Count => self.iteration_count.max(0) as i64 * self.duration,
+            AnimationIterationBehavior::Forever => self.duration,
+        };
+        ProgressSpan { delay: self.delay_time, active }
     }
 
     /// Sets the batches the animation belongs to (see
@@ -152,7 +177,12 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
 
     fn evaluate_core(&self, now: Duration, current_value: ExpressionVariant) -> ExpressionVariant {
         let starting = ExpressionVariant::create(self.starting_value.get());
-        let elapsed = ticks(now) - self.started_at.get();
+        let elapsed = self.clock.elapsed(
+            self.base.compositor().as_ref(),
+            ticks(now),
+            self.started_at.get(),
+            Some(self.progress_span()),
+        );
         let res = self.base.with_target_expression_object(|target| {
             let ctx = ExpressionEvaluationContext {
                 parameters: Some(&**self.base.parameters()),
@@ -165,9 +195,11 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
             self.evaluate_impl(elapsed, current_value, &ctx)
         });
 
+        // A paused animation does not end: its controller may move it back.
         if self.iteration_behavior == AnimationIterationBehavior::Count
             && !self.finished.get()
             && elapsed > self.total_duration
+            && !self.clock.is_paused()
         {
             // Active check?
             if let (Some(compositor), Some(this)) = (self.base.compositor(), self.base.this_clock_item()) {
@@ -295,6 +327,8 @@ impl<T: ExpressionVariantValue> IAnimationInstance for KeyFrameAnimationInstance
     }
 
     fn initialize(&self, started_at: Duration, starting_value: ExpressionVariant, property: &'static CompositionProperty) {
+        let initial_values = std::mem::take(&mut *self.initial_values.borrow_mut());
+        let starting_value = self.base.apply_initial_values(&initial_values, property, starting_value);
         self.started_at.set(ticks(started_at));
         self.starting_value.set(starting_value.cast_or_default::<T>());
         let mut hs = HashSet::new();
@@ -342,5 +376,9 @@ impl<T: ExpressionVariantValue> IAnimationInstance for KeyFrameAnimationInstance
 
     fn release_completion(&self) {
         self.release_completion_now()
+    }
+
+    fn attach_controller(&self, controller: ServerObjectId) {
+        self.clock.attach(controller)
     }
 }

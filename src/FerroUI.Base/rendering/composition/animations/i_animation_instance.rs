@@ -45,6 +45,15 @@ pub trait IAnimationInstance: IServerClockItem + 'static {
     /// nothing; an animation that belongs to no batch does nothing.
     fn release_completion(&self) {}
 
+    /// Puts the instance under the control of an
+    /// [`AnimationController`](super::AnimationController), named by the id of
+    /// the controller's property set: from now on the controller pauses,
+    /// resumes, scrubs and speeds up the animation; if the progress of the
+    /// controller was assigned, the animation moves there at its next
+    /// evaluation. An instance that cannot be controlled (an expression
+    /// animation) ignores it.
+    fn attach_controller(&self, _controller: ServerObjectId) {}
+
     /// The instance as an animation of components of its property
     /// (`Offset.X`), if it is one: such animations of one property are
     /// merged on the server.
