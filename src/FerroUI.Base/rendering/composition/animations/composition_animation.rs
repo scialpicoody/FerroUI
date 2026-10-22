@@ -31,7 +31,7 @@ impl CompositionAnimation {
     pub(crate) fn new(compositor: &Rc<Compositor>) -> Self {
         Self {
             object: CompositionObject::new(compositor, None),
-            property_set: CompositionPropertySet::new(compositor),
+            property_set: CompositionPropertySet::new_parameters(compositor),
             target: RefCell::new(None),
         }
     }

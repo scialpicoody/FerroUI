@@ -139,6 +139,8 @@ pub use animations::{
 };
 
 #[cfg(test)]
+mod composition_property_set_tests;
+#[cfg(test)]
 mod compositor_tests;
 #[cfg(test)]
 mod render_thread_tests;

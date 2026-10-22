@@ -86,9 +86,7 @@ impl ServerObjectAnimations {
         instance.needs_update.set(false);
         let Some(owner) = self.owner.upgrade() else { return };
         let value = self.get_variant(instance);
-        if let Some(set) = instance.property.set_variant() {
-            set(owner.as_server_object_dyn(), value);
-        }
+        owner.write_property_variant(instance.property, value);
         owner.notify_animated_value_changed(instance.property);
         self.on_set_direct_value(instance.property);
     }
@@ -199,7 +197,7 @@ impl ServerObjectAnimations {
         if let Some(animation) = self.animation(property) {
             return self.get_variant(&animation);
         }
-        property.get_variant().map(|get| get(owner.as_server_object_dyn())).unwrap_or_default()
+        owner.read_property_variant(property)
     }
 
     pub fn evaluate_animations(&self) {

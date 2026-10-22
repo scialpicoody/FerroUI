@@ -1,11 +1,13 @@
-use super::animations::{PropertySetSnapshot, PropertySetSnapshotSource, PropertySetSnapshotSourceValue};
+use super::animations::{ICompositionAnimation, PropertySetSnapshot, PropertySetSnapshotSource, PropertySetSnapshotSourceValue};
 use super::expressions::{ExpressionVariant, ExpressionVariantValue};
-use super::{AsCompositionObject, CompositionObject, Compositor};
+use super::server::{CompositionProperty, PropertySetChanges, ServerCompositionPropertySet, ServerObjectId};
+use super::transport::BatchStreamWriter;
+use super::{AsCompositionObject, CompositionObject, Compositor, ICompositionObjectAnimations, ICompositorSerializable};
 use crate::media::Color;
 use crate::numerics::{Matrix3x2, Matrix4x4, Quaternion, Vector2, Vector3, Vector4};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 /// Property sets are composition objects that allow storage of key values pairs
 /// that can be shared across the application and are not tied to the lifetime of another composition object.
@@ -14,10 +16,20 @@ use std::rc::Rc;
 /// provide the ability to insert key-value pairs or retrieve a value for a given key.
 /// A property set does not support a delete function – ensure you use property sets
 /// to store values that will be shared across the application.
+///
+/// A property set made with [`new`](Self::new) (or `Compositor::create_property_set`) is live,
+/// as in WinUI: it has a server counterpart that receives its entries with each batch, its
+/// entries can be animated with `start_animation`, and an expression that refers to it reads
+/// its current values. Upstream's property sets live on the UI thread only, and an expression
+/// sees a copy of them taken when its animation starts; the parameters of an animation are such
+/// a set (see `docs/porting/winui-composition.md`).
 pub struct CompositionPropertySet {
+    this: Weak<CompositionPropertySet>,
     object: CompositionObject,
     variants: RefCell<HashMap<String, ExpressionVariant>>,
     objects: RefCell<HashMap<String, Rc<dyn AsCompositionObject>>>,
+    /// The changes of a live set that the next batch carries.
+    pending: RefCell<PropertySetChanges>,
 }
 
 /// The result of reading a value of a [`CompositionPropertySet`].
@@ -29,12 +41,38 @@ pub enum CompositionGetValueStatus {
 }
 
 impl CompositionPropertySet {
-    pub(crate) fn new(compositor: &Rc<Compositor>) -> Rc<CompositionPropertySet> {
-        Rc::new(CompositionPropertySet {
-            object: CompositionObject::new(compositor, None),
+    /// Creates a live property set (`Compositor.CreatePropertySet`).
+    pub fn new(compositor: &Rc<Compositor>) -> Rc<CompositionPropertySet> {
+        let server = compositor.create_server_object(|compositor, _| ServerCompositionPropertySet::new(compositor));
+        Self::create(compositor, Some(server))
+    }
+
+    /// Creates a property set without a server counterpart: the parameters of an animation,
+    /// which are copied when the animation starts.
+    pub(crate) fn new_parameters(compositor: &Rc<Compositor>) -> Rc<CompositionPropertySet> {
+        Self::create(compositor, None)
+    }
+
+    fn create(compositor: &Rc<Compositor>, server: Option<ServerObjectId>) -> Rc<CompositionPropertySet> {
+        Rc::new_cyclic(|this| CompositionPropertySet {
+            this: this.clone(),
+            object: CompositionObject::new(compositor, server),
             variants: RefCell::new(HashMap::new()),
             objects: RefCell::new(HashMap::new()),
+            pending: RefCell::new(PropertySetChanges::default()),
         })
+    }
+
+    /// Whether the set is live (has a server counterpart).
+    pub fn is_live(&self) -> bool {
+        self.object.server().is_some()
+    }
+
+    fn register_for_serialization(&self) {
+        let this = self.this.clone();
+        self.object.register_for_serialization(move || {
+            this.upgrade().map(|this| this as Rc<dyn ICompositorSerializable>)
+        });
     }
 
     pub fn compositor(&self) -> &Rc<Compositor> {
@@ -44,6 +82,17 @@ impl CompositionPropertySet {
     pub(crate) fn set(&self, key: &str, value: ExpressionVariant) {
         self.objects.borrow_mut().remove(key);
         self.variants.borrow_mut().insert(key.to_owned(), value);
+        if self.is_live() && !self.object.is_disposed() {
+            {
+                let mut pending = self.pending.borrow_mut();
+                // A value set after an animation was started in the same frame replaces it, as
+                // the value of a declared property does.
+                pending.animations.retain(|(name, _)| name != key);
+                pending.values.retain(|(name, _)| name != key);
+                pending.values.push((key.to_owned(), value));
+            }
+            self.register_for_serialization();
+        }
     }
 
     // For INTERNAL USE by CompositionAnimation ONLY, we DON'T support expression
@@ -169,7 +218,7 @@ impl CompositionPropertySet {
         for (key, value) in objects {
             let type_name = value.composition_type_name();
             let server = value.as_composition_object().server();
-            if let Some(ps) = value.as_property_set() {
+            if let Some(ps) = value.clone().as_property_set().filter(|ps| !ps.is_live()) {
                 if allowed_nesting_level <= 0 {
                     panic!("PropertySet depth limit reached");
                 }
@@ -203,5 +252,49 @@ impl AsCompositionObject for CompositionPropertySet {
 
     fn as_property_set(self: Rc<Self>) -> Option<Rc<CompositionPropertySet>> {
         Some(self)
+    }
+}
+
+impl ICompositorSerializable for CompositionPropertySet {
+    fn try_get_server(&self, c: &Compositor) -> Option<ServerObjectId> {
+        self.object.try_get_server(c)
+    }
+
+    fn serialize_changes(&self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
+        self.object.begin_serialize_changes(c);
+        let changes = std::mem::take(&mut *self.pending.borrow_mut());
+        writer.write_value(Some(changes));
+    }
+}
+
+impl ICompositionObjectAnimations for CompositionPropertySet {
+    /// Starts an animation of an entry of a live set. As in WinUI the entry must have been
+    /// inserted first; the animation starts from its current value.
+    fn try_start_animation(
+        &self,
+        property_name: &str,
+        animation: &dyn ICompositionAnimation,
+        final_value: Option<ExpressionVariant>,
+    ) -> bool {
+        let Some(server) = self.object.server() else { return false };
+        if !self.variants.borrow().contains_key(property_name) {
+            return false;
+        }
+        let factory = animation.create_instance(server, final_value);
+        {
+            let mut pending = self.pending.borrow_mut();
+            pending.animations.retain(|(name, _)| name != property_name);
+            pending.animations.push((property_name.to_owned(), factory));
+        }
+        self.register_for_serialization();
+        true
+    }
+
+    fn get_composition_property(&self, property_name: &str) -> Option<&'static CompositionProperty> {
+        self.variants.borrow().contains_key(property_name).then(|| CompositionProperty::dynamic(property_name))
+    }
+
+    fn composition_object(&self) -> &CompositionObject {
+        &self.object
     }
 }

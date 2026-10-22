@@ -16,6 +16,7 @@ mod server_composition_draw_list_visual;
 mod server_composition_drawing_surface;
 mod server_composition_experimental_acrylic_visual;
 mod server_composition_gradient_stop;
+mod server_composition_property_set;
 mod server_composition_solid_color_visual;
 mod server_composition_surface;
 mod server_composition_surface_visual;
@@ -78,6 +79,8 @@ pub use server_composition_draw_list_visual::ServerCompositionDrawListVisual;
 pub use server_composition_drawing_surface::{DrawingSurfaceUpdateError, ServerCompositionDrawingSurface};
 pub use server_composition_experimental_acrylic_visual::ServerCompositionExperimentalAcrylicVisual;
 pub use server_composition_gradient_stop::ServerCompositionGradientStop;
+pub(crate) use server_composition_property_set::PropertySetChanges;
+pub use server_composition_property_set::ServerCompositionPropertySet;
 // The server-side composition brushes are in the namespace of the server
 // objects upstream.
 pub use super::brushes::{
