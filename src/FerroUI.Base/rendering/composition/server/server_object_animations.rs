@@ -1,4 +1,4 @@
-use super::{CompositionProperty, IAnimatedServerObject, ServerCompositor};
+use super::{CompositionProperty, IAnimatedServerObject, ServerCompositor, ServerObjectId};
 use crate::rendering::composition::animations::IAnimationInstance;
 use crate::rendering::composition::expressions::ExpressionVariant;
 use std::cell::{Cell, RefCell};
@@ -73,7 +73,9 @@ impl ServerObjectAnimations {
         // Set before evaluating the animation to prevent stack overflows
         // due to potential cyclic references.
         instance.is_dirty.set(false);
-        let now = self.compositor.upgrade().map_or(Duration::ZERO, |c| c.server_now());
+        // The time of the animations: the time of the compositor scaled by
+        // the global playback rate.
+        let now = self.compositor.upgrade().map_or(Duration::ZERO, |c| c.animations().animation_time(c.server_now()));
         let value = instance.animation.evaluate(now, instance.cached_variant.get());
         instance.cached_variant.set(value);
         value
@@ -137,6 +139,12 @@ impl ServerObjectAnimations {
         committed_at: Duration,
         animation: Rc<dyn IAnimationInstance>,
     ) {
+        // Animations run on the clock of the animations, which the global
+        // playback rate scales.
+        let committed_at = self
+            .compositor
+            .upgrade()
+            .map_or(committed_at, |c| c.animations().animation_time(committed_at));
         let is_active = self.owner_is_active();
         let old = self.animation(property);
         // An animation of components of the property (`Offset.Y`) joins the
@@ -246,6 +254,15 @@ impl ServerObjectAnimations {
             owner.notify_animated_value_changed(property);
         }
         self.on_set_direct_value(property);
+    }
+
+    /// Puts the animation of `property`, if it has one, under the
+    /// animation controller whose property set has the id `controller`
+    /// (`TryGetAnimationController` of an animation started without one).
+    pub fn attach_controller(&self, property: &CompositionProperty, controller: ServerObjectId) {
+        if let Some(instance) = self.animation(property) {
+            instance.animation.attach_controller(controller);
+        }
     }
 
     /// Releases the batches of every animation of the object: its

@@ -1,6 +1,6 @@
 use super::animations::{
-    extract_subchannel, parse_subchannel, ICompositionAnimation, ICompositionAnimationBase, ImplicitAnimationCollection,
-    SubchannelAnimation,
+    extract_subchannel, parse_subchannel, AnimationController, ICompositionAnimation, ICompositionAnimationBase,
+    ImplicitAnimationCollection, PreparedAnimation, SubchannelAnimation,
 };
 use super::expressions::ExpressionVariant;
 use super::server::{CompositionProperty, ServerObjectId};
@@ -32,6 +32,14 @@ pub struct CompositionObject {
     registered_for_serialization: Cell<bool>,
     pending_animations: PendingAnimations,
     implicit_animations: RefCell<Option<Rc<ImplicitAnimationCollection>>>,
+    /// `Properties`, created when it is first asked for.
+    properties: RefCell<Option<Rc<CompositionPropertySet>>>,
+    /// `Comment`.
+    comment: RefCell<String>,
+    /// The properties animated through this object, by the name the
+    /// animation was started with, and the controller of the animation if it
+    /// has one (see `TryGetAnimationController`).
+    animation_controllers: RefCell<Vec<(String, Option<Rc<AnimationController>>)>>,
 }
 
 impl CompositionObject {
@@ -43,7 +51,86 @@ impl CompositionObject {
             registered_for_serialization: Cell::new(false),
             pending_animations: PendingAnimations::new(),
             implicit_animations: RefCell::new(None),
+            properties: RefCell::new(None),
+            comment: RefCell::new(String::new()),
+            animation_controllers: RefCell::new(Vec::new()),
         }
+    }
+
+    /// The property set of the object (WinUI `CompositionObject.Properties`):
+    /// a live property set that belongs to the object, for the values an
+    /// application keeps with it. Animations and expressions use it as any
+    /// property set (`set_reference_parameter("props", obj.properties())`,
+    /// then `props.Name`). Created when it is first asked for.
+    //
+    // Deviation (winui-composition.md): in WinUI an expression that refers to
+    // an object reads the entries of its `Properties` as members of the
+    // object (`visual.Name`); here they are read through a reference to the
+    // property set itself.
+    pub fn properties(&self) -> Rc<CompositionPropertySet> {
+        self.properties
+            .borrow_mut()
+            .get_or_insert_with(|| CompositionPropertySet::new(&self.compositor))
+            .clone()
+    }
+
+    /// A string the application associates with the object, for debugging
+    /// (WinUI `Comment`); empty by default.
+    pub fn comment(&self) -> String {
+        self.comment.borrow().clone()
+    }
+
+    pub fn set_comment(&self, value: String) {
+        *self.comment.borrow_mut() = value;
+    }
+
+    /// Records that an animation was started on `property_name` (as given to
+    /// `StartAnimation`), with its controller if it has one.
+    pub(crate) fn note_animation_started(&self, property_name: &str, controller: Option<Rc<AnimationController>>) {
+        let mut controllers = self.animation_controllers.borrow_mut();
+        match controllers.iter_mut().find(|(name, _)| name == property_name) {
+            Some(entry) => entry.1 = controller,
+            None => controllers.push((property_name.to_owned(), controller)),
+        }
+    }
+
+    /// Forgets the animation of `property_name`: it was stopped.
+    pub(crate) fn note_animation_stopped(&self, property_name: &str) {
+        self.animation_controllers.borrow_mut().retain(|(name, _)| name != property_name);
+    }
+
+    /// The controller of the animation started on `property_name`: `None`
+    /// when no animation was started on it, `Some(None)` when it was started
+    /// without a controller.
+    pub(crate) fn animation_controller_entry(&self, property_name: &str) -> Option<Option<Rc<AnimationController>>> {
+        self.animation_controllers
+            .borrow()
+            .iter()
+            .find(|(name, _)| name == property_name)
+            .map(|(_, controller)| controller.clone())
+    }
+
+    /// Puts the running animation of `property` under `controller` on the
+    /// server, and records the controller for `property_name`.
+    pub(crate) fn attach_animation_controller(
+        &self,
+        property_name: &str,
+        property: &'static CompositionProperty,
+        controller: Rc<AnimationController>,
+    ) {
+        let controller_id = controller.server();
+        self.note_animation_started(property_name, Some(controller));
+        let Some(server) = self.server else { return };
+        self.compositor.post_server_job(
+            move |compositor| {
+                if let Some(object) = compositor.get_animated_object(server) {
+                    if let Some(animations) = object.server_object().animations() {
+                        animations.attach_controller(property, controller_id);
+                    }
+                }
+            },
+            false,
+        );
     }
 
     /// The collection of implicit animations attached to this object.
@@ -255,28 +342,44 @@ pub trait ICompositionObjectAnimations {
         animation: &dyn ICompositionAnimation,
         final_value: Option<ExpressionVariant>,
     ) {
-        if let Some((property, components)) = parse_subchannel(property_name) {
-            // The instance of the animation is wrapped in an animation of
-            // the whole property, which the start path of the property sends
-            // as usual.
-            let target = self.composition_object().required_server();
-            let channel_final_value = final_value.map(|value| extract_subchannel(value, &components));
-            let inner = animation.create_instance(target, channel_final_value);
-            // An animation of the property started earlier in this frame
-            // would be replaced by the start path: the wrapper takes it over,
-            // so sub-channels started in one frame run together.
-            let previous = self
-                .get_composition_property(property)
-                .and_then(|p| self.composition_object().pending_animations().get_and_remove(p));
-            let wrapper = SubchannelAnimation::new(components, inner, previous);
-            if !self.try_start_animation(property, &wrapper, None) {
-                panic!("Unknown property {property_name}");
-            }
-            return;
+        start_animation_core(self, property_name, animation, final_value, None)
+    }
+
+    /// `StartAnimation(propertyName, animation, animationController)`: starts
+    /// the animation under `controller`, which can pause, resume, scrub and
+    /// speed it up. `property_name` may name a sub-channel, as for
+    /// [`start_animation`](Self::start_animation).
+    fn start_animation_with_controller(
+        &self,
+        property_name: &str,
+        animation: &dyn ICompositionAnimation,
+        controller: &Rc<AnimationController>,
+    ) {
+        start_animation_core(self, property_name, animation, None, Some(controller))
+    }
+
+    /// The controller of the animation of the named property
+    /// (`TryGetAnimationController`): the controller it was started with, or
+    /// a new controller that takes the running animation over. `None` when no
+    /// animation was started on the property through this object, or it was
+    /// stopped.
+    //
+    // Deviation (winui-composition.md): the UI thread does not know when an
+    // animation ends on the server, so an animation that ended by itself
+    // still gets a controller, which controls nothing.
+    fn try_get_animation_controller(&self, property_name: &str) -> Option<Rc<AnimationController>> {
+        let object = self.composition_object();
+        if let Some(controller) = object.animation_controller_entry(property_name)? {
+            return Some(controller);
         }
-        if !self.try_start_animation(property_name, animation, final_value) {
-            panic!("Unknown property {property_name}");
-        }
+        let property = match parse_subchannel(property_name) {
+            Some((property, _)) => property,
+            None => property_name,
+        };
+        let property = self.get_composition_property(property)?;
+        let controller = AnimationController::new(object.compositor());
+        object.attach_animation_controller(property_name, property, controller.clone());
+        Some(controller)
     }
 
     /// Disconnects an animation from the named property and stops it,
@@ -284,6 +387,7 @@ pub trait ICompositionObjectAnimations {
     /// (`Offset.X`): the animations of the sub-channels that share a
     /// component with it are stopped.
     fn stop_animation(&self, property_name: &str) {
+        self.composition_object().note_animation_stopped(property_name);
         if let Some((property, components)) = parse_subchannel(property_name) {
             let Some(property) = self.get_composition_property(property) else {
                 panic!("Unknown property {property_name}");
@@ -369,4 +473,47 @@ pub trait ICompositionObjectAnimations {
             }
         }
     }
+}
+
+/// `StartAnimation` with an optional final value (implicit animations) and an
+/// optional controller.
+fn start_animation_core<O: ICompositionObjectAnimations + ?Sized>(
+    this: &O,
+    property_name: &str,
+    animation: &dyn ICompositionAnimation,
+    final_value: Option<ExpressionVariant>,
+    controller: Option<&Rc<AnimationController>>,
+) {
+    if let Some((property, components)) = parse_subchannel(property_name) {
+        // The instance of the animation is wrapped in an animation of
+        // the whole property, which the start path of the property sends
+        // as usual.
+        let target = this.composition_object().required_server();
+        let channel_final_value = final_value.map(|value| extract_subchannel(value, &components));
+        let mut inner = animation.create_instance(target, channel_final_value);
+        if let Some(controller) = controller {
+            inner = controller.wrap(inner);
+        }
+        // An animation of the property started earlier in this frame
+        // would be replaced by the start path: the wrapper takes it over,
+        // so sub-channels started in one frame run together.
+        let previous = this
+            .get_composition_property(property)
+            .and_then(|p| this.composition_object().pending_animations().get_and_remove(p));
+        let wrapper = SubchannelAnimation::new(components, inner, previous);
+        if !this.try_start_animation(property, &wrapper, None) {
+            panic!("Unknown property {property_name}");
+        }
+    } else if let Some(controller) = controller {
+        // The instance is made here, wrapped so that it comes under the
+        // controller, and handed to the start path ready-made.
+        let Some(target) = this.composition_object().server() else { panic!("Unknown property {property_name}") };
+        let prepared = PreparedAnimation::new(controller.wrap(animation.create_instance(target, final_value)));
+        if !this.try_start_animation(property_name, &prepared, None) {
+            panic!("Unknown property {property_name}");
+        }
+    } else if !this.try_start_animation(property_name, animation, final_value) {
+        panic!("Unknown property {property_name}");
+    }
+    this.composition_object().note_animation_started(property_name, controller.cloned());
 }
