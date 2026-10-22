@@ -7,7 +7,8 @@ use crate::rendering::composition::expressions::{
     BuiltInExpressionFfi, ExpressionEvaluationContext, ExpressionVariant, ExpressionVariantValue,
 };
 use crate::rendering::composition::server::{CompositionProperty, IServerClockItem, ServerCompositor, ServerObjectId};
-use std::cell::Cell;
+use crate::rendering::composition::AnimationCompletion;
+use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
 use std::rc::{Rc, Weak};
 use std::time::Duration;
@@ -56,13 +57,17 @@ pub struct KeyFrameAnimationInstance<T: ExpressionVariantValue> {
     duration: i64,
     iteration_behavior: AnimationIterationBehavior,
     iteration_count: i32,
-    // Stored as upstream stores it; upstream does not read it either.
-    #[allow(dead_code)]
+    /// Applied when the animation is stopped (see
+    /// [`IAnimationInstance::value_on_stop`]); upstream stores it and does
+    /// not apply it.
     stop_behavior: AnimationStopBehavior,
     started_at: Cell<i64>,
     starting_value: Cell<T>,
     total_duration: i64,
     finished: Cell<bool>,
+    /// The batches the animation belongs to, released when it finishes or
+    /// is dropped.
+    completion: RefCell<AnimationCompletion>,
 }
 
 impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
@@ -111,6 +116,37 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
             starting_value: Cell::new(T::default()),
             total_duration,
             finished: Cell::new(false),
+            completion: RefCell::new(AnimationCompletion::none()),
+        })
+    }
+
+    /// Sets the batches the animation belongs to (see
+    /// [`CompositionScopedBatch`](crate::rendering::composition::CompositionScopedBatch)).
+    pub fn set_completion(&self, completion: AnimationCompletion) {
+        *self.completion.borrow_mut() = completion;
+    }
+
+    fn release_completion_now(&self) {
+        // Taken out first: releasing may post the completion of a batch,
+        // which must not run with the cell borrowed.
+        let mut completion = std::mem::take(&mut *self.completion.borrow_mut());
+        completion.release();
+    }
+
+    /// The value of the last key frame, with the context of an evaluation
+    /// at the current value.
+    fn final_key_frame_value(&self, current_value: ExpressionVariant) -> T {
+        let starting = ExpressionVariant::create(self.starting_value.get());
+        self.base.with_target_expression_object(|target| {
+            let ctx = ExpressionEvaluationContext {
+                parameters: Some(&**self.base.parameters()),
+                target,
+                current_value,
+                final_value: self.final_value.unwrap_or(starting),
+                starting_value: starting,
+                foreign_function_interface: Some(BuiltInExpressionFfi::instance()),
+            };
+            Self::get_key_frame(&ctx, &self.key_frames[self.key_frames.len() - 1])
         })
     }
 
@@ -138,6 +174,8 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
                 compositor.animations().remove_from_clock(&this);
             }
             self.finished.set(true);
+            // The animation is over: the batches it belongs to may complete.
+            self.release_completion_now();
         }
         res
     }
@@ -228,6 +266,16 @@ impl<T: ExpressionVariantValue> KeyFrameAnimationInstance<T> {
 
 impl<T: ExpressionVariantValue> IServerClockItem for KeyFrameAnimationInstance<T> {
     fn on_tick(&self) {
+        // A target that is gone (its server object released) never
+        // evaluates the animation again: it leaves the clock and its
+        // batches.
+        if self.base.target().is_none() {
+            if let (Some(compositor), Some(this)) = (self.base.compositor(), self.base.this_clock_item()) {
+                compositor.animations().remove_from_clock(&this);
+            }
+            self.release_completion_now();
+            return;
+        }
         self.base.on_tick()
     }
 }
@@ -280,5 +328,19 @@ impl<T: ExpressionVariantValue> IAnimationInstance for KeyFrameAnimationInstance
 
     fn invalidate(&self) {
         self.base.invalidate()
+    }
+
+    fn value_on_stop(&self, current_value: ExpressionVariant) -> Option<ExpressionVariant> {
+        match self.stop_behavior {
+            AnimationStopBehavior::LeaveCurrentValue => None,
+            AnimationStopBehavior::SetToInitialValue => Some(ExpressionVariant::create(self.starting_value.get())),
+            AnimationStopBehavior::SetToFinalValue => {
+                Some(ExpressionVariant::create(self.final_key_frame_value(current_value)))
+            }
+        }
+    }
+
+    fn release_completion(&self) {
+        self.release_completion_now()
     }
 }

@@ -70,14 +70,14 @@ it does not.
 | Type / member | Status | Notes | Phase |
 |---|---|---|---|
 | `CompositionObject.Compositor`, `Dispose`, `ImplicitAnimations` | has | `CompositionObject` | - |
-| `CompositionObject.StartAnimation`, `StopAnimation`, `StartAnimationGroup`, `StopAnimationGroup` | partial | Whole properties only; a sub-channel target (`Offset.X`, `Scale.XY`) is not accepted. | 1 |
+| `CompositionObject.StartAnimation`, `StopAnimation`, `StartAnimationGroup`, `StopAnimationGroup` | has | Sub-channel targets of vector properties (`Offset.X`, `Scale.XY`, components X, Y, Z, W in any case) animate those components only; sub-channels of one property run together, an animation of the whole property replaces them. `StopAnimation` applies the stop behavior. | 1 |
 | `CompositionObject.Properties` | missing | Every WinUI object has its own property set, reachable by expressions as `obj.Name`. | 3 |
 | `CompositionObject.Comment` | missing | | 3 |
 | `CompositionObject.TryGetAnimationController`, `AnimationController` | missing | Pause, resume, progress and playback rate of a running animation. | 3 |
 | `CompositionPropertySet` `Insert*`, `TryGet*` | has | Scalar, vector, matrix, quaternion, colour, boolean. | - |
 | `Compositor.Create*` for the types below | partial | The factories of the existing types exist; the new types bring theirs. | 1-6 |
-| `Compositor.CreatePropertySet` | partial | `CompositionPropertySet::new(compositor)`; the factory is added. | 1 |
-| `Compositor.CreateScopedBatch`, `GetCommitBatch`, `CompositionScopedBatch`, `CompositionCommitBatch` | missing | Completion of a group of animations: `End`, `Suspend`, `Resume`, `IsActive`, `IsEnded`, `Completed`. | 1 |
+| `Compositor.CreatePropertySet` | has | `create_property_set`. | 1 |
+| `Compositor.CreateScopedBatch`, `GetCommitBatch`, `CompositionScopedBatch`, `CompositionCommitBatch` | has | `create_scoped_batch`, `get_commit_batch`, `CompositionBatchTypes`. Key frame animations started while a batch is active take a completion guard that the server releases when the animation ends, is stopped or replaced, or its target is disposed; `Completed` is raised on the thread of the compositor. Expression animations belong to no batch. | 1 |
 | `Compositor.RequestCommitAsync` | has | `request_commit_async`. | - |
 | `Compositor.GlobalPlaybackRate`, `MinGlobalPlaybackRate`, `MaxGlobalPlaybackRate` | missing | | 3 |
 
@@ -150,8 +150,8 @@ it does not.
 |---|---|---|---|
 | `ScalarKeyFrameAnimation`, `Vector2/3/4KeyFrameAnimation`, `ColorKeyFrameAnimation`, `QuaternionKeyFrameAnimation`, `BooleanKeyFrameAnimation` | has | From the schema. | - |
 | `KeyFrameAnimation` `DelayBehavior`, `DelayTime`, `Direction`, `Duration`, `IterationBehavior`, `IterationCount`, `InsertExpressionKeyFrame` | has | | - |
-| `KeyFrameAnimation.StopBehavior` | partial | Stored and not applied, as upstream. Applied when an animation is stopped. | 1 |
-| `KeyFrameAnimation.KeyFrameCount` | missing | | 1 |
+| `KeyFrameAnimation.StopBehavior` | has | Applied by `StopAnimation` (upstream stores it and does not apply it); an animation that is replaced leaves the current value. | 1 |
+| `KeyFrameAnimation.KeyFrameCount` | has | `key_frame_count`. | 1 |
 | `ColorKeyFrameAnimation.InterpolationColorSpace` | missing | | 3 |
 | `PathKeyFrameAnimation` | missing | Needs `CompositionPath` (phase 2). | 3 |
 | `ExpressionAnimation` (`Expression`) | has | | - |
@@ -160,11 +160,11 @@ it does not.
 | `CompositionAnimationGroup` | has | | - |
 | `ImplicitAnimationCollection` | has | | - |
 | `NaturalMotionAnimation`, `SpringScalarNaturalMotionAnimation`, `SpringVector2/3NaturalMotionAnimation` | missing | Spring animations (`DampingRatio`, `Period`, `FinalValue`, `InitialValue`, `InitialVelocity`). | 3 |
-| `CompositionScopedBatch`, `CompositionCommitBatch` | missing | See 3.1. | 1 |
-| `CubicBezierEasingFunction` (`ControlPoint1`, `ControlPoint2`) | partial | `SplineEasing` is the same curve; the WinUI factory and members are added. | 1 |
-| `LinearEasingFunction` | has | `LinearEasing`. | 1 (factory) |
-| `StepEasingFunction` (`StepCount`, `InitialStep`, `FinalStep`, `IsInitialStepSingleFrame`, `IsFinalStepSingleFrame`) | missing | | 1 |
-| `BackEasingFunction` (`Mode`, `Amplitude`), `BounceEasingFunction` (`Mode`, `Bounces`, `Bounciness`), `CircleEasingFunction` (`Mode`), `ElasticEasingFunction` (`Mode`, `Oscillations`, `Springiness`), `ExponentialEasingFunction` (`Mode`, `Exponent`), `PowerEasingFunction` (`Mode`, `Power`), `SineEasingFunction` (`Mode`) | partial | FerroUI has the in, out and in-out variants of these curves with fixed parameters (`BackEaseIn`, ...). The parametric WinUI functions are added. | 1 |
+| `CompositionScopedBatch`, `CompositionCommitBatch` | has | See 3.1. | 1 |
+| `CubicBezierEasingFunction` (`ControlPoint1`, `ControlPoint2`) | has | The curve of `SplineEasing`. The easing functions are `IEasing` implementations, not composition objects; `CompositionEasingFunction` has the factories of WinUI 1.4+ and `Compositor` the `Create*EasingFunction` factories. | 1 |
+| `LinearEasingFunction` | has | `LinearEasingFunction` (the curve of `LinearEasing`). | 1 |
+| `StepEasingFunction` (`StepCount`, `InitialStep`, `FinalStep`, `IsInitialStepSingleFrame`, `IsFinalStepSingleFrame`) | has | The steps share the duration; a single-frame step is shown only at the start or the end. | 1 |
+| `BackEasingFunction` (`Mode`, `Amplitude`), `BounceEasingFunction` (`Mode`, `Bounces`, `Bounciness`), `CircleEasingFunction` (`Mode`), `ElasticEasingFunction` (`Mode`, `Oscillations`, `Springiness`), `ExponentialEasingFunction` (`Mode`, `Exponent`), `PowerEasingFunction` (`Mode`, `Power`), `SineEasingFunction` (`Mode`) | has | The parametric curves of the XAML easing functions, with `CompositionEasingFunctionMode`; read-only members as in WinUI. | 1 |
 
 ### 3.8 Expression language
 

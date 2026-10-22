@@ -55,6 +55,7 @@ pub mod server;
 pub mod testing;
 pub mod transport;
 
+mod composition_batch;
 mod composition_cache_mode;
 mod composition_custom_visual;
 mod composition_custom_visual_handler;
@@ -86,6 +87,10 @@ mod i_compositor_serializable;
 mod matrix_utils;
 mod render_interface_feature;
 
+pub use composition_batch::{
+    AnimationCompletion, BatchCompletionGuard, CompositionBatchCompletedEventArgs, CompositionBatchTypes,
+    CompositionCommitBatch, CompositionScopedBatch,
+};
 pub use composition_cache_mode::{CompositionBitmapCache, CompositionCacheMode};
 pub use composition_custom_visual::CompositionCustomVisual;
 pub use composition_custom_visual_handler::{CompositionCustomVisualHandler, ICompositionCustomVisualHandler};
@@ -138,6 +143,8 @@ pub use animations::{
     Vector3DKeyFrameAnimation, Vector3KeyFrameAnimation, Vector4KeyFrameAnimation, VectorKeyFrameAnimation,
 };
 
+#[cfg(test)]
+mod composition_batch_tests;
 #[cfg(test)]
 mod compositor_tests;
 #[cfg(test)]
