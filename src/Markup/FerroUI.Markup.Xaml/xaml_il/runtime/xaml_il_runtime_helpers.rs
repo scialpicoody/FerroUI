@@ -117,6 +117,8 @@ pub struct DeferredContent {
     result_type: ValueType,
     #[cfg(all(feature = "hot-reload", debug_assertions))]
     reload_context: RefCell<Option<Rc<reload::Context>>>,
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    event_context: crate::reload_events::DeferredEventContext,
 }
 
 /// The resource nodes above a declaration, held weakly, shared by the
@@ -147,6 +149,8 @@ impl DeferredContent {
         parent_name_scope: Option<NameScopeRef>,
         builder: DeferredContentBuilder,
         result_type: ValueType,
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        event_context: crate::reload_events::DeferredEventContext,
     ) -> Rc<Self> {
         let content = Rc::new_cyclic(|this| Self {
             this: this.clone(),
@@ -157,6 +161,8 @@ impl DeferredContent {
             result_type,
             #[cfg(all(feature = "hot-reload", debug_assertions))]
             reload_context: RefCell::new(None),
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            event_context,
         });
         #[cfg(all(feature = "hot-reload", debug_assertions))]
         reload::record(&content);
@@ -204,6 +210,8 @@ impl DeferredContent {
             nodes.alive(),
             root.as_ref().and_then(WeakValue::upgrade),
             scope.clone(),
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            self.event_context.clone(),
         );
         let obj = self.builder.invoke(&provider)?;
         scope.complete();
@@ -249,6 +257,8 @@ struct DeferredParentServiceProvider {
     root_object: Option<BoxedValue>,
     runtime_platform: RefCell<Option<Rc<dyn IRuntimePlatform>>>,
     parent_stack_provider: RefCell<Option<Option<Rc<dyn IFerroXamlIlEagerParentStackProvider>>>>,
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    event_context: crate::reload_events::DeferredEventContext,
 }
 
 impl DeferredParentServiceProvider {
@@ -257,6 +267,8 @@ impl DeferredParentServiceProvider {
         parent_resource_nodes: Rc<Vec<BoxedValue>>,
         root_object: Option<BoxedValue>,
         name_scope: NameScopeRef,
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        event_context: crate::reload_events::DeferredEventContext,
     ) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
@@ -266,6 +278,8 @@ impl DeferredParentServiceProvider {
             root_object,
             runtime_platform: RefCell::new(None),
             parent_stack_provider: RefCell::new(None),
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            event_context,
         })
     }
 
@@ -320,6 +334,8 @@ impl IFerroXamlIlEagerParentStackProvider for DeferredParentServiceProvider {
 
 impl IServiceProvider for DeferredParentServiceProvider {
     fn get_service(&self, service_type: TypeId) -> Option<Rc<dyn Any>> {
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        if let Some(value) = self.event_context.get_service(service_type) { return Some(value); }
         if let Some(scope) = name_scope_service(service_type, &self.name_scope) {
             return Some(scope);
         }
@@ -477,7 +493,10 @@ impl XamlIlRuntimeHelpers {
             .root_object();
         let parent_scope = provider.get_name_scope().map(NameScopeRef);
 
-        Ok(DeferredContent::new(resource_nodes, root_object, parent_scope, builder, result_type))
+        Ok(DeferredContent::new(resource_nodes, root_object, parent_scope, builder, result_type,
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            crate::reload_events::DeferredEventContext::capture(&**provider),
+        ))
     }
 
     fn as_resource_nodes_stack(provider: &Rc<dyn IFerroXamlIlParentStackProvider>) -> Rc<CapturedResourceNodes> {
@@ -758,6 +777,14 @@ impl RootServiceProvider {
 
 impl IServiceProvider for RootServiceProvider {
     fn get_service(&self, service_type: TypeId) -> Option<Rc<dyn Any>> {
+        // A document has its own namescope and root provider, but its explicit
+        // development ownership services must survive this loading boundary.
+        #[cfg(all(feature = "hot-reload", debug_assertions))]
+        if service_type == TypeId::of::<Rc<crate::reload_events::EventGeneration>>()
+            || service_type == TypeId::of::<Rc<crate::reload_events::ReloadCodeBehind>>()
+        {
+            return self.parent_service_provider.as_ref()?.get_service(service_type);
+        }
         if let Some(scope) = name_scope_service(service_type, &self.name_scope) {
             return Some(scope);
         }

@@ -702,7 +702,17 @@ pub(crate) fn evaluate_intrinsic(
 
 fn load_method_delegate(node: &Rc<XamlLoadMethodDelegateNode>, context: &mut EvalContext<'_>) -> XamlResult<EvalResult> {
     let declaring_type = node.method.declaring_type();
-    let instance = context.evaluate(&node.base.value().as_node(), Some(&declaring_type))?;
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    let replacement = if node.base.value().as_node().cast::<XamlRootObjectNode>().is_some() {
+        let runtime = context.runtime_context()?;
+        ferroui_markup_xaml::reload_events::code_behind(&**runtime, &runtime.root_object())
+    } else { None };
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+    let replacement: Option<BoxedValue> = None;
+    let instance = match replacement {
+        Some(root) => Some(root),
+        None => context.evaluate(&node.base.value().as_node(), Some(&declaring_type))?,
+    };
     if node.method.as_any().downcast_ref::<RuntimeMethod>().is_none() {
         return Err(XamlError::load_exception(
             format!(

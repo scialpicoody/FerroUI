@@ -70,7 +70,7 @@ pub trait ComponentRefresh {
 /// application child subscriptions. The original component is never reconstructed. Root
 /// assignments can be claimed with the literal, static-resource and binding ownership
 /// methods. `with_owned_resources` and `with_owned_styles` claim inline
-/// Resources and Styles. XAML handlers still need their own adapter.
+/// Resources and Styles. `with_owned_handlers` claims routed XAML subscriptions.
 pub struct ComponentReloadTarget {
     root: Root,
     uri: String,
@@ -81,6 +81,7 @@ pub struct ComponentReloadTarget {
     properties: Vec<Box<dyn crate::root_properties::OwnedRootProperty>>,
     resources: Option<crate::root_resources::OwnedResources>,
     styles: Option<crate::root_styles::OwnedStyles>,
+    handlers: Option<crate::handlers::OwnedHandlers>,
     state_adapters: Vec<Rc<dyn crate::ControlStateAdapter>>,
     restoration: crate::control_state::StateRestoration,
 }
@@ -112,6 +113,7 @@ impl ComponentReloadTarget {
             properties: Vec::new(),
             resources: None,
             styles: None,
+            handlers: None,
             state_adapters: Vec::new(),
             restoration: Default::default(),
         }
@@ -132,6 +134,7 @@ impl ComponentReloadTarget {
             properties: Vec::new(),
             resources: None,
             styles: None,
+            handlers: None,
             state_adapters: Vec::new(),
             restoration: Default::default(),
         }
@@ -151,6 +154,12 @@ impl ComponentReloadTarget {
     /// population. Later application style entries retain their identity/order.
     pub fn with_owned_styles(mut self) -> Self {
         self.styles = self.root.upgrade().map(|root| crate::root_styles::OwnedStyles::capture(&root.element()));
+        self
+    }
+    /// Claims routed XAML subscriptions from initial population. Framework
+    /// metadata events without a removable token require an explicit adapter.
+    pub fn with_owned_handlers(mut self) -> Self {
+        self.handlers = self.root.upgrade().map(|root| crate::handlers::OwnedHandlers::capture(&root.element().upcast()));
         self
     }
     /// Add application state transfer for named/keyed replacement children.
@@ -226,13 +235,13 @@ pub(crate) fn shadow_source(
     content_member: &str,
     owned_properties: &[&str],
     owned_members: &[&str],
+    owned_handlers: bool,
 ) -> Result<String, ReloadError> {
     const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
     let parse = |text: &str| crate::DocumentContract::parse(text);
     if !parse(source)?.events.is_empty() {
-        return Err(ReloadError::RestartRequired(
-            "Component handlers require an explicit refresh adapter".into(),
-        ));
+        if !owned_handlers { return Err(ReloadError::RestartRequired("Component handlers require an ownership adapter".into())); }
+        crate::contract::validate_routed_events(source)?;
     }
     let current =
         roxmltree::Document::parse(source).map_err(|e| ReloadError::Failed(e.to_string()))?;
@@ -315,10 +324,12 @@ struct Change {
     baseline: Rc<RefCell<String>>,
     refresh: Option<Box<dyn PreparedReload>>,
     properties: Vec<Box<dyn PreparedReload>>,
+    handlers: Option<Box<dyn PreparedReload>>,
     detached_context: Option<crate::detached_context::DetachedContext>,
 }
 impl PreparedReload for Change {
     fn commit(&mut self) -> Result<(), ReloadError> {
+        if let Some(handlers) = &mut self.handlers { handlers.commit()?; }
         for property in &mut self.properties {
             property.commit()?;
         }
@@ -343,6 +354,7 @@ impl PreparedReload for Change {
         if let Some(refresh) = &mut self.refresh {
             refresh.rollback();
         }
+        if let Some(handlers) = &mut self.handlers { handlers.rollback(); }
     }
     fn finish(&mut self) {
         for property in &mut self.properties {
@@ -352,6 +364,7 @@ impl PreparedReload for Change {
         if let Some(refresh) = &mut self.refresh {
             refresh.finish();
         }
+        if let Some(handlers) = &mut self.handlers { handlers.finish(); }
         let root = self.root.element().downgrade();
         let content = self.new_content.clone();
         let scope = self.new_scope.clone();
@@ -408,6 +421,7 @@ impl ReloadTarget for ComponentReloadTarget {
                 (false, true) => &["Styles"],
                 _ => &[],
             },
+            self.handlers.is_some(),
         )?;
         let uri = ferroui_base::utilities::Uri::try_create(
             &self.uri,
@@ -420,10 +434,14 @@ impl ReloadTarget for ComponentReloadTarget {
         );
         let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &prepared);
         document.service_provider = Some(crate::root_resources::services(&root.element(), self.resources.as_ref(), self.styles.as_ref()));
-        let candidate_root = (self.styles.is_some() || self.resources.is_some()).then(|| crate::root_preview::create(&prepared)).transpose()?;
+        let candidate_root = (self.styles.is_some() || self.resources.is_some() || self.handlers.is_some()).then(|| crate::root_preview::create(&prepared)).transpose()?;
         let _preview = candidate_root.as_ref().map(|candidate| crate::root_preview::install(
             &root.element(), candidate, self.resources.as_ref(), self.styles.as_ref(),
         ));
+        let code = self.handlers.as_ref().map(|_| ferroui_markup_xaml::reload_events::ReloadCodeBehind::new(
+            &root.element().upcast(), &candidate_root.as_ref().unwrap().clone().upcast(),
+        ));
+        if let Some(code) = &code { document.service_provider = Some(code.services(document.service_provider.take().unwrap())); }
         document.root_instance = candidate_root.map(|candidate| Rc::new(candidate) as BoxedValue);
         let deferred = ferroui_markup_xaml::xaml_il::runtime::DeferredContentReloadScope::new();
         let dynamic = ferroui_markup_xaml::reload_resources::DynamicResourceReloadScope::new();
@@ -480,6 +498,7 @@ impl ReloadTarget for ComponentReloadTarget {
         properties.insert(dynamic_index, crate::deferred_context::prepare_dynamic(
             &dynamic, &candidate.element(), &root.element(),
         ));
+        let handlers = self.handlers.as_ref().zip(code.as_ref()).map(|(owner, code)| owner.prepare(code)).transpose()?;
         let refresh = self
             .refresh
             .as_ref()
@@ -502,6 +521,7 @@ impl ReloadTarget for ComponentReloadTarget {
             baseline: self.baseline.clone(),
             refresh,
             properties,
+            handlers,
             detached_context: None,
         }))
     }

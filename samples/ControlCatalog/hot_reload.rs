@@ -50,6 +50,7 @@ fn configuration() -> RuntimeXamlLoaderConfiguration {
 }
 pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str) {
     if ![
+        "/Pages/AdornerLayerPage.xaml",
         "/Pages/BorderPage.xaml",
         "/Pages/SliderPage.xaml",
         "/Pages/ProgressBarPage.xaml",
@@ -210,12 +211,16 @@ pub(crate) fn component_target(
     let mut target = ComponentReloadTarget::content_page(root, uri, baseline, configuration())
         .with_dependencies(dependencies)
         .with_owned_resources()
-    .with_owned_styles()
+        .with_owned_styles()
+        .with_owned_handlers()
         .with_owned_root_static_resource_property(ferroui_base::StyledElement::theme_property())
         .with_owned_root_binding_property(ferroui_base::layout::Layoutable::width_property())
         .with_owned_root_binding_property(ferroui_base::layout::Layoutable::height_property())
         .with_owned_root_binding_property(ferroui_base::layout::Layoutable::margin_property());
     if let Some(page) = root.cast::<crate::pages::ExpanderPage>() {
+        target = target.with_refresh(page.reload_refresh());
+    }
+    if let Some(page) = root.cast::<crate::pages::AdornerLayerPage>() {
         target = target.with_refresh(page.reload_refresh());
     }
     if root.cast::<crate::pages::CheckBoxPage>().is_some() {

@@ -1522,6 +1522,22 @@ pub fn add_handler<Target, EventArgs: ?Sized>(
     let _ = target.upcast_ref::<Interactive>().add_handler_untyped(event, handler, routes, false);
 }
 
+/// Context-aware XAML routed event subscription, preserving development ownership.
+pub fn add_handler_with_context<Target, EventArgs: ?Sized>(
+    context: &Rc<XamlIlContext>, target: &Ref<Target>,
+    event: &ferroui_base::interactivity::RoutedEvent<EventArgs>,
+    handler: ferroui_base::metadata::MarkupDelegate,
+) where Target: ferroui_base::ObjectType + ferroui_base::Upcast<ferroui_base::interactivity::Interactive> {
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    {
+        use ferroui_base::interactivity::{Interactive, RoutingStrategies};
+        crate::reload_events::add_handler(context, &target.clone().upcast::<Interactive>(), &event.as_routed_event(), handler,
+            RoutingStrategies::DIRECT | RoutingStrategies::BUBBLE, false);
+    }
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
+    { let _ = context; add_handler(target, event, handler); }
+}
+
 /// `target.Event += handler` for an event that is not a routed event, which metadata
 /// declares with its subscription (`events:`): the subscription the run-time loader
 /// invokes, of the event `event` the metadata `declaring` declares. No typed function

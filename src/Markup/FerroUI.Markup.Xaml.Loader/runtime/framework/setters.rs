@@ -278,6 +278,18 @@ fn add_handler(
         XamlError::load_exception("The AddHandler method doesn't take routing strategies", Some(line_info))
     })?;
     let routes = enum_constant(&routes_type, 5, line_info)?;
+    #[cfg(all(feature = "hot-reload", debug_assertions))]
+    {
+        use ferroui_base::{interactivity::{Interactive, RoutedEvent, RoutingStrategies}, metadata::from_markup_value};
+        let object = object_of(target, line_info)?;
+        let object = object.cast::<Interactive>().ok_or_else(|| XamlError::load_exception("Event target is not Interactive", Some(line_info)))?;
+        let event = from_markup_value::<RoutedEvent>(&event).ok_or_else(|| XamlError::load_exception("Invalid routed event", Some(line_info)))?;
+        let handler = from_markup_value::<ferroui_base::metadata::MarkupDelegate>(&handler).ok_or_else(|| XamlError::load_exception("Invalid event delegate", Some(line_info)))?;
+        let routes = from_markup_value::<RoutingStrategies>(&routes).ok_or_else(|| XamlError::load_exception("Invalid event routes", Some(line_info)))?;
+        ferroui_markup_xaml::reload_events::add_handler(context.runtime_context()?, &object, &event, handler, routes, false);
+        Ok(())
+    }
+    #[cfg(not(all(feature = "hot-reload", debug_assertions)))]
     context
         .call_method(&setter.add_method, &[target.clone(), event, handler, routes, boxed(false)], line_info)
         .map(|_| ())

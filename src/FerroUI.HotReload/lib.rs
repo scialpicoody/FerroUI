@@ -1,6 +1,9 @@
 //! Development reload transactions. All targets and commits remain on the creating UI thread.
 #![cfg(debug_assertions)]
 mod component;
+mod handlers;
+#[cfg(test)]
+mod handler_tests;
 mod detached_context;
 mod deferred_context;
 mod frame_timing;

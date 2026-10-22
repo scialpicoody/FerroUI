@@ -317,6 +317,32 @@ fn metadata_event(node: roxmltree::Node<'_, '_>, attr: roxmltree::Attribute<'_, 
     })
 }
 
+/// Routed event tokens have reversible ownership. Metadata events exposing only
+/// an add accessor require an explicit subscription adapter.
+pub(crate) fn validate_routed_events(source: &str) -> Result<(), ReloadError> {
+    let xml = roxmltree::Document::parse(source).map_err(|error| ReloadError::Failed(error.to_string()))?;
+    for node in xml.descendants().filter(|node| node.is_element()) {
+        for attr in node.attributes().filter(|attr| metadata_event(node, *attr)) {
+            let (namespace, owner, member) = member_owner(node, attr);
+            let routed = types(namespace, owner).into_iter().any(|type_| {
+                let mut current = Some(type_);
+                let mut seen = std::collections::HashSet::new();
+                while let Some(type_) = current {
+                    if !seen.insert(type_ as *const MarkupType as usize) { break; }
+                    let definition = format!("{member}Event");
+                    let field = type_.find_field(&definition).map(|field| (field.type_)())
+                        .or_else(|| type_.find_static_property(&definition).map(|property| (property.type_)()));
+                    if field.is_some_and(|field| field.name().split('<').next().unwrap_or("").rsplit("::").next() == Some("RoutedEvent")) { return true; }
+                    current = type_.base_type();
+                }
+                false
+            });
+            if !routed { return Err(ReloadError::RestartRequired(format!("{owner}.{member} needs a reversible subscription adapter"))); }
+        }
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod metadata_tests {
     use super::*;
@@ -330,6 +356,14 @@ mod metadata_tests {
         }],
         ..MarkupType::new("Custom", MarkupTypeKind::Class, "reload_contract_tests")
     };
+    #[test]
+    fn non_routed_events_require_an_adapter_without_invoking_accessors() {
+        MarkupType::register(&CUSTOM);
+        let source = r#"<Custom xmlns="using:Reload.Contract.Tests" Recomputed="Handler"/>"#;
+        assert!(matches!(validate_routed_events(source), Err(ReloadError::RestartRequired(_))));
+        ferroui_controls::register_types();
+        assert!(validate_routed_events(r#"<Button xmlns="https://github.com/ferroui" Click="Handler"/>"#).is_ok());
+    }
     #[test]
     fn built_handler_contract_is_stable_across_lazy_runtime_registration() {
         static LAZY: MarkupType = MarkupType {

@@ -25,6 +25,8 @@ pub mod source_overlay;
 pub mod reload_validation;
 #[cfg(all(feature = "hot-reload", debug_assertions))]
 pub mod reload_resources;
+#[cfg(all(feature = "hot-reload", debug_assertions))]
+pub mod reload_events;
 mod markup_extension;
 mod object_casts;
 mod register_types;

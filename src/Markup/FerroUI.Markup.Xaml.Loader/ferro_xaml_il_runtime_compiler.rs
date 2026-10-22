@@ -190,6 +190,10 @@ impl FerroXamlIlRuntimeCompiler {
             })?;
             let override_type: Option<Rc<dyn IXamlType>> =
                 document.root_instance.as_ref().map(|root| runtime_type_system.runtime_type_of(root));
+            #[cfg(all(feature = "hot-reload", debug_assertions))]
+            let override_type = document.service_provider.as_ref()
+                .and_then(|provider| ferroui_markup_xaml::reload_events::code_behind(&**provider, &document.root_instance))
+                .map(|root| runtime_type_system.runtime_type_of(&root)).or(override_type);
             sources.push(DocumentSource {
                 xaml,
                 override_type,

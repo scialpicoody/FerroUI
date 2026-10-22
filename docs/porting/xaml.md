@@ -2566,7 +2566,7 @@ For applications, `export_metadata()` can generate the whole function (`$OUT_DIR
 | `ClassBindingSetter` | `BindClass(target, name, binding, null)` | as implemented: `let _ = ClassBindingManager::__markup_BindClass_0(target, name, binding, None);`, the typed function of the declared method; the subscription it returns is dropped | — |
 | `FerroAttachedInstancePropertySetterMethod` | `set_value_untyped(Field, value, LocalValue)` | typed `t.set_value(Owner::p_property(), v)` when the value type is exact, else untyped | setter arity quirk (decision 15) |
 | `FerroAttachedInstancePropertyGetterMethod` | `GetValue(Field)` | `t.get_value(Owner::p_property())` | — |
-| `XamlDirectCallAddHandler` | `AddHandler(event, handler, Direct \| Bubble, false)` | `rt::add_handler(&t, &Owner::__markup_field_NameEvent(), delegate);` (`add_handler_untyped` with `Direct \| Bubble`, `false`; 9.4.4) | a choice of the setter at run time is refused |
+| `XamlDirectCallAddHandler` | `AddHandler(event, handler, Direct \| Bubble, false)` | `rt::add_handler_with_context(&context, &t, &Owner::__markup_field_NameEvent(), delegate);` (`add_handler_untyped` with `Direct \| Bubble`, `false`; 9.4.4) | a choice of the setter at run time is refused |
 | `InjectServiceProviderNode` | context as service provider | `sp.clone()` | — |
 | `OptionsMarkupExtensionMethod` | first branch whose condition holds, else default; only tested options and the chosen value are evaluated | `if <cond>(&sp, opt1) { v1 } else if .. { .. } else { default }` as an expression; `OnPlatform` branches may be folded to `cfg!` later | conversion of the branch value to the return type per branch |
 | `ResourceAdderSetter` | dictionary (optional getter), key, value, `Add*`, optional source info | `let d = ..; let k = ..; d.add_deferred(k, value); XamlSourceInfo::set_xaml_source_info_for_key(..)` | key forms (`&str`, `&'static TypeInfo`, `ValueType`) → `ResourceKey` |
@@ -2764,13 +2764,13 @@ Status of the open technical issues: O1 (strong capture of the root by handler d
 
 The asset URI scheme of the port is `ferres://` everywhere (asset loader, includes, group transformers, error messages); the upstream scheme is not accepted. Markup files of the port have the extension `.xaml` only: the upstream-derived extension is not used or recognised anywhere (loader, build integration, asset and URI handling, tests, documentation). Files brought over from upstream are renamed. Earlier sections of this document were updated accordingly.
 
-### E6 implementation status (2026-10-20)
+### E6 implementation status (2026-10-22)
 
 The development session, populate hooks, source overlays and detached replacement
 adapters are implemented. Supported component and panel adapters preserve roots,
 view models and compatible UI state, including application state callbacks.
 Explicit root-property ownership and application resource/style include tracking
-support rollback. Ten ControlCatalog pages demonstrate the integration.
+support rollback. Eleven ControlCatalog pages demonstrate the integration.
 
 Development manifests use the compiler's type metadata to record handler
 signatures, including inherited and qualified events. Sessions freeze that
@@ -2783,8 +2783,14 @@ the owning supervisor admits changes, coordinates XAML updates and builds a
 replacement before retiring the old process on restart. Native evidence exists
 on all three desktop platforms at recorded revisions.
 
-E6 is **not complete**: standard component XAML handler attachment and inline
-resource/style ownership remain incomplete, and final acceptance must cover the
-finished revision. The [bounded completion audit](../development/hot-reload-completion-audit.md)
+Standard component/panel adapters now support explicit inline resource/style
+ownership and routed XAML subscription ownership. Compiled and interpreted event
+setters retain a document generation; deferred declarations keep that generation
+without retaining the root. Replacement handlers target the preserved component,
+activate after successful commit, and retire old subscriptions without removing
+application subscriptions. Non-routed metadata events require an explicit adapter.
+
+E6 is **not complete**: compatible template-part state transfer remains incomplete,
+and final acceptance must cover the finished revision. The [bounded completion audit](../development/hot-reload-completion-audit.md)
 and [implementation status](../development/hot-reload.md) distinguish these
 requirements from later designer tooling and optional extensions.

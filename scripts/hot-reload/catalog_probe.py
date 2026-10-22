@@ -98,5 +98,5 @@ def run_page(name):
 
 
 if __name__ == '__main__':
-    for name in os.environ.get('FERROUI_CATALOG_RELOAD_PAGES', 'Border,Slider,ProgressBar,CheckBox,Canvas,RadioButton,TextBlock,Viewbox,Expander,ListBox').split(','):
+    for name in os.environ.get('FERROUI_CATALOG_RELOAD_PAGES', 'Border,Slider,ProgressBar,CheckBox,Canvas,RadioButton,TextBlock,Viewbox,Expander,ListBox,AdornerLayer').split(','):
         run_page(name)

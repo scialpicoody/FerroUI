@@ -12,22 +12,22 @@ retain their original source revisions.
 | Sessions and build/loading integration | Manifest, persistent/scoped populate hooks, weak targets, document buffers, directory polling/debounce, superseded revisions, transformed-document cache and debug/release gates exist. Build handler contracts include signatures and conservative unresolved-type admission, verified by build/engine tests on macOS/Linux and generated-manifest catalog tests on macOS. |
 | Stable windows, roots and view models | Native identity probes and lifecycle tests cover supported adapters. Root literal/static-resource/binding ownership supports removal and rollback. |
 | Compatible UI state | Focus, text/caret/selection, scroll and selection-model tests exist. Application state callbacks and queued-revision state preservation are implemented. |
-| Cached controls and subscriptions | Transactional refresh hooks and the Expander sample exercise rollback, disposal and retired-tree release. Ten catalog pages are registered. This is representative integration, not all-page support. |
-| Included resources/styles and static consumers | Registered application containers discover direct live includes; dependency revisions prepare resources and consumers coherently. Resource/theme probes and include lifetime tests exist. Standard inline component ownership remains incomplete below. |
+| Cached controls and subscriptions | Transactional refresh hooks and the Expander sample exercise rollback, disposal and retired-tree release. Eleven catalog pages are registered. This is representative integration, not all-page support. |
+| Included resources/styles and static consumers | Registered application containers discover direct live includes; dependency revisions prepare resources and consumers coherently. Resource/theme probes and include lifetime tests exist. Standard inline resource/style ownership and routed handler ownership are implemented; final acceptance remains below. |
 | Explicit Rust patching | Real Subsecond patches update existing callback subscriptions, with stable framework identity, conservative admission and controlled application. Native patch evidence exists for macOS, Linux and Windows at recorded revisions. |
 | Supervisor and restart | The dedicated sample owns admission/build/application, retains the old process on failed replacement builds and restores versioned application/window/navigation state. Native supervisor evidence exists. |
 | Combined updates and measurements | Combined XAML/Rust acceptance and stage/save-to-render measurements exist for a small fixture and representative catalog pages. These are functional baselines, not statistical performance guarantees. |
 
 ## Required completion work
 
-1. **Close standard component integration gaps.** The shared component/panel
-   preparation currently rejects XAML event handlers.
-   Inline Resources and Styles now have explicit ownership adapters, including deferred
-   template context transfer, application-style ordering, and composed previews for
-   mixed application/XAML dictionary providers. Implement standard handler ownership
-   and exercise it through actual component-loading paths. Complete state transfer
-   for compatible, uniquely identified template parts; the current logical-child capture does not cover
-   replacement root-template parts. Preserve the documented restart boundary for
+1. **Close standard component integration gaps.** Inline Resources and Styles now
+   have explicit ownership adapters, including deferred template context transfer,
+   application-style ordering, and composed previews for mixed application/XAML
+   dictionary providers. Routed handler ownership now covers compiled/runtime
+   population and the catalog's AdornerLayerPage, including rollback and cached
+   reference refresh. Complete state transfer for compatible, uniquely identified
+   template parts; the current logical-child capture does not cover replacement
+   root-template parts. Preserve the documented restart boundary for
    unsupported custom mutations and irreversible user code.
 2. **Freeze a final implementation revision and close acceptance.** Reuse existing
    evidence where behavior and inputs are unchanged, but run the final relevant
@@ -101,8 +101,29 @@ provider precedence, repeated replacement, rollback and removal through the actu
 component adapter. The commands are the engine/catalog commands recorded above.
 The Linux release check also passes with the development feature requested.
 
-These checks do not close the remaining handler, template-state,
-or final native acceptance requirements.
+The routed-handler increment passes 120 engine tests on macOS and Linux and all
+10 catalog reload integration tests on macOS. Coverage includes child/root handlers,
+commit failure, activation after publication, repeated replacement without duplicate
+handlers, application subscriptions, multiple component instances, panel ownership,
+retired-tree release, and deferred factories built after their generation retired.
+Non-routed add-only metadata events require an adapter before candidate population.
+The AdornerLayerPage integration starts from compiled markup, reloads through the
+interpreter, retains its page instance, and refreshes its cached removed adorner.
+
+The markup suites pass on macOS and Linux: 271 markup tests, 205 XAML runtime tests, and
+598 XAML/compiler integration tests (17 pre-existing ignored tests). These include
+compiled/runtime event parity and exact emitted-source checks for the updated
+context-aware event setter. Command:
+
+```sh
+cargo test --locked -p ferroui-markup -p ferroui-markup-xaml -p ferroui-markup-xaml-tests --features ferroui-markup-xaml-loader/hot-reload --lib
+```
+
+The Linux release check above also passes with the development feature requested;
+event ownership storage and services are excluded from release builds.
+
+These checks do not close the remaining template-state or final native acceptance
+requirements.
 
 ## Follow-ups outside the first-release requirement
 

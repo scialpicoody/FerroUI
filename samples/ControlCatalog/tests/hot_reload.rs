@@ -414,3 +414,77 @@ fn application_resource_include_is_discovered_and_replaced() {
     assert!(current[0].owner().is_some());
     assert!(application.resources().ptr_eq(&resources));
 }
+
+#[test]
+fn catalog_xaml_handlers_refresh_cached_adorner_and_retire_old_subscriptions() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_controls::{Button, primitives::AdornerLayer};
+    use std::cell::Cell;
+    let _application = super::support::start_catalog_application();
+    // This constructor uses generated markup by default. Replacements use the
+    // interpreter, exercising ownership across the two actual loading paths.
+    let page = crate::pages::AdornerLayerPage::new();
+    let root: Ref<ContentPage> = page.clone().upcast();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&page.clone().upcast::<Control>())));
+    window.show();
+    let uri = "ferres://controlcatalog/reload-tests/Handlers.xaml";
+    let baseline = include_str!("../Pages/AdornerLayerPage.xaml");
+    let target: Rc<dyn ReloadTarget> = Rc::new(crate::hot_reload::component_target(
+        &root, uri.into(), baseline.into(), Vec::new(),
+    ));
+    let mut session = HotReloadSession::new();
+    session.register_document(uri.into(), baseline.into()).unwrap();
+    session.register_target(&target);
+    let click = |button: &Button| button.raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+    let application = Rc::new(Cell::new(0));
+    for width in [240, 280, 320] {
+        let old = page.get_control::<Button>("AdornerButton");
+        let remove = page.get_control::<Button>("RemoveAdorner");
+        let add = page.get_control::<Button>("AddAdorner");
+        let old_adorner = AdornerLayer::get_adorner(&old).unwrap();
+        let adorner_weak = old_adorner.downgrade();
+        let remove_weak = remove.downgrade();
+        let app = application.clone(); remove.click(move |_, _| app.set(app.get() + 1));
+        click(&remove);
+        assert!(AdornerLayer::get_adorner(&old).is_none());
+        let update = baseline.replace("Width=\"200\"", &format!("Width=\"{width}\""));
+        session.submit(uri.into(), update.clone());
+        let reached = Cell::new(false);
+        let result = session.apply_pending_with(|| {
+            reached.set(true);
+            Err(ReloadError::Failed("adorner rollback".into()))
+        }).unwrap();
+        assert!(reached.get(), "{result:?}");
+        assert_eq!(result.status, ReloadStatus::Failed);
+        assert!(page.get_control::<Button>("AdornerButton").ptr_eq(&old));
+        click(&add);
+        assert!(AdornerLayer::get_adorner(&old).unwrap().ptr_eq(&old_adorner));
+        click(&remove);
+        session.submit(uri.into(), update);
+        let result = session.apply_pending().unwrap();
+        assert_eq!(result.status, ReloadStatus::Applied, "{result:?}");
+        Dispatcher::ui_thread().run_jobs(None);
+        let new = page.get_control::<Button>("AdornerButton");
+        assert!(!new.ptr_eq(&old));
+        assert_eq!(new.width(), width as f64);
+        let new_adorner = AdornerLayer::get_adorner(&new).unwrap();
+        // Old XAML subscriptions must not act on the new namescope, even while
+        // the application deliberately holds the old buttons alive.
+        click(&remove);
+        click(&add);
+        assert!(AdornerLayer::get_adorner(&new).unwrap().ptr_eq(&new_adorner));
+        click(&page.get_control::<Button>("AddAdorner"));
+        assert!(AdornerLayer::get_adorner(&new).unwrap().ptr_eq(&new_adorner));
+        click(&page.get_control::<Button>("RemoveAdorner"));
+        assert!(AdornerLayer::get_adorner(&new).is_none());
+        click(&page.get_control::<Button>("AddAdorner"));
+        assert!(AdornerLayer::get_adorner(&new).unwrap().ptr_eq(&new_adorner));
+        drop(old); drop(remove); drop(add); drop(old_adorner);
+        Dispatcher::ui_thread().run_jobs(None);
+        assert!(remove_weak.upgrade().is_none());
+        assert!(adorner_weak.upgrade().is_none());
+    }
+    assert_eq!(application.get(), 9);
+    window.close();
+}

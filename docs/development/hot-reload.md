@@ -33,8 +33,7 @@ separately.
   rolls back content/scope on failure. Implicit content and explicit framework
   `Content` property elements use the same transaction. Opt-in inline `Resources` and `Styles`
   ownership is described below. Unregistered root assignments, other root property elements,
-  named roots and XAML handlers are conservatively rejected until their adapters
-  support them. `with_refresh` accepts a `ComponentRefresh` implementation for
+  named roots and unclaimed XAML handlers are conservatively rejected. `with_refresh` accepts a `ComponentRefresh` implementation for
   cached controls and application-installed subscriptions: prepare validates the
   candidate namescope, commit refreshes references after the graph swap, rollback
   restores them with the previous graph, and finish disposes old subscriptions only
@@ -63,6 +62,22 @@ separately.
   scopes. External interleaving/removal of owned children, items-host panels, root
   assignment edits without explicit ownership and unsupported handler/resource
   ownership require restart.
+- Component and panel adapters expose `with_owned_handlers` for routed XAML events.
+  Call after initial population; generated markup and the runtime interpreter both
+  record the exact subscriptions they install. Replacement delegates invoke the
+  preserved component instance, with a fresh namescope, without rerunning its
+  constructor. New subscriptions stay inactive through preparation and commit;
+  old subscriptions are suspended during commit and restored on rollback. Once
+  every target succeeds, old subscriptions are removed and new ones activated.
+  Ordinary application `add_handler` subscriptions are never claimed or removed.
+  Deferred templates/resources retain their declaring subscription generation
+  without retaining their root; an old factory built after retirement cannot
+  install a new live XAML handler. Panel opt-in requires the complete initial XAML
+  child range, before adding application children. Partial document ownership,
+  non-routed metadata events with only add accessors, and irreversible user
+  callbacks require an explicit adapter. Handler contract changes still restart.
+  Use `ComponentRefresh` for application caches and child subscriptions; handler
+  ownership does not infer which fields application code has cached.
 - Component and panel adapters expose `with_owned_resources`, called immediately
   after initial XAML population. The root dictionary retains its identity.
   Replacement removes old XAML entries, merged dictionaries and theme dictionaries,
@@ -468,7 +483,7 @@ cargo run -p control-catalog-desktop --features hot-reload
 ```
 
 Supported pages are **Border, Slider, ProgressBar, CheckBox, Canvas,
-RadioButton, TextBlock, Viewbox, Expander, and ListBox**. Edit their documents under
+RadioButton, TextBlock, Viewbox, Expander, ListBox, and AdornerLayer**. Edit their documents under
 `samples/ControlCatalog/Pages`. The custom catalog build emits a 220-document
 manifest, and the session resolves local include dependencies from that baseline.
 Build-time placeholder geometry substitution is shared with runtime updates, so
@@ -493,13 +508,15 @@ existing overlay files replace their manifest paths, and remaining files use the
 original source tree. This explicit overlay watches known manifest files, avoiding
 ambiguous discovery of two files under one document URI.
 
-Pages with cached references, XAML handlers, custom side effects or root resource
-ownership still need explicit adapters. ExpanderPage now supplies one: its cached
+Pages with cached references and custom side effects still need explicit refresh
+adapters. ExpanderPage supplies one: its cached
 named controls and cancellation subscriptions are replaced transactionally. The old
 handlers remain available for rollback and are removed after successful commit;
 the page constructor and view-model initialization are not rerun. This remains
-partial catalog integration.
-`python3 scripts/hot-reload/catalog_probe.py` exercises all ten registered pages;
+partial catalog integration. AdornerLayerPage uses owned XAML routed handlers and
+an explicit refresh that clears its cached removed adorner on success, retains it
+for rollback, and permits the new markup's adorner to take precedence.
+`python3 scripts/hot-reload/catalog_probe.py` exercises all eleven registered pages;
 `FERROUI_CATALOG_RELOAD_PAGES=Border,Slider` selects a subset. Each case changes an
 owned root attribute, rejects invalid syntax, recovers through atomic replacement,
 and removes the attribute. The probes also wait for the corresponding compositor

@@ -1916,7 +1916,7 @@ impl<'a> Emitter<'a> {
                 SetterValues::Checked => return Ok(String::new()),
                 SetterValues::None => return Err(unsupported(node, format!("{property_name}: a setter without its value"))),
             };
-            return Ok(format!("rt::add_handler(&{}, &{event}, {handler});", target.expr));
+            return Ok(format!("rt::add_handler_with_context(&context, &{}, &{event}, {handler});", target.expr));
         }
         if let Some(adder) = any.downcast_ref::<AdderSetter>() {
             return self.adder_statement(node, assignment, adder, target, values);

@@ -75,7 +75,7 @@ fn populate_handlers_templateevent_xaml_deferred_0(
     border_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("part")));
     rt::register_name(name_scope.as_ref(), "part", ::core::clone::Clone::clone(&border_0).upcast::<::ferroui_base::FerroObject>(), 1, 215)?;
     // Handlers/TemplateEvent.xaml(1,208) Tapped
-    rt::add_handler(&border_0, &::ferroui_base::input::InputElement::__markup_field_TappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyPanel::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
+    rt::add_handler_with_context(&context, &border_0, &::ferroui_base::input::InputElement::__markup_field_TappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyPanel::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
     rt::invoked(border_0.try_end_init(), 1, 208)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }

@@ -18,8 +18,8 @@ struct Owned {
 /// Opt-in adapter for framework panels. Only `owned` children are replaced;
 /// application children outside that range retain their identity and ordering.
 /// The root namescope must belong to this XAML document. Application children
-/// needing names must own separate namescopes. Root assignments and handlers still
-/// need their own ownership adapter; constructors are never rerun on the live root.
+/// needing names must own separate namescopes. Root assignments and routed handlers
+/// require explicit ownership opt-in; constructors are never rerun on the live root.
 pub struct PanelReloadTarget {
     root: WeakRef<Panel>,
     uri: String,
@@ -31,6 +31,7 @@ pub struct PanelReloadTarget {
     properties: Vec<Box<dyn crate::root_properties::OwnedRootProperty>>,
     resources: Option<crate::root_resources::OwnedResources>,
     styles: Option<crate::root_styles::OwnedStyles>,
+    handlers: Option<crate::handlers::OwnedHandlers>,
     state_adapters: Vec<Rc<dyn crate::ControlStateAdapter>>,
     restoration: crate::control_state::StateRestoration,
 }
@@ -76,6 +77,7 @@ impl PanelReloadTarget {
             properties: Vec::new(),
             resources: None,
             styles: None,
+            handlers: None,
             state_adapters: Vec::new(),
             restoration: Default::default(),
         })
@@ -93,6 +95,18 @@ impl PanelReloadTarget {
     pub fn with_owned_styles(mut self) -> Self {
         self.styles = self.root.upgrade().map(|root| crate::root_styles::OwnedStyles::capture(&root.upcast()));
         self
+    }
+    /// Claims the document's routed XAML handlers. Call after population and
+    /// before adding application children; the owned range must cover the document.
+    pub fn with_owned_handlers(mut self) -> Result<Self, ReloadError> {
+        let root = self.root.upgrade().ok_or_else(|| ReloadError::Failed("Panel closed".into()))?;
+        let owned = self.owned.borrow();
+        if owned.index != 0 || owned.children.len() != root.children().count() {
+            return Err(ReloadError::RestartRequired("Handler ownership requires the complete XAML child range".into()));
+        }
+        self.handlers = Some(crate::handlers::OwnedHandlers::capture(&root.upcast()));
+        drop(owned);
+        Ok(self)
     }
     /// Add application state transfer for uniquely identified controls in the
     /// panel's namescope. Application children must use separate scopes.
@@ -168,6 +182,7 @@ struct Change {
     state: Rc<crate::state::ViewState>,
     refresh: Option<Box<dyn PreparedReload>>,
     properties: Vec<Box<dyn PreparedReload>>,
+    handlers: Option<Box<dyn PreparedReload>>,
     started: bool,
     detached_contexts: Vec<crate::detached_context::DetachedContext>,
 }
@@ -178,6 +193,7 @@ impl PreparedReload for Change {
                 "Panel children changed after preparation".into(),
             ));
         }
+        if let Some(handlers) = &mut self.handlers { handlers.commit()?; }
         for property in &mut self.properties {
             property.commit()?;
         }
@@ -206,6 +222,7 @@ impl PreparedReload for Change {
             property.rollback();
         }
         if !self.started {
+            if let Some(handlers) = &mut self.handlers { handlers.rollback(); }
             return;
         }
         let _retired: Vec<_> = self
@@ -229,6 +246,7 @@ impl PreparedReload for Change {
         if let Some(refresh) = &mut self.refresh {
             refresh.rollback();
         }
+        if let Some(handlers) = &mut self.handlers { handlers.rollback(); }
     }
     fn finish(&mut self) {
         for property in &mut self.properties {
@@ -242,6 +260,7 @@ impl PreparedReload for Change {
         if let Some(refresh) = &mut self.refresh {
             refresh.finish();
         }
+        if let Some(handlers) = &mut self.handlers { handlers.finish(); }
         let root = self.root.downgrade();
         let scope = self.new_scope.clone();
         let state = self.state.clone();
@@ -338,6 +357,7 @@ impl ReloadTarget for PanelReloadTarget {
                 (false, true) => &["Styles"],
                 _ => &[],
             },
+            self.handlers.is_some(),
         )?;
         let uri = ferroui_base::utilities::Uri::try_create(
             &self.uri,
@@ -350,10 +370,14 @@ impl ReloadTarget for PanelReloadTarget {
         );
         let mut document = RuntimeXamlLoaderDocument::with_base_uri(Some(uri), &prepared);
         document.service_provider = Some(crate::root_resources::services(&root.clone().upcast(), self.resources.as_ref(), self.styles.as_ref()));
-        let candidate_root = (self.styles.is_some() || self.resources.is_some()).then(|| crate::root_preview::create(&prepared)).transpose()?;
+        let candidate_root = (self.styles.is_some() || self.resources.is_some() || self.handlers.is_some()).then(|| crate::root_preview::create(&prepared)).transpose()?;
         let _preview = candidate_root.as_ref().map(|candidate| crate::root_preview::install(
             &root.clone().upcast(), candidate, self.resources.as_ref(), self.styles.as_ref(),
         ));
+        let code = self.handlers.as_ref().map(|_| ferroui_markup_xaml::reload_events::ReloadCodeBehind::new(
+            &root.clone().upcast::<ferroui_base::StyledElement>().upcast(), &candidate_root.as_ref().unwrap().clone().upcast(),
+        ));
+        if let Some(code) = &code { document.service_provider = Some(code.services(document.service_provider.take().unwrap())); }
         document.root_instance = candidate_root.map(|candidate| Rc::new(candidate) as BoxedValue);
         let deferred = ferroui_markup_xaml::xaml_il::runtime::DeferredContentReloadScope::new();
         let dynamic = ferroui_markup_xaml::reload_resources::DynamicResourceReloadScope::new();
@@ -399,6 +423,7 @@ impl ReloadTarget for PanelReloadTarget {
         properties.insert(dynamic_index, crate::deferred_context::prepare_dynamic(
             &dynamic, &candidate.clone().upcast(), &root.clone().upcast(),
         ));
+        let handlers = self.handlers.as_ref().zip(code.as_ref()).map(|(owner, code)| owner.prepare(code)).transpose()?;
         let refresh = self
             .refresh
             .as_ref()
@@ -423,6 +448,7 @@ impl ReloadTarget for PanelReloadTarget {
             after: source.clone(),
             refresh,
             properties,
+            handlers,
             started: false,
             detached_contexts: Vec::new(),
         }))
