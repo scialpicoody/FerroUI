@@ -77,6 +77,11 @@ mod composition_surface_visual;
 mod composition_target;
 mod composition_visual_surface;
 mod composition_winui_factories;
+mod composition_visual_winui;
+mod composition_winui_enums;
+mod composition_winui_layer_factories;
+mod layer_visual;
+mod redirect_visual;
 mod compositing_renderer;
 mod compositor_factories;
 mod container_visual;
@@ -119,6 +124,12 @@ pub use brushes::{
     CompositionBrush, CompositionConicGradientBrush, CompositionGradientBrush, CompositionLinearGradientBrush,
     CompositionRadialGradientBrush, CompositionSolidColorBrush, CompositionSurfaceBrush,
 };
+pub use brushes::{CompositionMaskBrush, CompositionNineGridBrush};
+pub use composition_winui_enums::{
+    CompositionBackfaceVisibility, CompositionBorderMode, CompositionCompositeMode, CompositionMappingMode,
+};
+pub use layer_visual::LayerVisual;
+pub use redirect_visual::RedirectVisual;
 pub use composition_clip::{CompositionClip, InsetClip, RectangleClip};
 pub use composition_visual_surface::CompositionVisualSurface;
 pub use drop_shadow::DropShadow;

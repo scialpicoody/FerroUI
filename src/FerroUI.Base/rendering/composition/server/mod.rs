@@ -28,6 +28,8 @@ mod server_composition_visual_surface;
 mod server_compositor_animations;
 mod server_custom_composition_visual;
 mod server_drop_shadow;
+mod server_layer_visual;
+mod server_redirect_visual;
 mod server_loaded_image_surface;
 mod server_object_animations;
 mod server_size_dependant_visual;
@@ -108,8 +110,15 @@ pub use server_composition_visual_surface::ServerCompositionVisualSurface;
 pub use server_drop_shadow::ServerDropShadow;
 pub use server_loaded_image_surface::ServerLoadedImageSurface;
 pub use server_sprite_visual::ServerSpriteVisual;
+pub use server_layer_visual::{drop_shadow_effect, ServerLayerVisual};
+pub use server_redirect_visual::ServerRedirectVisual;
 // The server-side surface brush lives with the composition brushes.
 pub use super::brushes::{paint_composition_brush, surface_brush_content_rect, ServerCompositionSurfaceBrush};
+// The server-side nine-grid and mask brushes live with the composition
+// brushes.
+pub use super::brushes::{
+    nine_grid_rects, NineGridEdges, ServerCompositionMaskBrush, ServerCompositionNineGridBrush, NINE_GRID_CENTER,
+};
 pub use server_compositor_animations::ServerCompositorAnimations;
 pub use server_custom_composition_visual::ServerCompositionCustomVisual;
 pub use server_object::{

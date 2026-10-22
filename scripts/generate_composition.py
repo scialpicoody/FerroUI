@@ -281,6 +281,17 @@ TYPES = {
         "CompositionDropShadowSourcePolicy",
         ["crate::rendering::composition::CompositionDropShadowSourcePolicy"],
     ),
+    "CompositionBorderMode": ("value", "CompositionBorderMode", ["crate::rendering::composition::CompositionBorderMode"]),
+    "CompositionBackfaceVisibility": (
+        "value",
+        "CompositionBackfaceVisibility",
+        ["crate::rendering::composition::CompositionBackfaceVisibility"],
+    ),
+    "CompositionCompositeMode": (
+        "value",
+        "CompositionCompositeMode",
+        ["crate::rendering::composition::CompositionCompositeMode"],
+    ),
     "Avalonia.Media.RenderOptions": ("value", "RenderOptions", ["crate::media::RenderOptions"]),
     "Avalonia.Media.TextOptions": ("value", "TextOptions", ["crate::media::TextOptions"]),
     "Avalonia.Media.PenLineCap": ("value", "PenLineCap", ["crate::media::PenLineCap"]),
@@ -348,6 +359,7 @@ DEFAULTS = {
     ("Vector", "Vector.One"): "Vector::new(1.0, 1.0)",
     ("Matrix", "Matrix.Identity"): "Matrix::IDENTITY",
     ("Color", "Colors.Black"): "crate::media::Colors::BLACK",
+    ("Vector3D", "Vector3D.UnitZ"): "Vector3D::new(0.0, 0.0, 1.0)",
     ("CompositionStretch", "CompositionStretch.Fill"): "CompositionStretch::Fill",
     (
         "CompositionBitmapInterpolationMode",

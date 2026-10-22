@@ -44,6 +44,11 @@ pub struct ServerCompositionVisualSurface {
     freeze_requested: Cell<bool>,
     frozen: Cell<bool>,
     frozen_content: RefCell<Option<FrozenContent>>,
+    /// Whether a change of the extent of the source subtree counts as a
+    /// change of the surface (the surface of a redirect visual, whose bounds
+    /// cover the source).
+    follows_source_bounds: Cell<bool>,
+    followed_source_bounds: Cell<Option<LtrbRect>>,
 }
 
 /// The image of a frozen visual surface: an offscreen layer, and the size of
@@ -70,6 +75,8 @@ impl ServerCompositionVisualSurface {
             freeze_requested: Cell::new(false),
             frozen: Cell::new(false),
             frozen_content: RefCell::new(None),
+            follows_source_bounds: Cell::new(false),
+            followed_source_bounds: Cell::new(None),
         });
         surface.base.object().activate();
         compositor.register_visual_surface(Rc::downgrade(&surface));
@@ -158,7 +165,37 @@ impl ServerCompositionVisualSurface {
             return false;
         }
         let Some(source) = self.source_visual() else { return false };
-        source.root().is_some() && source.has_pending_render_changes()
+        if source.root().is_none() {
+            return false;
+        }
+        let mut changed = source.has_pending_render_changes();
+        if self.follows_source_bounds.get() {
+            // The bounds of the last update of the target, which the
+            // pending changes of the last frame may have moved.
+            let bounds = source.unclipped_sub_tree_bounds();
+            if self.followed_source_bounds.replace(bounds) != bounds {
+                changed = true;
+            }
+        }
+        changed
+    }
+
+    /// Makes a change of the extent of the source subtree a change of the
+    /// surface (what a redirect visual, whose bounds cover its source, needs;
+    /// not from upstream).
+    pub fn set_follows_source_bounds(&self, value: bool) {
+        self.follows_source_bounds.set(value);
+    }
+
+    /// Renders the whole subtree of the source onto `canvas`, whose transform
+    /// maps the coordinates of the source, as the bitmap cache renders it
+    /// (the visibility, opacity, transform and clip of the source itself are
+    /// ignored), unless the surface is rendering its source already: what a
+    /// redirect visual draws (not from upstream). `clip` is in the
+    /// coordinates of the device.
+    pub fn render_source_subtree(&self, canvas: &mut dyn IDrawingContextImpl, clip: LtrbRect) {
+        let Some(source) = self.source_visual() else { return };
+        self.render_source(&source, canvas, clip);
     }
 
     fn content_changed(&self) {
