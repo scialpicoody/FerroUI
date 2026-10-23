@@ -327,13 +327,13 @@ impl StyledElementBehavior {
 
                 this.attach_behavior_to_logical_tree();
                 let behavior = this.downgrade();
-                let target_subscription = target.get_observable(data_context_property).subscribe_fn(
-                    move |x: Option<BoxedValue>| {
+                let target_object: &FerroObject = &target;
+                let target_subscription = FerroObjectExtensions::get_observable(target_object, data_context_property)
+                    .subscribe_fn(move |x: Option<BoxedValue>| {
                         if let Some(behavior) = behavior.upgrade() {
                             behavior.set_current_value(data_context_property, x);
                         }
-                    },
-                );
+                    });
                 *subscription.borrow_mut() = Some(target_subscription);
             };
 

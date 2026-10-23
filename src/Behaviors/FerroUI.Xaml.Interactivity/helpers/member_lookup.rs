@@ -58,7 +58,8 @@ pub fn subscribe_plain_event(
     instance: &BoxedValue,
     handler: MarkupDelegate,
 ) -> Option<Rc<dyn IDisposable>> {
-    event.subscribe(instance, handler)
+    // `AddEventHandler` throws for a target that is not an instance of the declaring type.
+    event.subscribe(Some(instance.clone()), handler).unwrap_or_else(|error| panic!("{error}"))
 }
 
 /// A routed event of the class of `owner` or of its base classes by name, with or without the
