@@ -74,10 +74,11 @@
              place of the Fluent and Simple items, which need the feature `classic-themes`. -->
         <ComboBox HorizontalAlignment="Stretch"
                   Grid.Column="1"
-                  ItemsSource="{x:Static local:App.AvailableThemes}"
                   SelectedItem="{x:Static local:App.CurrentTheme}"
+                  ItemsSource="{x:Static local:App.AvailableThemes}"
                   SelectionChanged="Themes_SelectionChanged"
-                  ToolTip.Tip="Catalog Theme" />
+                  ToolTip.Tip="Catalog Theme">
+        </ComboBox>
       </Grid>
     </Border>
 

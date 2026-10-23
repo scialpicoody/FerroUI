@@ -83,16 +83,18 @@ impl ApplicationImpl for App {
         this.load_document();
 
         // The resources of the themes of the original (`ClassicThemes.xaml`), which `App.xaml` of
-        // the original declares itself: with the feature `classic-themes` only.
+        // the original declares itself: with the feature `classic-themes` only. The dictionary is
+        // merged into the resources of the application, and its entries are read from it
+        // (`Resources[key]` reads the entries of a dictionary itself, not of the ones it merges).
         #[cfg(feature = "classic-themes")]
         {
             let classic_themes = crate::ClassicThemes::new().upcast::<ferroui_base::controls::ResourceDictionary>();
+            let resource = |key: &str| classic_themes.try_get_value(&ResourceKey::String(key.into())).flatten();
+            *this.fluent_theme.borrow_mut() = from_markup_value::<Ref<FluentTheme>>(&resource("FluentTheme"));
+            *this.simple_theme.borrow_mut() = from_markup_value::<Ref<SimpleTheme>>(&resource("SimpleTheme"));
+            *this.color_picker_simple.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&resource("ColorPickerSimple"));
+            *this.tree_data_grid_generic.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&resource("TreeDataGridGeneric"));
             this.resources().merged_dictionaries().add(classic_themes.into());
-            *this.fluent_theme.borrow_mut() = from_markup_value::<Ref<FluentTheme>>(&this.resource("FluentTheme"));
-            *this.simple_theme.borrow_mut() = from_markup_value::<Ref<SimpleTheme>>(&this.resource("SimpleTheme"));
-            *this.color_picker_simple.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerSimple"));
-            *this.tree_data_grid_generic.borrow_mut() =
-                from_markup_value::<Rc<dyn IStyle>>(&this.resource("TreeDataGridGeneric"));
         }
         *this.winui_theme.borrow_mut() = from_markup_value::<Ref<WinUITheme>>(&this.resource("WinUITheme"));
         *this.color_picker_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerFluent"));
