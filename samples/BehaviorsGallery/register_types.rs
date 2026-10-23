@@ -130,7 +130,7 @@ pub fn register_types() {
         ferroui_xaml_interactions_draggable::register_types();
         ferroui_xaml_interactions_events::register_types();
         ferroui_xaml_interactions_responsive::register_types();
-        // Not yet (Cargo.toml): ferroui_xaml_interactions_reactiveui::register_types();
+        ferroui_xaml_interactions_reactiveui::register_types();
         ferroui_xaml_behaviors_animations::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         for types in [

@@ -261,6 +261,7 @@ dependencies = [
  "ferroui-xaml-interactions-draganddrop",
  "ferroui-xaml-interactions-draggable",
  "ferroui-xaml-interactions-events",
+ "ferroui-xaml-interactions-reactiveui",
  "ferroui-xaml-interactions-responsive",
  "ferroui-xaml-interactivity",
  "sample-build",

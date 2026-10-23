@@ -50,11 +50,7 @@ ferroui-xaml-interactions-draganddrop = { workspace = true }
 ferroui-xaml-interactions-draggable = { workspace = true }
 ferroui-xaml-interactions-events = { workspace = true }
 ferroui-xaml-interactions-responsive = { workspace = true }
-# Not yet: the type model of `ferroui-xaml-interactions-reactiveui` has a cast registration the
-# scanner cannot read (a generic `register_cast` in `interaction_trigger_behavior.rs`), which makes
-# the compiler of the documents refuse every question about casts in this crate. The pages of the
-# crate (InteractionTriggerBehaviorView, ReactiveNavigationView) are placeholders until it is fixed.
-# ferroui-xaml-interactions-reactiveui = { workspace = true }
+ferroui-xaml-interactions-reactiveui = { workspace = true }
 ferroui-xaml-behaviors-animations = { workspace = true }
 # The view models (the reference uses ReactiveUI with its source generators and
 # `UseReactiveUI()`).
