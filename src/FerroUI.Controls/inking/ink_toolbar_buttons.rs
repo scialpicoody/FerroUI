@@ -408,6 +408,11 @@ impl InkToolbarPenButtonImpl for InkToolbarBallpointPenButton {
     }
 }
 impl InkToolbarBallpointPenButton {
+    fn static_constructor() {
+        // The stroke widths of the style of WinUI's `InkToolbarBallpointPenButton` (`InkToolBar.xaml`), as
+        // defaults, so the button has them without the WinUI theme too.
+        override_stroke_widths::<InkToolbarBallpointPenButton>(1.0, 24.0, 2.0);
+    }
     pub fn construct() -> Self {
         Self {
             base: InkToolbarPenButton::construct(),
@@ -444,6 +449,11 @@ impl InkToolbarPenButtonImpl for InkToolbarPencilButton {
     }
 }
 impl InkToolbarPencilButton {
+    fn static_constructor() {
+        // The stroke widths of the style of WinUI's `InkToolbarPencilButton` (`InkToolBar.xaml`), as
+        // defaults, so the button has them without the WinUI theme too.
+        override_stroke_widths::<InkToolbarPencilButton>(1.0, 24.0, 4.0);
+    }
     pub fn construct() -> Self {
         Self {
             base: InkToolbarPenButton::construct(),
@@ -468,6 +478,8 @@ impl FerroObjectImpl for InkToolbarHighlighterButton {
         this.set_tool_kind(InkToolbarTool::Highlighter);
         strings::bind_content(this, "InkToolbarHighlighterButtonName");
         this.set_palette(default_palette(true));
+        // As WinUI (`InkToolBarHighlighterButton.h`): a local value, above the style's 36.
+        this.set_selected_stroke_width(16.0);
     }
 }
 impl InkToolbarPenButtonImpl for InkToolbarHighlighterButton {
@@ -484,8 +496,9 @@ impl InkToolbarPenButtonImpl for InkToolbarHighlighterButton {
 }
 impl InkToolbarHighlighterButton {
     fn static_constructor() {
-        InkToolbarPenButton::selected_stroke_width_property()
-            .override_default_value::<InkToolbarHighlighterButton>(16.0);
+        // The style of WinUI's highlighter sets 12, 64 and 36; its constructor then sets 16
+        // as a local value, which wins (see `constructed`).
+        override_stroke_widths::<InkToolbarHighlighterButton>(12.0, 64.0, 16.0);
     }
     pub fn construct() -> Self {
         Self {
@@ -559,8 +572,6 @@ impl FerroObjectImpl for InkToolbarCustomPenButton {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_tool_kind(InkToolbarTool::CustomPen);
-        this.set_content(Some(Rc::new("Custom pen".to_owned())));
-        AutomationProperties::set_name(this, Some("Custom pen"));
     }
 }
 impl InkToolbarPenButtonImpl for InkToolbarCustomPenButton {
@@ -586,6 +597,11 @@ ferro_properties! {impl InkToolbarCustomPenButton{
     pub fn configuration_content_property()->StyledProperty<Option<Ref<Control>>>{FerroProperty::register::<InkToolbarCustomPenButton,_>("ConfigurationContent",None)}
 }}
 impl InkToolbarCustomPenButton {
+    fn static_constructor() {
+        // The stroke widths of the style of WinUI's `InkToolbarCustomPenButton` (`InkToolBar.xaml`), as
+        // defaults, so the button has them without the WinUI theme too.
+        override_stroke_widths::<InkToolbarCustomPenButton>(1.0, 10.0, 5.0);
+    }
     pub fn construct() -> Self {
         Self {
             base: InkToolbarPenButton::construct(),
@@ -653,8 +669,6 @@ impl FerroObjectImpl for InkToolbarCustomToolButton {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_tool_kind(InkToolbarTool::CustomTool);
-        this.set_content(Some(Rc::new("Custom tool".to_owned())));
-        AutomationProperties::set_name(this, Some("Custom tool"));
     }
 }
 impl InkToolbarCustomToolButton {
@@ -667,6 +681,25 @@ impl InkToolbarCustomToolButton {
         instantiate(Self::construct())
     }
 }
+fn override_stroke_widths<T: ferroui_base::ObjectType>(minimum: f64, maximum: f64, selected: f64) {
+    InkToolbarPenButton::min_stroke_width_property().override_default_value::<T>(minimum);
+    InkToolbarPenButton::max_stroke_width_property().override_default_value::<T>(maximum);
+    InkToolbarPenButton::selected_stroke_width_property().override_default_value::<T>(selected);
+}
+
+/// Whether a change of `property` of a pen button can change the drawing attributes it
+/// creates: WinUI listens to `SelectedBrush` and `SelectedStrokeWidth` alone; the port also
+/// names what those two are computed from.
+pub(crate) fn affects_pen_attributes(property: &FerroProperty) -> bool {
+    property == InkToolbarPenButton::selected_brush_property().as_property()
+        || property == InkToolbarPenButton::selected_brush_index_property().as_property()
+        || property == InkToolbarPenButton::selected_stroke_width_property().as_property()
+        || property == InkToolbarPenButton::min_stroke_width_property().as_property()
+        || property == InkToolbarPenButton::max_stroke_width_property().as_property()
+        || property == InkToolbarPenButton::palette_property().as_property()
+        || property == InkToolbarCustomPenButton::custom_pen_property().as_property()
+}
+
 ferro_properties! {impl InkToolbarEraserButton{pub fn is_clear_all_visible_property()->StyledProperty<bool>{FerroProperty::register::<InkToolbarEraserButton,_>("IsClearAllVisible",true)}}}
 impl InkToolbarEraserButton {
     pub fn is_clear_all_visible(&self) -> bool {
@@ -726,8 +759,6 @@ impl FerroObjectImpl for InkToolbarCustomToggleButton {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.toggle_kind.set(InkToolbarToggle::Custom);
-        this.set_content(Some(Rc::new("Custom toggle".to_owned())));
-        AutomationProperties::set_name(this, Some("Custom toggle"));
     }
 }
 impl InkToolbarCustomToggleButton {
@@ -873,6 +904,16 @@ impl FerroObjectImpl for InkToolbarStencilButton {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         let property = change.property();
+        if property == Self::selected_stencil_property().as_property()
+            && !this.syncing_menu.get()
+        {
+            // As WinUI (`OnSelectedStencilChanged`): the item of the newly selected stencil is
+            // shown, rather than the selection being forced back to the one visible item.
+            match this.selected_stencil() {
+                InkToolbarStencilKind::Ruler => this.set_is_ruler_item_visible(true),
+                InkToolbarStencilKind::Protractor => this.set_is_protractor_item_visible(true),
+            }
+        }
         if property == Self::selected_stencil_property().as_property()
             || property == ToggleButton::is_checked_property().as_property()
             || property == Self::is_ruler_item_visible_property().as_property()

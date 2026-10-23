@@ -35,7 +35,10 @@ struct ActiveStroke {
     attributes: InkDrawingAttributes,
     last_event: InkPointerEventArgs,
     erasing: bool,
-    preview: Option<Vec<Rc<InkStroke>>>,
+    /// The preview strokes of the completed fragments, built once each.
+    fragment_previews: Vec<Rc<InkStroke>>,
+    /// The preview stroke of the fragment being drawn, built again after each sample.
+    tail_preview: Option<Rc<InkStroke>>,
 }
 
 impl ActiveStroke {
@@ -47,7 +50,7 @@ impl ActiveStroke {
         point_limit: usize,
     ) -> Result<(), InkError> {
         self.last_point = point;
-        self.preview = None;
+        self.tail_preview = None;
         for part in parts.into_iter().filter(|part| !part.is_empty()) {
             if !self.points.is_empty() && self.points.last() != part.first() {
                 self.fragments.push(std::mem::take(&mut self.points));
@@ -443,7 +446,8 @@ impl InkPresenter {
                         attributes: self.attributes.get(),
                         last_event: e.clone(),
                         erasing,
-                        preview: None,
+                        fragment_previews: Vec::new(),
+                        tail_preview: None,
                     },
                 );
                 if erasing {
@@ -611,18 +615,28 @@ impl InkPresenter {
         };
         let mut active = self.active.borrow_mut();
         for stroke in active.values_mut().filter(|s| !s.erasing) {
-            if stroke.preview.is_none() {
-                stroke.preview = stroke
-                    .fragments
-                    .iter()
-                    .chain(std::iter::once(&stroke.points))
-                    .filter(|points| !points.is_empty())
-                    .map(|points| InkStroke::new(points.clone(), stroke.attributes))
-                    .collect::<Result<Vec<_>, _>>()
-                    .ok();
+            // A completed fragment does not change, so its preview is built once; only the
+            // fragment being drawn is built again (each sample used to rebuild them all).
+            let mut complete = true;
+            while stroke.fragment_previews.len() < stroke.fragments.len() {
+                let points = &stroke.fragments[stroke.fragment_previews.len()];
+                match InkStroke::new(points.clone(), stroke.attributes) {
+                    Ok(preview) => stroke.fragment_previews.push(preview),
+                    Err(_) => {
+                        complete = false;
+                        break;
+                    }
+                }
             }
-            if let Some(preview) = &stroke.preview {
-                strokes.extend(preview.iter().cloned());
+            if stroke.tail_preview.is_none() && !stroke.points.is_empty() {
+                match InkStroke::new(stroke.points.clone(), stroke.attributes) {
+                    Ok(preview) => stroke.tail_preview = Some(preview),
+                    Err(_) => complete = false,
+                }
+            }
+            if complete {
+                strokes.extend(stroke.fragment_previews.iter().cloned());
+                strokes.extend(stroke.tail_preview.iter().cloned());
             }
         }
         strokes

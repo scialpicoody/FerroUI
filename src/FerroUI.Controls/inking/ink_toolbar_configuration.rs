@@ -246,7 +246,6 @@ impl FerroObjectImpl for InkToolbarPenConfigurationControl {
                 config.rebuild_palette();
             }
         });
-        AutomationProperties::set_name(this, Some("Pen configuration"));
         this.bind_pen();
     }
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -451,6 +450,9 @@ impl InkToolbarPenConfigurationControl {
             let weak = self.to_ref().downgrade();
             let subscription = pen.property_changed(move |change| {
                 if let Some(config) = weak.upgrade() {
+                    if !super::ink_toolbar_buttons::affects_pen_attributes(change.property()) {
+                        return;
+                    }
                     if change.property() == InkToolbarPenButton::palette_property().as_property() {
                         config.bind_palette();
                     }
@@ -637,6 +639,9 @@ impl FerroObjectImpl for InkToolbarFlyoutItem {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         if change.property() == ToggleButton::is_checked_property().as_property() {
+            if this.is_checked() == Some(true) {
+                this.uncheck_others_in_group();
+            }
             let handlers = if this.is_checked() == Some(true) {
                 &this.checked
             } else {
@@ -671,6 +676,31 @@ impl InkToolbarFlyoutItem {
     }
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+    /// As WinUI (`ForAllOthersInGroup`): a radio item that becomes checked unchecks the other
+    /// items of its kind in the same panel of the flyout.
+    fn uncheck_others_in_group(&self) {
+        let kind = self.kind();
+        if !matches!(
+            kind,
+            InkToolbarFlyoutItemKind::Radio | InkToolbarFlyoutItemKind::RadioCheck
+        ) {
+            return;
+        }
+        let Some(panel) = self.parent().and_then(|parent| parent.cast::<crate::Panel>()) else {
+            return;
+        };
+        let this: Ref<Control> = self.to_ref().upcast();
+        for item in panel
+            .children()
+            .snapshot()
+            .iter()
+            .filter(|child| **child != this)
+            .filter_map(|child| child.cast::<InkToolbarFlyoutItem>())
+            .filter(|item| item.kind() == kind && item.is_checked() == Some(true))
+        {
+            item.set_is_checked(Some(false));
+        }
     }
     pub fn kind(&self) -> InkToolbarFlyoutItemKind {
         self.get_value(Self::kind_property())

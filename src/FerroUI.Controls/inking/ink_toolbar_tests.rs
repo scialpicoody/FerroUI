@@ -884,7 +884,22 @@ fn pen_palettes_and_widths_are_independent() {
     a.set_selected_stroke_width(8.0);
     a.palette().clear();
     assert_eq!(b.palette().count(), 30);
-    assert_eq!(b.selected_stroke_width(), 2.0);
+    assert_eq!(b.selected_stroke_width(), 4.0);
+}
+#[test]
+fn pen_stroke_widths_default_to_the_values_of_winui() {
+    let _scope = test_scope();
+    let widths = |pen: &InkToolbarPenButton| {
+        (
+            pen.min_stroke_width(),
+            pen.max_stroke_width(),
+            pen.selected_stroke_width(),
+        )
+    };
+    assert_eq!((1.0, 24.0, 2.0), widths(&InkToolbarBallpointPenButton::new()));
+    assert_eq!((1.0, 24.0, 4.0), widths(&InkToolbarPencilButton::new()));
+    assert_eq!((12.0, 64.0, 16.0), widths(&InkToolbarHighlighterButton::new()));
+    assert_eq!((1.0, 10.0, 5.0), widths(&InkToolbarCustomPenButton::new()));
 }
 #[test]
 fn editing_palette_updates_active_presenter_without_reselecting() {
@@ -942,7 +957,7 @@ fn tool_selection_changes_processing_mode() {
     );
 }
 #[test]
-fn erase_all_event_precedes_clear_and_restores_previous_tool() {
+fn erase_all_restores_the_previous_tool_then_raises_the_event_then_clears() {
     let _scope = test_scope();
     let toolbar = InkToolbar::new();
     let presenter = InkPresenter::new();
@@ -959,6 +974,8 @@ fn erase_all_event_precedes_clear_and_restores_previous_tool() {
     toolbar.set_active_tool(toolbar.get_tool_button(InkToolbarTool::Eraser));
     let seen = Rc::new(Cell::new(0));
     let seen_copy = seen.clone();
+    let tool_seen = Rc::new(Cell::new(None));
+    let tool_seen_copy = tool_seen.clone();
     toolbar.erase_all_clicked(move |toolbar| {
         seen_copy.set(
             toolbar
@@ -966,10 +983,13 @@ fn erase_all_event_precedes_clear_and_restores_previous_tool() {
                 .unwrap()
                 .stroke_container()
                 .len(),
-        )
+        );
+        // As WinUI, the previous tool is restored before the event is raised.
+        tool_seen_copy.set(toolbar.active_tool().map(|tool| tool.tool_kind()));
     });
     toolbar.erase_all();
     assert_eq!(seen.get(), 1);
+    assert_eq!(tool_seen.get(), Some(InkToolbarTool::Pencil));
     assert!(presenter.stroke_container().is_empty());
     assert_eq!(
         toolbar.active_tool().unwrap().tool_kind(),
@@ -1079,7 +1099,7 @@ fn named_automation_peers_expose_expected_patterns() {
     assert!(peer.get_provider::<dyn IValueProvider>().is_some());
     assert_eq!(
         ControlAutomationPeer::create_peer_for_element(&toolbar).get_automation_control_type(),
-        AutomationControlType::ToolBar
+        AutomationControlType::Pane
     );
 }
 #[test]
@@ -1189,4 +1209,80 @@ fn custom_pen_factory_is_dispatched_virtually_by_toolbar() {
     let attrs = presenter.copy_default_drawing_attributes();
     assert_eq!(attrs.color, Color::from_uint32(0xff123456));
     assert_eq!(attrs.size, ferroui_base::Size::new(5.0, 10.0));
+}
+#[test]
+fn selecting_a_hidden_stencil_shows_its_item() {
+    let _scope = test_scope();
+    let stencil = InkToolbarStencilButton::new();
+    stencil.set_is_protractor_item_visible(false);
+    assert_eq!(stencil.selected_stencil(), InkToolbarStencilKind::Ruler);
+    stencil.set_selected_stencil(InkToolbarStencilKind::Protractor);
+    assert_eq!(stencil.selected_stencil(), InkToolbarStencilKind::Protractor);
+    assert!(stencil.is_protractor_item_visible());
+    assert!(stencil.is_ruler_item_visible());
+}
+#[test]
+fn application_buttons_replace_the_built_in_buttons_of_their_kind() {
+    let _scope = test_scope();
+    let toolbar = InkToolbar::new();
+    assert_eq!(toolbar.initial_controls(), InkToolbarInitialControls::All);
+    let ballpoint = InkToolbarBallpointPenButton::new();
+    ballpoint.set_selected_brush_index(7);
+    let eraser = InkToolbarEraserButton::new();
+    eraser.set_is_clear_all_visible(false);
+    toolbar.children().add(&ballpoint);
+    toolbar.children().add(&eraser);
+    let registered = |kind| toolbar.get_tool_button(kind).unwrap();
+    assert_eq!(
+        registered(InkToolbarTool::BallpointPen),
+        ballpoint.clone().upcast::<InkToolbarToolButton>()
+    );
+    assert_eq!(
+        registered(InkToolbarTool::Eraser),
+        eraser.clone().upcast::<InkToolbarToolButton>()
+    );
+    // One button of each kind, and the application's ballpoint is the active tool, as the
+    // built-in one it replaced was.
+    let ballpoints = toolbar
+        .children()
+        .snapshot()
+        .iter()
+        .filter(|child| child.cast::<InkToolbarBallpointPenButton>().is_some())
+        .count();
+    assert_eq!(ballpoints, 1);
+    assert_eq!(
+        toolbar.active_tool(),
+        Some(ballpoint.clone().upcast::<InkToolbarToolButton>())
+    );
+    assert_eq!(ballpoint.selected_brush_index(), 7);
+}
+#[test]
+fn a_toolbar_without_an_active_tool_leaves_inking_on() {
+    let _scope = test_scope();
+    let toolbar = InkToolbar::new();
+    toolbar.set_initial_controls(InkToolbarInitialControls::None);
+    toolbar.set_active_tool(None);
+    let presenter = InkPresenter::new();
+    presenter
+        .input_processing_configuration()
+        .set_mode(InkInputProcessingMode::Inking);
+    toolbar.set_target_ink_presenter(Some(presenter.clone()));
+    assert!(toolbar.active_tool().is_none());
+    assert_eq!(
+        presenter.input_processing_configuration().mode(),
+        InkInputProcessingMode::Inking
+    );
+}
+#[test]
+fn the_stencil_event_is_raised_for_a_change_of_is_stencil_button_checked_alone() {
+    let _scope = test_scope();
+    let toolbar = InkToolbar::new();
+    let raised = Rc::new(Cell::new(0));
+    let count = raised.clone();
+    let _subscription = toolbar.is_stencil_button_checked_changed(move |_| count.set(count.get() + 1));
+    toolbar.set_target_ink_presenter(Some(InkPresenter::new()));
+    toolbar.set_is_ruler_button_checked(true);
+    assert_eq!(raised.get(), 0);
+    toolbar.set_is_stencil_button_checked(true);
+    assert_eq!(raised.get(), 1);
 }

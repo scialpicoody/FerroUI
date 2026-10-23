@@ -627,3 +627,25 @@ fn canvas_peer_is_a_pane_and_respects_ancestor_clipping() {
     root.set_is_visible(false);
     assert!(peer.is_offscreen());
 }
+
+#[test]
+fn nominal_pressure_draws_the_configured_width() {
+    let builder = InkStrokeBuilder::new();
+    builder
+        .set_default_drawing_attributes(InkDrawingAttributes {
+            size: Size::new(4.0, 4.0),
+            ..InkDrawingAttributes::default()
+        })
+        .unwrap();
+    // The builder's points have the nominal pressure 0.5, as mouse and touch input.
+    let stroke = builder.create_stroke([Point::new(10.0, 10.0)]).unwrap();
+    let bounds = stroke.bounding_rect();
+    assert!((bounds.width - 4.0).abs() < 1.0e-9, "{bounds:?}");
+    assert!((bounds.height - 4.0).abs() < 1.0e-9, "{bounds:?}");
+    let full = InkStroke::new(
+        vec![InkPoint::new(Point::new(10.0, 10.0), 1.0).unwrap()],
+        builder.default_drawing_attributes(),
+    )
+    .unwrap();
+    assert!(full.bounding_rect().width > bounds.width);
+}

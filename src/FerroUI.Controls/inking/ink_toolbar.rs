@@ -1,8 +1,6 @@
 //! Live toolbar orchestration over FerroUI controls and the portable ink presenter.
 use super::ink_toolbar_buttons::strings;
 use super::*;
-use crate::automation::peers::AutomationControlType;
-use crate::automation::AutomationProperties;
 use crate::primitives::{PopupFlyoutBase, ToggleButton};
 use crate::utils::BorderRenderHelper;
 use crate::{
@@ -192,11 +190,6 @@ impl FerroObjectImpl for InkToolbar {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_orientation(Orientation::Horizontal);
-        AutomationProperties::set_name(this, Some("Ink toolbar"));
-        this.set_value(
-            AutomationProperties::control_type_override_property(),
-            Some(AutomationControlType::ToolBar),
-        );
         let weak = this.to_ref().downgrade();
         this.children.add_collection_changed(Rc::new(move |event| {
             if let Some(toolbar) = weak.upgrade() {
@@ -216,10 +209,13 @@ impl FerroObjectImpl for InkToolbar {
             || property == Self::target_ink_presenter_property().as_property()
         {
             this.update_target();
-        } else if property == Self::is_ruler_button_checked_property().as_property()
-            || property == Self::is_stencil_button_checked_property().as_property()
-        {
+        } else if property == Self::is_ruler_button_checked_property().as_property() {
             this.apply_stencil();
+        } else if property == Self::is_stencil_button_checked_property().as_property() {
+            this.apply_stencil();
+            // As WinUI (`OnIsStencilButtonCheckedChanged`), the event is raised for a change of
+            // the property alone, not whenever the stencils are applied again.
+            this.raise_stencil_changed();
         } else if property == Self::button_flyout_placement_property().as_property()
             || property == StackPanel::orientation_property().as_property()
         {
@@ -342,6 +338,12 @@ impl InkToolbar {
                 if !self.children.contains(child) {
                     continue;
                 }
+                // WinUI fills in only the kinds the application has not supplied: a button the
+                // application declares replaces the built-in button of its kind.
+                let replaced_active = self.displace_default_of_kind(child);
+                if !self.children.contains(child) {
+                    continue;
+                }
                 if !self.can_register_child(child) {
                     if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::CONTROL)
                     {
@@ -362,6 +364,11 @@ impl InkToolbar {
                     .map_or(0, |index| index + 1)
                     .min(registered.count());
                 registered.insert(index, child);
+                if replaced_active {
+                    if let Some(tool) = child.cast::<InkToolbarToolButton>() {
+                        self.set_active_tool(Some(tool));
+                    }
+                }
             }
         } else {
             let mut ordered = Vec::new();
@@ -378,6 +385,31 @@ impl InkToolbar {
                 }
             }
         }
+    }
+    /// Removes the built-in button of the same kind as the application's `child`, if there is
+    /// one. Returns whether that button was the active tool.
+    fn displace_default_of_kind(&self, child: &Ref<Control>) -> bool {
+        let Some(kind) = button_kind(child) else {
+            return false;
+        };
+        if self.defaults.borrow().contains(child) {
+            return false;
+        }
+        let displaced = self
+            .defaults
+            .borrow()
+            .iter()
+            .find(|default| button_kind(default) == Some(kind))
+            .cloned();
+        let Some(displaced) = displaced else {
+            return false;
+        };
+        self.defaults.borrow_mut().retain(|default| default != &displaced);
+        let was_active = self
+            .active_tool()
+            .is_some_and(|active| active.upcast::<Control>() == displaced);
+        self.children.remove(&displaced);
+        was_active
     }
     fn can_register_child(&self, child: &Ref<Control>) -> bool {
         let registered = self.registered_children().snapshot();
@@ -544,15 +576,9 @@ impl InkToolbar {
             }
         })
     }
-    /// Raises EraseAllClicked before clearing, allowing callers to capture an undo snapshot.
+    /// As WinUI: selects the most recent tool that is not the eraser, raises EraseAllClicked
+    /// (handlers can capture an undo snapshot), then clears the strokes.
     pub fn erase_all(&self) {
-        let target = self.effective_ink_presenter();
-        for (_, handler) in self.erase_all_clicked.snapshot().iter() {
-            handler(self);
-        }
-        if let Some(target) = target {
-            target.stroke_container().clear();
-        }
         let recent = self
             .recent_tool
             .borrow()
@@ -569,6 +595,13 @@ impl InkToolbar {
             });
         if let Some(restore) = restore {
             self.set_active_tool(Some(restore));
+        }
+        let target = self.effective_ink_presenter();
+        for (_, handler) in self.erase_all_clicked.snapshot().iter() {
+            handler(self);
+        }
+        if let Some(target) = target {
+            target.stroke_container().clear();
         }
     }
     fn rebuild_default_buttons(&self) {
@@ -592,6 +625,14 @@ impl InkToolbar {
             defaults.push(InkToolbarEraserButton::new().upcast());
             defaults.push(InkToolbarStencilButton::new().upcast());
         }
+        // Kinds the application supplied itself are not filled in again.
+        let supplied: Vec<ButtonKind> = self
+            .children
+            .snapshot()
+            .iter()
+            .filter_map(button_kind)
+            .collect();
+        defaults.retain(|default| button_kind(default).is_none_or(|kind| !supplied.contains(&kind)));
         *self.defaults.borrow_mut() = defaults.clone();
         for (index, child) in defaults.into_iter().enumerate() {
             self.children().insert(index, child);
@@ -630,7 +671,9 @@ impl InkToolbar {
                 {
                     toolbar.set_active_tool(Some(tool.clone()));
                 }
-                if toolbar.active_tool().as_ref() == Some(&tool) {
+                if toolbar.active_tool().as_ref() == Some(&tool)
+                    && super::ink_toolbar_buttons::affects_pen_attributes(change.property())
+                {
                     toolbar.update_drawing_attributes();
                 }
             } else if let Some(stencil) = child.cast::<InkToolbarStencilButton>() {
@@ -743,8 +786,10 @@ impl InkToolbar {
         }
         self.selection_sync.set(false);
         self.update_drawing_attributes();
-        if let Some(target) = self.effective_ink_presenter() {
-            let mode = match active.as_ref().map(|b| b.tool_kind()) {
+        // As WinUI (`ApplyToolStateToInkCanvas`), no active tool leaves the presenter's mode
+        // as it is: a toolbar without a tool does not switch inking off.
+        if let Some((target, active)) = self.effective_ink_presenter().zip(active.as_ref()) {
+            let mode = match Some(active.tool_kind()) {
                 Some(InkToolbarTool::Eraser) => InkInputProcessingMode::Erasing,
                 Some(
                     InkToolbarTool::BallpointPen
@@ -852,16 +897,19 @@ impl InkToolbar {
         for stencil in &stencils {
             stencil.set_current_value(ToggleButton::is_checked_property(), Some(enabled));
         }
-        for toggle in self
+        let rulers: Vec<_> = self
             .registered_children()
             .snapshot()
             .iter()
             .filter_map(|c| c.cast::<InkToolbarToggleButton>())
             .filter(|b| b.toggle_kind() == InkToolbarToggle::Ruler)
-        {
+            .collect();
+        for toggle in &rulers {
             toggle.set_current_value(ToggleButton::is_checked_property(), Some(ruler));
         }
         self.selection_sync.set(was_sync);
+        // As WinUI, `IsRulerButtonChecked` shows the ruler only when there is a ruler button.
+        let ruler = ruler && !rulers.is_empty();
         if let Some(target) = self.effective_ink_presenter() {
             target
                 .set_ruler_visible(ruler || (enabled && selected == InkToolbarStencilKind::Ruler));
@@ -869,14 +917,22 @@ impl InkToolbar {
                 !ruler && enabled && selected == InkToolbarStencilKind::Protractor,
             );
         }
-        if let Some(stencil_button) = stencils.first() {
-            let args = InkToolbarIsStencilButtonCheckedChangedEventArgs {
-                stencil_button: stencil_button.clone(),
-                stencil_kind: selected,
-            };
-            for (_, handler) in self.stencil_changed.snapshot().iter() {
-                handler(&args);
-            }
+    }
+    fn raise_stencil_changed(&self) {
+        let Some(stencil_button) = self
+            .registered_children()
+            .snapshot()
+            .iter()
+            .find_map(|c| c.cast::<InkToolbarStencilButton>())
+        else {
+            return;
+        };
+        let args = InkToolbarIsStencilButtonCheckedChangedEventArgs {
+            stencil_kind: stencil_button.selected_stencil(),
+            stencil_button,
+        };
+        for (_, handler) in self.stencil_changed.snapshot().iter() {
+            handler(&args);
         }
     }
     fn update_flyout_placement(&self) {
@@ -932,3 +988,26 @@ fn subscribe(
 #[cfg(test)]
 #[path = "ink_toolbar_tests.rs"]
 mod tests;
+
+/// The kind of a built-in toolbar button: the kinds the toolbar has at most one of.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ButtonKind {
+    Tool(InkToolbarTool),
+    Toggle(InkToolbarToggle),
+    Menu(InkToolbarMenuKind),
+}
+
+fn button_kind(child: &Ref<Control>) -> Option<ButtonKind> {
+    if let Some(tool) = child.cast::<InkToolbarToolButton>() {
+        let kind = tool.tool_kind();
+        return (!matches!(kind, InkToolbarTool::CustomPen | InkToolbarTool::CustomTool))
+            .then_some(ButtonKind::Tool(kind));
+    }
+    if let Some(toggle) = child.cast::<InkToolbarToggleButton>() {
+        let kind = toggle.toggle_kind();
+        return (kind != InkToolbarToggle::Custom).then_some(ButtonKind::Toggle(kind));
+    }
+    child
+        .cast::<InkToolbarMenuButton>()
+        .map(|menu| ButtonKind::Menu(menu.menu_kind()))
+}

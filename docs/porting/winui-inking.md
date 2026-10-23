@@ -181,7 +181,9 @@ separate validation requirements.
 ### Stroke geometry and rendering
 
 The portable renderer constructs pressure-dependent circular or rectangular nib
-geometry using FerroUI points and matrices. It preserves raw samples, caches
+geometry using FerroUI points and matrices. The nib size is scaled by
+`0.25 + 1.5 * pressure`, so the nominal pressure 0.5 of mouse, touch and
+`InkStrokeBuilder` points draws the configured size (DEVIATIONS.md, "WinUI inking"). It preserves raw samples, caches
 derived smoothing/outline/bounds data and invalidates those caches when geometry
 inputs change. Selection alone does not need to rebuild tessellation.
 
@@ -460,9 +462,8 @@ for configuration flyouts, accessible numeric width values and localized color
 help. Reusing a base peer covers only the patterns that base actually implements.
 Dedicated upstream peers and their tests remain explicit ledger records.
 
-Named canvas and toolbar/tool/menu/flyout/slider peers are present. The source
-toolbar peer reports `Pane`; FerroUI deliberately reports the semantic `ToolBar`
-role. The canvas retains `Pane`. Pen peers append localized selection and
+Named canvas and toolbar/tool/menu/flyout/slider peers are present. The toolbar
+and the canvas report `Pane`, as the source peers do. Pen peers append localized selection and
 configuration information, menu peers vary toggle/expand patterns with the
 available stencils, and flyout items expose invoke plus the applicable selection
 pattern. Width values clamp to their range and raise the framework's value

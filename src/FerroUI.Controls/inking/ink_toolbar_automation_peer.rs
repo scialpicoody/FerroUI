@@ -170,7 +170,8 @@ impl AutomationPeerImpl for InkToolbarAutomationPeer {
         "InkToolbar".to_owned()
     }
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
-        AutomationControlType::ToolBar
+        // As WinUI (`InkToolBarAutomationPeer.cpp`, which matches the peer of WinUI 2).
+        AutomationControlType::Pane
     }
 }
 impl InkToolbarAutomationPeer {

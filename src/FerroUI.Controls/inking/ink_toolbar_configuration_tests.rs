@@ -136,3 +136,27 @@ fn pen_owned_flyout_configuration_has_no_reverse_ownership_cycle() {
     assert!(weak_pen.upgrade().is_none());
     assert!(weak_configuration.upgrade().is_none());
 }
+#[test]
+fn checking_a_radio_item_unchecks_the_others_of_its_group() {
+    let _scope = test_scope();
+    let panel = crate::StackPanel::new();
+    let items: Vec<_> = (0..3)
+        .map(|_| {
+            let item = InkToolbarFlyoutItem::new();
+            item.set_kind(InkToolbarFlyoutItemKind::Radio);
+            panel.children().add(&item);
+            item
+        })
+        .collect();
+    let check = InkToolbarFlyoutItem::new();
+    check.set_kind(InkToolbarFlyoutItemKind::Check);
+    check.set_is_checked(Some(true));
+    panel.children().add(&check);
+    items[0].set_is_checked(Some(true));
+    items[2].set_is_checked(Some(true));
+    assert_eq!(items[0].is_checked(), Some(false));
+    assert_eq!(items[1].is_checked(), Some(false));
+    assert_eq!(items[2].is_checked(), Some(true));
+    // Another kind is another group.
+    assert_eq!(check.is_checked(), Some(true));
+}
