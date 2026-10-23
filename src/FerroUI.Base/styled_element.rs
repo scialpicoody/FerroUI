@@ -534,6 +534,12 @@ impl StyledElement {
         resources
     }
 
+    /// The resource dictionary of the element if it has been created; unlike `resources`, this
+    /// does not create one.
+    pub fn resources_if_created(&self) -> Option<Ref<ResourceDictionary>> {
+        self.resources.borrow().clone()
+    }
+
     pub fn set_resources(&self, value: Ref<ResourceDictionary>) {
         let this = ResourceHostRef::Element(self.to_ref());
         let old = self.resources.borrow_mut().take();

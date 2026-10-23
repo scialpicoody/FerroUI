@@ -1380,6 +1380,27 @@ The port of upstream's developer tools at their last open-source version (`src/A
 | The layout explorer draws the margin, border, padding and content boxes in fixed pastel colours with black text and square corners. | The boxes are the tinted backgrounds of the WinUI 3 theme in the same hues (critical, caution, success) and the accent colour for the content, with rounded corners, the theme's text colours, small captions and the accent outline under the pointer. | Behaviour | The owner asked for the WinUI 3 design; the colours follow the light and dark variants. | #302 |
 | No counterpart. | The tree pane (the trees, the routed events) has the background of a navigation pane of WinUI 3, a shade apart from the details; a page whose pane is collapsed and that shows nothing says what to do ("Select a control in the tree, or hold Ctrl+Shift ...", "No events recorded yet ..."); a toggle of the command bar of the header (`MainViewModel::IsSidePaneOpen`, `ToggleSidePane`) shows or hides the side pane of the details (the layout, the value frames, the pseudo-classes). | Addition | The owner asked for a tree pane set apart from the details and for a way to hide the side pane; a collapsed tree pane with nothing selected left the page blank. | #302 |
 
+### Dependency injection (`src/FerroUI.DependencyInjection/`, `tests/FerroUI.DependencyInjection.Tests/`)
+
+The port of Microsoft.Extensions.DependencyInjection at dotnet/runtime v10.0.13 and of Splat's adapter to it (issue #251, `dependency-injection.md`).
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| Two packages, `Microsoft.Extensions.DependencyInjection.Abstractions` and `Microsoft.Extensions.DependencyInjection`; providers are thread-safe and the engine compiles call sites (reflection, emitted IL, the switch to compiled resolution, `EventSource` diagnostics). | One crate. Providers are per-thread `Rc` handles, neither `Send` nor `Sync`; resolution interprets the call sites, with no compilation and no event source. | Representation | FerroUI's object model is single-threaded (`Rc`), as the reactive crates are; Rust has no reflection or IL. | #299 |
+| A service type is a `Type`; constructors are found by reflection, chosen with `[ActivatorUtilitiesConstructor]`, with `[FromKeyedServices]` and `[ServiceKey]` parameters; `ActivatorUtilities` activates with untyped arguments. | A service type is a `TypeId` (a trait object too). Registrations take typed, fallible factories, and the `service_factory!` macro writes one from a constructor's parameters and records them as dependencies for validation; a plain closure has no dependencies that validation can see, as an upstream delegate has none. | Representation | Rust has no reflection; the macro is the constructor injection. | #299 |
+| Open generic registrations (`typeof(IRepository<>)`) are closed at resolution; `IEnumerable<T>` is a service. | Each generic instantiation is registered as a concrete type; enumeration is a `Vec<Rc<S>>` resolution (`get_services`), and an explicit enumerable is `ServiceDescriptor::enumerable_instance`. | Representation | Rust generics are monomorphized; there is no open type to close at run time. | #299 |
+| The provider disposes every service it created that implements `IDisposable` or `IAsyncDisposable`. | A factory registration states its disposal (`on_dispose`, `on_dispose_async`); instances registered as instances stay owned by the caller, as upstream. | Behaviour | Rust cannot ask an arbitrary service whether it implements an unrelated trait. | #299 |
+| `Dispose` of a provider or scope with a service that has only asynchronous disposal throws `InvalidOperationException`. | `dispose` returns `ServiceError::AsyncDisposalRequired` before it changes anything, so `dispose_async` can still run; the `IDisposable` implementation, which has no result, panics with that error. | Behaviour | Errors are values; the trait method of `IDisposable` cannot return one. | #299 |
+| A disposed provider's services are unusable objects; a scope is disposed when its `using` ends. | Handles are cloneable and dropping one disposes nothing: `dispose` or `dispose_async` releases the services and the cycles between them and the provider; `Rc` handles to services stay valid Rust values after disposal. | Representation | Ownership of `Rc` handles; disposal is explicit as upstream's `Dispose` call. | #299 |
+| The extension methods of `IServiceCollection` (`AddSingleton`, `TryAdd`, `TryAddEnumerable`, keyed variants); `TryAddEnumerable` compares implementation types found by reflection. | Inherent methods of `ServiceCollection`; `try_add_enumerable` needs the implementation type stated with `with_implementation::<I>()`. | Representation | Rust has no extension members; the implementation type of a factory is not discoverable. | #299 |
+| A change of a read-only collection throws `InvalidOperationException`; `TryAddEnumerable` with an implementation type that cannot be told from the service type throws `ArgumentException`. | Both panic (`assert!`). | Behaviour | Programming errors, which panic in Rust; errors of resolution remain `ServiceError` results. | #299 |
+| `MicrosoftDependencyResolver.GetService` and `GetServices` throw when the provider cannot resolve; `ServiceRegistrationCallback` throws `NotSupportedException`. | The adapter panics with the error; `service_registration_callback_erased` panics. | Behaviour | `IReadonlyDependencyResolver` returns an `Option`, which cannot carry the error. | #299 |
+| `MicrosoftDependencyResolver.UpdateContainer(IServiceProvider)` disposes the current provider, even when it is the provider passed in, and the resolver then holds a disposed provider. | `update_provider` disposes the current provider only when another one replaces it. | Behaviour | Handing the resolver its own provider (to freeze it) leaves it usable. | #307 |
+| `RegisterLazySingleton` registers a factory of one shared `Lazy<T>`; the provider that a later registration replaces disposes the value when it is disposable, and the next provider returns the same, disposed value. | The value is shared across rebuilds as upstream, and its disposal runs once, when the resolver is disposed, if the value was created. A constant's disposal callback runs at the resolver's disposal too, resolved or not. | Behaviour | The value stays usable for the life of the resolver. | #299 |
+| Contracts are strings, with `null` the default contract. | A contract is a service key; `None` and `Some("")` are different keys. A Splat factory that returns null resolves to `None` and is left out of enumerations. | Representation | Keys are typed values; Splat's null result is an `Option`. | #299 |
+| The tests of the call-site compiler, reflection, `EventSource` diagnostics and the CLR's type-assignability and argument-null checks. | Not ported; the generated inventories list the exclusions. Call-site tests assert the metadata and cache identities instead, generic constraints use closed instantiations, and invalid abstract or null constructor arguments are compile tests. | Test | No counterpart in Rust. | #299 |
+| `AsyncServiceScope` and the optional capabilities (`IServiceProviderIsService`, `ISupportRequiredService`, `IAsyncDisposable`) are interface casts. | `AsyncServiceScope` wraps a scope; the capabilities are trait methods; `typed_key::<T>()` checks the type of a key at activation. | Representation | Rust cannot cast a trait object to another trait. | #299 |
+
 ## Corrected divergences
 
 Places where the port did work that upstream does not do, or did it differently, and a later change made it match upstream again. They are kept here so a regression can be recognised. Extra allocations and copies on hot paths belong here too: `PORTING-GUIDE.md` rules out allocations on hot paths that upstream avoids.
@@ -1418,41 +1439,3 @@ Places where the port did work that upstream does not do, or did it differently,
 | `TextBoxTextInputMethodClient.TextViewVisual` is null while the text box has no presenter. | Reported the last presenter the client had (the contract of the base crate had no "none" value), and panicked when it never had one. | `textbox-contract-and-loader` (2026-10-15) |
 | `WindowImplBase.FrameSize` (Avalonia.Native) starts the result of `GetFrameSize` at (-1, -1); the native side leaves it so while the window is not shown, and the property is then null, so `Window.SetWindowStartupLocation` centres the client size. | `frame_size` called the generated `get_frame_size`, which starts the result at zero: a window not shown had a frame of no size, and a centred window was placed half its size away from the centre (`WindowTests.StartupLocation` on macOS: 450 for 225, 900 for 700). Now `IFrnWindowBase::get_frame_size_from` with (-1, -1); checked by `tests/accessibility_tree.rs`. | integration-tests-fixes (2026-10-16) |
 | `ScrollGestureRecognizer.PointerReleased` starts a `Stopwatch` when the inertia starts, and each frame of the inertia (`OnAnimationRequested`) scrolls by the speed times the time since the previous frame, the first frame by the time since the release. | Timed the inertia with the frame times of the media context and started its clock with the first frame, which therefore scrolled by nothing. A scroll content presenter that chains scrolling (`IsScrollChainingEnabled`, true by default) leaves a scroll event that changes no offset unhandled, and an unhandled inertia event ends the gesture: a touch flick never coasted, on every touch platform, and on a phone in the browser a swipe moved the content only as far as the finger. Not recorded as a deviation. Tests: `the_first_frame_of_scroll_inertia_scrolls` (`input_tests.rs`), `touch_flick_scrolls_on_with_inertia` (`scroll_content_presenter_tests.rs`) and the touch swipe of `scripts/browser/tests/control_catalog.test.mjs`. | `browser-touch-scroll` (2026-10-17) |
-
-## Microsoft.Extensions.DependencyInjection (issue #251)
-
-`ferroui-dependency-injection` follows dotnet/runtime v10.0.13. See
-[dependency-injection.md](dependency-injection.md) for the API, ownership contract and reference.
-
-- One UI-independent crate holds both upstream packages. Providers are per-thread `Rc` handles;
-  there is no `Send + Sync`/Arc provider, reflection, emitted IL, JIT switching or EventSource.
-- `TypeId` identifies service types, including trait objects. Typed fallible factories and the
-  `service_factory!` macro replace constructor reflection, constructor-selection attributes,
-  keyed-parameter attributes and activation with untyped arguments. The macro emits dependencies
-  for validation. Opaque closures have no statically discoverable dependencies, as upstream
-  delegates do not. Open generic registrations are replaced by concrete Rust instantiations;
-  enumeration is explicit `Vec<Rc<S>>` resolution. Key inheritance is supported.
-- Disposal is explicit and opt-in on factory descriptors because Rust cannot discover unrelated
-  disposable traits on arbitrary services. Instances remain externally owned. A sync disposal
-  attempt with async-only services returns an error before changing state, so async disposal can
-  still run. Async cleanup uses FerroUI tasks, never a blocking wait. The rare service returned
-  after its factory disposes its scope has async-only cleanup started locally, not synchronously
-  waited. Existing Rc handles remain valid Rust values after logical disposal.
-- Scoped/provider handles are cloneable; dropping them does not invoke disposal. Call disposal to
-  release resources and cached service/provider cycles. Root disposal invalidates child resolution,
-  but each child still owns its cleanup. Scopes are flat, as upstream.
-- Collection extensions are inherent methods; descriptor factories take an explicit lifetime.
-  `TryAddEnumerable` uses explicit implementation type metadata. Keyed and unkeyed descriptor
-  metadata share accessors; CLR argument-null/type-assignability checks become Rust type checks.
-- The optional Splat adapter preserves mutable collection rebuilds and immutable provider mode.
-  Contracts become keys; null and empty differ. Splat null factories return None and are filtered
-  from enumerations. Its upstream registration callbacks remain unsupported. Explicit Splat
-  constant disposal callbacks are honored at adapter disposal, even for unresolved constants.
-- CLR engine/compiler/reflection and diagnostics tests are not runnable equivalents. Existing
-  exclusions remain explicit in the generated inventories; no applicable test gaps remain.
-  Internal call-site tests assert metadata and cache identities, generic constraints use closed
-  instantiations, and invalid abstract/null constructor inputs are rejected in compile tests.
-- `AsyncServiceScope` wraps a custom scope. Optional async-disposal and required-service capabilities
-  use explicit trait methods rather than CLR interface casts. `typed_key(T)` checks the key type at
-  activation. Explicit enumerables use `ServiceDescriptor::enumerable_instance` so both erased and
-  typed enumeration can find their element type without reflection.
