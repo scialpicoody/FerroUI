@@ -3,7 +3,6 @@
 use ferroui_base::ferro_markup_type;
 use ferroui_base::media::imaging::WriteableBitmap;
 use ferroui_base::media::Color;
-use ferroui_base::platform::ILockedFramebuffer;
 use ferroui_xaml_interactions_custom::IWriteableBitmapRenderer;
 use std::rc::Rc;
 use std::time::Instant;
