@@ -41,8 +41,9 @@ on:
 
 concurrency:
   # An edit that leaves the base alone gets a group of its own, so that it does not cancel the
-  # run of the pull request that is in progress.
-  group: ci-${{ github.ref }}-${{ (github.event.action == 'edited' && github.event.changes.base == null) && github.run_id || 'run' }}
+  # run of the pull request that is in progress; so does the nightly run, so that it and a run of a
+  # push to main do not cancel each other.
+  group: ci-${{ github.ref }}-${{ (github.event.action == 'edited' && github.event.changes.base == null) && github.run_id || (github.event_name == 'schedule' && 'nightly' || 'run') }}
   cancel-in-progress: true
 
 permissions:
@@ -111,6 +112,9 @@ jobs:
   #   workspace has none that run) and no example or binary is linked.
   # - No debug information in the test build, which shortens compiling and linking; a failing test
   #   still reports its message and location, a backtrace has no line numbers.
+  # - The tests of the ControlCatalog with its feature classic-themes and those of the Vello
+  #   backend are in the job macos-features, which runs beside this one.
+  # - It runs in the nightly run of main, which saves its build cache.
   macos:
     name: Build and test (macOS)
     if: (github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'push')
@@ -124,7 +128,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
-          save-if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci-build-times' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
       - name: Test
         run: cargo test --workspace --locked --no-fail-fast --lib --tests --exclude ferroui-render-backends-comparison --exclude ferroui-vello
@@ -147,7 +151,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
-          save-if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci-build-times' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
       # The Simple and Fluent themes of the ControlCatalog are behind its feature `classic-themes`,
       # off by default (docs/binary-size.md): the tests of the document of the two themes and of
@@ -198,7 +202,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
-          save-if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci-build-times' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
       # Without the default feature `angle`: the backend with software rendering alone, which is
       # what builds where there is no libclang.
@@ -884,7 +888,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: ios
-          save-if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci-build-times' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
       - name: Skia features of the target
         run: |
@@ -933,7 +937,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: x11
-          save-if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci-build-times' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
       # The X libraries are opened at run time (nothing links them); Skia links FreeType and
       # Fontconfig, and needs a font to answer for the default family.
@@ -1207,7 +1211,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: wayland
-          save-if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci-build-times' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
       # libwayland-client, libwayland-egl, libEGL and libxkbcommon are opened at run time (nothing
       # links them); Skia links FreeType and Fontconfig, and needs a font to answer for the default
@@ -1414,7 +1418,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: wayland-next
-          save-if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci-build-times' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
       - name: Build the window example
         run: cargo build --locked -p ferroui-wayland --features example --example wayland_window
@@ -1464,7 +1468,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: linuxfb
-          save-if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci-build-times' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
       # Skia links FreeType and Fontconfig, and needs a font to answer for the default family.
       # The DRM output opens libdrm, libgbm and libEGL at run time; Mesa renders on the card of
@@ -1552,7 +1556,7 @@ jobs:
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
           key: android
-          save-if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/ci-build-times' }}
+          save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
       - name: Tests of the Android crate (the logic, on the host)
         run: cargo test --locked -p ferroui-android --no-fail-fast
