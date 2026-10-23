@@ -34,7 +34,7 @@ pub fn Hello() -> Element {
         StackPanel { horizontal_alignment: HorizontalAlignment::Center, vertical_alignment: VerticalAlignment::Center, spacing: 12.0,
             TextBlock { text: "Hello, World!", font_size: 28.0 }
             Button { name: "Count", horizontal_alignment: HorizontalAlignment::Center, on_click: move |_| clicks.update(|c| *c += 1),
-                TextBlock { text: move || format!("Clicked {} times", clicks.get()) }
+                TextBlock { text: move || clicked_text(clicks.get()) }
             }
         }
     }
@@ -42,3 +42,11 @@ pub fn Hello() -> Element {
 
 #[cfg(test)]
 mod tests;
+
+/// The text of the button after `clicks` clicks.
+fn clicked_text(clicks: i32) -> String {
+    match clicks {
+        1 => "Clicked 1 time".to_string(),
+        _ => format!("Clicked {clicks} times"),
+    }
+}

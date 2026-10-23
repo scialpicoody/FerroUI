@@ -18,7 +18,15 @@ pub fn hello() -> Element {
                 .name("Count")
                 .horizontal_alignment(HorizontalAlignment::Center)
                 .on_click(move |_| clicks.update(|c| *c += 1))
-                .child(text_block().text(move || format!("Clicked {} times", clicks.get()))),
+                .child(text_block().text(move || clicked_text(clicks.get()))),
         )
         .into()
+}
+
+/// The text of the button after `clicks` clicks.
+fn clicked_text(clicks: i32) -> String {
+    match clicks {
+        1 => "Clicked 1 time".to_string(),
+        _ => format!("Clicked {clicks} times"),
+    }
 }
