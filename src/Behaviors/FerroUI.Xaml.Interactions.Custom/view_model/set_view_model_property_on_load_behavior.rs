@@ -79,6 +79,8 @@ impl SetViewModelPropertyOnLoadBehavior {
     }
 
     /// Sets the value to assign (named apart from the setter of every property of the object).
+    // Deviation (DEVIATIONS.md, Behaviors): the setter of `Value` is not named `set_value`, which is
+    // the setter of every property of the object.
     pub fn set_behavior_value(&self, value: Option<BoxedValue>) {
         self.set_value(Self::value_property(), value)
     }

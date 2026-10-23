@@ -221,6 +221,9 @@ impl IRenderTargetBitmapRenderHost for RenderTargetBitmapBehavior {
     }
 }
 
+// Deviation (DEVIATIONS.md, Behaviors): a property typed `IRenderTargetBitmapRenderHost` holds a
+// shared handle of the contract; the behavior converts to it through this handle (an interface of
+// its class info), which compares by the identity of the behavior.
 /// The handle of a behavior as the contract of render hosts.
 struct RenderHostHandle(Ref<RenderTargetBitmapBehavior>);
 

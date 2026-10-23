@@ -75,6 +75,8 @@ impl ToggleViewModelBooleanAction {
         let Some(info) = find_plain_property(&*target, &property_name) else {
             return false;
         };
+        // Deviation (DEVIATIONS.md, Behaviors): a property without a getter is not toggled (the
+        // reference throws when it reads it).
         let (Some(get), Some(set)) = (info.get, info.set) else {
             return false;
         };
