@@ -1745,6 +1745,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-xaml-interactions-custom"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-fluent",
+ "ferroui-xaml-behaviors-animations",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
 name = "ferroui-xaml-interactions-draganddrop"
 version = "0.4.0"
 dependencies = [

@@ -48,6 +48,7 @@ members = [
     "src/Behaviors/FerroUI.Xaml.Behaviors.Animations",
     "src/Behaviors/FerroUI.Xaml.Interactions",
     "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI",
+    "src/Behaviors/FerroUI.Xaml.Interactions.Custom",
     "src/Behaviors/FerroUI.Xaml.Interactions.Draggable",
     "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop",
     "src/Behaviors/FerroUI.Xaml.Interactions.Events",
@@ -214,6 +215,7 @@ ferroui-xaml-interactivity = { version = "=0.4.0", path = "src/Behaviors/FerroUI
 ferroui-xaml-behaviors-animations = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Behaviors.Animations" }
 ferroui-xaml-interactions = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions" }
 ferroui-xaml-interactions-reactiveui = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI" }
+ferroui-xaml-interactions-custom = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Custom" }
 ferroui-xaml-interactions-draggable = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Draggable" }
 ferroui-xaml-interactions-draganddrop = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop" }
 ferroui-xaml-interactions-events = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactions.Events" }
