@@ -153,92 +153,92 @@ until the page is ported.
 
 | # | Header | Reference file | Group | Lines | State | Notes |
 |---|---|---|---|---|---|---|
-| 1 | SelectAllOnFocusBehavior | `Views/Pages/SelectAllOnFocusBehaviorView` | A | 40 | placeholder |  |
-| 2 | FocusNextElementAction | `Views/Pages/FocusNextElementActionView` | A | 38 | placeholder |  |
-| 3 | WindowDragMoveBehavior | `Views/Pages/WindowDragMoveBehaviorView` | A | 46 | placeholder | owns: WindowDemo (commented line in its folder); port the code-behind |
-| 4 | TiltEffectBehavior | `Views/Pages/TiltEffectBehaviorView` | A | 53 | placeholder |  |
-| 5 | OrbitEffectBehavior | `Views/Pages/OrbitEffectBehaviorView` | A | 59 | placeholder |  |
-| 6 | ParallaxBehavior | `Views/Pages/ParallaxBehaviorView` | A | 70 | placeholder |  |
-| 7 | ConditionalAction | `Views/Pages/ConditionalActionView` | A | 51 | placeholder |  |
-| 8 | SwitchCaseAction | `Views/Pages/SwitchCaseActionView` | A | 67 | placeholder |  |
-| 9 | SwitchCaseBehavior | `Views/Pages/SwitchCaseBehaviorView` | A | 64 | placeholder |  |
-| 10 | ConditionalBehavior | `Views/Pages/ConditionalBehaviorView` | A | 41 | placeholder |  |
-| 11 | LoseFocusOnEnterBehavior | `Views/Pages/LoseFocusOnEnterBehaviorView` | A | 34 | placeholder |  |
-| 12 | AutoScrollToBottomBehavior | `Views/Pages/AutoScrollToBottomBehaviorView` | A | 57 | placeholder | port the code-behind |
+| 1 | SelectAllOnFocusBehavior | `Views/Pages/SelectAllOnFocusBehaviorView` | A | 40 | in progress |  |
+| 2 | FocusNextElementAction | `Views/Pages/FocusNextElementActionView` | A | 38 | in progress |  |
+| 3 | WindowDragMoveBehavior | `Views/Pages/WindowDragMoveBehaviorView` | A | 46 | in progress | owns: WindowDemo (commented line in its folder); port the code-behind |
+| 4 | TiltEffectBehavior | `Views/Pages/TiltEffectBehaviorView` | A | 53 | in progress |  |
+| 5 | OrbitEffectBehavior | `Views/Pages/OrbitEffectBehaviorView` | A | 59 | in progress |  |
+| 6 | ParallaxBehavior | `Views/Pages/ParallaxBehaviorView` | A | 70 | in progress |  |
+| 7 | ConditionalAction | `Views/Pages/ConditionalActionView` | A | 51 | in progress |  |
+| 8 | SwitchCaseAction | `Views/Pages/SwitchCaseActionView` | A | 67 | in progress |  |
+| 9 | SwitchCaseBehavior | `Views/Pages/SwitchCaseBehaviorView` | A | 64 | in progress |  |
+| 10 | ConditionalBehavior | `Views/Pages/ConditionalBehaviorView` | A | 41 | in progress |  |
+| 11 | LoseFocusOnEnterBehavior | `Views/Pages/LoseFocusOnEnterBehaviorView` | A | 34 | in progress |  |
+| 12 | AutoScrollToBottomBehavior | `Views/Pages/AutoScrollToBottomBehaviorView` | A | 57 | in progress | port the code-behind |
 | 13 | CallMethodAction | `Views/Pages/CallMethodActionView` | A | 63 | ported | EventTriggerBehavior (Click) with CallMethodAction and ChangePropertyAction on the view model; tested (`tests/page_behaviors.rs`) |
-| 14 | Debounce & Throttle | `Views/Pages/DebounceThrottleActionView` | A | 74 | placeholder | port the code-behind |
-| 15 | ObservableStreamBehavior | `Views/Pages/ObservableStreamBehaviorView` | A | 61 | placeholder |  |
-| 16 | AsyncActionGroup | `Views/Pages/AsyncActionGroupView` | A | 56 | placeholder |  |
-| 17 | FocusTrapBehavior | `Views/Pages/FocusTrapBehaviorView` | A | 48 | placeholder |  |
-| 18 | ScreenReaderAnnounceAction | `Views/Pages/ScreenReaderAnnounceActionView` | A | 49 | placeholder |  |
-| 19 | GlobalHotkeyBehavior | `Views/Pages/GlobalHotkeyBehaviorView` | A | 43 | placeholder |  |
-| 20 | VisualDebugBehavior | `Views/Pages/VisualDebugBehaviorView` | A | 49 | placeholder |  |
-| 21 | LogAction | `Views/Pages/LogActionView` | A | 62 | placeholder |  |
-| 22 | NetworkStatusTrigger | `Views/Pages/NetworkStatusTriggerView` | A | 50 | placeholder |  |
-| 23 | ClipboardMonitorBehavior | `Views/Pages/ClipboardMonitorBehaviorView` | A | 52 | placeholder | port the code-behind |
+| 14 | Debounce & Throttle | `Views/Pages/DebounceThrottleActionView` | A | 74 | in progress | port the code-behind |
+| 15 | ObservableStreamBehavior | `Views/Pages/ObservableStreamBehaviorView` | A | 61 | in progress |  |
+| 16 | AsyncActionGroup | `Views/Pages/AsyncActionGroupView` | A | 56 | in progress |  |
+| 17 | FocusTrapBehavior | `Views/Pages/FocusTrapBehaviorView` | A | 48 | in progress |  |
+| 18 | ScreenReaderAnnounceAction | `Views/Pages/ScreenReaderAnnounceActionView` | A | 49 | in progress |  |
+| 19 | GlobalHotkeyBehavior | `Views/Pages/GlobalHotkeyBehaviorView` | A | 43 | in progress |  |
+| 20 | VisualDebugBehavior | `Views/Pages/VisualDebugBehaviorView` | A | 49 | in progress |  |
+| 21 | LogAction | `Views/Pages/LogActionView` | A | 62 | in progress |  |
+| 22 | NetworkStatusTrigger | `Views/Pages/NetworkStatusTriggerView` | A | 50 | in progress |  |
+| 23 | ClipboardMonitorBehavior | `Views/Pages/ClipboardMonitorBehaviorView` | A | 52 | in progress | port the code-behind |
 | 24 | ChangePropertyAction | `Views/Pages/ChangePropertyActionView` | A | 55 | ported | ChangePropertyAction with a dynamic resource value; tested |
 | 25 | DataTriggerBehavior | `Views/Pages/DataTriggerBehaviorView` | A | 64 | ported | DataTriggerBehavior with comparison conditions on an element binding |
-| 26 | DataTriggerBehavior Advanced | `Views/Pages/DataTriggerBehaviorAdvancedView` | A | 51 | placeholder |  |
-| 27 | MultiDataTriggerBehavior | `Views/Pages/MultiDataTriggerBehaviorView` | A | 87 | placeholder |  |
-| 28 | BindingTriggerBehavior | `Views/Pages/BindingTriggerBehaviorView` | A | 64 | placeholder |  |
+| 26 | DataTriggerBehavior Advanced | `Views/Pages/DataTriggerBehaviorAdvancedView` | A | 51 | in progress |  |
+| 27 | MultiDataTriggerBehavior | `Views/Pages/MultiDataTriggerBehaviorView` | A | 87 | in progress |  |
+| 28 | BindingTriggerBehavior | `Views/Pages/BindingTriggerBehaviorView` | A | 64 | in progress |  |
 | 29 | ValueChangedTriggerBehavior | `Views/Pages/ValueChangedTriggerBehaviorView` | A | 40 | ported | ValueChangedTriggerBehavior on a stream binding (`Values^`) |
-| 30 | PropertyChangedTrigger | `Views/Pages/PropertyChangedTriggerView` | A | 39 | placeholder |  |
+| 30 | PropertyChangedTrigger | `Views/Pages/PropertyChangedTriggerView` | A | 39 | in progress |  |
 | 31 | EventTriggerBehavior | `Views/Pages/EventTriggerBehaviorView` | A | 56 | ported | code-behind: `OnPointerPressed` override (`InputElementImpl`); shows `Views/SampleView` |
 | 32 | TimerTrigger | `Views/Pages/TimerTriggerView` | A | 45 | ported | TimerTrigger with CallMethodAction |
-| 33 | TaskCompletedTrigger | `Views/Pages/TaskCompletedTriggerView` | A | 45 | placeholder |  |
-| 34 | LoadedTrigger | `Views/Pages/LoadedTriggerView` | A | 39 | placeholder |  |
+| 33 | TaskCompletedTrigger | `Views/Pages/TaskCompletedTriggerView` | A | 45 | in progress |  |
+| 34 | LoadedTrigger | `Views/Pages/LoadedTriggerView` | A | 39 | in progress |  |
 | 35 | InvokeCommandAction | `Views/Pages/InvokeCommandActionView` | A | 62 | ported | InvokeCommandAction; deviation: no `Unit.Default` command parameter; tested |
-| 36 | AutoFocusBehavior | `Views/Pages/AutoFocusBehaviorView` | A | 34 | placeholder |  |
-| 37 | AutoSelectBehavior | `Views/Pages/AutoSelectBehaviorView` | A | 34 | placeholder |  |
-| 38 | TextBoxValidationBehavior | `Views/Pages/TextBoxValidationBehaviorView` | A | 43 | placeholder |  |
-| 39 | NumericUpDownValidationBehavior | `Views/Pages/NumericUpDownValidationBehaviorView` | A | 46 | placeholder |  |
-| 40 | NotNullValidationRule | `Views/Pages/NotNullValidationRuleView` | A | 45 | placeholder |  |
-| 41 | PropertyValidationBehavior | `Views/Pages/PropertyValidationBehaviorView` | A | 56 | placeholder |  |
-| 42 | SliderValidationBehavior | `Views/Pages/SliderValidationBehaviorView` | A | 60 | placeholder |  |
-| 43 | DatePickerValidationBehavior | `Views/Pages/DatePickerValidationBehaviorView` | A | 47 | placeholder |  |
-| 44 | ComboBoxValidationBehavior | `Views/Pages/ComboBoxValidationBehaviorView` | A | 46 | placeholder |  |
-| 45 | FocusControlBehavior | `Views/Pages/FocusControlBehaviorView` | A | 37 | placeholder |  |
+| 36 | AutoFocusBehavior | `Views/Pages/AutoFocusBehaviorView` | A | 34 | in progress |  |
+| 37 | AutoSelectBehavior | `Views/Pages/AutoSelectBehaviorView` | A | 34 | in progress |  |
+| 38 | TextBoxValidationBehavior | `Views/Pages/TextBoxValidationBehaviorView` | A | 43 | in progress |  |
+| 39 | NumericUpDownValidationBehavior | `Views/Pages/NumericUpDownValidationBehaviorView` | A | 46 | in progress |  |
+| 40 | NotNullValidationRule | `Views/Pages/NotNullValidationRuleView` | A | 45 | in progress |  |
+| 41 | PropertyValidationBehavior | `Views/Pages/PropertyValidationBehaviorView` | A | 56 | in progress |  |
+| 42 | SliderValidationBehavior | `Views/Pages/SliderValidationBehaviorView` | A | 60 | in progress |  |
+| 43 | DatePickerValidationBehavior | `Views/Pages/DatePickerValidationBehaviorView` | A | 47 | in progress |  |
+| 44 | ComboBoxValidationBehavior | `Views/Pages/ComboBoxValidationBehaviorView` | A | 46 | in progress |  |
+| 45 | FocusControlBehavior | `Views/Pages/FocusControlBehaviorView` | A | 37 | in progress |  |
 | 46 | FocusOnAttachedBehavior | `Views/Pages/FocusOnAttachedBehaviorView` | A | 34 | ported | a behavior of the Custom crate |
-| 47 | FocusOnAttachedToVisualTreeBehavior | `Views/Pages/FocusOnAttachedToVisualTreeBehaviorView` | A | 34 | placeholder |  |
-| 48 | FocusOnPointerMovedBehavior | `Views/Pages/FocusOnPointerMovedBehaviorView` | A | 34 | placeholder |  |
-| 49 | FocusOnPointerPressedBehavior | `Views/Pages/FocusOnPointerPressedBehaviorView` | A | 34 | placeholder |  |
-| 50 | FocusOnVisibleBehavior | `Views/Pages/FocusOnVisibleBehaviorView` | A | 38 | placeholder |  |
-| 51 | FocusSelectedItemBehavior | `Views/Pages/FocusSelectedItemBehaviorView` | A | 34 | placeholder |  |
-| 52 | RoutedEventTriggerBehavior | `Views/Pages/RoutedEventTriggerBehaviorView` | A | 61 | placeholder |  |
-| 53 | ChangeFerroPropertyAction | `Views/Pages/ChangeFerroPropertyActionView` | A | 59 | placeholder | the reference names the view and its text after the upstream framework (`ChangeFerroPropertyAction` here) |
-| 54 | ViewModel Property Actions | `Views/Pages/ViewModelPropertyActionsView` | A | 66 | placeholder |  |
+| 47 | FocusOnAttachedToVisualTreeBehavior | `Views/Pages/FocusOnAttachedToVisualTreeBehaviorView` | A | 34 | in progress |  |
+| 48 | FocusOnPointerMovedBehavior | `Views/Pages/FocusOnPointerMovedBehaviorView` | A | 34 | in progress |  |
+| 49 | FocusOnPointerPressedBehavior | `Views/Pages/FocusOnPointerPressedBehaviorView` | A | 34 | in progress |  |
+| 50 | FocusOnVisibleBehavior | `Views/Pages/FocusOnVisibleBehaviorView` | A | 38 | in progress |  |
+| 51 | FocusSelectedItemBehavior | `Views/Pages/FocusSelectedItemBehaviorView` | A | 34 | in progress |  |
+| 52 | RoutedEventTriggerBehavior | `Views/Pages/RoutedEventTriggerBehaviorView` | A | 61 | in progress |  |
+| 53 | ChangeFerroPropertyAction | `Views/Pages/ChangeFerroPropertyActionView` | A | 59 | in progress | the reference names the view and its text after the upstream framework (`ChangeFerroPropertyAction` here) |
+| 54 | ViewModel Property Actions | `Views/Pages/ViewModelPropertyActionsView` | A | 66 | in progress |  |
 | 55 | Custom Action | `Views/Pages/CustomActionView` | A | 67 | ported | ShowPointerPositionBehavior and PopupAction (custom action) |
 | 56 | Custom Behavior | `Views/Pages/CustomBehaviorView` | A | 68 | ported | DragControlBehavior (custom behavior), also through a style setter with a BehaviorCollectionTemplate |
-| 57 | ButtonClickEventTriggerBehavior | `Views/Pages/ButtonClickEventTriggerBehaviorView` | A | 53 | placeholder |  |
-| 58 | ClickEventTrigger | `Views/Pages/ClickEventTriggerView` | A | 336 | placeholder |  |
-| 59 | Advanced Behavior | `Views/Pages/AdvancedView` | A | 66 | placeholder |  |
+| 57 | ButtonClickEventTriggerBehavior | `Views/Pages/ButtonClickEventTriggerBehaviorView` | A | 53 | in progress |  |
+| 58 | ClickEventTrigger | `Views/Pages/ClickEventTriggerView` | A | 336 | in progress |  |
+| 59 | Advanced Behavior | `Views/Pages/AdvancedView` | A | 66 | in progress |  |
 | 60 | Add/RemoveClassAction | `Views/Pages/AddRemoveClassActionView` | A | 64 | ported | AddClassAction and RemoveClassAction from data triggers on the bounds |
-| 61 | RemoveElementAction | `Views/Pages/RemoveElementActionView` | A | 45 | placeholder |  |
-| 62 | RemoveItemInListBoxAction | `Views/Pages/RemoveItemInListBoxActionView` | A | 45 | placeholder |  |
-| 63 | RemoveItemInItemsControlAction | `Views/Pages/RemoveItemInItemsControlActionView` | A | 45 | placeholder |  |
-| 64 | AddItemToItemsControlAction | `Views/Pages/AddItemToItemsControlActionView` | A | 64 | placeholder |  |
-| 65 | InsertItemToItemsControlAction | `Views/Pages/InsertItemToItemsControlActionView` | A | 60 | placeholder |  |
-| 66 | ObjectTemplate | `Views/Pages/ObjectTemplateView` | A | 82 | placeholder |  |
-| 67 | ClearItemsControlAction | `Views/Pages/ClearItemsControlActionView` | A | 45 | placeholder |  |
-| 68 | AddRangeAction | `Views/Pages/AddRangeActionView` | A | 72 | placeholder |  |
-| 69 | RemoveRangeAction | `Views/Pages/RemoveRangeActionView` | A | 45 | placeholder |  |
-| 70 | MoveItemInItemsControlAction | `Views/Pages/MoveItemInItemsControlActionView` | A | 56 | placeholder |  |
-| 71 | MoveElementToPanelAction | `Views/Pages/MoveElementActionsView` | A | 76 | placeholder |  |
-| 72 | CollectionChangedTrigger | `Views/Pages/CollectionChangedTriggerBehaviorView` | A | 55 | placeholder |  |
-| 73 | ItemsControl Container Triggers | `Views/Pages/ItemsControlContainerTriggersView` | A | 106 | placeholder |  |
-| 74 | Remove Items Sample | `Views/Pages/RemoveItemsSampleView` | A | 61 | placeholder |  |
+| 61 | RemoveElementAction | `Views/Pages/RemoveElementActionView` | A | 45 | in progress |  |
+| 62 | RemoveItemInListBoxAction | `Views/Pages/RemoveItemInListBoxActionView` | A | 45 | in progress |  |
+| 63 | RemoveItemInItemsControlAction | `Views/Pages/RemoveItemInItemsControlActionView` | A | 45 | in progress |  |
+| 64 | AddItemToItemsControlAction | `Views/Pages/AddItemToItemsControlActionView` | A | 64 | in progress |  |
+| 65 | InsertItemToItemsControlAction | `Views/Pages/InsertItemToItemsControlActionView` | A | 60 | in progress |  |
+| 66 | ObjectTemplate | `Views/Pages/ObjectTemplateView` | A | 82 | in progress |  |
+| 67 | ClearItemsControlAction | `Views/Pages/ClearItemsControlActionView` | A | 45 | in progress |  |
+| 68 | AddRangeAction | `Views/Pages/AddRangeActionView` | A | 72 | in progress |  |
+| 69 | RemoveRangeAction | `Views/Pages/RemoveRangeActionView` | A | 45 | in progress |  |
+| 70 | MoveItemInItemsControlAction | `Views/Pages/MoveItemInItemsControlActionView` | A | 56 | in progress |  |
+| 71 | MoveElementToPanelAction | `Views/Pages/MoveElementActionsView` | A | 76 | in progress |  |
+| 72 | CollectionChangedTrigger | `Views/Pages/CollectionChangedTriggerBehaviorView` | A | 55 | in progress |  |
+| 73 | ItemsControl Container Triggers | `Views/Pages/ItemsControlContainerTriggersView` | A | 106 | in progress |  |
+| 74 | Remove Items Sample | `Views/Pages/RemoveItemsSampleView` | A | 61 | in progress |  |
 | 75 | AdaptiveBehavior | `Views/Pages/AdaptiveBehaviorView` | A | 155 | ported | the Responsive crate; the shared `ClassesToStringConverter` as a markup extension |
-| 76 | AspectRatioBehavior | `Views/Pages/AspectRatioBehaviorView` | A | 76 | placeholder | uses the shared `ClassesToStringConverter` |
-| 77 | SplitView | `Views/Pages/SplitViewStateBehaviorView` | A | 75 | placeholder |  |
-| 78 | EditableListBox | `Views/Pages/EditableListBoxView` | A | 44 | placeholder | uses the shared `EditableItem` control |
-| 79 | EditableDraggableListBox | `Views/Pages/EditableDraggableListBoxView` | A | 83 | placeholder | BLOCKED: a drop handler as a resource (IDropHandler has no markup metadata); port the code-behind |
-| 80 | EditableListBox DoubleTap | `Views/Pages/EditableDoubleTappedListBoxView` | A | 44 | placeholder | uses the shared `EditableItem` control |
-| 81 | EditableTree | `Views/Pages/EditableTreeViewView` | A | 45 | placeholder | uses the shared `EditableItem` control |
-| 82 | EditableTree DoubleTap | `Views/Pages/EditableDoubleTappedTreeViewView` | A | 44 | placeholder | uses the shared `EditableItem` control |
-| 83 | Editable Drag TreeView | `Views/Pages/EditableDragTreeViewView` | A | 67 | placeholder | BLOCKED: a drop handler as a resource (IDropHandler has no markup metadata); port the code-behind |
-| 84 | Sliding Animation | `Views/Pages/SlidingAnimationView` | A | 77 | placeholder |  |
+| 76 | AspectRatioBehavior | `Views/Pages/AspectRatioBehaviorView` | A | 76 | in progress | uses the shared `ClassesToStringConverter` |
+| 77 | SplitView | `Views/Pages/SplitViewStateBehaviorView` | A | 75 | in progress |  |
+| 78 | EditableListBox | `Views/Pages/EditableListBoxView` | A | 44 | in progress | uses the shared `EditableItem` control |
+| 79 | EditableDraggableListBox | `Views/Pages/EditableDraggableListBoxView` | A | 83 | in progress | BLOCKED: a drop handler as a resource (IDropHandler has no markup metadata); port the code-behind |
+| 80 | EditableListBox DoubleTap | `Views/Pages/EditableDoubleTappedListBoxView` | A | 44 | in progress | uses the shared `EditableItem` control |
+| 81 | EditableTree | `Views/Pages/EditableTreeViewView` | A | 45 | in progress | uses the shared `EditableItem` control |
+| 82 | EditableTree DoubleTap | `Views/Pages/EditableDoubleTappedTreeViewView` | A | 44 | in progress | uses the shared `EditableItem` control |
+| 83 | Editable Drag TreeView | `Views/Pages/EditableDragTreeViewView` | A | 67 | in progress | BLOCKED: a drop handler as a resource (IDropHandler has no markup metadata); port the code-behind |
+| 84 | Sliding Animation | `Views/Pages/SlidingAnimationView` | A | 77 | in progress |  |
 | 85 | Fade Animation | `Views/Pages/FadeAnimationView` | A | 49 | ported | attached properties of the Custom crate (`custom:FadeAnimation`): an animation page |
-| 86 | Scale Animation | `Views/Pages/ScaleAnimationView` | A | 91 | placeholder |  |
+| 86 | Scale Animation | `Views/Pages/ScaleAnimationView` | A | 91 | in progress |  |
 | 87 | Rotate Animation | `Views/Pages/RotateAnimationView` | B | 105 | placeholder |  |
 | 88 | Entrance Animations | `Views/Pages/EntranceAnimationsView` | B | 198 | placeholder |  |
 | 89 | Attention Animations | `Views/Pages/AttentionAnimationsView` | B | 117 | placeholder |  |
