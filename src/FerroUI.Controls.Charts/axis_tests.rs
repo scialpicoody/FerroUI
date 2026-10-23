@@ -6,7 +6,7 @@ use crate::{
 use ferroui_base::animation::TimeSpan;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Colors, IBrush};
-use ferroui_base::utilities::DateTimeOffset;
+use ferroui_base::utilities::{CultureInfo, DateTimeOffset};
 use ferroui_base::{Ref, StyledProperty};
 use std::rc::Rc;
 
@@ -523,4 +523,48 @@ fn calendar_ticks_and_auto_ranges_handle_datetime_extrema_without_panics() {
     let ticks = axis.ticks(DateTimeOffset::MIN_VALUE, DateTimeOffset::MAX_VALUE, 10);
     assert!(ticks.len() <= 4096);
     assert!(ticks.windows(2).all(|pair| pair[0] < pair[1]));
+}
+
+#[test]
+fn automatic_date_labels_use_the_interval_the_ticks_were_made_with() {
+    let axis = DateTimeAxis::new();
+    let years = axis.labeled_ticks(date(2016, 1, 1), date(2026, 1, 1), 8);
+    assert_eq!(
+        DateTimeIntervalType::Year,
+        axis.resolved_interval(date(2016, 1, 1), date(2026, 1, 1), 8)
+    );
+    assert!(years.len() >= 2);
+    assert!(years.iter().all(|(_, text)| text.len() == 4), "{years:?}");
+    assert_eq!("2016", years[0].1);
+    let months = axis.labeled_ticks(date(2020, 1, 1), date(2020, 7, 1), 8);
+    assert_eq!(
+        DateTimeIntervalType::Month,
+        axis.resolved_interval(date(2020, 1, 1), date(2020, 7, 1), 8)
+    );
+    assert_eq!(
+        date(2020, 1, 1).try_to_string_format("MMM yyyy", &CultureInfo::current_culture()).unwrap(),
+        months[0].1
+    );
+    // An explicit format still wins.
+    axis.set_label_format("yyyy-MM-dd");
+    assert_eq!("2016-01-01", axis.labeled_ticks(date(2016, 1, 1), date(2026, 1, 1), 8)[0].1);
+}
+
+#[test]
+fn a_date_range_inside_one_day_has_time_ticks() {
+    let at = |hour: i32, minute: i32| DateTimeOffset::new(2024, 3, 5, hour, minute, 0, TimeSpan::ZERO);
+    let axis = DateTimeAxis::new();
+    let ticks = axis.labeled_ticks(at(6, 0), at(12, 0), 8);
+    assert!(ticks.len() >= 2, "{ticks:?}");
+    assert_eq!(at(6, 0), ticks[0].0);
+    assert_eq!(at(12, 0), ticks.last().unwrap().0);
+    assert!(ticks.windows(2).all(|pair| pair[0].0 < pair[1].0));
+    assert_eq!("06:00", ticks[0].1);
+    // An explicit daily interval divides the day as well.
+    axis.set_interval_type(DateTimeIntervalType::Day);
+    assert!(axis.ticks(at(6, 0), at(12, 0), 8).len() >= 2);
+    // Shorter than a minute: the two bounds.
+    let start = at(6, 0);
+    let end = DateTimeOffset::new(2024, 3, 5, 6, 0, 30, TimeSpan::ZERO);
+    assert_eq!(vec![start, end], axis.ticks(start, end, 8));
 }

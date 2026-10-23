@@ -9,19 +9,6 @@ use ferroui_base::metadata::{
 use ferroui_base::TypeInfo;
 use std::rc::Rc;
 
-// Descriptors are immutable reference objects. Identity equality preserves the
-// observable-map replacement semantics when their fields happen to be equal.
-impl PartialEq for DataLabelOverride {
-    fn eq(&self, other: &Self) -> bool {
-        std::ptr::eq(self, other)
-    }
-}
-impl PartialEq for DataMarkerOverride {
-    fn eq(&self, other: &Self) -> bool {
-        std::ptr::eq(self, other)
-    }
-}
-
 ferroui_base::ferro_markup_type!(class DataLabelOverride {
     handles: [Rc<DataLabelOverride>, Option<Rc<DataLabelOverride>>],
     this: Rc<DataLabelOverride>,

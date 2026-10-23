@@ -11,7 +11,7 @@ use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate,
     FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size,
-    StyledElementImpl, StyledProperty, VisualImpl,
+    StyledElementImpl, StyledProperty, Visual, VisualImpl,
 };
 use ferroui_controls::automation::peers::AutomationPeer;
 use ferroui_controls::primitives::{TemplatedControl, TemplatedControlImpl};
@@ -107,12 +107,39 @@ impl FerroObjectImpl for Chart {
         {
             this.refresh_subscriptions();
         }
-        this.invalidate_scene();
+        // Only the properties the scene is built from rebuild it: pointer-over, focus,
+        // the data context and the like do not, and a new size is caught by `scene_for`.
+        if affects_scene(change.property()) {
+            this.invalidate_scene();
+        }
     }
+}
+
+/// Whether a change of the chart's own property `property` changes what the scene draws.
+fn affects_scene(property: &FerroProperty) -> bool {
+    let affecting: [&FerroProperty; 13] = [
+        Chart::show_legend_property().as_property(),
+        Chart::legend_title_property().as_property(),
+        TemplatedControl::padding_property().as_property(),
+        TemplatedControl::foreground_property().as_property(),
+        TemplatedControl::background_property().as_property(),
+        TemplatedControl::font_family_property().as_property(),
+        TemplatedControl::font_size_property().as_property(),
+        TemplatedControl::font_style_property().as_property(),
+        TemplatedControl::font_weight_property().as_property(),
+        TemplatedControl::font_stretch_property().as_property(),
+        TemplatedControl::font_features_property().as_property(),
+        TemplatedControl::letter_spacing_property().as_property(),
+        Visual::flow_direction_property().as_property(),
+    ];
+    affecting.contains(&property)
 }
 
 impl LayoutableImpl for Chart {
     fn measure_override(this: &Self, available: Size) -> Size {
+        // Deviation (DEVIATIONS.md, WinUI Charts): the size of the published measure contract
+        // (the available size, or 160 x 96 when it is infinite) rather than the unpublished
+        // measure of WinUI, which is not available (winui-charts.md section 2.3).
         // Native templates can add adornments; retain their child lifecycle
         // while the chart keeps its published finite/infinite size contract.
         Self::parent_measure_override(this, available);

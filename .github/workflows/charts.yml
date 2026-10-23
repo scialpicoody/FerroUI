@@ -6,12 +6,9 @@ on:
       - 'src/FerroUI.Controls.Charts/**'
       - 'src/FerroUI/Cargo.toml'
       - 'src/FerroUI/lib.rs'
-      - 'src/Markup/FerroUI.Markup.Xaml/**'
       - 'samples/ChartsDemo/**'
       - 'docs/porting/data/winui-charts/**'
       - 'scripts/winui-charts/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/charts.yml'
   workflow_dispatch:
 
@@ -53,10 +50,9 @@ jobs:
         run: cargo test --locked -p ferroui-controls-charts --lib | tee charts-contract.log
       - name: Every published source test has an explicit, verified disposition
         run: python3 scripts/winui-charts/conformance.py check --require-complete --execution-log charts-contract.log
-      - name: Shared XAML runtime and optional facade integration
-        run: |
-          cargo test --locked -p ferroui-markup-xaml --lib
-          cargo check --locked -p ferroui --no-default-features --features charts
+      # The tests of the shared XAML runtime run in ci.yml with the rest of the workspace.
+      - name: Optional facade integration
+        run: cargo check --locked -p ferroui --no-default-features --features charts
       - name: Compiled markup and light, dark and live-data renders
         env:
           FERROUI_CHARTS_RENDER_OUTPUT: ${{ github.workspace }}/charts-render

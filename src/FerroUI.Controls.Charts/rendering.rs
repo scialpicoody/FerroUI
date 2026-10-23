@@ -288,11 +288,11 @@ impl AxisGroup {
                 }
             }
             self.ticks = axis
-                .ticks(minimum, maximum, target)
+                .labeled_ticks(minimum, maximum, target)
                 .into_iter()
-                .map(|value| Tick {
+                .map(|(value, text)| Tick {
                     position: date_position(value, minimum, maximum),
-                    text: axis.format_tick(value),
+                    text,
                 })
                 .collect();
             self.scale = Scale::Date(minimum, maximum);

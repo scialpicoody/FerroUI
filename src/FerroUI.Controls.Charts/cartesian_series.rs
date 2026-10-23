@@ -3,11 +3,13 @@ use crate::{
     LinearAxis, MarkerShape, Samples, StrokeDashStyle,
 };
 use ferroui_base::collections::FerroDictionary;
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::IBrush;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, DirectProperty,
     FerroObject, FerroObjectImpl, FerroProperty, Ref, StyledProperty,
 };
+use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -84,7 +86,13 @@ ferro_properties! { impl CartesianSeries {
     pub fn x_axis_property() -> DirectProperty<CartesianSeries, Option<Ref<Axis>>> {
         FerroProperty::register_direct::<CartesianSeries, _>(
             "XAxis", |this| this.x_axis(),
-            Some(|this, value| this.set_x_axis(value).unwrap_or_else(|error| panic!("{error}"))), None,
+            Some(|this, value| {
+                // Deviation (DEVIATIONS.md, WinUI Charts): upstream XAxis is a plain property; a
+                // rejected write through the property system keeps the old axis and is logged.
+                if let Err(error) = this.set_x_axis(value) {
+                    log_rejected_axis(this, "XAxis", &error);
+                }
+            }), None,
         )
     }
 
@@ -92,10 +100,24 @@ ferro_properties! { impl CartesianSeries {
     pub fn y_axis_property() -> DirectProperty<CartesianSeries, Option<Ref<Axis>>> {
         FerroProperty::register_direct::<CartesianSeries, _>(
             "YAxis", |this| this.y_axis(),
-            Some(|this, value| this.set_y_axis(value).unwrap_or_else(|error| panic!("{error}"))), None,
+            Some(|this, value| {
+                // Deviation (DEVIATIONS.md, WinUI Charts): upstream YAxis is a plain property; a
+                // rejected write through the property system keeps the old axis and is logged.
+                if let Err(error) = this.set_y_axis(value) {
+                    log_rejected_axis(this, "YAxis", &error);
+                }
+            }), None,
         )
     }
 } }
+
+/// A write of `XAxis` or `YAxis` through the property system (a binding, a style, an
+/// inspector) that the series rejects: the old axis stays and the reason is logged.
+fn log_rejected_axis(series: &CartesianSeries, property: &str, error: &ChartError) {
+    if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::PROPERTY) {
+        logger.log(Some(series as &dyn Any), &format!("{property} was not changed: {error}"));
+    }
+}
 
 impl CartesianSeries {
     /// Creates base data for a concrete series class.

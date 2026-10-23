@@ -16,7 +16,6 @@ use ferroui_base::Ref;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Control, Window};
 use std::cell::RefCell;
-use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
 
 fn scope() -> (TextTestScope, UnitTestApplicationScope) {
@@ -806,17 +805,15 @@ fn same_brush_instance_can_be_shared_by_series_and_overrides() {
 }
 
 #[test]
-fn raw_direct_axis_writes_validate_before_mutating() {
+fn raw_direct_axis_writes_are_rejected_without_mutating_or_panicking() {
     let _scope = scope();
     let series = LineSeries::new();
     let x: Ref<Axis> = CategoryAxis::new().upcast();
     let y: Ref<Axis> = LinearAxis::new().upcast();
     series.set_direct_value(CartesianSeries::x_axis_property(), Some(x.clone()));
     series.set_direct_value(CartesianSeries::y_axis_property(), Some(y.clone()));
-    assert!(catch_unwind(AssertUnwindSafe(|| {
-        series.set_direct_value(CartesianSeries::x_axis_property(), Some(y.clone()));
-    }))
-    .is_err());
+    // A rejected write through the property system keeps the old axis and does not panic.
+    series.set_direct_value(CartesianSeries::x_axis_property(), Some(y.clone()));
     assert_eq!(series.x_axis(), Some(x.clone()));
     assert_eq!(series.y_axis(), Some(y.clone()));
     let chart = Chart::new();
@@ -829,10 +826,7 @@ fn raw_direct_axis_writes_validate_before_mutating() {
         Err(ChartError::AxisNotInChart)
     );
     assert_eq!(series.y_axis(), Some(y.clone()));
-    assert!(catch_unwind(AssertUnwindSafe(|| {
-        series.set_direct_value(CartesianSeries::y_axis_property(), Some(outside));
-    }))
-    .is_err());
+    series.set_direct_value(CartesianSeries::y_axis_property(), Some(outside));
     assert_eq!(series.y_axis(), Some(y));
 }
 

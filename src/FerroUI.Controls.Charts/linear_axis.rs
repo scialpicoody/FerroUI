@@ -74,6 +74,9 @@ impl LinearAxis {
         Ok(())
     }
 
+    // Deviation (DEVIATIONS.md, WinUI Charts): upstream rejects an invalid bound with an
+    // exception; a write through the property system keeps the old value instead
+    // (winui-charts.md section 4, item 2). The typed setters return `ChartError`.
     fn coerce_minimum(sender: &FerroObject, value: Option<f64>) -> Option<f64> {
         if validate_range(
             value,

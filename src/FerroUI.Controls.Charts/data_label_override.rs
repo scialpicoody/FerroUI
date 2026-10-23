@@ -33,3 +33,11 @@ impl std::fmt::Debug for DataLabelOverride {
             .finish()
     }
 }
+
+// Descriptors are immutable reference objects. Identity equality preserves the
+// observable-map replacement semantics when their fields happen to be equal.
+impl PartialEq for DataLabelOverride {
+    fn eq(&self, other: &Self) -> bool {
+        std::ptr::eq(self, other)
+    }
+}

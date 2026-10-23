@@ -194,7 +194,11 @@ series replacement and capture charts weakly.
 
 Geometry/tick construction is separated from drawing. Retained scenes can be
 reused when data, axes, style and layout are unchanged; relevant changes
-invalidate them through framework notifications. Core paths do not assume an
+invalidate them through framework notifications. Of the chart's own properties,
+only those the scene is built from (`ShowLegend`, `LegendTitle`, `Padding`,
+`Foreground`, `Background`, the font properties, `LetterSpacing` and
+`FlowDirection`) invalidate it; pointer-over, focus, `DataContext`, `Tag` and the
+like do not, and a new size is detected when the scene is requested. Core paths do not assume an
 OS clock, filesystem or thread availability.
 
 ### 3.1 Explicit geometry decisions
@@ -227,6 +231,16 @@ decisions rather than inferred implementation parity:
   dates and then divide that band among series. Duplicate dates do not collapse
   the spacing calculation to zero. Baselines include zero when auto-ranging
   area/bar values; explicit bounds still control the visible range.
+- Date ticks are aligned to UTC calendar boundaries (midnights, Mondays, the
+  first of a month or a year), not to the offsets of the samples. With an empty
+  `LabelFormat` the labels use the format of the interval the ticks were made
+  with (`yyyy` for years, `MMM yyyy` for months, `yyyy-MM-dd` for days and
+  weeks), including the interval `Auto` resolves to. A daily range with fewer
+  than two midnights in it (the published interval types stop at a day) is
+  divided into whole minutes or hours (1, 5, 15 or 30 minutes, 1, 2, 3, 6 or
+  12 hours, the smallest step that gives at most the target count) and labelled
+  `HH:mm` (`MMM d HH:mm` across midnight); a range shorter than a minute has its
+  two bounds as ticks.
 - Monotone dense line paths use a min/max envelope per pixel column, preserving
   extrema and source traversal order. Nonmonotone paths and separate gap
   segments preserve their order. Dense area polygons reduce each monotone run
@@ -249,8 +263,12 @@ behavior, without pretending to specify Microsoft's unpublished algorithms.
    null-insertion and arbitrary invalid-enum cases unrepresentable. Null sample
    references and arbitrary `ItemsSource` values remain representable. Invalid
    bounds and axis ownership return `ChartError` from typed setters. Raw
-   dependency-property writes are validated or coerced before an invalid value
-   can replace valid state.
+   property-system writes (bindings, style setters, inspectors) never replace
+   valid state with an invalid value: an invalid `Minimum` or `Maximum` of a
+   `LinearAxis` or `DateTimeAxis` is coerced back to the old value without an
+   error, and a rejected `XAxis` or `YAxis` (an axis of the wrong kind, or one
+   that is not in the chart) keeps the old axis and is logged as a warning in
+   the area `Property`.
 3. **Enumeration.** FerroUI's snapshot collection conventions can differ from
    managed enumerator invalidation. The snapshot/borrow contract is an explicit
    adaptation, not the upstream mutation-during-enumeration exception.
@@ -261,7 +279,9 @@ behavior, without pretending to specify Microsoft's unpublished algorithms.
 5. **Control/property hierarchy.** Native `Chart` derives `TemplatedControl`
    because that class supplies the typography/background/foreground surface
    present on WinUI `Control`. `XAxis`/`YAxis` are validated native
-   `DirectProperty` values for invalidation; upstream exposes plain properties.
+   `DirectProperty` values for invalidation; upstream exposes plain properties,
+   which no binding, style or property editor can reach (see item 2 for what a
+   rejected write through those does).
    Override maps remain excluded from XAML, while the immutable descriptor
    types have read-only native metadata.
 6. **Notifications and theme scopes.** Native vector events translate source
@@ -280,6 +300,17 @@ behavior, without pretending to specify Microsoft's unpublished algorithms.
    view and optional desktop host. The upstream engineering menu, debug
    commands and secondary-window workflow are not a public control API and are
    not copied one for one.
+9. **Calendar ticks.** Date ticks are aligned to UTC calendar boundaries and a
+   daily range without two midnights in it gets minute or hour ticks
+   (section 3.1); the published API has no sub-day interval type.
+10. **Additions.** `CategoryAxis::sorted_indices_by`, `Chart::layout_snapshot`
+    and `Chart::scene_build_count` are native additions to the public API for
+    tests and diagnostics; they are not part of the WinUI contract.
+11. **Markup conversion.** `ferroui-markup-xaml` registers a conversion from a
+    run-time list (`RuntimeList`) to `ItemsSource` that shares the list's
+    storage, so that a list built in XAML can be the `ItemsSource` of a chart's
+    samples and stays live. The conversion applies to every `ItemsSource`
+    target, not only to the charts.
 
 Implementation presence, mapping completeness, test execution and visual
 verification are distinct. All 132 public test cases have a reviewed

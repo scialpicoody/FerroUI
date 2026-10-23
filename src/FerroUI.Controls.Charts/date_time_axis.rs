@@ -87,6 +87,9 @@ impl DateTimeAxis {
         self.set_label_format(value.unwrap_or_default());
     }
 
+    // Deviation (DEVIATIONS.md, WinUI Charts): upstream rejects an invalid bound with an
+    // exception; a write through the property system keeps the old value instead
+    // (winui-charts.md section 4, item 2). The typed setters return `ChartError`.
     fn coerce_minimum(
         sender: &FerroObject,
         value: Option<DateTimeOffset>,
@@ -147,38 +150,86 @@ impl DateTimeAxis {
         (minimum, maximum)
     }
 
+    /// The interval of the ticks between `minimum` and `maximum`: the `IntervalType`, or
+    /// for `Auto` the calendar unit that gives about `target_tick_count` ticks.
+    pub fn resolved_interval(
+        &self,
+        minimum: DateTimeOffset,
+        maximum: DateTimeOffset,
+        target_tick_count: usize,
+    ) -> DateTimeIntervalType {
+        let interval = self.interval_type();
+        if interval != DateTimeIntervalType::Auto {
+            return interval;
+        }
+        let days = span_in_days(minimum, maximum);
+        let span_per_tick = days / target_tick_count.clamp(2, 4096) as f64;
+        if span_per_tick <= 1.0 {
+            DateTimeIntervalType::Day
+        } else if span_per_tick <= 7.0 {
+            DateTimeIntervalType::Week
+        } else if span_per_tick <= 31.0 {
+            DateTimeIntervalType::Month
+        } else {
+            DateTimeIntervalType::Year
+        }
+    }
+
     /// Calendar-aligned ticks in UTC. Month/year ticks use calendar
     /// arithmetic, so leap days and variable-length months are preserved.
     /// Explicit daily/weekly intervals may be sampled for very large ranges;
-    /// no call produces more than 4096 ticks.
+    /// no call produces more than 4096 ticks. A daily range with fewer than two
+    /// midnights in it is divided into whole minutes or hours instead.
     pub fn ticks(
         &self,
         minimum: DateTimeOffset,
         maximum: DateTimeOffset,
         target_tick_count: usize,
     ) -> Vec<DateTimeOffset> {
+        self.tick_plan(minimum, maximum, target_tick_count).0
+    }
+
+    /// The ticks with their labels, in the format `LabelFormat` names or, when it is empty,
+    /// the default format of the interval the ticks were actually made with.
+    pub(crate) fn labeled_ticks(
+        &self,
+        minimum: DateTimeOffset,
+        maximum: DateTimeOffset,
+        target_tick_count: usize,
+    ) -> Vec<(DateTimeOffset, String)> {
+        let (ticks, unit) = self.tick_plan(minimum, maximum, target_tick_count);
+        let default = match unit {
+            TickUnit::Calendar(interval) => default_format(interval),
+            TickUnit::SubDay => {
+                let first = ticks.first().map(|tick| tick.utc_date_time().date());
+                if ticks.iter().all(|tick| Some(tick.utc_date_time().date()) == first) {
+                    "HH:mm"
+                } else {
+                    "MMM d HH:mm"
+                }
+            }
+        };
+        ticks
+            .into_iter()
+            .map(|tick| (tick, self.format_with_default(tick, default)))
+            .collect()
+    }
+
+    fn tick_plan(
+        &self,
+        minimum: DateTimeOffset,
+        maximum: DateTimeOffset,
+        target_tick_count: usize,
+    ) -> (Vec<DateTimeOffset>, TickUnit) {
         if minimum >= maximum {
-            return Vec::new();
+            return (Vec::new(), TickUnit::Calendar(DateTimeIntervalType::Day));
         }
         let min = minimum.utc_date_time();
         let max = maximum.utc_date_time();
-        let days = (max.ticks() - min.ticks()) as f64 / TimeSpan::TICKS_PER_DAY as f64;
+        let days = span_in_days(minimum, maximum);
         let target = target_tick_count.clamp(2, 4096) as f64;
         let automatic = self.interval_type() == DateTimeIntervalType::Auto;
-        let interval = if automatic {
-            let span_per_tick = days / target;
-            if span_per_tick <= 1.0 {
-                DateTimeIntervalType::Day
-            } else if span_per_tick <= 7.0 {
-                DateTimeIntervalType::Week
-            } else if span_per_tick <= 31.0 {
-                DateTimeIntervalType::Month
-            } else {
-                DateTimeIntervalType::Year
-            }
-        } else {
-            self.interval_type()
-        };
+        let interval = self.resolved_interval(minimum, maximum, target_tick_count);
         let units = match interval {
             DateTimeIntervalType::Auto | DateTimeIntervalType::Day => days,
             DateTimeIntervalType::Week => days / 7.0,
@@ -221,20 +272,26 @@ impl DateTimeAxis {
                 _ => date.try_add_days(step as f64),
             };
         }
-        ticks
+        // Deviation (DEVIATIONS.md, WinUI Charts): the published interval types stop at a
+        // day, so a daily range without two midnights in it is divided into whole minutes
+        // or hours rather than left without ticks.
+        if ticks.len() < 2 && matches!(interval, DateTimeIntervalType::Day) {
+            return (sub_day_ticks(min, max, target as i64), TickUnit::SubDay);
+        }
+        (ticks, TickUnit::Calendar(interval))
     }
 
     /// Formats an axis label using the framework's culture-aware date
     /// formatter. The public WinRT templates used by the source samples are
     /// translated to their framework format equivalents.
     pub fn format_tick(&self, value: DateTimeOffset) -> String {
+        self.format_with_default(value, default_format(self.interval_type()))
+    }
+
+    fn format_with_default(&self, value: DateTimeOffset, default: &str) -> String {
         let requested = self.label_format();
         let format = match requested.as_str() {
-            "" => match self.interval_type() {
-                DateTimeIntervalType::Year => "yyyy",
-                DateTimeIntervalType::Month => "MMM yyyy",
-                _ => "yyyy-MM-dd",
-            },
+            "" => default,
             "shortdate" => "d",
             "longdate" => "D",
             "month year" => "MMMM yyyy",
@@ -253,6 +310,64 @@ impl DateTimeAxis {
                 )
             })
     }
+}
+
+/// The unit the ticks of a range were made with.
+#[derive(Clone, Copy)]
+enum TickUnit {
+    Calendar(DateTimeIntervalType),
+    SubDay,
+}
+
+/// The default label format of the ticks of a calendar interval.
+fn default_format(interval: DateTimeIntervalType) -> &'static str {
+    match interval {
+        DateTimeIntervalType::Year => "yyyy",
+        DateTimeIntervalType::Month => "MMM yyyy",
+        _ => "yyyy-MM-dd",
+    }
+}
+
+fn span_in_days(minimum: DateTimeOffset, maximum: DateTimeOffset) -> f64 {
+    (maximum.utc_date_time().ticks() - minimum.utc_date_time().ticks()) as f64
+        / TimeSpan::TICKS_PER_DAY as f64
+}
+
+/// Ticks at whole minutes or hours (the smallest step of 1, 5, 15 or 30 minutes or 1, 2, 3,
+/// 6 or 12 hours that gives at most `target` ticks), or the two bounds when the range is
+/// shorter than a minute.
+fn sub_day_ticks(min: DateTime, max: DateTime, target: i64) -> Vec<DateTimeOffset> {
+    const MINUTE: i64 = TimeSpan::TICKS_PER_MINUTE;
+    const HOUR: i64 = TimeSpan::TICKS_PER_HOUR;
+    let (low, high) = (min.ticks(), max.ticks());
+    let span = high - low;
+    let step = [
+        MINUTE,
+        5 * MINUTE,
+        15 * MINUTE,
+        30 * MINUTE,
+        HOUR,
+        2 * HOUR,
+        3 * HOUR,
+        6 * HOUR,
+        12 * HOUR,
+    ]
+    .into_iter()
+    .find(|step| span / step <= target)
+    .unwrap_or(12 * HOUR);
+    let mut ticks = Vec::new();
+    let mut tick = low.div_euclid(step) * step;
+    if tick < low {
+        tick += step;
+    }
+    while tick <= high {
+        ticks.push(DateTimeOffset::from_ticks(tick, TimeSpan::ZERO));
+        tick += step;
+    }
+    if ticks.len() < 2 {
+        ticks = vec![from_utc(min), from_utc(max)];
+    }
+    ticks
 }
 
 fn from_utc(value: DateTime) -> DateTimeOffset {

@@ -1007,6 +1007,27 @@ fn chart_keeps_working_through_data_series_legend_and_theme_changes() {
 }
 
 #[test]
+fn scene_cache_survives_changes_that_do_not_affect_the_output() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = populated_chart();
+    let size = Size::new(400.0, 300.0);
+    let first = chart.layout_snapshot(size);
+    let builds = chart.scene_build_count();
+    chart.set_tag(Some(Rc::new(42_i32) as ferroui_base::BoxedValue));
+    chart.set_data_context(Some(Rc::new("context".to_owned()) as ferroui_base::BoxedValue));
+    chart.set_name(Some("Renamed".to_owned()));
+    chart.set_is_enabled(false);
+    assert_eq!(first, chart.layout_snapshot(size));
+    assert_eq!(builds, chart.scene_build_count());
+    chart.set_show_legend(true);
+    chart.layout_snapshot(size);
+    assert_eq!(builds + 1, chart.scene_build_count());
+    chart.set_font_size(chart.font_size() + 4.0);
+    chart.layout_snapshot(size);
+    assert_eq!(builds + 2, chart.scene_build_count());
+}
+
+#[test]
 fn scene_cache_rebuilds_only_after_size_data_axis_or_presentation_changes() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let axis = LinearAxis::new();
