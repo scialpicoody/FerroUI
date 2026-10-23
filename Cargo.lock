@@ -1724,6 +1724,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-xaml-behaviors"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-xaml-behaviors-animations",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactions-draganddrop",
+ "ferroui-xaml-interactions-draggable",
+ "ferroui-xaml-interactions-events",
+ "ferroui-xaml-interactions-reactiveui",
+ "ferroui-xaml-interactions-responsive",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
 name = "ferroui-xaml-behaviors-animations"
 version = "0.4.0"
 dependencies = [
