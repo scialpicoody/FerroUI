@@ -4,14 +4,19 @@
 //! The reference runs its tests on the headless platform with the Fluent theme, and the platform
 //! ticks the global clock. Here the tests run in the unit test application of the framework with
 //! the services of a styled window, the Fluent theme and a manual global clock
-//! ([`MockGlobalClock`]), which a test pulses where the platform of the reference ticks.
+//! ([`MockGlobalClock`]), which a test pulses where the platform of the reference ticks. The tests
+//! that read the composition visuals of a shown window start a [`CompositionApp`] (a compositing
+//! renderer over the test compositor of the framework, driven one frame per
+//! [`CompositionApp::run_jobs`]), as the tests of the animations crate do.
 
 use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
 use ferroui_base::input::ICommand;
 use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{BoxedValue, FerroObject, ObjectType, Ref, Upcast};
-use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
+use ferroui_controls::testing::{
+    CompositorTestServices, MockWindowingPlatform, TestServices, UnitTestApplication, UnitTestApplicationScope,
+};
 use ferroui_controls::{Control, Window};
 use ferroui_xaml_interactivity::Interaction;
 use std::cell::Cell;
@@ -70,6 +75,42 @@ pub(crate) fn start_app() -> App {
     let clock = Rc::new(MockGlobalClock { subject: LightweightSubject::new(), play_state: Cell::new(PlayState::Run) });
     let scope = UnitTestApplication::start(fluent_services(clock.clone()));
     App { clock, _scope: scope }
+}
+
+/// A test application whose windows render through a compositing renderer, so that their visuals
+/// have composition visuals.
+pub(crate) struct CompositionApp {
+    #[allow(dead_code)]
+    pub(crate) clock: Rc<MockGlobalClock>,
+    services: CompositorTestServices,
+}
+
+impl CompositionApp {
+    /// Starts the application (the headless test attribute of the reference).
+    pub(crate) fn start() -> CompositionApp {
+        Control::reset_loaded_queue_for_unit_tests();
+        crate::register_types();
+        let clock =
+            Rc::new(MockGlobalClock { subject: LightweightSubject::new(), play_state: Cell::new(PlayState::Run) });
+        let services = CompositorTestServices::start(fluent_services(clock.clone()));
+        CompositionApp { clock, services }
+    }
+
+    /// `new Window { Content = content }`, rendered by the compositor of the test (not shown yet).
+    pub(crate) fn window_with<T: ObjectType + Upcast<Control>>(&self, content: &Ref<T>) -> Ref<Window> {
+        let window_impl = MockWindowingPlatform::create_window_mock();
+        self.services.setup(&window_impl);
+        let window = Window::with_impl(window_impl);
+        let content: Ref<Control> = content.clone().upcast();
+        window.set_content(Some(Control::boxed(content)));
+        window
+    }
+
+    /// `Dispatcher.UIThread.RunJobs()`: runs the dispatcher jobs, renders one frame and runs the
+    /// jobs the frame posted.
+    pub(crate) fn run_jobs(&self) {
+        self.services.run_jobs();
+    }
 }
 
 /// `Dispatcher.UIThread.RunJobs()`.
