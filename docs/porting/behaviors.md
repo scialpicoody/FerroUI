@@ -78,7 +78,7 @@ Each stage ends with its ported tests passing on macOS and in CI.
 2. Interactivity, with its 124 tests (the lifecycle tests of `InteractionTest` verbatim).
 3. Interactions, Events, Responsive, Draggable, DragAndDrop and ReactiveUI, with the 149 tests of Interactions.
 4. Interactions.Custom, by folder.
-5. The facade crate, the gallery sample, the tracking pages (`docs/porting/tracking/behaviors/`), the README
+5. The facade crate, the gallery sample, the tracking pages ([`docs/porting/tracking/behaviors/`](tracking/behaviors/TRACKING.md)), the README
    table and the CHANGELOG.
 
 ## 5. Progress
@@ -89,4 +89,13 @@ Each stage ends with its ported tests passing on macOS and in CI.
 | 2 | Done: `ferroui-xaml-interactivity` (121 tests) |
 | 3 | Done: `ferroui-xaml-interactions` (63), `-events` (55), `-responsive` (23), `-draggable` (22), `-draganddrop` (46), `-reactiveui` (44) |
 | 4 | Done: `ferroui-xaml-interactions-custom` (59 tests), in four parts (`part_a.rs` to `part_d.rs`) |
-| 5 | In progress: the facade crate `ferroui-xaml-behaviors` is done; the gallery, the tracking pages, the README and the CHANGELOG are under way |
+| 5 | In progress: the facade crate `ferroui-xaml-behaviors` is done; the tracking pages, the README and the CHANGELOG are done; the gallery is under way |
+
+## 6. Tracking
+
+[Generated tracking](tracking/behaviors/TRACKING.md) maps each project of the reference to its crate and counts
+the files, the public types and members, and the tests that are ported, missing and waived, with one page per
+project. It is the reference `behaviors` of `scripts/port-status/references.toml`; its data (the extraction, the
+path overrides, the waivers and aliases, the test aliases and the test reports) is in `docs/porting/data/behaviors/`.
+Regenerate it with `python3 scripts/port-status/test_gaps.py --reference behaviors --all`, then
+`scripts/port-status/run.sh --reference behaviors` (`scripts/port-status/README.md`).
