@@ -31,6 +31,7 @@
 //! | `controls_charts` | `ferroui-controls-charts` | `charts` | no |
 //! | `controls_treedatagrid`, `treedatagrid_core` | `ferroui-controls-treedatagrid`, `ferroui-treedatagrid-core` | `treedatagrid` | no |
 //! | `dialogs` | `ferroui-dialogs` | `dialogs` | no |
+//! | `diagnostics` | `ferroui-diagnostics` (the developer tools) | `diagnostics` | no |
 //! | `system`, `reactive` | `ferroui-system`, `ferroui-reactive` (Rx) | `reactive` | no |
 //! | `dynamic_data` | `ferroui-dynamic-data` (DynamicData) | `dynamic-data` | no |
 //! | `splat`, `reactiveui`, `reactiveui_controls` | `ferroui-splat`, `ferroui-reactiveui`, `ferroui-reactiveui-controls` (ReactiveUI and its integration) | `reactiveui` | no |
@@ -162,6 +163,8 @@ pub use ferroui_controls_treedatagrid as controls_treedatagrid;
 pub use ferroui_treedatagrid_core as treedatagrid_core;
 #[cfg(feature = "dialogs")]
 pub use ferroui_dialogs as dialogs;
+#[cfg(feature = "diagnostics")]
+pub use ferroui_diagnostics as diagnostics;
 
 #[cfg(feature = "reactive")]
 pub use ferroui_system as system;
@@ -229,3 +232,7 @@ pub mod prelude {
     #[cfg(feature = "winui-theme")]
     pub use ferroui_themes_winui::WinUITheme;
 }
+
+/// Chrome DevTools Protocol inspection and automation.
+#[cfg(feature = "devtools")]
+pub use ferroui_devtools as devtools;
