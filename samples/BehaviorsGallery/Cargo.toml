@@ -67,3 +67,6 @@ sample-build = { path = "../SampleBuild" }
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 sample-testing = { path = "../SampleTesting" }
+# The styles document of the drag and drop crate as an asset too: the run-time loader of the tests
+# includes it (`pages/EditableDragTreeViewView.xaml`).
+ferroui-xaml-interactions-draganddrop = { workspace = true, features = ["document-assets"] }
