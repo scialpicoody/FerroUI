@@ -33,6 +33,10 @@ ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-xaml-interactivity = { workspace = true }
 ferroui-xaml-behaviors-animations = { workspace = true }
+# `ObservableCollection` items sources (ItemsControl, Collections).
+ferroui-system = { workspace = true }
+# The pattern of `RegexValidationRule` (Validation).
+regex = "1"
 
 [build-dependencies]
 ferroui-build-scan = { workspace = true }

@@ -1753,10 +1753,12 @@ dependencies = [
  "ferroui-controls",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-system",
  "ferroui-themes-fluent",
  "ferroui-xaml-behaviors-animations",
  "ferroui-xaml-interactions",
  "ferroui-xaml-interactivity",
+ "regex",
 ]
 
 [[package]]
