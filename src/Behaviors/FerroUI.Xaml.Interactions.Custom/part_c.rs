@@ -4,7 +4,9 @@
 //! - `SplitView/` ([`split_view`](self::split_view)): the split view;
 //! - `Notifications/` ([`notifications`](self::notifications)): the notifications of a top level;
 //! - `RenderTarget/` ([`render_target`](self::render_target)): drawing into a render target bitmap, with its contracts;
-//! - `WriteableBitmap/` ([`writeable_bitmap`](self::writeable_bitmap)): rendering into a writeable bitmap, with its contract.
+//! - `WriteableBitmap/` ([`writeable_bitmap`](self::writeable_bitmap)): rendering into a writeable bitmap, with its contract;
+//! - `Window/` ([`window`](self::window)): the window of the associated control;
+//! - `Button/` ([`button`](self::button)): buttons.
 //!
 //! The part owns its classes ([`TYPES`]), their public Rust paths and its markup types
 //! ([`register`]); `lib.rs` re-exports everything public of it.
@@ -19,19 +21,25 @@ use std::rc::Rc;
 
 #[path = "animations/mod.rs"]
 mod animations;
+#[path = "button/mod.rs"]
+mod button;
 #[path = "notifications/mod.rs"]
 mod notifications;
 #[path = "render_target/mod.rs"]
 mod render_target;
 #[path = "split_view/mod.rs"]
 mod split_view;
+#[path = "window/mod.rs"]
+mod window;
 #[path = "writeable_bitmap/mod.rs"]
 mod writeable_bitmap;
 
 pub use self::animations::*;
+pub use self::button::*;
 pub use self::notifications::*;
 pub use self::render_target::*;
 pub use self::split_view::*;
+pub use self::window::*;
 pub use self::writeable_bitmap::*;
 
 macro_rules! types {
@@ -78,6 +86,20 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::WriteableBitmapRenderBehavior,
     crate::WriteableBitmapTimerTrigger,
     crate::WriteableBitmapTrigger,
+    // Window/
+    crate::CenterWindowBehavior,
+    crate::CloseWindowAction,
+    crate::ShowWindowAction,
+    crate::WindowAction,
+    crate::WindowDragMoveBehavior,
+    crate::WindowStateTrigger,
+    // Button/
+    crate::ButtonClickEventTriggerBehavior,
+    crate::ButtonExecuteCommandOnKeyDownBehavior,
+    crate::ButtonHideFlyoutBehavior,
+    crate::ButtonHideFlyoutOnClickBehavior,
+    crate::ButtonHidePopupOnClickBehavior,
+    crate::InvokeButtonClickAction,
 ];
 
 /// The types of this part that are not classes (lists, enumerations and contracts), declared for
@@ -91,6 +113,8 @@ const MARKUP_TYPES: &[&MarkupType] = &[
     <dyn crate::IRenderTargetBitmapSimpleRenderer as MarkupTyped>::MARKUP,
     // WriteableBitmap/
     <dyn crate::IWriteableBitmapRenderer as MarkupTyped>::MARKUP,
+    // Window/
+    <crate::WindowActionType as MarkupTyped>::MARKUP,
 ];
 
 /// The public Rust paths of the classes of this part, by the shortest path another crate names
@@ -134,10 +158,26 @@ mod rust_paths {
             crate::WriteableBitmapRenderBehavior,
             crate::WriteableBitmapTimerTrigger,
             crate::WriteableBitmapTrigger,
+            // Window/
+            crate::CenterWindowBehavior,
+            crate::CloseWindowAction,
+            crate::ShowWindowAction,
+            crate::WindowAction,
+            crate::WindowDragMoveBehavior,
+            crate::WindowStateTrigger,
+            // Button/
+            crate::ButtonClickEventTriggerBehavior,
+            crate::ButtonExecuteCommandOnKeyDownBehavior,
+            crate::ButtonHideFlyoutBehavior,
+            crate::ButtonHideFlyoutOnClickBehavior,
+            crate::ButtonHidePopupOnClickBehavior,
+            crate::InvokeButtonClickAction,
         ],
         types: [
             // SplitView/
             crate::SplitViewStateSetters,
+            // Window/
+            crate::WindowActionType,
         ],
         contracts: [
             // RenderTarget/
@@ -183,6 +223,11 @@ fn register_value_types() {
     // WriteableBitmap/
     ValueTypes::register_nullable::<crate::WriteableBitmapRef>();
     ValueTypes::register_nullable::<Rc<dyn crate::IWriteableBitmapRenderer>>();
+    // Window/
+    ValueTypes::register_nullable::<crate::WindowActionType>();
+    ValueTypes::register_element_ref::<ferroui_controls::Window>();
+    // Button/
+    ValueTypes::register_element_ref::<ferroui_controls::Button>();
 }
 
 /// The sender of an action as an object of class `T` (`sender as T` of the reference).
