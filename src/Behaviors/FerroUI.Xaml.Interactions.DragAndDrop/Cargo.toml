@@ -50,6 +50,7 @@ ferroui-xaml-interactivity = { workspace = true }
 ferroui-build = { workspace = true }
 
 [dev-dependencies]
+ferroui-themes-fluent = { workspace = true }
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The styles document is loaded with the run-time loader in a test.

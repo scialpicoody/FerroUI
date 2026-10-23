@@ -37,6 +37,15 @@ pub(crate) fn start_app() -> UnitTestApplicationScope {
     UnitTestApplication::start(TestServices::styled_window())
 }
 
+/// [`start_app`] with the Fluent theme, the theme of the reference's test application.
+pub(crate) fn start_app_with_fluent_theme() -> UnitTestApplicationScope {
+    Control::reset_loaded_queue_for_unit_tests();
+    crate::register_types();
+    UnitTestApplication::start(
+        fluent_services(),
+    )
+}
+
 /// `Dispatcher.UIThread.RunJobs()`.
 pub(crate) fn run_jobs() {
     Dispatcher::ui_thread().run_jobs(None);
@@ -439,4 +448,43 @@ pub(crate) fn files_drag_data(names: &[&'static str]) -> Rc<dyn IDataTransfer> {
         data.add(DataTransferItem::create_file(Some(Rc::new(TestFile { name }))));
     }
     data
+}
+
+/// The global clock of the themed application: the transitions of the Fluent control themes need
+/// one. It never pulses.
+struct MockGlobalClock {
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    play_state: Cell<ferroui_base::animation::PlayState>,
+}
+
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
+    fn subscribe(
+        &self,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+    ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
+        self.subject.subscribe(observer)
+    }
+}
+
+impl ferroui_base::animation::IClock for MockGlobalClock {
+    fn play_state(&self) -> ferroui_base::animation::PlayState {
+        self.play_state.get()
+    }
+
+    fn set_play_state(&self, value: ferroui_base::animation::PlayState) {
+        self.play_state.set(value)
+    }
+}
+
+impl ferroui_base::animation::IGlobalClock for MockGlobalClock {}
+
+/// The services of the reference's test application: the Fluent theme and a global clock.
+fn fluent_services() -> TestServices {
+    let clock = Rc::new(MockGlobalClock {
+        subject: ferroui_base::reactive::LightweightSubject::new(),
+        play_state: Cell::new(ferroui_base::animation::PlayState::Run),
+    });
+    TestServices::styled_window()
+        .with_global_clock(clock)
+        .with_theme(|| ferroui_themes_fluent::FluentTheme::new().as_style())
 }

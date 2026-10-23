@@ -7,7 +7,7 @@
 //! raises the pointer events on the element directly (as the mouse helper of the controls tests
 //! of the framework does).
 
-use ferroui_base::controls::NameScopeRef;
+use ferroui_base::controls::NameScope;
 use ferroui_base::input::{
     IPointer, KeyModifiers, MouseButton, Pointer, PointerEventArgs, PointerPointProperties, PointerPressedEventArgs,
     PointerReleasedEventArgs, PointerType, PointerUpdateKind, RawInputModifiers,
@@ -28,7 +28,11 @@ pub(crate) fn start_app() -> UnitTestApplicationScope {
     // The queue of the `Loaded` events belongs to the thread; start from an empty one.
     Control::reset_loaded_queue_for_unit_tests();
     crate::register_types();
-    UnitTestApplication::start(TestServices::styled_window())
+    // The application of the reference's tests has the Fluent theme: items controls need their
+    // templates to realize containers.
+    UnitTestApplication::start(
+        fluent_services(),
+    )
 }
 
 /// `Dispatcher.UIThread.RunJobs()`.
@@ -72,7 +76,7 @@ pub(crate) fn load_window(name: &str, xaml: &str) -> Ref<Window> {
 /// The element named `name` in the name scope of `root` (the field `x:Name` generates in the
 /// reference).
 pub(crate) fn find<T: ObjectType>(root: &Window, name: &str) -> Ref<T> {
-    NameScopeRef::get_name_scope(root)
+    NameScope::get_name_scope(root)
         .and_then(|scope| scope.find(name))
         .and_then(|object| object.cast::<T>())
         .unwrap_or_else(|| panic!("the element {name}"))
@@ -177,4 +181,43 @@ impl Mouse {
             self.pressed_button.get(),
         ));
     }
+}
+
+/// The global clock of the themed application: the transitions of the Fluent control themes need
+/// one. It never pulses.
+struct MockGlobalClock {
+    subject: ferroui_base::reactive::LightweightSubject<ferroui_base::animation::TimeSpan>,
+    play_state: Cell<ferroui_base::animation::PlayState>,
+}
+
+impl ferroui_base::reactive::IObservable<ferroui_base::animation::TimeSpan> for MockGlobalClock {
+    fn subscribe(
+        &self,
+        observer: Rc<dyn ferroui_base::reactive::IObserver<ferroui_base::animation::TimeSpan>>,
+    ) -> Rc<dyn ferroui_base::reactive::IDisposable> {
+        self.subject.subscribe(observer)
+    }
+}
+
+impl ferroui_base::animation::IClock for MockGlobalClock {
+    fn play_state(&self) -> ferroui_base::animation::PlayState {
+        self.play_state.get()
+    }
+
+    fn set_play_state(&self, value: ferroui_base::animation::PlayState) {
+        self.play_state.set(value)
+    }
+}
+
+impl ferroui_base::animation::IGlobalClock for MockGlobalClock {}
+
+/// The services of the reference's test application: the Fluent theme and a global clock.
+fn fluent_services() -> TestServices {
+    let clock = Rc::new(MockGlobalClock {
+        subject: ferroui_base::reactive::LightweightSubject::new(),
+        play_state: Cell::new(ferroui_base::animation::PlayState::Run),
+    });
+    TestServices::styled_window()
+        .with_global_clock(clock)
+        .with_theme(|| ferroui_themes_fluent::FluentTheme::new().as_style())
 }

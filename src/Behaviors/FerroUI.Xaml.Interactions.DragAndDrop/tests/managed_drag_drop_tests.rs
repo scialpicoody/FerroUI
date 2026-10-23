@@ -6,7 +6,6 @@ use crate::drag_drop_context_store::DragDropContextStore;
 use crate::tests::support::{add_behavior, border, is_text, run_jobs, show_window, start_app, text, Mouse, TestDropHandler};
 use crate::{DragPreviewService, ManagedContextDragBehavior, ManagedContextDropBehavior, ManagedDragDropService};
 use ferroui_base::input::DragDropEffects;
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::{BoxedValue, Point, Ref};
 use ferroui_controls::{StackPanel, TopLevel, Window};
 use std::cell::RefCell;

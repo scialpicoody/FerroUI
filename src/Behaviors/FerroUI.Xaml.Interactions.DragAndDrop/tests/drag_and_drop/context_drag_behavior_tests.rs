@@ -8,7 +8,7 @@
 //! (`support.rs`).
 
 use super::test_context_drag_behavior::TestContextDragBehavior;
-use crate::tests::support::{add_behavior, border, key_down, object, run_jobs, show_window, start_app, Mouse};
+use crate::tests::support::{add_behavior, border, capture_rendered_frame, key_down, object, run_jobs, show_window, start_app, start_app_with_fluent_theme, Mouse};
 use ferroui_base::input::{InputElement, Key, PointerPressedEventArgs};
 use ferroui_base::interactivity::{Interactive, RoutingStrategies};
 use ferroui_base::{Point, Ref};
@@ -93,14 +93,17 @@ fn escape_cancels_drag() {
 
 #[test]
 fn virtualized_list_box_item_replacement_transfers_context_drag_lifecycle() {
-    let _app = start_app();
+    // The application of the reference's tests has the Fluent theme: the list box needs its
+    // template to realize containers.
+    let _app = start_app_with_fluent_theme();
     let list_box = ListBox::new();
     list_box.set_items_source(Some(ItemsSource::from_values(0..100)));
-    let _window = show_window(list_box.clone(), 400.0, 210.0);
+    let window = show_window(list_box.clone(), 400.0, 210.0);
     run_jobs();
 
     list_box.scroll_into_view(50);
     run_jobs();
+    capture_rendered_frame(&window);
 
     let container = list_box
         .container_from_index(50)

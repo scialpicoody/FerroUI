@@ -49,6 +49,7 @@ ferroui-xaml-interactivity = { workspace = true }
 ferroui-build = { workspace = true }
 
 [dev-dependencies]
+ferroui-themes-fluent = { workspace = true }
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The windows of the ported tests are loaded with the run-time loader, as the template tests of the
