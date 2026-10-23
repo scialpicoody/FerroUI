@@ -43,7 +43,7 @@ From the reports of `scripts/port-status/test_gaps.py --reference behaviors --al
 | Upstream test project | Tests | Ported | Stated not ported: waived | Stated not ported: deferred | Waived by file | Missing | Report |
 |---|---:|---:|---:|---:|---:|---:|---|
 | `tests/Xaml.Behaviors.Interactivity.UnitTests` | 124 | 121 | 3 | 0 | 0 | 0 | `test-gaps-interactivity.txt` |
-| `tests/Xaml.Behaviors.Interactions.UnitTests` | 149 | 144 | 5 | 0 | 0 | 0 | `test-gaps-interactions.txt` |
+| `tests/Xaml.Behaviors.Interactions.UnitTests` | 149 | 149 | 0 | 0 | 0 | 0 | `test-gaps-interactions.txt` |
 | `tests/Xaml.Behaviors.Animations.UnitTests` | 41 | 40 | 1 | 0 | 0 | 0 | `test-gaps-animations.txt` |
 
 ## Waived
