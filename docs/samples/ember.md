@@ -248,6 +248,16 @@ cargo run --locked -p ember-desktop
 cargo run --locked -p ember-desktop -- 'https://news.ycombinator.com/item?id=8863'
 ```
 
+On ARM64 Windows (`aarch64-pc-windows-msvc`) LLVM's `clang` must be on `PATH`:
+the native HTTP client uses rustls, whose `ring` dependency compiles C and
+assembly with clang on that target (x64 Windows, macOS and Linux need nothing
+extra). Install it with the Visual Studio component "C++ Clang Compiler for
+Windows" or from the LLVM releases, and open a shell where `clang --version` works.
+
+The window asks for 1440 by 940; when that does not fit the work area of the
+screen (a small or highly scaled display), it is shrunk to the work area and moved
+onto it when it opens.
+
 The default native database is `Ember/reader.sqlite3` under `%LOCALAPPDATA%` on
 Windows, `~/Library/Application Support` on macOS, and `$XDG_DATA_HOME` or
 `~/.local/share` on other desktop Unix systems. Set `EMBER_DATABASE` to use a

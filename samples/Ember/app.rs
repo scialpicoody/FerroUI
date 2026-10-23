@@ -45,6 +45,15 @@ impl ApplicationImpl for App {
             window.set_min_width(340.0);
             window.set_min_height(480.0);
             window.set_content(Some(Control::boxed(&ReaderView::new())));
+            // The size asked for can be larger than the work area of a small or highly
+            // scaled screen (1440 x 940 is 2880 x 1880 pixels at 200 %): the window is then
+            // fitted to the work area once it has been placed.
+            let weak = window.downgrade();
+            let _ = window.opened(move || {
+                if let Some(window) = weak.upgrade() {
+                    fit_to_work_area(&window);
+                }
+            });
             desktop.set_main_window(Some(window));
         } else if let Some(activity) = lifetime
             .as_ref()
@@ -75,4 +84,35 @@ impl App {
             .and_then(|app| app.cast::<App>())
             .and_then(|app| app.theme.borrow().clone())
     }
+}
+
+/// Shrinks the window to the work area of its screen and moves it there when any of it lies
+/// outside; a window that fits stays as it is.
+fn fit_to_work_area(window: &Ref<Window>) {
+    let Some(screen) = window.screens().screen_from_window(window) else {
+        return;
+    };
+    let area = screen.working_area();
+    let scaling = window.desktop_scaling();
+    let client = window.client_size();
+    let frame = window.frame_size().unwrap_or(client);
+    let position = window.position();
+    let frame_width = (frame.width * scaling).ceil() as i32;
+    let frame_height = (frame.height * scaling).ceil() as i32;
+    if position.x >= area.x
+        && position.y >= area.y
+        && position.x + frame_width <= area.right()
+        && position.y + frame_height <= area.bottom()
+    {
+        return;
+    }
+    let width = client
+        .width
+        .min(f64::from(area.width) / scaling - (frame.width - client.width));
+    let height = client
+        .height
+        .min(f64::from(area.height) / scaling - (frame.height - client.height));
+    window.set_width(width.floor().max(window.min_width()));
+    window.set_height(height.floor().max(window.min_height()));
+    window.set_position(area.position());
 }
