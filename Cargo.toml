@@ -133,6 +133,7 @@ members = [
     "samples/ControlGallery.WinUI",
     "samples/WinUIEmbedSample",
     "samples/WinUIThemeGallery",
+    "samples/BehaviorsGallery",
     "samples/SafeAreaDemo",
     "samples/SafeAreaDemo.Desktop",
     "samples/SafeAreaDemo.Android",

@@ -1,0 +1,73 @@
+[package]
+name = "behaviors-gallery"
+description = "The gallery of the behaviors of FerroUI: one page per behavior, action and trigger of the Xaml.Behaviors port, in a searchable list of pages"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+# The build script compiles the markup documents of the gallery, embeds its assets and generates
+# its per-document tests (`sample-build`).
+build = "build.rs"
+
+# Unit tests live next to the code (`tests/` modules of the library), not as integration test
+# targets.
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+# The gallery: the application, its window, the shared view models, controls and behaviors, and
+# the pages (`pages/`).
+[lib]
+path = "lib.rs"
+
+# The desktop entry point: `Program.cs` of the reference sample, with the smoke run
+# (`FERROUI_SMOKE_*`).
+[[bin]]
+name = "behaviors-gallery"
+path = "program.rs"
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+# `FluentTheme` of `App.xaml`.
+ferroui-themes-fluent = { workspace = true }
+# `WithInterFont()` of the reference.
+ferroui-fonts-inter = { workspace = true }
+# The entry point.
+ferroui-desktop = { workspace = true }
+# The behaviors (the projects of the reference library the sample references; the scripting and
+# the DataGrid drag and drop projects have no port).
+ferroui-xaml-interactivity = { workspace = true }
+ferroui-xaml-interactions = { workspace = true }
+ferroui-xaml-interactions-custom = { workspace = true }
+ferroui-xaml-interactions-draganddrop = { workspace = true }
+ferroui-xaml-interactions-draggable = { workspace = true }
+ferroui-xaml-interactions-events = { workspace = true }
+ferroui-xaml-interactions-responsive = { workspace = true }
+# Not yet: the type model of `ferroui-xaml-interactions-reactiveui` has a cast registration the
+# scanner cannot read (a generic `register_cast` in `interaction_trigger_behavior.rs`), which makes
+# the compiler of the documents refuse every question about casts in this crate. The pages of the
+# crate (InteractionTriggerBehaviorView, ReactiveNavigationView) are placeholders until it is fixed.
+# ferroui-xaml-interactions-reactiveui = { workspace = true }
+ferroui-xaml-behaviors-animations = { workspace = true }
+# The view models (the reference uses ReactiveUI with its source generators and
+# `UseReactiveUI()`).
+ferroui-system = { workspace = true }
+ferroui-reactive = { workspace = true }
+ferroui-reactiveui = { workspace = true }
+ferroui-reactiveui-controls = { workspace = true }
+sample-support = { path = "../SampleSupport" }
+
+[build-dependencies]
+sample-build = { path = "../SampleBuild" }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+sample-testing = { path = "../SampleTesting" }
