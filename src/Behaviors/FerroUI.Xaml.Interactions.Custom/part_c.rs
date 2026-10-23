@@ -10,7 +10,9 @@
 //! - `Cursor/` ([`cursor`](self::cursor)): the cursor of an input element, with its contract;
 //! - `ScrollViewer/` ([`scroll_viewer`](self::scroll_viewer)): the scroll viewer;
 //! - `ViewModel/` ([`view_model`](self::view_model)): the properties of the view model (the data context) of a control;
-//! - `ContextDialogs/` ([`context_dialogs`](self::context_dialogs)): a context dialog shown in a popup.
+//! - `ContextDialogs/` ([`context_dialogs`](self::context_dialogs)): a context dialog shown in a popup;
+//! - `Transitions/` ([`transitions`](self::transitions)): the transitions of an element;
+//! - `ToolTips/` ([`tool_tips`](self::tool_tips)): the tool tip of a control.
 //!
 //! The part owns its classes ([`TYPES`]), their public Rust paths and its markup types
 //! ([`register`]); `lib.rs` re-exports everything public of it.
@@ -39,6 +41,10 @@ mod render_target;
 mod scroll_viewer;
 #[path = "split_view/mod.rs"]
 mod split_view;
+#[path = "tool_tips/mod.rs"]
+mod tool_tips;
+#[path = "transitions/mod.rs"]
+mod transitions;
 #[path = "view_model/mod.rs"]
 mod view_model;
 #[path = "window/mod.rs"]
@@ -54,6 +60,8 @@ pub use self::notifications::*;
 pub use self::render_target::*;
 pub use self::scroll_viewer::*;
 pub use self::split_view::*;
+pub use self::tool_tips::*;
+pub use self::transitions::*;
 pub use self::view_model::*;
 pub use self::window::*;
 pub use self::writeable_bitmap::*;
@@ -140,6 +148,18 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::ContextDialogOpenedTrigger,
     crate::HideContextDialogAction,
     crate::ShowContextDialogAction,
+    // Transitions/
+    crate::AddTransitionAction,
+    crate::ClearTransitionsAction,
+    crate::RemoveTransitionAction,
+    crate::TransitionsBehavior,
+    crate::TransitionsChangedTrigger,
+    // ToolTips/
+    crate::HideToolTipAction,
+    crate::SetToolTipTipAction,
+    crate::ShowToolTipAction,
+    crate::ToolTipClosingTrigger,
+    crate::ToolTipOpeningTrigger,
 ];
 
 /// The types of this part that are not classes (lists, enumerations and contracts), declared for
@@ -240,6 +260,18 @@ mod rust_paths {
             crate::ContextDialogOpenedTrigger,
             crate::HideContextDialogAction,
             crate::ShowContextDialogAction,
+            // Transitions/
+            crate::AddTransitionAction,
+            crate::ClearTransitionsAction,
+            crate::RemoveTransitionAction,
+            crate::TransitionsBehavior,
+            crate::TransitionsChangedTrigger,
+            // ToolTips/
+            crate::HideToolTipAction,
+            crate::SetToolTipTipAction,
+            crate::ShowToolTipAction,
+            crate::ToolTipClosingTrigger,
+            crate::ToolTipOpeningTrigger,
         ],
         types: [
             // SplitView/
@@ -308,6 +340,8 @@ fn register_value_types() {
     ValueTypes::register_element_ref::<ferroui_controls::ScrollViewer>();
     // ContextDialogs/
     ValueTypes::register_element_ref::<crate::ContextDialogBehavior>();
+    // Transitions/
+    ValueTypes::register_element_ref::<ferroui_base::StyledElement>();
 }
 
 /// The sender of an action as an object of class `T` (`sender as T` of the reference).
