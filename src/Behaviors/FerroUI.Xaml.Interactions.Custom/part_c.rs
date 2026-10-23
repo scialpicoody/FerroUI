@@ -8,7 +8,9 @@
 //! - `Window/` ([`window`](self::window)): the window of the associated control;
 //! - `Button/` ([`button`](self::button)): buttons;
 //! - `Cursor/` ([`cursor`](self::cursor)): the cursor of an input element, with its contract;
-//! - `ScrollViewer/` ([`scroll_viewer`](self::scroll_viewer)): the scroll viewer.
+//! - `ScrollViewer/` ([`scroll_viewer`](self::scroll_viewer)): the scroll viewer;
+//! - `ViewModel/` ([`view_model`](self::view_model)): the properties of the view model (the data context) of a control;
+//! - `ContextDialogs/` ([`context_dialogs`](self::context_dialogs)): a context dialog shown in a popup.
 //!
 //! The part owns its classes ([`TYPES`]), their public Rust paths and its markup types
 //! ([`register`]); `lib.rs` re-exports everything public of it.
@@ -25,6 +27,8 @@ use std::rc::Rc;
 mod animations;
 #[path = "button/mod.rs"]
 mod button;
+#[path = "context_dialogs/mod.rs"]
+mod context_dialogs;
 #[path = "cursor/mod.rs"]
 mod cursor;
 #[path = "notifications/mod.rs"]
@@ -35,6 +39,8 @@ mod render_target;
 mod scroll_viewer;
 #[path = "split_view/mod.rs"]
 mod split_view;
+#[path = "view_model/mod.rs"]
+mod view_model;
 #[path = "window/mod.rs"]
 mod window;
 #[path = "writeable_bitmap/mod.rs"]
@@ -42,11 +48,13 @@ mod writeable_bitmap;
 
 pub use self::animations::*;
 pub use self::button::*;
+pub use self::context_dialogs::*;
 pub use self::cursor::*;
 pub use self::notifications::*;
 pub use self::render_target::*;
 pub use self::scroll_viewer::*;
 pub use self::split_view::*;
+pub use self::view_model::*;
 pub use self::window::*;
 pub use self::writeable_bitmap::*;
 
@@ -120,6 +128,18 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::ScrollToOffsetAction,
     crate::ScrollViewerOffsetBehavior,
     crate::ViewportBehavior,
+    // ViewModel/
+    crate::IncrementViewModelPropertyAction,
+    crate::SetViewModelPropertyAction,
+    crate::SetViewModelPropertyOnLoadBehavior,
+    crate::ToggleViewModelBooleanAction,
+    crate::ViewModelPropertyChangedTrigger,
+    // ContextDialogs/
+    crate::ContextDialogBehavior,
+    crate::ContextDialogClosedTrigger,
+    crate::ContextDialogOpenedTrigger,
+    crate::HideContextDialogAction,
+    crate::ShowContextDialogAction,
 ];
 
 /// The types of this part that are not classes (lists, enumerations and contracts), declared for
@@ -208,6 +228,18 @@ mod rust_paths {
             crate::ScrollToOffsetAction,
             crate::ScrollViewerOffsetBehavior,
             crate::ViewportBehavior,
+            // ViewModel/
+            crate::IncrementViewModelPropertyAction,
+            crate::SetViewModelPropertyAction,
+            crate::SetViewModelPropertyOnLoadBehavior,
+            crate::ToggleViewModelBooleanAction,
+            crate::ViewModelPropertyChangedTrigger,
+            // ContextDialogs/
+            crate::ContextDialogBehavior,
+            crate::ContextDialogClosedTrigger,
+            crate::ContextDialogOpenedTrigger,
+            crate::HideContextDialogAction,
+            crate::ShowContextDialogAction,
         ],
         types: [
             // SplitView/
@@ -274,6 +306,8 @@ fn register_value_types() {
     // ScrollViewer/
     ValueTypes::register_nullable::<crate::ChangeSize>();
     ValueTypes::register_element_ref::<ferroui_controls::ScrollViewer>();
+    // ContextDialogs/
+    ValueTypes::register_element_ref::<crate::ContextDialogBehavior>();
 }
 
 /// The sender of an action as an object of class `T` (`sender as T` of the reference).
