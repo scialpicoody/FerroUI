@@ -1733,6 +1733,52 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-xaml-interactions"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-events"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-reactiveui"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-reactive",
+ "ferroui-reactiveui",
+ "ferroui-splat",
+ "ferroui-system",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
+name = "ferroui-xaml-interactions-responsive"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-xaml-interactivity",
+]
+
+[[package]]
 name = "ferroui-xaml-interactivity"
 version = "0.4.0"
 dependencies = [
