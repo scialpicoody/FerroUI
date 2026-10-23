@@ -1,7 +1,11 @@
 //! The test files of `tests/Xaml.Behaviors.Interactions.UnitTests` of Xaml.Behaviors that test the
 //! types of other projects of the reference: the test project of the reference holds the tests of
 //! the draggable, drag and drop and custom behaviors too. They are ported with the crates of those
-//! projects (docs/porting/behaviors.md, stages 3 and 4), which this crate does not depend on.
+//! projects (docs/porting/behaviors.md, stages 3 and 4), in their own test modules: every test
+//! below has its port there (the two item drag reorder tests, which the reference skips, run
+//! there). This crate does not depend on those crates; the custom behaviors are a development
+//! dependency only for the logical tree lifetime tests of `Core/`, which test the actions of this
+//! crate.
 //!
 //! 78 test methods; the test names below keep the names of the reference, except the name of its
 //! framework, which three of them contain and which is replaced by `Framework` or left out

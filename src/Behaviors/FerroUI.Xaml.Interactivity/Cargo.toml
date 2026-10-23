@@ -40,6 +40,20 @@ ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The binding of the condition tests (`Binding` with a path and a source).
 ferroui-markup = { workspace = true }
+# The collection template tests load a window with the run-time loader; its styles set an event
+# trigger with a change property action of the interactions crate. The interactions crate depends
+# on this one, so it is named by its path alone: Cargo leaves a development dependency without a
+# version out of the package, which breaks the cycle of the packages (docs/release.md, "Dependency
+# order"). The tests are an integration test target (below), which links this crate once.
+ferroui-xaml-interactions = { path = "../FerroUI.Xaml.Interactions" }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+
+# The collection template tests of the reference: an integration test, not a unit test of the
+# library, so that the interactions crate and the tests use the same copy of this crate
+# (tests/collections/collection_template_tests.rs).
+[[test]]
+name = "collection_template_tests"
+path = "tests/collections/collection_template_tests.rs"
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

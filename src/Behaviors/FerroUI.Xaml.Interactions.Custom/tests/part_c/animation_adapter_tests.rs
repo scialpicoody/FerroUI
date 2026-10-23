@@ -3,20 +3,25 @@
 //!
 //! Adapted: the platform of the reference ticks the global clock of the animations; here the test
 //! pulses the manual clock of the test application where the reference waits or runs the jobs.
+//! The parallax test reads a composition visual, so its window renders through the test
+//! compositor ([`CompositionApp`](super::support::CompositionApp)).
 //! The document of the run-time loader test names the types without prefixes, as the namespaces
 //! of the crates are mapped into the default XML namespace of the framework.
 
-use super::support::{add_behavior, as_bool, boxed, run_jobs, start_app, window_with};
+use super::support::{add_behavior, as_bool, boxed, run_jobs, start_app, window_with, CompositionApp};
 use crate::{
     AnimateOnAttachedBehavior, AnimationBuilderRef, AnimationCompletedTrigger, BeginAnimationAction, FadeInBehavior,
-    PlayAnimationBehavior, RunAnimationTrigger, StartAnimationAction, StartBuiltAnimationAction, TransitionsBehavior,
-    TransitionsChangedTrigger, ASSEMBLY,
+    FluidMoveBehavior, FluidMoveScope, ParallaxBehavior, PlayAnimationBehavior, RunAnimationTrigger,
+    StartAnimationAction, StartBuiltAnimationAction, TransitionsBehavior, TransitionsChangedTrigger, ASSEMBLY,
 };
 use ferroui_base::animation::{Animation, Cue, FillMode, IAnimationSetter, KeyFrame, TimeSpan, Transitions};
+use ferroui_base::media::TranslateTransform;
 use ferroui_base::metadata::from_markup_value;
+use ferroui_base::numerics::Vector3;
+use ferroui_base::rendering::composition::ElementComposition;
 use ferroui_base::styling::Setter;
-use ferroui_base::{ferro_class, instantiate, BoxedValue, FerroObject, FerroObjectImpl, Ref, Visual};
-use ferroui_controls::{Border, Control, Panel, StackPanel};
+use ferroui_base::{ferro_class, instantiate, BoxedValue, FerroObject, FerroObjectImpl, Ref, Vector, Visual};
+use ferroui_controls::{Border, Canvas, Control, Panel, ScrollViewer, StackPanel};
 use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use ferroui_xaml_behaviors_animations::IAnimationBuilder;
@@ -161,9 +166,68 @@ fn transitions_changed_trigger_executes_for_shared_transition_observation() {
     assert_eq!(initial_count + 1, action.execution_count());
 }
 
-// Not ported: FluidMoveBehavior_AnimatesChangedChildPositionThroughSharedPrimitive - it tests a type of another part of the crate (`Layout/`).
+#[test]
+fn fluid_move_behavior_animates_changed_child_position_through_shared_primitive() {
+    let _app = start_app();
+    let child = Border::new();
+    child.set_width(40.0);
+    child.set_height(40.0);
+    Canvas::set_left(&child, 0.0);
+    let canvas = Canvas::new();
+    canvas.set_width(200.0);
+    canvas.set_height(100.0);
+    canvas.children().add(child.clone().upcast::<Control>());
+    let behavior = FluidMoveBehavior::new();
+    behavior.set_applies_to(FluidMoveScope::Children);
+    behavior.set_duration(TimeSpan::ZERO);
+    add_behavior(&canvas, &behavior);
+    let window = window_with(&canvas);
+    window.show();
+    run_jobs();
 
-// Not ported: ParallaxBehavior_TracksScrollOffsetThroughSharedPrimitive - it tests a type of another part of the crate (`Composition/`).
+    Canvas::set_left(&child, 80.0);
+    run_jobs();
+
+    let render_transform = child.render_transform().expect("a render transform");
+    assert!(render_transform
+        .as_object()
+        .is_some_and(|object| object.downcast_ref::<TranslateTransform>().is_some()));
+    window.close();
+}
+
+#[test]
+fn parallax_behavior_tracks_scroll_offset_through_shared_primitive() {
+    let app = CompositionApp::start();
+    let target = Border::new();
+    target.set_width(100.0);
+    target.set_height(100.0);
+    Canvas::set_left(&target, 30.0);
+    Canvas::set_top(&target, 40.0);
+    let content = Canvas::new();
+    content.set_width(500.0);
+    content.set_height(1000.0);
+    content.children().add(target.clone().upcast::<Control>());
+    let scroll_viewer = ScrollViewer::new();
+    scroll_viewer.set_width(300.0);
+    scroll_viewer.set_height(300.0);
+    scroll_viewer.set_content(Some(Control::boxed(content)));
+    let behavior = ParallaxBehavior::new();
+    behavior.set_source_scroll_viewer(&scroll_viewer);
+    behavior.set_parallax_ratio(0.25);
+    add_behavior(&target, &behavior);
+    let window = app.window_with(&scroll_viewer);
+    window.show();
+    app.run_jobs();
+
+    scroll_viewer.set_offset(Vector::new(20.0, 100.0));
+    app.run_jobs();
+
+    assert_eq!(
+        Some(Vector3::new(35.0, 65.0, 0.0).into()),
+        ElementComposition::get_element_visual(&target).map(|visual| visual.offset())
+    );
+    window.close();
+}
 
 #[test]
 fn animation_actions_preserve_targets_results_and_builder_precedence() {
