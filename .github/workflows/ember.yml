@@ -3,32 +3,18 @@ name: Ember reader
 on:
   push:
     branches: [main]
+    # Changes to the framework are covered by the workspace run of ci.yml, which runs the
+    # Ember tests as well; this workflow follows the Ember sources.
     paths:
       - 'samples/Ember*/**'
-      - 'samples/SampleTesting/**'
-      - 'samples/SampleSupport/**'
-      - 'samples/SampleBuild/**'
-      - 'src/**'
-      - 'external/XamlX/**'
       - 'scripts/build-ember-browser.sh'
-      - 'scripts/build-browser.sh'
-      - 'scripts/browser/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/ember.yml'
   pull_request:
+    # Changes to the framework are covered by the workspace run of ci.yml, which runs the
+    # Ember tests as well; this workflow follows the Ember sources.
     paths:
       - 'samples/Ember*/**'
-      - 'samples/SampleTesting/**'
-      - 'samples/SampleSupport/**'
-      - 'samples/SampleBuild/**'
-      - 'src/**'
-      - 'external/XamlX/**'
       - 'scripts/build-ember-browser.sh'
-      - 'scripts/build-browser.sh'
-      - 'scripts/browser/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/ember.yml'
   workflow_dispatch:
 
@@ -69,7 +55,7 @@ jobs:
       - name: Real control tree, layout, interaction and rich content tests
         env:
           EMBER_CAPTURE_DIR: ${{ github.workspace }}/target/ember-captures
-        run: cargo test --locked -p ember -p ember-content --features ember-content/render-tests --lib -- --test-threads=1
+        run: cargo test --locked -p ember -p ember-content --features ember-content/render-tests --lib
       - name: Desktop host compiles
         run: cargo check --locked -p ember-desktop
       - name: Upload reader theme captures

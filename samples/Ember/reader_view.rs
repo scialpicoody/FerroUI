@@ -102,6 +102,8 @@ pub struct ReaderView {
     thread: RefCell<Option<ThreadSnapshot>>,
     thread_control: RefCell<Option<Ref<Control>>>,
     pruning: Cell<bool>,
+    /// Whether the cache was pruned after a feed loaded this session (see `accept_items`).
+    pruned_after_feed: Cell<bool>,
     downloading: Cell<bool>,
     thread_budget: Cell<usize>,
     thread_sort: Cell<ThreadSort>,
@@ -158,6 +160,7 @@ impl ReaderView {
             thread: RefCell::new(None),
             thread_control: RefCell::new(None),
             pruning: Cell::new(false),
+            pruned_after_feed: Cell::new(false),
             downloading: Cell::new(false),
             thread_budget: Cell::new(120),
             thread_sort: Cell::new(ThreadSort::Ranked),
@@ -512,13 +515,14 @@ impl ReaderView {
             }
         }));
     }
-    fn prune_cache(&self) {
+    /// Starts evicting the oldest cached items beyond the limit; returns whether it started.
+    fn prune_cache(&self) -> bool {
         if !self.state_ready.get() || self.downloading.get() || self.pruning.replace(true) {
-            return;
+            return false;
         }
         let Some(repo) = self.repo() else {
             self.pruning.set(false);
-            return;
+            return false;
         };
         let state = self.state.borrow().clone();
         let weak = self.to_ref().downgrade();
@@ -533,6 +537,7 @@ impl ReaderView {
                 }
             }),
         );
+        true
     }
     fn select_feed(&self, route: FeedRoute) {
         if let Some(scroll) = self
@@ -644,8 +649,10 @@ impl ReaderView {
             self.status(&warning);
         }
         self.render_stories();
-        if !self.busy.get() {
-            self.prune_cache();
+        // Pruning reads every cached item, so it runs once a session after a feed has loaded,
+        // and again after a download or a change of the cache limit, not after every refresh.
+        if !self.busy.get() && !self.pruned_after_feed.get() && self.prune_cache() {
+            self.pruned_after_feed.set(true);
         }
     }
     fn visible_stories(&self) -> Vec<HnItem> {
@@ -1101,13 +1108,46 @@ impl ReaderView {
         self.button("DownloadButton").set_is_enabled(false);
         self.status("Downloading discussion for offline reading…");
         let weak = self.to_ref().downgrade();
-        drop(Dispatcher::ui_thread().invoke_async_task_local(move||async move{
-            let result=repo.download_thread(id,10000,services::now()).await;
-            if let Some(v)=weak.upgrade(){v.downloading.set(false);v.button("DownloadButton").set_is_enabled(true);match result{
-                Ok(thread)=>{if thread.complete {let mut ids:Vec<_>=thread.items.keys().copied().collect();ids.push(thread.root.id);let mut state=v.state.borrow_mut();state.downloaded_threads.insert(id,ids);state.items.entry(id).or_default().saved_at.get_or_insert(services::now());drop(state);v.changed();v.status("Discussion downloaded. It is available offline in Saved stories.");}else{v.status(&format!("Partial download: {} comments stored; {} still missing or pending. Retry Download to continue.",thread.items.len(),thread.missing_ids.len()+thread.pending_ids.len()));}
-                    if v.selected.get()==Some(id)&&matches!(*v.detail.borrow(),DetailRoute::Thread(_)){v.accept_thread(thread);}},
-                Err(error)=>v.status(&format!("Download could not complete: {error}")),
-            }}
+        drop(Dispatcher::ui_thread().invoke_async_task_local(move || async move {
+            let result = repo.download_thread(id, 10000, services::now()).await;
+            let Some(v) = weak.upgrade() else {
+                return;
+            };
+            v.downloading.set(false);
+            v.button("DownloadButton").set_is_enabled(true);
+            match result {
+                Ok(thread) => {
+                    if thread.complete {
+                        let mut ids: Vec<_> = thread.items.keys().copied().collect();
+                        ids.push(thread.root.id);
+                        let mut state = v.state.borrow_mut();
+                        state.downloaded_threads.insert(id, ids);
+                        state
+                            .items
+                            .entry(id)
+                            .or_default()
+                            .saved_at
+                            .get_or_insert(services::now());
+                        drop(state);
+                        v.changed();
+                        v.status("Discussion downloaded. It is available offline in Saved stories.");
+                    } else {
+                        v.status(&format!(
+                            "Partial download: {} comments stored; {} still missing or pending. Retry Download to continue.",
+                            thread.items.len(),
+                            thread.missing_ids.len() + thread.pending_ids.len()
+                        ));
+                    }
+                    if v.selected.get() == Some(id)
+                        && matches!(*v.detail.borrow(), DetailRoute::Thread(_))
+                    {
+                        v.accept_thread(thread);
+                    }
+                    // A download adds items to the cache.
+                    v.prune_cache();
+                }
+                Err(error) => v.status(&format!("Download could not complete: {error}")),
+            }
         }));
     }
     fn navigate(&self, route: DetailRoute) {

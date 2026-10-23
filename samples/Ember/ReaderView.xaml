@@ -1,6 +1,6 @@
 <UserControl xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="Ember.ReaderView" Background="{DynamicResource EmberBackground}">
+             x:Class="Ember.ReaderView" Background="{DynamicResource EmberBackground}" Foreground="{DynamicResource EmberText}">
   <InputPaneAwareDecorator Behavior="Resize">
   <Grid RowDefinitions="Auto,*,Auto,Auto">
     <Border BorderBrush="{DynamicResource EmberBorder}" BorderThickness="0,0,0,1" Background="{DynamicResource EmberSurface}" Padding="20,12">

@@ -17,7 +17,7 @@ mod application {
         // activity yet. Use the existing application context for private storage.
         if let Some(directory) = files_directory() {
             ember::set_database_path(
-                std::path::PathBuf::from(directory).join("Ember/reader.sqlite"),
+                std::path::PathBuf::from(directory).join("Ember/reader.sqlite3"),
             );
         }
         AppBuilder::configure::<ember::App>()

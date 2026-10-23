@@ -7,8 +7,10 @@ import { fileURLToPath } from "node:url";
 import { open, run, assert, sleep, colours } from "../../../scripts/browser/harness.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
-const site = process.argv[2] ?? path.join(root, "target/browser/ember-browser");
-const captures = path.join(root, "target/ember-browser-smoke");
+// Build output follows CARGO_TARGET_DIR, as scripts/build-browser.sh does.
+const targetDir = process.env.CARGO_TARGET_DIR ? path.resolve(process.env.CARGO_TARGET_DIR) : path.join(root, "target");
+const site = process.argv[2] ?? path.join(targetDir, "browser/ember-browser");
+const captures = path.join(targetDir, "ember-browser-smoke");
 const title = "Show HN: A quieter place for curious minds";
 const fixtures = {
     101: { id: 101, type: "story", title, by: "maker", time: 1792573200, score: 284, descendants: 3, url: "https://example.org/ember", kids: [201, 203] },

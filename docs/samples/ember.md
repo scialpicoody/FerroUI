@@ -237,7 +237,9 @@ foreground. Their upstream sources and license are recorded under
 ## Run and package
 
 Use the repository's normal Rust and platform prerequisites. Commands below run
-from the repository root.
+from the repository root. Build output goes to `$CARGO_TARGET_DIR`, or `target`
+when it is not set; point it at a directory outside the repository (for example
+on a larger disk) to keep the checkout small, and the paths below follow it.
 
 ### Desktop
 
@@ -257,7 +259,7 @@ specific file. Android and iOS hosts override that path with their app sandbox.
 scripts/browser/setup.sh /path/to/browser-tools
 source /path/to/browser-tools/env.sh
 scripts/build-ember-browser.sh
-python3 -m http.server 8080 --directory target/browser/ember-browser
+python3 -m http.server 8080 --directory "${CARGO_TARGET_DIR:-target}/browser/ember-browser"
 ```
 
 Open `http://localhost:8080/`. The build uses FerroUI's
@@ -281,8 +283,10 @@ sandbox. Signing and installation follow the existing platform scripts.
 ## Verification and CI
 
 The focused [Ember workflow](../../.github/workflows/ember.yml) runs core/parser
-tests, actual control-tree/render tests, a desktop compile check and the browser
-service-provider tests when relevant source files change. It uses the repository's
+tests, actual control-tree/render tests (in parallel, as the workspace run does), a
+desktop compile check and the browser service-provider tests when the Ember sources
+change; the workspace run of the main CI runs the same tests on macOS with every
+other change. It uses the repository's
 pinned actions and disables debug information/incremental artifacts to reduce
 disk use. Android/iOS packaging and the full Emscripten build are separate gates
 because they need their platform toolchains.
@@ -291,7 +295,7 @@ because they need their platform toolchains.
 export CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 CARGO_INCREMENTAL=0
 cargo test --locked -p ember-core
 cargo test --locked -p ember-content --no-default-features
-cargo test --locked -p ember -p ember-content --features ember-content/render-tests --lib -- --test-threads=1
+cargo test --locked -p ember -p ember-content --features ember-content/render-tests --lib
 cargo check --locked -p ember-desktop
 npm ci --prefix samples/Ember.Browser
 npm test --prefix samples/Ember.Browser
@@ -309,7 +313,7 @@ Skia/HarfBuzz test services, including finite-width rich text and interaction.
 To save rendered desktop/phone theme captures:
 
 ```sh
-EMBER_CAPTURE_DIR=target/ember-captures cargo test --locked -p ember \
+EMBER_CAPTURE_DIR="${CARGO_TARGET_DIR:-target}/ember-captures" cargo test --locked -p ember \
   capture_real_control_tree_in_desktop_and_phone_themes -- --nocapture
 ```
 
@@ -319,12 +323,13 @@ URL history and complete/incomplete shell installation. After building the real
 browser application, run its interaction smoke test with Chrome/Chromium:
 
 ```sh
-CHROME=/path/to/chrome node samples/Ember.Browser/tests/browser-smoke.mjs \
-  target/browser/ember-browser
+CHROME=/path/to/chrome node samples/Ember.Browser/tests/browser-smoke.mjs
 ```
 
 The smoke runner uses deterministic API fixtures with the actual compiled reader,
-its input handling and IndexedDB. Captures go to `target/ember-browser-smoke`.
+its input handling and IndexedDB. It serves `$CARGO_TARGET_DIR/browser/ember-browser`
+(or the site given as its argument), and its captures go to
+`$CARGO_TARGET_DIR/ember-browser-smoke` (`target` when `CARGO_TARGET_DIR` is not set).
 The read-only `emberState()` test export reports actual visible controls, their
 bounds and hit-test availability; it does not provide a second UI implementation.
 
@@ -332,12 +337,12 @@ bounds and hit-test availability; it does not provide a second UI implementation
 
 | Surface | Implementation | Validation status for this change |
 | --- | --- | --- |
-| Shared core | Native/browser-neutral models, repository and storage contracts | 23 deterministic core tests passed locally, including native pool cancellation/saturation, metadata bounds, SQLite and offline reopening. |
-| Rich content | HTML document model and native renderer | 15 tests passed: 13 parser/security tests and 2 Skia renderer tests. |
-| Shared UI | Real FerroUI controls, themes, layout and interaction | 16 tests passed, including semantic Find, bounded code, long-link wrapping and baseline alignment, navigation, restored reading context and importing a backup during a delayed startup read. Desktop/phone light/dark and tablet custom-theme captures were generated. |
-| Linux desktop | Native host, SQLite/HTTP and shared reader controls | `cargo check --locked -p ember-desktop` passed; shared UI capture tests exercised the actual control tree through Skia/HarfBuzz. |
-| Browser | WebAssembly reader, Fetch, IndexedDB, URL history and default offline shell | 12 JavaScript tests passed (8 platform-provider and 4 offline-worker tests). The optimized development Emscripten bundle built successfully. Both real Chrome desktop/phone cases passed, including touch gestures, themes, URL history, downloads, IndexedDB persistence and a new-document reload with networking disabled through the complete 12-file offline shell. |
-| Windows/macOS | Shared desktop host with the existing FerroUI platform services | No physical Windows/macOS run is claimed by Linux validation. |
+| Shared core | Native/browser-neutral models, repository and storage contracts | `cargo test -p ember-core` in the Ember workflow (Linux) and the workspace run (macOS): native pool cancellation and saturation, metadata bounds, SQLite and offline reopening. |
+| Rich content | HTML document model and native renderer | `cargo test -p ember-content`, parser and security tests and the Skia renderer tests, on the same two runs. |
+| Shared UI | Real FerroUI controls, themes, layout and interaction | The `ember` tests on the same two runs, in parallel: semantic Find, bounded code, long-link wrapping and baseline alignment, navigation, restored reading context and importing a backup during a delayed startup read. Desktop/phone light/dark and tablet custom-theme captures can be generated (see above). |
+| Linux desktop | Native host, SQLite/HTTP and shared reader controls | `cargo check -p ember-desktop` in the Ember workflow; the shared UI tests exercise the actual control tree through Skia/HarfBuzz. |
+| Browser | WebAssembly reader, Fetch, IndexedDB, URL history and default offline shell | The JavaScript tests of the platform providers and the offline worker in the Ember workflow. The Chrome smoke test (desktop and phone: touch gestures, themes, URL history, downloads, IndexedDB persistence, an offline reload through the offline shell) is run by hand; it is not part of CI. |
+| Windows/macOS | Shared desktop host with the existing FerroUI platform services | The shared UI tests run on macOS in the workspace run of CI; no interactive Windows or macOS session is claimed. |
 | Android | Native host and packaging-script integration | Physical-device layout, IME, lifecycle and signed-package behavior remain unverified. |
 | iOS | Native host and bundling-script integration | Physical-device layout, safe areas, lifecycle and signed-package behavior remain unverified. |
 

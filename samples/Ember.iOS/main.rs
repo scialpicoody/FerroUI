@@ -11,7 +11,7 @@ fn main() {
     // HOME is the application's sandbox, not a shared system directory.
     if let Some(home) = std::env::var_os("HOME") {
         ember::set_database_path(
-            std::path::PathBuf::from(home).join("Library/Application Support/Ember/reader.sqlite"),
+            std::path::PathBuf::from(home).join("Library/Application Support/Ember/reader.sqlite3"),
         );
     }
     ferroui_ios::run_application_with(std::rc::Rc::new(host::AppDelegate))

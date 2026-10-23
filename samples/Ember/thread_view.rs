@@ -1,5 +1,6 @@
 //! The virtualized native conversation surface. Only realized rows create rich-text controls.
 
+use crate::widgets::{bind_resource, muted, text as label};
 use ember_content::{HtmlDocument, RenderOptions};
 use ember_core::{
     flatten_thread, flatten_thread_with_match, relative_time, HnItem, ReaderState, ThreadOptions,
@@ -7,12 +8,10 @@ use ember_core::{
 };
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
-use ferroui_base::media::{Color, FontWeight, IBrush, SolidColorBrush, TextWrapping};
+use ferroui_base::media::{Color, FontWeight, IBrush, SolidColorBrush};
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::{
-    BoxedValue, CornerRadius, FerroObject, FerroProperty, Point, Ref, Thickness, Vector,
-};
+use ferroui_base::{BoxedValue, CornerRadius, Point, Ref, Thickness, Vector};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::templates::FuncDataTemplate;
@@ -20,7 +19,6 @@ use ferroui_controls::{
     Application, Border, Button, ColumnDefinitions, ComboBox, Control, Grid, ItemsSource, ListBox,
     ProgressBar, ScrollViewer, StackPanel, TextBlock, WrapPanel,
 };
-use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
 use std::cell::{Cell, OnceCell};
 use std::collections::{BTreeMap, BTreeSet};
 use std::rc::Rc;
@@ -844,19 +842,6 @@ fn action_button(
     button
 }
 
-fn label(text: &str, size: f64) -> Ref<TextBlock> {
-    let block = TextBlock::new();
-    block.set_text(Some(text));
-    block.set_font_size(size);
-    block.set_text_wrapping(TextWrapping::Wrap);
-    block
-}
-
-fn muted(text: &str) -> Ref<TextBlock> {
-    let block = label(text, 12.0);
-    block.classes().add("muted");
-    block
-}
 
 fn badge(text: &str) -> Ref<Border> {
     let border = Border::new();
@@ -880,11 +865,6 @@ fn badge(text: &str) -> Ref<Border> {
     border
 }
 
-fn bind_resource(target: &FerroObject, property: &'static FerroProperty, key: &str) {
-    let resource =
-        DynamicResourceExtension::with_resource_key(Some(Rc::new(key.to_owned()) as BoxedValue));
-    target.bind_binding(property, &*resource.as_binding());
-}
 
 fn brush(key: &str) -> Option<Rc<dyn IBrush>> {
     let app = Application::current()?;

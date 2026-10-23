@@ -38,6 +38,9 @@ impl NativeHttpClient {
             .timeout_read(Duration::from_secs(20))
             .timeout(Duration::from_secs(30))
             .user_agent("Ember-HN/0.1 (FerroUI; public read API)")
+            // As the browser client: no redirects, HTTPS only.
+            .redirects(0)
+            .https_only(true)
             .build();
         Self::with_handler(Arc::new(move |url| {
             let response = agent

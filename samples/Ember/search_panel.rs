@@ -1,15 +1,17 @@
 //! Search and public-profile forms. Filters are data, never interpolated tags.
+use crate::widgets::{combo, form_button as button, label as text, section};
 use ember_core::{validate_username, SearchKind, SearchQuery, SearchSort};
-use ferroui_base::layout::HorizontalAlignment;
-use ferroui_base::media::{FontWeight, TextWrapping};
 use ferroui_base::utilities::DateTime;
-use ferroui_base::{CornerRadius, FerroObject, FerroProperty, Ref, Thickness};
-use ferroui_controls::automation::AutomationProperties;
-use ferroui_controls::{
-    Border, Button, ComboBox, Control, ItemsSource, ScrollViewer, StackPanel, TextBlock, TextBox,
-};
-use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
+use ferroui_base::{Ref, Thickness};
+use ferroui_controls::{Control, ScrollViewer, StackPanel, TextBox};
 use std::rc::Rc;
+
+/// The longest text of a search field.
+const FIELD_LENGTH: i32 = 2048;
+
+fn field(parent: &StackPanel, label: &str, value: &str, placeholder: &str) -> Ref<TextBox> {
+    crate::widgets::field(parent, label, value, placeholder, FIELD_LENGTH, false)
+}
 
 pub fn build(
     query: &SearchQuery,
@@ -34,7 +36,6 @@ pub fn build(
         &query.query,
         "Ideas, projects, or a phrase…",
     );
-    words.set_max_length(2048);
     let kind = combo(
         &search,
         "Search in",
@@ -223,80 +224,6 @@ pub fn build(
     scroll.upcast()
 }
 
-fn text(value: &str, size: f64, muted: bool) -> Ref<TextBlock> {
-    let text = TextBlock::new();
-    text.set_text(Some(value));
-    text.set_font_size(size);
-    text.set_text_wrapping(TextWrapping::Wrap);
-    if size >= 18.0 {
-        text.set_font_weight(FontWeight::SemiBold);
-    }
-    resource(
-        &text,
-        TextBlock::foreground_property().as_property(),
-        if muted { "EmberMuted" } else { "EmberText" },
-    );
-    text
-}
-fn resource(target: &FerroObject, property: &'static FerroProperty, key: &str) {
-    let binding = DynamicResourceExtension::with_resource_key(Some(Rc::new(key.to_owned())));
-    target.bind_binding(property, &*binding.as_binding());
-}
-fn section(parent: &StackPanel, title: &str) -> Ref<StackPanel> {
-    let content = StackPanel::new();
-    content.set_spacing(12.0);
-    content.children().add(text(title, 19.0, false));
-    let border = Border::new();
-    border.set_padding(Thickness::uniform(20.0));
-    border.set_corner_radius(CornerRadius::uniform(12.0));
-    border.set_border_thickness(Thickness::uniform(1.0));
-    resource(
-        &border,
-        Border::background_property().as_property(),
-        "EmberSurface",
-    );
-    resource(
-        &border,
-        Border::border_brush_property().as_property(),
-        "EmberBorder",
-    );
-    border.set_child(content.clone());
-    parent.children().add(border);
-    content
-}
-fn field(parent: &StackPanel, label: &str, value: &str, placeholder: &str) -> Ref<TextBox> {
-    parent.children().add(text(label, 13.0, false));
-    let input = TextBox::new();
-    input.set_text(Some(value));
-    input.set_placeholder_text(Some(placeholder));
-    input.set_min_height(44.0);
-    input.set_max_length(2048);
-    AutomationProperties::set_name(&input, Some(label));
-    parent.children().add(input.clone());
-    input
-}
-fn combo(parent: &StackPanel, label: &str, values: &[&str], selected: i32) -> Ref<ComboBox> {
-    parent.children().add(text(label, 13.0, false));
-    let input = ComboBox::new();
-    input.set_items_source(Some(ItemsSource::from_values(
-        values.iter().map(|s| (*s).to_owned()).collect::<Vec<_>>(),
-    )));
-    input.set_selected_index(selected);
-    input.set_min_height(44.0);
-    input.set_horizontal_alignment(HorizontalAlignment::Stretch);
-    AutomationProperties::set_name(&input, Some(label));
-    parent.children().add(input.clone());
-    input
-}
-fn button(label: &str) -> Ref<Button> {
-    let button = Button::new();
-    button.set_content(Some(Control::boxed(text(label, 14.0, false))));
-    button.set_min_height(44.0);
-    button.set_padding(Thickness::symmetric(16.0, 10.0));
-    button.set_horizontal_alignment(HorizontalAlignment::Stretch);
-    AutomationProperties::set_name(&button, Some(label));
-    button
-}
 fn optional_number(input: &TextBox, label: &str) -> Result<Option<u64>, String> {
     let value = input.text().unwrap_or_default();
     let value = value.trim();

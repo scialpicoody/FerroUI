@@ -1,16 +1,25 @@
 //! Touch-sized preference and reading-data editor. Changes are committed through
 //! the owner so persistence failures remain visible to the user.
+use crate::widgets::{combo, form_button as button, label as text, section};
 use ember_core::{MuteRules, Preferences, ReaderState, ThemeMode};
 use ferroui_base::layout::HorizontalAlignment;
-use ferroui_base::media::{FontWeight, TextWrapping};
-use ferroui_base::{CornerRadius, FerroObject, FerroProperty, Ref, Thickness};
+use ferroui_base::{BoxedValue, Ref, Thickness};
 use ferroui_controls::automation::AutomationProperties;
-use ferroui_controls::{
-    Border, Button, CheckBox, ComboBox, Control, ItemsSource, ScrollViewer, StackPanel, TextBlock,
-    TextBox,
-};
-use ferroui_markup_xaml::markup_extensions::DynamicResourceExtension;
+use ferroui_controls::{CheckBox, Control, ScrollViewer, StackPanel, TextBox};
 use std::{collections::BTreeSet, rc::Rc};
+
+/// The longest text of a settings field; the backup field takes up to 16 MiB.
+const FIELD_LENGTH: i32 = 8192;
+
+fn field(
+    parent: &StackPanel,
+    label: &str,
+    value: &str,
+    placeholder: &str,
+    multiline: bool,
+) -> Ref<TextBox> {
+    crate::widgets::field(parent, label, value, placeholder, FIELD_LENGTH, multiline)
+}
 
 #[derive(Clone)]
 pub enum SettingsAction {
@@ -193,12 +202,13 @@ pub fn build(state: &ReaderState, on_action: Rc<dyn Fn(SettingsAction)>) -> Ref<
     let json = field(
         &data,
         "Reading data JSON",
-        &state.export_json().unwrap_or_default(),
+        "",
         "Paste an Ember backup to import",
         true,
     );
     json.set_min_height(180.0);
     json.set_max_height(320.0);
+    // The limit is raised before the backup is put in: the field's own limit would cut it.
     json.set_max_length(16 * 1024 * 1024);
     json.set_text(Some(&state.export_json().unwrap_or_default()));
     let export = button("Copy backup");
@@ -234,104 +244,14 @@ pub fn build(state: &ReaderState, on_action: Rc<dyn Fn(SettingsAction)>) -> Ref<
     scroll.upcast()
 }
 
-fn text(value: &str, size: f64, muted: bool) -> Ref<TextBlock> {
-    let text = TextBlock::new();
-    text.set_text(Some(value));
-    text.set_font_size(size);
-    text.set_text_wrapping(TextWrapping::Wrap);
-    if size >= 18.0 {
-        text.set_font_weight(FontWeight::SemiBold);
-    }
-    resource(
-        &text,
-        TextBlock::foreground_property().as_property(),
-        if muted { "EmberMuted" } else { "EmberText" },
-    );
-    text
-}
-fn resource(target: &FerroObject, property: &'static FerroProperty, key: &str) {
-    let binding = DynamicResourceExtension::with_resource_key(Some(Rc::new(key.to_owned())));
-    target.bind_binding(property, &*binding.as_binding());
-}
-fn section(parent: &StackPanel, title: &str) -> Ref<StackPanel> {
-    let content = StackPanel::new();
-    content.set_spacing(12.0);
-    content.children().add(text(title, 19.0, false));
-    let border = Border::new();
-    border.set_padding(Thickness::uniform(20.0));
-    border.set_corner_radius(CornerRadius::uniform(12.0));
-    border.set_border_thickness(Thickness::uniform(1.0));
-    resource(
-        &border,
-        Border::background_property().as_property(),
-        "EmberSurface",
-    );
-    resource(
-        &border,
-        Border::border_brush_property().as_property(),
-        "EmberBorder",
-    );
-    border.set_child(content.clone());
-    parent.children().add(border);
-    content
-}
-fn field(
-    parent: &StackPanel,
-    label: &str,
-    value: &str,
-    placeholder: &str,
-    multiline: bool,
-) -> Ref<TextBox> {
-    parent.children().add(text(label, 13.0, false));
-    let input = TextBox::new();
-    input.set_text(Some(value));
-    input.set_placeholder_text(Some(placeholder));
-    input.set_min_height(44.0);
-    input.set_accepts_return(multiline);
-    input.set_text_wrapping(if multiline {
-        TextWrapping::Wrap
-    } else {
-        TextWrapping::NoWrap
-    });
-    input.set_max_length(8192);
-    if multiline {
-        input.set_min_height(76.0);
-        input.set_max_height(160.0);
-    }
-    AutomationProperties::set_name(&input, Some(label));
-    parent.children().add(input.clone());
-    input
-}
-fn combo(parent: &StackPanel, label: &str, values: &[&str], selected: i32) -> Ref<ComboBox> {
-    parent.children().add(text(label, 13.0, false));
-    let input = ComboBox::new();
-    input.set_items_source(Some(ItemsSource::from_values(
-        values.iter().map(|s| (*s).to_owned()).collect::<Vec<_>>(),
-    )));
-    input.set_selected_index(selected);
-    input.set_min_height(44.0);
-    input.set_horizontal_alignment(HorizontalAlignment::Stretch);
-    AutomationProperties::set_name(&input, Some(label));
-    parent.children().add(input.clone());
-    input
-}
 fn toggle(parent: &StackPanel, label: &str, value: bool) -> Ref<CheckBox> {
     let input = CheckBox::new();
-    input.set_content(Some(Control::boxed(text(label, 14.0, false))));
+    input.set_content(Some(Rc::new(label.to_owned()) as BoxedValue));
     input.set_is_checked(Some(value));
     input.set_min_height(44.0);
     AutomationProperties::set_name(&input, Some(label));
     parent.children().add(input.clone());
     input
-}
-fn button(label: &str) -> Ref<Button> {
-    let button = Button::new();
-    button.set_content(Some(Control::boxed(text(label, 14.0, false))));
-    button.set_min_height(44.0);
-    button.set_padding(Thickness::symmetric(16.0, 10.0));
-    button.set_horizontal_alignment(HorizontalAlignment::Stretch);
-    AutomationProperties::set_name(&button, Some(label));
-    button
 }
 fn valid_color(value: &str) -> bool {
     value.len() == 7 && value.starts_with('#') && value[1..].bytes().all(|b| b.is_ascii_hexdigit())

@@ -67,6 +67,8 @@ font are configurable; invalid floating-point inputs are normalized before reach
 
 ## Validation
 
+Build output goes to `$CARGO_TARGET_DIR` (`target` when it is not set).
+
 ```sh
 cargo test -p ember-content --no-default-features
 cargo check -p ember-content

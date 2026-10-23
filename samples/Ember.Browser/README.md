@@ -12,8 +12,10 @@ From the repository root:
 scripts/browser/setup.sh /path/to/browser-tools
 source /path/to/browser-tools/env.sh
 scripts/build-ember-browser.sh
-python3 -m http.server 8080 --directory target/browser/ember-browser
+python3 -m http.server 8080 --directory "${CARGO_TARGET_DIR:-target}/browser/ember-browser"
 ```
+
+The site is built under `$CARGO_TARGET_DIR` (`target` when it is not set).
 
 Open `http://localhost:8080/`. The viewport is dynamic and carries `viewport-fit=cover`
 for mobile safe areas; the app handles touch input through FerroUI's browser platform.
@@ -88,8 +90,10 @@ CHROME=/path/to/chrome node samples/Ember.Browser/tests/browser-smoke.mjs
 The interaction checks supply deterministic HN responses at the network boundary.
 They exercise real pointer, keyboard and touch input, swipe-to-save, pull-to-refresh,
 rendering, URL history, themes, phone navigation, discussion downloads, IndexedDB
-persistence and service-worker startup with the network disabled. Screenshots and failure diagnostics are written under
-`target/ember-browser-smoke`.
+persistence and service-worker startup with the network disabled. The runner serves
+`$CARGO_TARGET_DIR/browser/ember-browser` unless a site is given as its argument, and screenshots
+and failure diagnostics are written under `$CARGO_TARGET_DIR/ember-browser-smoke` (`target` when
+`CARGO_TARGET_DIR` is not set).
 
 ## Other hosts
 

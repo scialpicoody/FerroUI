@@ -311,6 +311,11 @@ fn add_inlines(
                 link.set_content(Some(Control::boxed(caption)));
                 AutomationProperties::set_name(&link, Some(&label));
                 AutomationProperties::set_help_text(&link, Some(&destination));
+                // The destination is shown before the link is followed, whatever its caption says.
+                ferroui_controls::ToolTip::set_tip(
+                    &link,
+                    Some(Rc::new(destination.clone()) as ferroui_base::BoxedValue),
+                );
                 // Leave NavigateUri unset: only the host decides how to launch, route internal
                 // HN links, or copy a destination. There is never a second implicit launch.
                 let activate = activate_link.clone();

@@ -164,6 +164,54 @@ fn click(shell: &Shell, window: &Window, control: &Control) {
         shell.settle();
     }
 }
+/// Clicks `control` after it has been scrolled into view and laid out, and after checking
+/// that the pointer at its centre reaches it: a click that misses fails here, not later as
+/// a lost change.
+fn click_in_view(shell: &Shell, window: &Window, control: &Control) {
+    control.bring_into_view();
+    for _ in 0..4 {
+        shell.settle();
+    }
+    let reaches = |point| {
+        window
+            .input_hit_test(point)
+            .map(|hit| hit.upcast::<ferroui_base::Visual>())
+            .is_some_and(|hit| {
+                control.is_visual_ancestor_of(&hit)
+                    || hit
+                        .cast::<Control>()
+                        .is_some_and(|hit| std::ptr::eq(&*hit, control))
+            })
+    };
+    let mut center = Shell::bounds_of(window, control).center();
+    if !reaches(center) {
+        // Centre the control in its scroll viewer when bringing it into view left it
+        // under the edge of the viewport.
+        if let Some(scroll) = control
+            .get_visual_ancestors()
+            .find_map(|ancestor| ancestor.cast::<ferroui_controls::ScrollViewer>())
+        {
+            let in_viewer = Shell::bounds_of(window, control);
+            let viewer = Shell::bounds_of(window, &scroll);
+            let offset = scroll.offset();
+            let target = offset.y + (in_viewer.y - viewer.y)
+                - (viewer.height - in_viewer.height) / 2.0;
+            scroll.set_offset(ferroui_base::Vector::new(offset.x, target.max(0.0)));
+            for _ in 0..4 {
+                shell.settle();
+            }
+            center = Shell::bounds_of(window, control).center();
+        }
+    }
+    assert!(
+        reaches(center),
+        "the pointer at the centre of the control must reach it before the click"
+    );
+    shell.click(0, center);
+    for _ in 0..5 {
+        shell.settle();
+    }
+}
 fn first_story(window: &Window) -> Ref<crate::controls::StoryCard> {
     window
         .get_visual_descendants()
@@ -216,6 +264,9 @@ fn backup_import_survives_a_delayed_startup_snapshot_or_error() {
         let mut imported = ReaderState::default();
         imported.toggle_saved(1001, 2);
         input.set_text(Some(&imported.export_json().unwrap()));
+        for _ in 0..4 {
+            shell.settle();
+        }
         let import = view
             .get_visual_descendants()
             .filter_map(|node| node.cast::<Button>())
@@ -223,9 +274,13 @@ fn backup_import_survives_a_delayed_startup_snapshot_or_error() {
                 AutomationProperties::get_name(button).as_deref() == Some("Import this backup")
             })
             .expect("real Settings import action");
-        import.bring_into_view();
-        shell.settle();
-        click(&shell, &window, &import);
+        click_in_view(&shell, &window, &import);
+        // The import was accepted before the store is read: a missed click and a lost write
+        // would otherwise look the same.
+        assert_eq!(
+            view.get_control::<TextBlock>("StatusText").text().as_deref(),
+            Some("Reading library imported.")
+        );
         let persisted = ready(inner.get("reader:state")).unwrap().unwrap();
         assert_eq!(
             ReaderState::import_json(&persisted).unwrap().saved_ids(),
