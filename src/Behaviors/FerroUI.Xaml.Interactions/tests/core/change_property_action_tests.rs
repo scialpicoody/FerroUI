@@ -106,6 +106,7 @@ impl WriteOnlyTarget {
 
 ferro_markup_type!(class WriteOnlyTarget {
     handles: [Rc<WriteOnlyTarget>],
+    this: Rc<WriteOnlyTarget>,
     properties: [
         Value: Option<String> {
             set: |target: &Rc<WriteOnlyTarget>, value: Option<String>| target.set_value(value)
@@ -140,6 +141,7 @@ impl ReadWriteTarget {
 
 ferro_markup_type!(class ReadWriteTarget {
     handles: [Rc<ReadWriteTarget>],
+    this: Rc<ReadWriteTarget>,
     properties: [
         Value: Option<String> {
             get: |target: &Rc<ReadWriteTarget>| target.value(),

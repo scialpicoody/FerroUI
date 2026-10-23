@@ -2,7 +2,7 @@
 
 use crate::action_task::ActionTask;
 use crate::{SaveFilePickerBehaviorBase, SaveFilePickerBehaviorBaseImpl};
-use ferroui_base::interactivity::{Interactive, RoutedEventArgs, RoutedEventHandlerToken};
+use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEventArgs, RoutedEventHandlerToken};
 use ferroui_base::{ferro_class, ferro_class_info, instantiate, BoxedValue, FerroObjectImpl, Ref, StyledElementImpl};
 use ferroui_controls::Button;
 use ferroui_xaml_interactivity::{StyledElementBehaviorImpl, StyledElementBehaviorImplExt};
