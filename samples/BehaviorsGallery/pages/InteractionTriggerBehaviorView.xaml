@@ -4,7 +4,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:BehaviorsGallery.ViewModels.ReactiveUI"
-             xmlns:reactive="using:System.Reactive"
              x:DataType="vm:InteractionTriggerBehaviorViewModel"
              mc:Ignorable="d" d:DesignWidth="600" d:DesignHeight="450">
   <!-- Ported from Views/ReactiveUI/InteractionTriggerBehaviorView of the reference sample. -->
@@ -17,8 +16,9 @@
     <TextBox x:Name="TargetTextBox" Text="Initial Text" />
     <Button Content="Trigger" Command="{Binding TriggerCommand}">
       <Interaction.Behaviors>
-        <InteractionTriggerBehavior Interaction="{Binding TestInteraction}"
-                                    x:TypeArguments="reactive:Unit, reactive:Unit">
+        <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the behavior of the port is not generic (the
+             types of the interaction travel with it), so it takes no x:TypeArguments. -->
+        <InteractionTriggerBehavior Interaction="{Binding TestInteraction}">
           <ChangePropertyAction TargetObject="TargetTextBox"
                                 PropertyName="Text"
                                 Value="Triggered" />

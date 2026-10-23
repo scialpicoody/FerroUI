@@ -22,7 +22,9 @@
         </Style>
       </ListBox.Styles>
       <ListBox.ItemTemplate>
-        <DataTemplate>
+        <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the compiled bindings of the port need the
+             data type of the template, which the reference infers. -->
+        <DataTemplate x:DataType="viewModels:StandardCursorModel">
           <TextBlock Text="{Binding Type}"/>
         </DataTemplate>
       </ListBox.ItemTemplate>

@@ -16,7 +16,7 @@
 
   <UserControl.Styles>
     <StyleInclude Source="ferres://FerroUI.Xaml.Interactions.Draggable/Styles.xaml" />
-    <StyleInclude Source="/Styles/DraggableCustomStyles.xaml" />
+    <StyleInclude Source="ferres://BehaviorsGallery/Styles/DraggableCustomStyles.xaml" />
     <Style Selector="TextBlock">
       <Setter Property="HorizontalAlignment" Value="Center" />
       <Setter Property="VerticalAlignment" Value="Center" />
