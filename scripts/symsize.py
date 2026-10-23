@@ -3,8 +3,9 @@
 
 Size of a symbol = distance to the next symbol in the same section (nm -n). Rust legacy-mangled
 names are decoded here; a symbol is attributed to the crate named first in its path (for
-`<A as B>::f`, the crate of A). Non-Rust symbols are grouped as `[C/C++]` unless a prefix table
-matches.
+`<A as B>::f`, the crate of A). Names mangled with the v0 scheme (`_R...`) are attributed to the
+first crate root of their path and listed as they are. Other symbols are grouped as C, C++ and
+Objective-C, and the private constants that hold embedded files as anonymous data.
 """
 import argparse, collections, re, subprocess, sys
 
@@ -36,6 +37,19 @@ def decode_legacy(sym):
         p = p.replace('..', '::').replace('$u3b$', ';').replace('$u2b$', '+').replace('$u22$', '"').replace('$u21$', '!')
         out.append(p)
     return '::'.join(out)
+
+def crate_of_v0(sym):
+    """The crate of a symbol mangled with the v0 scheme (`_R...`, the default of newer rustc): the
+    first crate root of its path (`C`, an optional disambiguator `s<base62>_`, then the length
+    and the identifier), so `<core::ptr::drop_in_place<T>>` is `core` as in the legacy scheme."""
+    s = sym[1:] if sym.startswith('__R') else sym
+    if not s.startswith('_R'):
+        return None
+    m = re.search(r'C(?:s[0-9a-zA-Z]*_)?(\d+)_?', s[2:])
+    if not m:
+        return None
+    start = m.end() + 2
+    return s[start:start + int(m.group(1))] or None
 
 def crate_of(name):
     n = name
@@ -77,7 +91,11 @@ def main():
         if size <= 0 or size > 200_000_000:
             continue
         d = decode_legacy(name)
-        if d is None:
+        v0 = crate_of_v0(name) if d is None else None
+        if v0 is not None:
+            cr = v0
+            dn = name
+        elif d is None:
             cr = '[anonymous data]' if name.startswith(('_anon.', 'l_anon.')) or '.llvm.' in name and name.startswith('_anon') else '[C/C++/ObjC]'
             dn = name
         else:
