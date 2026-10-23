@@ -1741,6 +1741,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
+ "ferroui-xaml-interactions-custom",
  "ferroui-xaml-interactivity",
 ]
 
@@ -1832,6 +1833,8 @@ dependencies = [
  "ferroui-controls",
  "ferroui-markup",
  "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-xaml-interactions",
 ]
 
 [[package]]

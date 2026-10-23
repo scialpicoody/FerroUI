@@ -48,6 +48,12 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 # The windows of the tests are documents loaded with the run-time loader.
 ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+# The click trigger and the conditional and switch actions of the logical tree lifetime tests. Not a
+# cycle of the build: the custom behaviors do not depend on this crate, they only have it among their
+# development dependencies. That is a cycle of the packages, though, so the dependency is named by its
+# path alone: Cargo leaves a development dependency without a version out of the package
+# (docs/release.md, "Dependency order").
+ferroui-xaml-interactions-custom = { path = "../FerroUI.Xaml.Interactions.Custom" }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
