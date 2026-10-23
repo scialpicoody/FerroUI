@@ -97,7 +97,7 @@ fn transitions_behavior_applies_and_restores_transitions() {
     let target = Border::new();
     target.set_transitions(Some(original.clone()));
     let panel = Panel::new();
-    panel.children().add(target.clone().upcast());
+    panel.children().add(target.clone().upcast::<Control>());
     let behavior = TransitionsBehavior::new();
     behavior.set_value(TransitionsBehavior::transitions_source_property(), Some(replacement.clone()));
     assert!(behavior.transitions_source() == Some(replacement.clone()));
