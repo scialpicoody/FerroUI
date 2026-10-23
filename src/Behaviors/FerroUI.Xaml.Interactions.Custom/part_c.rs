@@ -6,7 +6,9 @@
 //! - `RenderTarget/` ([`render_target`](self::render_target)): drawing into a render target bitmap, with its contracts;
 //! - `WriteableBitmap/` ([`writeable_bitmap`](self::writeable_bitmap)): rendering into a writeable bitmap, with its contract;
 //! - `Window/` ([`window`](self::window)): the window of the associated control;
-//! - `Button/` ([`button`](self::button)): buttons.
+//! - `Button/` ([`button`](self::button)): buttons;
+//! - `Cursor/` ([`cursor`](self::cursor)): the cursor of an input element, with its contract;
+//! - `ScrollViewer/` ([`scroll_viewer`](self::scroll_viewer)): the scroll viewer.
 //!
 //! The part owns its classes ([`TYPES`]), their public Rust paths and its markup types
 //! ([`register`]); `lib.rs` re-exports everything public of it.
@@ -23,10 +25,14 @@ use std::rc::Rc;
 mod animations;
 #[path = "button/mod.rs"]
 mod button;
+#[path = "cursor/mod.rs"]
+mod cursor;
 #[path = "notifications/mod.rs"]
 mod notifications;
 #[path = "render_target/mod.rs"]
 mod render_target;
+#[path = "scroll_viewer/mod.rs"]
+mod scroll_viewer;
 #[path = "split_view/mod.rs"]
 mod split_view;
 #[path = "window/mod.rs"]
@@ -36,8 +42,10 @@ mod writeable_bitmap;
 
 pub use self::animations::*;
 pub use self::button::*;
+pub use self::cursor::*;
 pub use self::notifications::*;
 pub use self::render_target::*;
+pub use self::scroll_viewer::*;
 pub use self::split_view::*;
 pub use self::window::*;
 pub use self::writeable_bitmap::*;
@@ -100,6 +108,18 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::ButtonHideFlyoutOnClickBehavior,
     crate::ButtonHidePopupOnClickBehavior,
     crate::InvokeButtonClickAction,
+    // Cursor/
+    crate::PointerOverCursorBehavior,
+    crate::SetCursorAction,
+    crate::SetCursorBehavior,
+    crate::SetCursorFromProviderAction,
+    crate::SetCursorFromProviderBehavior,
+    // ScrollViewer/
+    crate::HorizontalScrollViewerBehavior,
+    crate::ScrollChangedTrigger,
+    crate::ScrollToOffsetAction,
+    crate::ScrollViewerOffsetBehavior,
+    crate::ViewportBehavior,
 ];
 
 /// The types of this part that are not classes (lists, enumerations and contracts), declared for
@@ -115,6 +135,10 @@ const MARKUP_TYPES: &[&MarkupType] = &[
     <dyn crate::IWriteableBitmapRenderer as MarkupTyped>::MARKUP,
     // Window/
     <crate::WindowActionType as MarkupTyped>::MARKUP,
+    // Cursor/
+    <dyn crate::ICursorProvider as MarkupTyped>::MARKUP,
+    // ScrollViewer/
+    <crate::ChangeSize as MarkupTyped>::MARKUP,
 ];
 
 /// The public Rust paths of the classes of this part, by the shortest path another crate names
@@ -172,12 +196,26 @@ mod rust_paths {
             crate::ButtonHideFlyoutOnClickBehavior,
             crate::ButtonHidePopupOnClickBehavior,
             crate::InvokeButtonClickAction,
+            // Cursor/
+            crate::PointerOverCursorBehavior,
+            crate::SetCursorAction,
+            crate::SetCursorBehavior,
+            crate::SetCursorFromProviderAction,
+            crate::SetCursorFromProviderBehavior,
+            // ScrollViewer/
+            crate::HorizontalScrollViewerBehavior,
+            crate::ScrollChangedTrigger,
+            crate::ScrollToOffsetAction,
+            crate::ScrollViewerOffsetBehavior,
+            crate::ViewportBehavior,
         ],
         types: [
             // SplitView/
             crate::SplitViewStateSetters,
             // Window/
             crate::WindowActionType,
+            // ScrollViewer/
+            crate::ChangeSize,
         ],
         contracts: [
             // RenderTarget/
@@ -186,6 +224,8 @@ mod rust_paths {
             crate::IRenderTargetBitmapSimpleRenderer,
             // WriteableBitmap/
             crate::IWriteableBitmapRenderer,
+            // Cursor/
+            crate::ICursorProvider,
         ],
         generics: [
         ],
@@ -228,6 +268,12 @@ fn register_value_types() {
     ValueTypes::register_element_ref::<ferroui_controls::Window>();
     // Button/
     ValueTypes::register_element_ref::<ferroui_controls::Button>();
+    // Cursor/
+    ValueTypes::register_nullable::<Rc<dyn crate::ICursorProvider>>();
+    ValueTypes::register_element_ref::<ferroui_base::input::InputElement>();
+    // ScrollViewer/
+    ValueTypes::register_nullable::<crate::ChangeSize>();
+    ValueTypes::register_element_ref::<ferroui_controls::ScrollViewer>();
 }
 
 /// The sender of an action as an object of class `T` (`sender as T` of the reference).
