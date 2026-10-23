@@ -15,7 +15,9 @@ Everything here is measured unless a sentence says otherwise. Sizes are in MB of
   workspace is set up for build time (thin LTO in sixteen code generation units,
   `docs/porting/desktop-performance.md`, section 7) and keeps the symbol table; `dist` is fat LTO in
   one unit with the symbols stripped. On macOS that alone makes the catalog of the baseline
-  140.1 MB instead of 220.2 MB (section 3).
+  140.1 MB instead of 220.2 MB; with the changes below it is 118.3 MB. On Windows (x86-64, where
+  the symbols are in the PDB anyway) the catalog goes from 200.8 MB (release, baseline) to
+  149.5 MB (`dist`, this change) (section 3).
 - **The catalog compiled and linked three themes.** It starts in the WinUI theme of the port, but
   the Simple and Fluent themes of the original were compiled into it as well (7.9 MB of code in
   the release build on macOS, 26.2 MB of the executable with their unwind tables and symbols).
@@ -26,12 +28,11 @@ Everything here is measured unless a sentence says otherwise. Sizes are in MB of
   went from 12.4 to 6.4 MB (section 4.2).
 - **What dominates now** is the framework itself: the object model and the property system
   instantiated per value type (`ferroui_base`, 31 % of the code and data of the catalog and 42 % of
-  the gallery), the embedded
-  pictures of the catalog (24 MB, the same pictures the upstream catalog embeds), the unwind tables
+  the gallery), the embedded pictures of the catalog (24 MB, the same pictures the upstream catalog embeds), the unwind tables
   that unwinding needs, and Skia (section 5).
 - **Direct3D 12 is not used.** On Windows Skia draws with OpenGL ES through ANGLE, which runs on
   Direct3D 11 (as upstream does), with software rendering as the fallback; ANGLE is linked into the
-  executable instead of being shipped as a DLL beside it (section 7).
+  executable instead of being shipped as a DLL beside it, and is about 4 % of it (section 7).
 
 No functionality was removed, no executable packer is used, and the panic strategy is unchanged.
 
@@ -39,10 +40,10 @@ No functionality was removed, no executable packer is used, and the panic strate
 
 - **macOS**: Apple M3 Pro (11 cores, 18 GB), macOS 26.6, rustc 1.90.0, Xcode 26.4.1. The machine was
   shared with other builds; sizes do not depend on that, start-up times do.
-- **Windows**: the owner's Windows 11 ARM64 virtual machine (Parallels, 4 processors, 6 GB),
-  rustc 1.99.0, MSVC 14.51 (`docs/porting/win32-platform.md`, section 10.4). The reporter's
-  executable was built for x86-64; the proportions carry over, the absolute numbers differ a little
-  with the instruction set.
+- **Windows**: GitHub's `windows-latest` runner (x86-64, the instruction set of the reporter's
+  executable), stable Rust and MSVC of the image, through the workflow `Performance`
+  (`.github/workflows/perf.yml`, input `windows`). The owner's Windows virtual machine was not used:
+  it is ARM64, and the host was short of memory while other builds ran.
 - **What was built**: `control-catalog-desktop` and `winui-theme-gallery` together, in one cargo
   invocation (`-p control-catalog-desktop -p winui-theme-gallery --bin ..`), so that the features of
   their common dependencies are the same in every measurement. Building one of them alone resolves
@@ -86,12 +87,50 @@ Every number below comes from this procedure; the commands are in section 9.
 |---|---:|---:|
 | Baseline, `dist` as it was (fat LTO, one unit, symbols kept) | 168.11 | 76.46 |
 | Baseline, the same stripped | 140.07 | 60.36 |
-| This change, `dist` (fat LTO, one unit, `strip = "symbols"`) | DIST_CATALOG | DIST_GALLERY |
-| **Change from the baseline release build** | DIST_CATALOG_CHANGE | DIST_GALLERY_CHANGE |
+| This change, `dist` (fat LTO, one unit, `strip = "symbols"`) | 118.25 | 54.04 |
+| **Change from the baseline release build** (what the report measured) | **-101.95 (-46.3 %)** | **-47.56 (-46.8 %)** |
+| **Change from the baseline `dist`, stripped** (the effect of the code changes alone) | **-21.82 (-15.6 %)** | **-6.32 (-10.5 %)** |
 
-### 3.3 Windows (ARM64), release and `dist`
+### 3.3 Windows (x86-64), release and `dist`
 
-WINDOWS_TABLE
+Measured on GitHub's `windows-latest` runner (x86-64, the instruction set of the report) by the
+workflow `Performance` with its input `windows` (run 39945714924): each tree and profile built
+in a job of its own. The file is what is shipped: a Windows executable holds no symbols (they are
+in the PDB beside it), so `strip` changes nothing here.
+
+| Build | Catalog | Gallery |
+|---|---:|---:|
+| Baseline, release | 200.81 | 92.05 |
+| Baseline, `dist` | 184.40 | 85.29 |
+| This change, release | 162.14 | 80.14 |
+| This change, `dist` | 149.52 | 74.04 |
+| **Change, release** | **-38.67 (-19.3 %)** | **-11.91 (-12.9 %)** |
+| **Change, from the baseline release build to this change with `dist`** | **-51.29 (-25.5 %)** | **-18.01 (-19.6 %)** |
+
+The reporter's 193 MB was a release build of an earlier commit. The sections of the catalog with
+`dist` after the change: code (`.text`) 94.32 MB, read-only data (`.rdata`: the embedded pictures
+and fonts, the unwind data `.xdata`, the constant data of Skia and ANGLE) 49.04 MB, function table
+(`.pdata`) 4.96 MB, relocations 0.52 MB, data 0.68 MB. The executables are larger than the stripped
+macOS ones: ANGLE (6.6 MB, below) is linked into them, x86-64 code is larger than ARM64 code, and
+the function table and unwind data of the x86-64 ABI (`.pdata`, `.xdata`) are larger than the
+compact unwind tables of macOS.
+
+**By library** (the release executable of the catalog after the change, linked once more with a
+map of the linker, `/MAP`; run 39952613814; 155.8 MB attributed to symbols, the largest objects):
+
+| Library or object | MB | Share |
+|---|---:|---:|
+| The objects of `control_catalog` (its compiled pages and code; the largest object, 27.4 MB, holds its 24 MB of embedded pictures) | 60.8 | 39 % |
+| The first object of `ferroui_themes_winui` (the compiled theme) | 10.7 | 7 % |
+| Six objects of `ferroui_controls` and `ferroui_base` among the largest (the rest of the framework is in objects below 1.7 MB each) | 12.7 | 8 % |
+| ANGLE: `libGLESv2` (OpenGL ES on Direct3D 11) and `libmozangle` (EGL and the shader translator) | 6.6 | 4 % |
+| Skia | 5.1 | 3 % |
+
+With thin LTO the Rust code stays in the objects of its crate, sixteen per crate, so the framework
+is spread over many objects smaller than the ones listed; the workflow now groups them by crate.
+What the table shows for the question of the report: the graphics stack of Windows (ANGLE with
+its Direct3D 11 renderer) is about 4 % of the executable and Skia 3 %; the rest is the framework,
+the compiled markup and the pictures of the catalog.
 
 ### 3.4 Code of the themes (release, macOS, from the symbol table)
 
@@ -104,6 +143,23 @@ WINDOWS_TABLE
 
 The generated Rust of the WinUI theme went from 17.2 to 12.2 MB, of the Fluent theme from 7.3 to
 5.5 MB and of the Simple theme from 3.7 to 3.2 MB.
+
+### 3.5 Start-up and the macOS runner of CI
+
+The workflow `Performance` (`.github/workflows/perf.yml`, run 39936080676) built the baseline and
+this change on a GitHub `macos-15` runner (Apple M1, 3 processors) with the release profile, each
+application by itself, and launched the two builds alternately, seven warm launches each, load
+average 6 to 10:
+
+| Application | Size before (stripped) | after | Start-up before, median (range) | after |
+|---|---:|---:|---:|---:|
+| control-catalog-desktop | 171.45 | 142.85 | 1012 ms (830 to 1152) | 1061 ms (829 to 1198) |
+| themed_window (Simple) | 73.89 | 70.59 | 162 ms (122 to 289) | 170 ms (129 to 339) |
+| hello_window | 52.17 | 52.17 | 139 ms (127 to 173) | 162 ms (143 to 197) |
+
+The start-up times are the same within the spread of the launches (hello_window, which no change
+touches, moved as much as the others). The helpers of compiled markup are calls where the
+statements were calls too; the theme is populated as fast as before.
 
 ## 4. The changes
 
@@ -251,11 +307,13 @@ backtrace with names. The release profile is unchanged.
 default, with software rendering as the fallback, the order upstream uses
 (`Win32RenderingMode::AngleEgl`, `Software`; WGL and Vulkan on request). ANGLE comes from the crate
 `mozangle`, which builds it from source and links it statically, so it is inside the executable,
-where upstream ships it as a DLL beside its assemblies; WINDOWS_ANGLE. Skia uses its Ganesh backend
-on that OpenGL context with the GPU resource cache limited to 29.5 MB (`1024 * 600 * 4 * 12`
+where upstream ships it as a DLL beside its assemblies; it is 6.6 MB of the 162 MB release
+executable of the catalog (section 3.3). Skia uses its Ganesh backend on that OpenGL context with the GPU resource cache limited to 29.5 MB (`1024 * 600 * 4 * 12`
 bytes), the limit upstream sets.
 
-**Memory, measured on macOS** (the catalog showing its home page, three launches each, median):
+**Memory, measured on macOS** (the catalog showing its home page, three launches each, median;
+not measured on Windows, where the hosted runners have no GPU and the virtual machine was not
+used):
 
 | Build, rendering | Resident | Peak footprint |
 |---|---:|---:|

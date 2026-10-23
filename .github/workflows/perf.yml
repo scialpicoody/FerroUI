@@ -239,11 +239,13 @@ jobs:
               if 0 < size < 64_000_000:
                   library = origin.split(':')[0] if ':' in origin else origin
                   library = re.sub(r'-[0-9a-f]{16}', '', library.replace('\\', '/').rsplit('/', 1)[-1])
-                  library = re.sub(r'\.[0-9a-z]+\.rcgu\.o$|\.[0-9a-z]+-cgu\.[0-9]+\.rcgu\.o$', ' (Rust)', library)
+                  # The objects of a crate after thin LTO: `<binary>.<crate>.<crate>.<hash>-cgu.<n>.rcgu.o`.
+                  crate = re.match(r'[a-z0-9_]+\.([a-z0-9_]+)\.\1\.[0-9a-f]+-cgu\.[0-9]+\.rcgu', library)
+                  library = f'{crate.group(1)} (Rust)' if crate else re.sub(r'\.[0-9a-z_]+-cgu\.[0-9]+\.rcgu.*$|\.lib$', '', library)
                   sizes[library] += size
           total = sum(sizes.values())
           print(f'{total / 1e6:8.2f} attributed')
-          for library, size in sizes.most_common(25):
+          for library, size in sizes.most_common(30):
               print(f'{size / 1e6:8.2f}  {100 * size / total:5.1f} %  {library}')
           PY
             echo '```'
