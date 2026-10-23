@@ -1755,6 +1755,7 @@ dependencies = [
  "ferroui-markup-xaml-loader",
  "ferroui-themes-fluent",
  "ferroui-xaml-behaviors-animations",
+ "ferroui-xaml-interactions",
  "ferroui-xaml-interactivity",
 ]
 

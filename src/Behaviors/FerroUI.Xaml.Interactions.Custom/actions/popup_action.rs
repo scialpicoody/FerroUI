@@ -3,7 +3,7 @@
 use super::control_of;
 use ferroui_base::data::BindingPriority;
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObjectExtensions, FerroObjectImpl,
+    ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObject, FerroObjectExtensions, FerroObjectImpl,
     FerroProperty, Nullable, Ref, StyledElement, StyledElementImpl, StyledProperty,
 };
 use ferroui_controls::primitives::Popup;
@@ -92,7 +92,8 @@ impl PopupAction {
     }
 
     fn bind_to_data_context(source: &Control, target: &Control) {
-        let data = source.get_observable(StyledElement::data_context_property());
+        let source_object: &FerroObject = source;
+        let data = FerroObjectExtensions::get_observable(source_object, StyledElement::data_context_property());
         let _ = target.bind(StyledElement::data_context_property(), data, BindingPriority::LocalValue);
     }
 }
