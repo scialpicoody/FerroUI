@@ -1061,6 +1061,9 @@ fn screenshot_run(directory: PathBuf) {
 /// (`flight-NN-<ms>.png`, the time from the selection of the page). Not in the original. The
 /// page should be shown for 5 s at least (`FERROUI_SMOKE_PAGES=5000`). The box of the implicit
 /// animations is then hidden and shown and the parallax scroller scrolled (`steps-<ms>.png`).
+/// From 5 s the sections of the later phases are opened, and each is brought into view in turn
+/// with its demo run (`section-N-<ms>.png`); that part needs `FERROUI_SMOKE_PAGES=13000`, or
+/// more with `FERROUI_SMOKE_WINUI_SECTION_MS`.
 fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
     let open_at = selected_at + Duration::from_millis(400);
     let back_at = selected_at + Duration::from_millis(2000);
@@ -1104,6 +1107,35 @@ fn winui_flight_run(directory: &std::path::Path, selected_at: Duration) {
             move || {
                 if let Some(window) = main_window() {
                     save_composed(&window, path.clone(), format!("step at {} ms", (at - selected_at).as_millis()));
+                }
+            },
+            at,
+            DispatcherPriority::NORMAL,
+        );
+    }
+    // The sections of the later phases: all opened (their demos are built then), then each
+    // brought into view with its demo run, and saved.
+    let _ = DispatcherTimer::run_once(
+        || println!("Flight: open the sections: {}", control_catalog::pages::smoke_expand_sections()),
+        selected_at + Duration::from_millis(5000),
+        DispatcherPriority::NORMAL,
+    );
+    // `FERROUI_SMOKE_WINUI_SECTION_MS`: the time between two sections (1200 ms by default); a
+    // debug build with Vello needs more, as each saved frame holds the compositor up.
+    let spacing = environment_milliseconds("FERROUI_SMOKE_WINUI_SECTION_MS").unwrap_or(1200);
+    for section in 0..6usize {
+        let shown = 5800 + section as u64 * spacing;
+        let _ = DispatcherTimer::run_once(
+            move || println!("Flight: show section {section}: {}", control_catalog::pages::smoke_show_section(section)),
+            selected_at + Duration::from_millis(shown),
+            DispatcherPriority::NORMAL,
+        );
+        let at = selected_at + Duration::from_millis(shown + 900);
+        let path = directory.join(format!("section-{section}-{}.png", (at - selected_at).as_millis()));
+        let _ = DispatcherTimer::run_once(
+            move || {
+                if let Some(window) = main_window() {
+                    save_composed(&window, path.clone(), format!("section {section}"));
                 }
             },
             at,
