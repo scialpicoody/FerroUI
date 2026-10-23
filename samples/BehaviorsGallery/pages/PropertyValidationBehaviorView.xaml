@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:BehaviorsGallery.ViewModels"
              xmlns:custom="using:FerroUI.Xaml.Interactions.Custom"
-             xmlns:sys="using:System"
+             xmlns:pages="using:BehaviorsGallery.Views.Pages"
              x:DataType="vm:MainWindowViewModel"
              mc:Ignorable="d"
              d:DesignWidth="500"
@@ -19,13 +19,15 @@
     <TextBlock Text="PropertyValidationBehavior applies rules to a FerroUI property and surfaces IsValid/Error values." TextWrapping="Wrap" />
     <TextBox Width="260" PlaceholderText="Enter at least 3 characters" Text="{Binding ValidatedText}">
       <Interaction.Behaviors>
-        <custom:PropertyValidationBehavior x:TypeArguments="TextBox, sys:String"
-                                           Property="{x:Static TextBox.TextProperty}"
-                                           IsValid="{Binding IsTextValid, Mode=TwoWay}"
-                                           Error="{Binding TextValidationError, Mode=TwoWay}">
+        <!-- Deviation (DEVIATIONS.md, Behaviors gallery): the behavior of the port is not generic, so the
+             closed type PropertyValidationBehavior<TextBox, string> of the reference (x:TypeArguments) is a
+             class of the page (pages:TextBoxPropertyValidationBehavior). -->
+        <pages:TextBoxPropertyValidationBehavior Property="{x:Static TextBox.TextProperty}"
+                                                 IsValid="{Binding IsTextValid, Mode=TwoWay}"
+                                                 Error="{Binding TextValidationError, Mode=TwoWay}">
           <custom:RequiredTextValidationRule ErrorMessage="Value is required." />
           <custom:MinLengthValidationRule Length="3" ErrorMessage="Minimum length is 3." />
-        </custom:PropertyValidationBehavior>
+        </pages:TextBoxPropertyValidationBehavior>
       </Interaction.Behaviors>
     </TextBox>
     <CheckBox Content="Is valid" IsChecked="{Binding IsTextValid}" IsEnabled="False" />

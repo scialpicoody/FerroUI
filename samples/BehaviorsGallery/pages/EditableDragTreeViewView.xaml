@@ -12,7 +12,7 @@
     <vm:DragAndDropSampleViewModel />
   </Design.DataContext>
   <UserControl.Styles>
-    <StyleInclude Source="ferres://Xaml.Behaviors.Interactions.DragAndDrop/Styles.xaml" />
+    <StyleInclude Source="ferres://FerroUI.Xaml.Interactions.DragAndDrop/Styles.xaml" />
     <Style Selector="TreeView.NodesEditableDrag">
       <Style.Resources>
         <NodesTreeViewDropHandler x:Key="NodesTreeViewDropHandler" />
