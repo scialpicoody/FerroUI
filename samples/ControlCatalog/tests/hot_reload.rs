@@ -532,3 +532,40 @@ fn compiled_catalog_template_scroll_survives_included_theme_replacement() {
     }
     drop(old); window.close();
 }
+
+#[test]
+fn reload_overlay_needs_the_source_directory_of_the_build() {
+    use std::{collections::BTreeMap, path::Path};
+    let original_root = Path::new(env!("CARGO_MANIFEST_DIR")).canonicalize().unwrap();
+    let page = original_root.join("Pages/BorderPage.xaml");
+    let directory =
+        std::env::temp_dir().join(format!("ferroui-catalog-overlay-{}", std::process::id()));
+    std::fs::create_dir_all(directory.join("Pages")).unwrap();
+    std::fs::write(directory.join("Pages/BorderPage.xaml"), "<ContentPage/>").unwrap();
+    let files = BTreeMap::from([
+        ("border".to_owned(), page.clone()),
+        ("slider".to_owned(), original_root.join("Pages/SliderPage.xaml")),
+    ]);
+
+    // A copy in the overlay takes the place of the source; the others stay.
+    let mut overlaid = files.clone();
+    crate::hot_reload::overlay_sources(&mut overlaid, &original_root, &directory).unwrap();
+    assert_eq!(overlaid["border"], directory.join("Pages/BorderPage.xaml"));
+    assert_eq!(overlaid["slider"], files["slider"]);
+
+    // A binary that runs where the source directory of its build does not exist.
+    let mut missing = files.clone();
+    let error =
+        crate::hot_reload::overlay_sources(&mut missing, &directory.join("missing"), &directory)
+            .unwrap_err();
+    assert!(error.contains("is not available"), "{error}");
+    assert_eq!(missing, files);
+
+    // A source outside the source directory of the build.
+    let mut outside =
+        BTreeMap::from([("other".to_owned(), directory.join("Pages/BorderPage.xaml"))]);
+    let error =
+        crate::hot_reload::overlay_sources(&mut outside, &original_root, &directory).unwrap_err();
+    assert!(error.contains("is not under"), "{error}");
+    std::fs::remove_dir_all(&directory).unwrap();
+}

@@ -6,7 +6,13 @@ use ferroui_hot_reload::{
     ComponentReloadTarget, FileWatcher, HotReloadSession, ReloadManifest, ReloadTarget,
 };
 use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
-use std::{cell::RefCell, collections::BTreeSet, rc::{Rc, Weak}, time::Duration};
+use std::{
+    cell::{Cell, RefCell},
+    collections::{BTreeMap, BTreeSet},
+    path::{Path, PathBuf},
+    rc::{Rc, Weak},
+    time::Duration,
+};
 
 struct CatalogSession {
     session: HotReloadSession,
@@ -17,6 +23,8 @@ struct CatalogSession {
 }
 ferroui_base::ferro_thread_local! {
     static SESSION: RefCell<Weak<RefCell<CatalogSession>>> = const { RefCell::new(Weak::new()) };
+    // Set when the session cannot start; the catalog then runs without reload.
+    static DISABLED: Cell<bool> = const { Cell::new(false) };
 }
 impl Drop for CatalogSession {
     fn drop(&mut self) {
@@ -66,28 +74,28 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
     {
         return;
     }
+    if DISABLED.with(Cell::get) {
+        return;
+    }
     SESSION.with(|slot| {
         let mut slot = slot.borrow_mut();
         let uri = crate::markup::document_uri(path);
-        let context = slot
+        let Some(context) = slot
             .upgrade()
-            .unwrap_or_else(|| {
+            .or_else(|| {
                 let mut manifest =
                     ReloadManifest::parse(include_str!(env!("FERROUI_HOT_RELOAD_MANIFEST")))
                         .expect("catalog development manifest");
                 let overlay_root = std::env::var_os("FERROUI_HOT_RELOAD_ROOT");
                 if let Some(directory) = &overlay_root {
-                    let original_root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                        .canonicalize()
-                        .expect("catalog source root");
-                    for source in manifest.files.values_mut() {
-                        let relative = source
-                            .strip_prefix(&original_root)
-                            .expect("catalog source path");
-                        let overlay = std::path::PathBuf::from(&directory).join(relative);
-                        if overlay.exists() {
-                            *source = overlay;
-                        }
+                    if let Err(message) = overlay_sources(
+                        &mut manifest.files,
+                        Path::new(env!("CARGO_MANIFEST_DIR")),
+                        Path::new(directory),
+                    ) {
+                        eprintln!("Catalog reload disabled: {message}");
+                        DISABLED.with(|disabled| disabled.set(true));
+                        return None;
                     }
                 }
                 let watcher = if overlay_root.is_some() {
@@ -178,8 +186,11 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
                 // the worker's own loader-lock-protected thread exit.
                 FerroLocator::current_mutable().bind_to_self(context.clone());
                 *slot = Rc::downgrade(&context);
-                context
-            });
+                Some(context)
+            })
+        else {
+            return;
+        };
         let mut context = context.borrow_mut();
         let canonical = ferroui_base::utilities::Uri::try_create(
             &uri,
@@ -200,6 +211,39 @@ pub(crate) fn track(root: Ref<ContentPage>, class: &'static TypeInfo, path: &str
         context.targets.push((target, root.downgrade()));
         eprintln!("Catalog reload tracking: {path}");
     });
+}
+
+/// Points the sources of the manifest that `directory` (`FERROUI_HOT_RELOAD_ROOT`) also holds at
+/// the copies there. The sources are paths under `original_root`, the source directory of the
+/// build; an error says why the overlay cannot be used, for example a binary that runs where that
+/// directory does not exist.
+pub(crate) fn overlay_sources(
+    files: &mut BTreeMap<String, PathBuf>,
+    original_root: &Path,
+    directory: &Path,
+) -> Result<(), String> {
+    let original_root = original_root.canonicalize().map_err(|error| {
+        format!(
+            "the source directory of the build, {}, is not available ({error})",
+            original_root.display()
+        )
+    })?;
+    let mut overlaid = files.clone();
+    for source in overlaid.values_mut() {
+        let relative = source.strip_prefix(&original_root).map_err(|_| {
+            format!(
+                "the source {} is not under the source directory of the build, {}",
+                source.display(),
+                original_root.display()
+            )
+        })?;
+        let overlay = directory.join(relative);
+        if overlay.exists() {
+            *source = overlay;
+        }
+    }
+    *files = overlaid;
+    Ok(())
 }
 
 pub(crate) fn component_target(
