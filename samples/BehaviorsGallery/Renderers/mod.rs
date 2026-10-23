@@ -5,9 +5,9 @@
 use ferroui_base::metadata::MarkupType;
 use ferroui_base::TypeInfo;
 
-// pub mod rotating_square_renderer; // owner: RenderTargetBitmapView
-// pub mod sample_writeable_bitmap_renderer; // owner: WriteableBitmapView
-// pub mod solid_square_renderer; // owner: RenderTargetBitmapView
+pub mod rotating_square_renderer; // owner: RenderTargetBitmapView
+pub mod sample_writeable_bitmap_renderer; // owner: WriteableBitmapView
+pub mod solid_square_renderer; // owner: RenderTargetBitmapView
 
 /// The shared classes of this namespace: none.
 pub(crate) const TYPES: &[&TypeInfo] = &[];

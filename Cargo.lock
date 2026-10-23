@@ -253,6 +253,7 @@ dependencies = [
  "ferroui-reactive",
  "ferroui-reactiveui",
  "ferroui-reactiveui-controls",
+ "ferroui-splat",
  "ferroui-system",
  "ferroui-themes-fluent",
  "ferroui-xaml-behaviors-animations",

@@ -5,7 +5,7 @@
 use ferroui_base::metadata::MarkupType;
 use ferroui_base::TypeInfo;
 
-// pub mod pointer_pressed_disposing_trigger; // owner: DisposingTriggerView
+pub mod pointer_pressed_disposing_trigger; // owner: DisposingTriggerView
 
 /// The shared classes of this namespace: none.
 pub(crate) const TYPES: &[&TypeInfo] = &[];

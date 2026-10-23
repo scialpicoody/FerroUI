@@ -44,7 +44,9 @@ ferroui-desktop = { workspace = true }
 # The behaviors (the projects of the reference library the sample references; the scripting and
 # the DataGrid drag and drop projects have no port).
 ferroui-xaml-interactivity = { workspace = true }
-ferroui-xaml-interactions = { workspace = true }
+# The actions and triggers of the file system and of the network (the FileSystem and Network
+# pages).
+ferroui-xaml-interactions = { workspace = true, features = ["file-system", "network"] }
 ferroui-xaml-interactions-custom = { workspace = true }
 ferroui-xaml-interactions-draganddrop = { workspace = true }
 ferroui-xaml-interactions-draggable = { workspace = true }
@@ -58,6 +60,8 @@ ferroui-system = { workspace = true }
 ferroui-reactive = { workspace = true }
 ferroui-reactiveui = { workspace = true }
 ferroui-reactiveui-controls = { workspace = true }
+# `Locator.CurrentMutable` of the navigation page.
+ferroui-splat = { workspace = true }
 sample-support = { path = "../SampleSupport" }
 
 [build-dependencies]
