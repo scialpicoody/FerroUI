@@ -57,6 +57,10 @@ impl fmt::Display for ItemViewModel {
 ferro_markup_type!(class ItemViewModel {
     this: Rc<ItemViewModel>,
     handles: [ItemViewModel, Rc<ItemViewModel>, Option<Rc<ItemViewModel>>],
+    // `new ItemViewModel(value, color)` of the documents (`<vm:ItemViewModel>` with `x:Arguments`).
+    constructors: [
+        (String, String) => |value: String, color: String| ItemViewModel::new(&value, &color),
+    ],
     properties: [
         Value: Option<String> {
             get: |this: &Rc<ItemViewModel>| this.value(),

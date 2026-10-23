@@ -21,92 +21,92 @@ pub mod placeholder;
 
 // The modules of the pages, in the order of the table; a page not ported yet is a comment.
 // Group A (pages 1 to 86)
-// pub mod select_all_on_focus_behavior_view;
-// pub mod focus_next_element_action_view;
-// pub mod window_drag_move_behavior_view;
-// pub mod tilt_effect_behavior_view;
-// pub mod orbit_effect_behavior_view;
-// pub mod parallax_behavior_view;
-// pub mod conditional_action_view;
-// pub mod switch_case_action_view;
-// pub mod switch_case_behavior_view;
-// pub mod conditional_behavior_view;
-// pub mod lose_focus_on_enter_behavior_view;
-// pub mod auto_scroll_to_bottom_behavior_view;
+pub mod select_all_on_focus_behavior_view;
+pub mod focus_next_element_action_view;
+pub mod window_drag_move_behavior_view;
+pub mod tilt_effect_behavior_view;
+pub mod orbit_effect_behavior_view;
+pub mod parallax_behavior_view;
+pub mod conditional_action_view;
+pub mod switch_case_action_view;
+pub mod switch_case_behavior_view;
+pub mod conditional_behavior_view;
+pub mod lose_focus_on_enter_behavior_view;
+pub mod auto_scroll_to_bottom_behavior_view;
 pub mod call_method_action_view;
-// pub mod debounce_throttle_action_view;
-// pub mod observable_stream_behavior_view;
-// pub mod async_action_group_view;
-// pub mod focus_trap_behavior_view;
-// pub mod screen_reader_announce_action_view;
-// pub mod global_hotkey_behavior_view;
-// pub mod visual_debug_behavior_view;
-// pub mod log_action_view;
-// pub mod network_status_trigger_view;
-// pub mod clipboard_monitor_behavior_view;
+pub mod debounce_throttle_action_view;
+pub mod observable_stream_behavior_view;
+pub mod async_action_group_view;
+pub mod focus_trap_behavior_view;
+pub mod screen_reader_announce_action_view;
+pub mod global_hotkey_behavior_view;
+pub mod visual_debug_behavior_view;
+pub mod log_action_view;
+pub mod network_status_trigger_view;
+pub mod clipboard_monitor_behavior_view;
 pub mod change_property_action_view;
 pub mod data_trigger_behavior_view;
-// pub mod data_trigger_behavior_advanced_view;
-// pub mod multi_data_trigger_behavior_view;
-// pub mod binding_trigger_behavior_view;
+pub mod data_trigger_behavior_advanced_view;
+pub mod multi_data_trigger_behavior_view;
+pub mod binding_trigger_behavior_view;
 pub mod value_changed_trigger_behavior_view;
-// pub mod property_changed_trigger_view;
+pub mod property_changed_trigger_view;
 pub mod event_trigger_behavior_view;
 pub mod timer_trigger_view;
-// pub mod task_completed_trigger_view;
-// pub mod loaded_trigger_view;
+pub mod task_completed_trigger_view;
+pub mod loaded_trigger_view;
 pub mod invoke_command_action_view;
-// pub mod auto_focus_behavior_view;
-// pub mod auto_select_behavior_view;
-// pub mod text_box_validation_behavior_view;
-// pub mod numeric_up_down_validation_behavior_view;
-// pub mod not_null_validation_rule_view;
-// pub mod property_validation_behavior_view;
-// pub mod slider_validation_behavior_view;
-// pub mod date_picker_validation_behavior_view;
-// pub mod combo_box_validation_behavior_view;
-// pub mod focus_control_behavior_view;
+pub mod auto_focus_behavior_view;
+pub mod auto_select_behavior_view;
+pub mod text_box_validation_behavior_view;
+pub mod numeric_up_down_validation_behavior_view;
+pub mod not_null_validation_rule_view;
+pub mod property_validation_behavior_view;
+pub mod slider_validation_behavior_view;
+pub mod date_picker_validation_behavior_view;
+pub mod combo_box_validation_behavior_view;
+pub mod focus_control_behavior_view;
 pub mod focus_on_attached_behavior_view;
-// pub mod focus_on_attached_to_visual_tree_behavior_view;
-// pub mod focus_on_pointer_moved_behavior_view;
-// pub mod focus_on_pointer_pressed_behavior_view;
-// pub mod focus_on_visible_behavior_view;
-// pub mod focus_selected_item_behavior_view;
-// pub mod routed_event_trigger_behavior_view;
-// pub mod change_ferro_property_action_view;
-// pub mod view_model_property_actions_view;
+pub mod focus_on_attached_to_visual_tree_behavior_view;
+pub mod focus_on_pointer_moved_behavior_view;
+pub mod focus_on_pointer_pressed_behavior_view;
+pub mod focus_on_visible_behavior_view;
+pub mod focus_selected_item_behavior_view;
+pub mod routed_event_trigger_behavior_view;
+pub mod change_ferro_property_action_view;
+pub mod view_model_property_actions_view;
 pub mod custom_action_view;
 pub mod custom_behavior_view;
-// pub mod button_click_event_trigger_behavior_view;
-// pub mod click_event_trigger_view;
-// pub mod advanced_view;
+pub mod button_click_event_trigger_behavior_view;
+pub mod click_event_trigger_view;
+pub mod advanced_view;
 pub mod add_remove_class_action_view;
-// pub mod remove_element_action_view;
-// pub mod remove_item_in_list_box_action_view;
-// pub mod remove_item_in_items_control_action_view;
-// pub mod add_item_to_items_control_action_view;
-// pub mod insert_item_to_items_control_action_view;
-// pub mod object_template_view;
-// pub mod clear_items_control_action_view;
-// pub mod add_range_action_view;
-// pub mod remove_range_action_view;
-// pub mod move_item_in_items_control_action_view;
-// pub mod move_element_actions_view;
-// pub mod collection_changed_trigger_behavior_view;
-// pub mod items_control_container_triggers_view;
-// pub mod remove_items_sample_view;
+pub mod remove_element_action_view;
+pub mod remove_item_in_list_box_action_view;
+pub mod remove_item_in_items_control_action_view;
+pub mod add_item_to_items_control_action_view;
+pub mod insert_item_to_items_control_action_view;
+pub mod object_template_view;
+pub mod clear_items_control_action_view;
+pub mod add_range_action_view;
+pub mod remove_range_action_view;
+pub mod move_item_in_items_control_action_view;
+pub mod move_element_actions_view;
+pub mod collection_changed_trigger_behavior_view;
+pub mod items_control_container_triggers_view;
+pub mod remove_items_sample_view;
 pub mod adaptive_behavior_view;
-// pub mod aspect_ratio_behavior_view;
-// pub mod split_view_state_behavior_view;
-// pub mod editable_list_box_view;
-// pub mod editable_draggable_list_box_view;
-// pub mod editable_double_tapped_list_box_view;
-// pub mod editable_tree_view_view;
-// pub mod editable_double_tapped_tree_view_view;
-// pub mod editable_drag_tree_view_view;
-// pub mod sliding_animation_view;
+pub mod aspect_ratio_behavior_view;
+pub mod split_view_state_behavior_view;
+pub mod editable_list_box_view;
+pub mod editable_draggable_list_box_view;
+pub mod editable_double_tapped_list_box_view;
+pub mod editable_tree_view_view;
+pub mod editable_double_tapped_tree_view_view;
+pub mod editable_drag_tree_view_view;
+pub mod sliding_animation_view;
 pub mod fade_animation_view;
-// pub mod scale_animation_view;
+pub mod scale_animation_view;
 // Group B (pages 87 to 144)
 // pub mod rotate_animation_view;
 // pub mod entrance_animations_view;
@@ -331,92 +331,92 @@ pub fn no_value_types() {}
 #[rustfmt::skip]
 pub(crate) const PAGE_TABLE: &[PageInfo] = &[
     // Group A (pages 1 to 86)
-    PageInfo::placeholder("SelectAllOnFocusBehavior", "Views/Pages/SelectAllOnFocusBehaviorView"),
-    PageInfo::placeholder("FocusNextElementAction", "Views/Pages/FocusNextElementActionView"),
-    PageInfo::placeholder("WindowDragMoveBehavior", "Views/Pages/WindowDragMoveBehaviorView"),
-    PageInfo::placeholder("TiltEffectBehavior", "Views/Pages/TiltEffectBehaviorView"),
-    PageInfo::placeholder("OrbitEffectBehavior", "Views/Pages/OrbitEffectBehaviorView"),
-    PageInfo::placeholder("ParallaxBehavior", "Views/Pages/ParallaxBehaviorView"),
-    PageInfo::placeholder("ConditionalAction", "Views/Pages/ConditionalActionView"),
-    PageInfo::placeholder("SwitchCaseAction", "Views/Pages/SwitchCaseActionView"),
-    PageInfo::placeholder("SwitchCaseBehavior", "Views/Pages/SwitchCaseBehaviorView"),
-    PageInfo::placeholder("ConditionalBehavior", "Views/Pages/ConditionalBehaviorView"),
-    PageInfo::placeholder("LoseFocusOnEnterBehavior", "Views/Pages/LoseFocusOnEnterBehaviorView"),
-    PageInfo::placeholder("AutoScrollToBottomBehavior", "Views/Pages/AutoScrollToBottomBehaviorView"),
+    select_all_on_focus_behavior_view::PAGE,
+    focus_next_element_action_view::PAGE,
+    window_drag_move_behavior_view::PAGE,
+    tilt_effect_behavior_view::PAGE,
+    orbit_effect_behavior_view::PAGE,
+    parallax_behavior_view::PAGE,
+    conditional_action_view::PAGE,
+    switch_case_action_view::PAGE,
+    switch_case_behavior_view::PAGE,
+    conditional_behavior_view::PAGE,
+    lose_focus_on_enter_behavior_view::PAGE,
+    auto_scroll_to_bottom_behavior_view::PAGE,
     call_method_action_view::PAGE,
-    PageInfo::placeholder("Debounce & Throttle", "Views/Pages/DebounceThrottleActionView"),
-    PageInfo::placeholder("ObservableStreamBehavior", "Views/Pages/ObservableStreamBehaviorView"),
-    PageInfo::placeholder("AsyncActionGroup", "Views/Pages/AsyncActionGroupView"),
-    PageInfo::placeholder("FocusTrapBehavior", "Views/Pages/FocusTrapBehaviorView"),
-    PageInfo::placeholder("ScreenReaderAnnounceAction", "Views/Pages/ScreenReaderAnnounceActionView"),
-    PageInfo::placeholder("GlobalHotkeyBehavior", "Views/Pages/GlobalHotkeyBehaviorView"),
-    PageInfo::placeholder("VisualDebugBehavior", "Views/Pages/VisualDebugBehaviorView"),
-    PageInfo::placeholder("LogAction", "Views/Pages/LogActionView"),
-    PageInfo::placeholder("NetworkStatusTrigger", "Views/Pages/NetworkStatusTriggerView"),
-    PageInfo::placeholder("ClipboardMonitorBehavior", "Views/Pages/ClipboardMonitorBehaviorView"),
+    debounce_throttle_action_view::PAGE,
+    observable_stream_behavior_view::PAGE,
+    async_action_group_view::PAGE,
+    focus_trap_behavior_view::PAGE,
+    screen_reader_announce_action_view::PAGE,
+    global_hotkey_behavior_view::PAGE,
+    visual_debug_behavior_view::PAGE,
+    log_action_view::PAGE,
+    network_status_trigger_view::PAGE,
+    clipboard_monitor_behavior_view::PAGE,
     change_property_action_view::PAGE,
     data_trigger_behavior_view::PAGE,
-    PageInfo::placeholder("DataTriggerBehavior Advanced", "Views/Pages/DataTriggerBehaviorAdvancedView"),
-    PageInfo::placeholder("MultiDataTriggerBehavior", "Views/Pages/MultiDataTriggerBehaviorView"),
-    PageInfo::placeholder("BindingTriggerBehavior", "Views/Pages/BindingTriggerBehaviorView"),
+    data_trigger_behavior_advanced_view::PAGE,
+    multi_data_trigger_behavior_view::PAGE,
+    binding_trigger_behavior_view::PAGE,
     value_changed_trigger_behavior_view::PAGE,
-    PageInfo::placeholder("PropertyChangedTrigger", "Views/Pages/PropertyChangedTriggerView"),
+    property_changed_trigger_view::PAGE,
     event_trigger_behavior_view::PAGE,
     timer_trigger_view::PAGE,
-    PageInfo::placeholder("TaskCompletedTrigger", "Views/Pages/TaskCompletedTriggerView"),
-    PageInfo::placeholder("LoadedTrigger", "Views/Pages/LoadedTriggerView"),
+    task_completed_trigger_view::PAGE,
+    loaded_trigger_view::PAGE,
     invoke_command_action_view::PAGE,
-    PageInfo::placeholder("AutoFocusBehavior", "Views/Pages/AutoFocusBehaviorView"),
-    PageInfo::placeholder("AutoSelectBehavior", "Views/Pages/AutoSelectBehaviorView"),
-    PageInfo::placeholder("TextBoxValidationBehavior", "Views/Pages/TextBoxValidationBehaviorView"),
-    PageInfo::placeholder("NumericUpDownValidationBehavior", "Views/Pages/NumericUpDownValidationBehaviorView"),
-    PageInfo::placeholder("NotNullValidationRule", "Views/Pages/NotNullValidationRuleView"),
-    PageInfo::placeholder("PropertyValidationBehavior", "Views/Pages/PropertyValidationBehaviorView"),
-    PageInfo::placeholder("SliderValidationBehavior", "Views/Pages/SliderValidationBehaviorView"),
-    PageInfo::placeholder("DatePickerValidationBehavior", "Views/Pages/DatePickerValidationBehaviorView"),
-    PageInfo::placeholder("ComboBoxValidationBehavior", "Views/Pages/ComboBoxValidationBehaviorView"),
-    PageInfo::placeholder("FocusControlBehavior", "Views/Pages/FocusControlBehaviorView"),
+    auto_focus_behavior_view::PAGE,
+    auto_select_behavior_view::PAGE,
+    text_box_validation_behavior_view::PAGE,
+    numeric_up_down_validation_behavior_view::PAGE,
+    not_null_validation_rule_view::PAGE,
+    property_validation_behavior_view::PAGE,
+    slider_validation_behavior_view::PAGE,
+    date_picker_validation_behavior_view::PAGE,
+    combo_box_validation_behavior_view::PAGE,
+    focus_control_behavior_view::PAGE,
     focus_on_attached_behavior_view::PAGE,
-    PageInfo::placeholder("FocusOnAttachedToVisualTreeBehavior", "Views/Pages/FocusOnAttachedToVisualTreeBehaviorView"),
-    PageInfo::placeholder("FocusOnPointerMovedBehavior", "Views/Pages/FocusOnPointerMovedBehaviorView"),
-    PageInfo::placeholder("FocusOnPointerPressedBehavior", "Views/Pages/FocusOnPointerPressedBehaviorView"),
-    PageInfo::placeholder("FocusOnVisibleBehavior", "Views/Pages/FocusOnVisibleBehaviorView"),
-    PageInfo::placeholder("FocusSelectedItemBehavior", "Views/Pages/FocusSelectedItemBehaviorView"),
-    PageInfo::placeholder("RoutedEventTriggerBehavior", "Views/Pages/RoutedEventTriggerBehaviorView"),
-    PageInfo::placeholder("ChangeFerroPropertyAction", "Views/Pages/ChangeFerroPropertyActionView"),
-    PageInfo::placeholder("ViewModel Property Actions", "Views/Pages/ViewModelPropertyActionsView"),
+    focus_on_attached_to_visual_tree_behavior_view::PAGE,
+    focus_on_pointer_moved_behavior_view::PAGE,
+    focus_on_pointer_pressed_behavior_view::PAGE,
+    focus_on_visible_behavior_view::PAGE,
+    focus_selected_item_behavior_view::PAGE,
+    routed_event_trigger_behavior_view::PAGE,
+    change_ferro_property_action_view::PAGE,
+    view_model_property_actions_view::PAGE,
     custom_action_view::PAGE,
     custom_behavior_view::PAGE,
-    PageInfo::placeholder("ButtonClickEventTriggerBehavior", "Views/Pages/ButtonClickEventTriggerBehaviorView"),
-    PageInfo::placeholder("ClickEventTrigger", "Views/Pages/ClickEventTriggerView"),
-    PageInfo::placeholder("Advanced Behavior", "Views/Pages/AdvancedView"),
+    button_click_event_trigger_behavior_view::PAGE,
+    click_event_trigger_view::PAGE,
+    advanced_view::PAGE,
     add_remove_class_action_view::PAGE,
-    PageInfo::placeholder("RemoveElementAction", "Views/Pages/RemoveElementActionView"),
-    PageInfo::placeholder("RemoveItemInListBoxAction", "Views/Pages/RemoveItemInListBoxActionView"),
-    PageInfo::placeholder("RemoveItemInItemsControlAction", "Views/Pages/RemoveItemInItemsControlActionView"),
-    PageInfo::placeholder("AddItemToItemsControlAction", "Views/Pages/AddItemToItemsControlActionView"),
-    PageInfo::placeholder("InsertItemToItemsControlAction", "Views/Pages/InsertItemToItemsControlActionView"),
-    PageInfo::placeholder("ObjectTemplate", "Views/Pages/ObjectTemplateView"),
-    PageInfo::placeholder("ClearItemsControlAction", "Views/Pages/ClearItemsControlActionView"),
-    PageInfo::placeholder("AddRangeAction", "Views/Pages/AddRangeActionView"),
-    PageInfo::placeholder("RemoveRangeAction", "Views/Pages/RemoveRangeActionView"),
-    PageInfo::placeholder("MoveItemInItemsControlAction", "Views/Pages/MoveItemInItemsControlActionView"),
-    PageInfo::placeholder("MoveElementToPanelAction", "Views/Pages/MoveElementActionsView"),
-    PageInfo::placeholder("CollectionChangedTrigger", "Views/Pages/CollectionChangedTriggerBehaviorView"),
-    PageInfo::placeholder("ItemsControl Container Triggers", "Views/Pages/ItemsControlContainerTriggersView"),
-    PageInfo::placeholder("Remove Items Sample", "Views/Pages/RemoveItemsSampleView"),
+    remove_element_action_view::PAGE,
+    remove_item_in_list_box_action_view::PAGE,
+    remove_item_in_items_control_action_view::PAGE,
+    add_item_to_items_control_action_view::PAGE,
+    insert_item_to_items_control_action_view::PAGE,
+    object_template_view::PAGE,
+    clear_items_control_action_view::PAGE,
+    add_range_action_view::PAGE,
+    remove_range_action_view::PAGE,
+    move_item_in_items_control_action_view::PAGE,
+    move_element_actions_view::PAGE,
+    collection_changed_trigger_behavior_view::PAGE,
+    items_control_container_triggers_view::PAGE,
+    remove_items_sample_view::PAGE,
     adaptive_behavior_view::PAGE,
-    PageInfo::placeholder("AspectRatioBehavior", "Views/Pages/AspectRatioBehaviorView"),
-    PageInfo::placeholder("SplitView", "Views/Pages/SplitViewStateBehaviorView"),
-    PageInfo::placeholder("EditableListBox", "Views/Pages/EditableListBoxView"),
-    PageInfo::placeholder("EditableDraggableListBox", "Views/Pages/EditableDraggableListBoxView"),
-    PageInfo::placeholder("EditableListBox DoubleTap", "Views/Pages/EditableDoubleTappedListBoxView"),
-    PageInfo::placeholder("EditableTree", "Views/Pages/EditableTreeViewView"),
-    PageInfo::placeholder("EditableTree DoubleTap", "Views/Pages/EditableDoubleTappedTreeViewView"),
-    PageInfo::placeholder("Editable Drag TreeView", "Views/Pages/EditableDragTreeViewView"),
-    PageInfo::placeholder("Sliding Animation", "Views/Pages/SlidingAnimationView"),
+    aspect_ratio_behavior_view::PAGE,
+    split_view_state_behavior_view::PAGE,
+    editable_list_box_view::PAGE,
+    editable_draggable_list_box_view::PAGE,
+    editable_double_tapped_list_box_view::PAGE,
+    editable_tree_view_view::PAGE,
+    editable_double_tapped_tree_view_view::PAGE,
+    editable_drag_tree_view_view::PAGE,
+    sliding_animation_view::PAGE,
     fade_animation_view::PAGE,
-    PageInfo::placeholder("Scale Animation", "Views/Pages/ScaleAnimationView"),
+    scale_animation_view::PAGE,
     // Group B (pages 87 to 144)
     PageInfo::placeholder("Rotate Animation", "Views/Pages/RotateAnimationView"),
     PageInfo::placeholder("Entrance Animations", "Views/Pages/EntranceAnimationsView"),
