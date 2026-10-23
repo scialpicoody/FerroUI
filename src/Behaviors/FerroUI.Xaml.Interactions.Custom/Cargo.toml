@@ -33,6 +33,10 @@ ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-xaml-interactivity = { workspace = true }
 ferroui-xaml-behaviors-animations = { workspace = true }
+# `ObservableCollection` items sources (ItemsControl, Collections).
+ferroui-system = { workspace = true }
+# The pattern of `RegexValidationRule` (Validation).
+regex = "1"
 
 [build-dependencies]
 ferroui-build-scan = { workspace = true }
@@ -42,6 +46,7 @@ ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The application of the reference's tests has the Fluent theme.
 ferroui-themes-fluent = { workspace = true }
+ferroui-xaml-interactions = { workspace = true }
 # The windows of the tests are documents loaded with the run-time loader.
 ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
