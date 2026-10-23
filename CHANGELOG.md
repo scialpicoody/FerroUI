@@ -6,8 +6,20 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **The WinUI 3 composition API** on the compositor of FerroUI ([docs/porting/winui-composition.md](docs/porting/winui-composition.md): the inventory of the WinUI surface, the plan and the deviations):
+  - connected animations with the engine of WinUI (`ConnectedAnimation.cpp` of microsoft-ui-xaml): a frozen image of the source and a live image of the destination on sprite visuals in a layer of the window, animated by the compositor, with the gravity, direct and basic configurations, coordinated elements, `cancel`, `is_scale_animation_enabled`, `set_animation_component` and `ConnectedAnimationService::get_for_current_view`;
+  - `ferroui_controls::hosting::ElementCompositionPreview`: the element visual and child visual, implicit show and hide animations (also when an element leaves the tree), `set_is_translation_enabled`, the manipulation property set of a scroll viewer and the pointer position property set; the `Translation`, `Rotation`, `RotationAxis`, `Scale`, `CenterPoint` and `TransformMatrix` facades of `Visual` and the opacity, rotation, scale and translation transitions;
+  - live property sets (a server counterpart, animatable entries, read live by expressions); scoped and commit batches with `Completed`; `StopBehavior`; sub-channel targets (`Offset.X`); the WinUI easing functions (cubic Bezier, linear, step, back, bounce, circle, elastic, exponential, power, sine); spring natural motion animations; `AnimationController` and the global playback rate; the colour spaces of colour key frame animations; the missing expression functions and parameters;
+  - `SpriteVisual`, `ShapeVisual` with sprite and container shapes and the rectangle, rounded rectangle, ellipse, line and path geometries (trimmed), `LayerVisual`, `RedirectVisual`; the surface, nine-grid and mask brushes and the WinUI members of the gradient brushes; `CompositionVisualSurface` and `LoadedImageSurface`; `DropShadow`; the inset, rectangle and geometric clips; the remaining members of `Visual`;
+  - `InteractionTracker` and `VisualInteractionSource` (on the UI thread);
+  - a "Composition (WinUI)" page in the ControlCatalog.
+
 - Opt-in application inspection and automation through MCP (#235): `ferroui-inspect` provides weak node IDs, trees, properties and styles, resource lookup, selectors, raw input, automation patterns, PNG screenshots, condition probes, logs and render/layout statistics. `ferroui-mcp` exposes the core over stdio and authenticated loopback Streamable HTTP, with UI dispatcher marshalling and separate input/property-write permissions.
 - ControlCatalog's `mcp` feature, native and headless launch modes, a protocol smoke test for both transports, and [MCP/Claude Code setup documentation](docs/mcp.md).
+
+### Changed
+
+- Composition, with the WinUI composition API (see `docs/porting/DEVIATIONS.md`, "WinUI composition"): a `CompositionPropertySet` made with `new` is live on the compositor; an animation that reads nothing (a constant expression) now applies; the operators of expressions combine the single- and double-precision forms of a vector; the expression functions `Matrix3x2.CreateTranslation` and `Matrix4x4.CreateTranslation` build translations, the 6- and 16-argument matrix constructors read every argument, and function names are matched ignoring case; in a window rendered by a compositor, `ConnectedAnimation` runs on the compositor with the engine of WinUI.
 
 ## [0.4.0] - 2026-10-22
 
