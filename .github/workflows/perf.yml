@@ -201,6 +201,31 @@ jobs:
           PY
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
+      # The HelloWorld samples (docs/binary-size.md, section 3.6) and the theme-less hello_window
+      # of ferroui-desktop, each built by itself as an application is, with the same profile.
+      - name: Sizes of the HelloWorld samples
+        if: matrix.tree == 'measured'
+        working-directory: tree
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          {
+            echo "## Windows x86-64: the HelloWorld samples, profile \`$PROFILE\`"
+            echo
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          for sample in hello-world hello-world-component-host hello-world-builders hello-world-macros hello-world-hooks hello_window; do
+            if [ "$sample" = hello_window ]; then
+              cargo build --locked --profile "$PROFILE" -p ferroui-desktop --example hello_window
+              file="$CARGO_TARGET_DIR/$PROFILE/examples/hello_window.exe"
+            else
+              cargo build --locked --profile "$PROFILE" -p "$sample" --bin "$sample"
+              file="$CARGO_TARGET_DIR/$PROFILE/$sample.exe"
+            fi
+            echo "$sample: $(stat -c %s "$file") bytes" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' | tee -a "$GITHUB_STEP_SUMMARY"
       # What the executable of the catalog is made of, by library: the measured tree with the
       # release profile is linked once more with a map of the linker (`/MAP`), and the code and
       # data of each symbol (the distance to the next one) are summed by the library or the object

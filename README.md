@@ -221,6 +221,14 @@ cargo run -p ferroui-desktop --example hello_window
 # Themed controls, Simple theme (add -- --fluent for the Fluent theme)
 cargo run -p ferroui-themes-simple --example themed_window
 
+# Hello, World! in the WinUI 3 theme, in XAML (samples/HelloWorld), and in each style of the
+# declarative Rust API: builders, rsx!, a component with hooks, a component in XAML
+cargo run -p hello-world
+cargo run -p hello-world-builders
+cargo run -p hello-world-macros
+cargo run -p hello-world-hooks
+cargo run -p hello-world-component-host
+
 # The ControlCatalog sample application
 cargo run -p control-catalog-desktop
 
@@ -378,7 +386,7 @@ fn main() {
 | Asynchronous data | A future run by a component on the executor of the thread, started again when its dependencies change; its state shown pending, ready or failed; a timer for debouncing | `use_future(deps, \|deps\| future)`, `suspense(..)`, `AsyncState`, `sleep` |
 | Error boundaries | A panic of a component below shows a fallback instead of ending the application; the child can be mounted again | `error_boundary(\|\| child, \|info\| fallback)`, `info.reset()` |
 | Navigation | A router of views modelled on the routing of ReactiveUI: a stack of paths, routes with parameters | `router("/", vec![route("/people/:id", \|m\| ..)])`, `use_router().navigate(..)`, `navigate_back`, `navigate_and_reset` |
-| Samples | The 7GUIs in builders, `rsx!` and hooks versions; XAML interoperation; the gallery; TodoMVC; ReactiveDemo as components | `samples/SevenGuis`, `samples/ViewInterop`, `samples/ViewGallery`, `samples/TodoMvc`, `samples/ReactiveDemoComponents` |
+| Samples | Hello, World! in each style; the 7GUIs in builders, `rsx!` and hooks versions; XAML interoperation; the gallery; TodoMVC; ReactiveDemo as components | `samples/HelloWorld.Builders`, `.Macros`, `.Hooks`, `.ComponentHost`, `samples/SevenGuis`, `samples/ViewInterop`, `samples/ViewGallery`, `samples/TodoMvc`, `samples/ReactiveDemoComponents` |
 
 For React developers, in short:
 
