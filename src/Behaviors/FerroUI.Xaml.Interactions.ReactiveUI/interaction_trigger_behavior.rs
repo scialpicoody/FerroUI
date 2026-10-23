@@ -89,24 +89,6 @@ impl AnyInteraction {
     pub fn downcast<I: 'static, O: 'static>(&self) -> Option<ReactiveInteraction<I, O>> {
         self.0.as_any().downcast_ref::<TypedInteraction<I, O>>().map(|typed| typed.0.clone())
     }
-
-    /// Makes the untyped value conversions cast an `Interaction<I, O>` to an [`AnyInteraction`],
-    /// on every thread, so that a binding of a view model's interaction of these types sets
-    /// [`InteractionTriggerBehavior::interaction`] (what the type arguments of the reference
-    /// state in markup). The crate registers `Interaction<(), ()>`.
-    pub fn register_value_type<I: Clone + PartialEq + 'static, O: Clone + Default + 'static>() {
-        ValueTypes::register_global(register_interaction_casts::<I, O>);
-    }
-}
-
-/// The casts of an `Interaction<I, O>` to an [`AnyInteraction`] and its nullable form.
-pub(crate) fn register_interaction_casts<I: Clone + PartialEq + 'static, O: Clone + Default + 'static>() {
-    ValueTypes::register_cast::<ReactiveInteraction<I, O>, AnyInteraction>(|interaction| {
-        AnyInteraction::new(interaction.clone())
-    });
-    ValueTypes::register_cast::<ReactiveInteraction<I, O>, Option<AnyInteraction>>(|interaction| {
-        Some(AnyInteraction::new(interaction.clone()))
-    });
 }
 
 impl<I: Clone + PartialEq + 'static, O: Clone + Default + 'static> From<ReactiveInteraction<I, O>> for AnyInteraction {
