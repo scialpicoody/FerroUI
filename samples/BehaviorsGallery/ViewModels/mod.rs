@@ -58,13 +58,13 @@ pub mod drag_node_view_model;
 // pub mod draggable_view_model; // owner: DraggableView
 // pub mod drawn_cursor_view_model; // owner: DrawnCursorView
 // pub mod execute_command_behaviors_view_model; // owner: ExecuteCommandBehaviorsView (also ButtonExecuteCommandOnKeyDownBehaviorView)
-// pub mod file_system_view_model; // owner: FileSystemView
+pub mod file_system_view_model; // owner: FileSystemView
 // pub mod fluid_move_behavior_view_model; // owner: FluidMoveBehaviorView
-// pub mod icon_view_model; // owner: IconView
+pub mod icon_view_model; // owner: IconView
 pub mod item_view_model;
 // pub mod key_gesture_trigger_view_model; // owner: KeyGestureTriggerView
 pub mod main_window_view_model;
-// pub mod network_view_model; // owner: NetworkView
+pub mod network_view_model; // owner: NetworkView
 // pub mod pointer_triggers_view_model; // owner: PointerTriggersView
 #[path = "ReactiveUI/mod.rs"]
 pub mod reactive_ui;

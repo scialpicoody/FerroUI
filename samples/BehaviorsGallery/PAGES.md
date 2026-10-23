@@ -297,93 +297,93 @@ until the page is ported.
 | 142 | Observable Trigger | `Views/ReactiveUI/ObservableTriggerBehaviorView` | B | 46 | placeholder |  |
 | 143 | InteractionTriggerBehavior | `Views/ReactiveUI/InteractionTriggerBehaviorView` | B | 45 | placeholder | own view model: InteractionTriggerBehaviorViewModel (commented line in `ViewModels/mod.rs`); BLOCKED: needs ferroui-xaml-interactions-reactiveui (not a dependency yet); port the code-behind |
 | 144 | Flyout Binding | `Views/Pages/FlyoutBindingView` | B | 48 | placeholder |  |
-| 145 | KeyTrigger | `Views/Pages/KeyTriggerView` | C | 49 | placeholder |  |
-| 146 | ToolTip Helpers | `Views/Pages/ToolTipHelpersView` | C | 62 | placeholder |  |
-| 147 | WriteableBitmap | `Views/Pages/WriteableBitmapView` | C | 123 | placeholder | owns: SampleWriteableBitmapRenderer (commented line in its folder) |
-| 148 | RenderTargetBitmap | `Views/Pages/RenderTargetBitmapView` | C | 67 | placeholder | owns: RotatingSquareRenderer, SolidSquareRenderer (commented line in its folder) |
-| 149 | LaunchUriOrFileAction | `Views/Pages/LaunchUriOrFileActionView` | C | 39 | placeholder |  |
-| 150 | Reactive Navigation | `Views/ReactiveUI/ReactiveNavigationView` | C | 84 | placeholder | own view model: DetailPageViewModel, DetailsViewModel, HomePageViewModel, ReactiveNavigationViewModel (commented line in `ViewModels/mod.rs`); BLOCKED: needs ferroui-xaml-interactions-reactiveui (not a dependency yet); the reference names the upstream framework: write FerroUI; port the code-behind |
-| 151 | Transitions Behavior | `Views/Pages/TransitionsBehaviorView` | C | 60 | placeholder |  |
-| 152 | Transitions Actions | `Views/Pages/TransitionsActionsView` | C | 75 | placeholder |  |
-| 153 | Transitions Trigger | `Views/Pages/TransitionsChangedTriggerView` | C | 75 | placeholder |  |
-| 154 | Notifications | `Views/Pages/NotificationsView` | C | 70 | placeholder |  |
-| 155 | Carousel Navigation | `Views/Pages/CarouselNavigationView` | C | 56 | placeholder |  |
-| 156 | CarouselSelectionChangedTrigger | `Views/Pages/CarouselSelectionChangedTriggerView` | C | 42 | placeholder |  |
-| 157 | AutoCompleteBox | `Views/Pages/AutoCompleteBoxView` | C | 49 | placeholder |  |
-| 158 | FocusAutoCompleteBoxTextBoxBehavior | `Views/Pages/FocusAutoCompleteBoxTextBoxBehaviorView` | C | 36 | placeholder |  |
-| 159 | TabControl Navigation | `Views/Pages/TabControlNavigationView` | C | 60 | placeholder |  |
-| 160 | TabControl Selection Trigger | `Views/Pages/TabControlSelectionChangedTriggerView` | C | 42 | placeholder |  |
-| 161 | Theme Variant | `Views/Pages/ThemeVariantView` | C | 58 | placeholder | port the code-behind |
-| 162 | Screens | `Views/Pages/ScreenView` | C | 86 | placeholder |  |
-| 163 | BindPointerOverBehavior | `Views/Pages/BindPointerOverBehaviorView` | C | 35 | placeholder |  |
-| 164 | BindTagToVisualRootDataContextBehavior | `Views/Pages/BindTagToVisualRootDataContextBehaviorView` | C | 45 | placeholder |  |
-| 165 | BoundsObserverBehavior | `Views/Pages/BoundsObserverBehaviorView` | C | 39 | placeholder |  |
-| 166 | HideAttachedFlyoutBehavior | `Views/Pages/HideAttachedFlyoutBehaviorView` | C | 48 | placeholder |  |
-| 167 | ButtonHideFlyoutBehavior | `Views/Pages/ButtonHideFlyoutBehaviorView` | C | 48 | placeholder |  |
-| 168 | ButtonHideFlyoutOnClickBehavior | `Views/Pages/ButtonHideFlyoutOnClickBehaviorView` | C | 45 | placeholder |  |
-| 169 | HideOnKeyPressedBehavior | `Views/Pages/HideOnKeyPressedBehaviorView` | C | 40 | placeholder |  |
-| 170 | HideOnLostFocusBehavior | `Views/Pages/HideOnLostFocusBehaviorView` | C | 40 | placeholder |  |
-| 171 | SizeChangedTrigger | `Views/Pages/SizeChangedTriggerView` | C | 40 | placeholder |  |
-| 172 | FadeInBehavior | `Views/Pages/FadeInBehaviorView` | C | 34 | placeholder |  |
-| 173 | DelayedLoadBehavior | `Views/Pages/DelayedLoadBehaviorView` | C | 34 | placeholder |  |
-| 174 | DelayedLoadTrigger | `Views/Pages/DelayedLoadTriggerView` | C | 38 | placeholder |  |
-| 175 | DelayedShowControlAction | `Views/Pages/DelayedShowControlActionView` | C | 38 | placeholder |  |
-| 176 | AnimateOnAttachedBehavior | `Views/Pages/AnimateOnAttachedBehaviorView` | C | 45 | placeholder |  |
-| 177 | Async Loading | `Views/Pages/AsyncLoadingView` | C | 44 | placeholder |  |
-| 178 | ThemeVariantTrigger | `Views/Pages/ThemeVariantTriggerView` | C | 57 | placeholder | the reference names the upstream framework: write FerroUI |
-| 179 | ActualThemeVariantChangedTrigger | `Views/Pages/ActualThemeVariantChangedTriggerView` | C | 47 | placeholder |  |
-| 180 | ToggleIsExpandedOnDoubleTappedBehavior | `Views/Pages/ToggleIsExpandedOnDoubleTappedBehaviorView` | C | 50 | placeholder |  |
-| 181 | TreeView Filter | `Views/Pages/TreeViewFilterView` | C | 57 | placeholder |  |
-| 182 | ViewportBehavior | `Views/Pages/ViewportBehaviorView` | C | 47 | placeholder |  |
-| 183 | ScrollChangedTrigger | `Views/Pages/ScrollChangedTriggerView` | C | 44 | placeholder |  |
-| 184 | ScrollViewerOffsetBehavior | `Views/Pages/ScrollViewerOffsetBehaviorView` | C | 43 | placeholder |  |
-| 185 | ScrollToOffsetAction | `Views/Pages/ScrollToOffsetActionView` | C | 44 | placeholder |  |
-| 186 | Scroll Behaviors | `Views/Pages/ScrollBehaviorsView` | C | 116 | placeholder |  |
-| 187 | Window Interactions | `Views/Pages/WindowInteractionsView` | C | 48 | placeholder | owns: SampleWindow (commented line in its folder) |
-| 188 | Events Behaviors | `Views/Pages/EventsBehaviorsView` | C | 34 | placeholder |  |
-| 189 | Focus Event Triggers | `Views/Pages/FocusEventTriggersView` | C | 37 | placeholder |  |
-| 190 | Key Event Triggers | `Views/Pages/KeyEventTriggersView` | C | 43 | placeholder |  |
+| 145 | KeyTrigger | `Views/Pages/KeyTriggerView` | C | 49 | in progress |  |
+| 146 | ToolTip Helpers | `Views/Pages/ToolTipHelpersView` | C | 62 | in progress |  |
+| 147 | WriteableBitmap | `Views/Pages/WriteableBitmapView` | C | 123 | in progress | owns: SampleWriteableBitmapRenderer (commented line in its folder) |
+| 148 | RenderTargetBitmap | `Views/Pages/RenderTargetBitmapView` | C | 67 | in progress | owns: RotatingSquareRenderer, SolidSquareRenderer (commented line in its folder) |
+| 149 | LaunchUriOrFileAction | `Views/Pages/LaunchUriOrFileActionView` | C | 39 | in progress |  |
+| 150 | Reactive Navigation | `Views/ReactiveUI/ReactiveNavigationView` | C | 84 | in progress | own view model: DetailPageViewModel, DetailsViewModel, HomePageViewModel, ReactiveNavigationViewModel (commented line in `ViewModels/mod.rs`); BLOCKED: needs ferroui-xaml-interactions-reactiveui (not a dependency yet); the reference names the upstream framework: write FerroUI; port the code-behind |
+| 151 | Transitions Behavior | `Views/Pages/TransitionsBehaviorView` | C | 60 | in progress |  |
+| 152 | Transitions Actions | `Views/Pages/TransitionsActionsView` | C | 75 | in progress |  |
+| 153 | Transitions Trigger | `Views/Pages/TransitionsChangedTriggerView` | C | 75 | in progress |  |
+| 154 | Notifications | `Views/Pages/NotificationsView` | C | 70 | in progress |  |
+| 155 | Carousel Navigation | `Views/Pages/CarouselNavigationView` | C | 56 | in progress |  |
+| 156 | CarouselSelectionChangedTrigger | `Views/Pages/CarouselSelectionChangedTriggerView` | C | 42 | in progress |  |
+| 157 | AutoCompleteBox | `Views/Pages/AutoCompleteBoxView` | C | 49 | in progress |  |
+| 158 | FocusAutoCompleteBoxTextBoxBehavior | `Views/Pages/FocusAutoCompleteBoxTextBoxBehaviorView` | C | 36 | in progress |  |
+| 159 | TabControl Navigation | `Views/Pages/TabControlNavigationView` | C | 60 | in progress |  |
+| 160 | TabControl Selection Trigger | `Views/Pages/TabControlSelectionChangedTriggerView` | C | 42 | in progress |  |
+| 161 | Theme Variant | `Views/Pages/ThemeVariantView` | C | 58 | in progress | port the code-behind |
+| 162 | Screens | `Views/Pages/ScreenView` | C | 86 | in progress |  |
+| 163 | BindPointerOverBehavior | `Views/Pages/BindPointerOverBehaviorView` | C | 35 | in progress |  |
+| 164 | BindTagToVisualRootDataContextBehavior | `Views/Pages/BindTagToVisualRootDataContextBehaviorView` | C | 45 | in progress |  |
+| 165 | BoundsObserverBehavior | `Views/Pages/BoundsObserverBehaviorView` | C | 39 | in progress |  |
+| 166 | HideAttachedFlyoutBehavior | `Views/Pages/HideAttachedFlyoutBehaviorView` | C | 48 | in progress |  |
+| 167 | ButtonHideFlyoutBehavior | `Views/Pages/ButtonHideFlyoutBehaviorView` | C | 48 | in progress |  |
+| 168 | ButtonHideFlyoutOnClickBehavior | `Views/Pages/ButtonHideFlyoutOnClickBehaviorView` | C | 45 | in progress |  |
+| 169 | HideOnKeyPressedBehavior | `Views/Pages/HideOnKeyPressedBehaviorView` | C | 40 | in progress |  |
+| 170 | HideOnLostFocusBehavior | `Views/Pages/HideOnLostFocusBehaviorView` | C | 40 | in progress |  |
+| 171 | SizeChangedTrigger | `Views/Pages/SizeChangedTriggerView` | C | 40 | in progress |  |
+| 172 | FadeInBehavior | `Views/Pages/FadeInBehaviorView` | C | 34 | in progress |  |
+| 173 | DelayedLoadBehavior | `Views/Pages/DelayedLoadBehaviorView` | C | 34 | in progress |  |
+| 174 | DelayedLoadTrigger | `Views/Pages/DelayedLoadTriggerView` | C | 38 | in progress |  |
+| 175 | DelayedShowControlAction | `Views/Pages/DelayedShowControlActionView` | C | 38 | in progress |  |
+| 176 | AnimateOnAttachedBehavior | `Views/Pages/AnimateOnAttachedBehaviorView` | C | 45 | in progress |  |
+| 177 | Async Loading | `Views/Pages/AsyncLoadingView` | C | 44 | in progress |  |
+| 178 | ThemeVariantTrigger | `Views/Pages/ThemeVariantTriggerView` | C | 57 | in progress | the reference names the upstream framework: write FerroUI |
+| 179 | ActualThemeVariantChangedTrigger | `Views/Pages/ActualThemeVariantChangedTriggerView` | C | 47 | in progress |  |
+| 180 | ToggleIsExpandedOnDoubleTappedBehavior | `Views/Pages/ToggleIsExpandedOnDoubleTappedBehaviorView` | C | 50 | in progress |  |
+| 181 | TreeView Filter | `Views/Pages/TreeViewFilterView` | C | 57 | in progress |  |
+| 182 | ViewportBehavior | `Views/Pages/ViewportBehaviorView` | C | 47 | in progress |  |
+| 183 | ScrollChangedTrigger | `Views/Pages/ScrollChangedTriggerView` | C | 44 | in progress |  |
+| 184 | ScrollViewerOffsetBehavior | `Views/Pages/ScrollViewerOffsetBehaviorView` | C | 43 | in progress |  |
+| 185 | ScrollToOffsetAction | `Views/Pages/ScrollToOffsetActionView` | C | 44 | in progress |  |
+| 186 | Scroll Behaviors | `Views/Pages/ScrollBehaviorsView` | C | 116 | in progress |  |
+| 187 | Window Interactions | `Views/Pages/WindowInteractionsView` | C | 48 | in progress | owns: SampleWindow (commented line in its folder) |
+| 188 | Events Behaviors | `Views/Pages/EventsBehaviorsView` | C | 34 | in progress |  |
+| 189 | Focus Event Triggers | `Views/Pages/FocusEventTriggersView` | C | 37 | in progress |  |
+| 190 | Key Event Triggers | `Views/Pages/KeyEventTriggersView` | C | 43 | in progress |  |
 | 191 | Pointer Event Triggers | `Views/Pages/PointerEventTriggersView` | C | 52 | ported | the triggers of the Events crate |
-| 192 | PointerEventsTrigger | `Views/Pages/PointerEventsTriggerView` | C | 69 | placeholder | port the code-behind |
-| 193 | DragLeaveEventTrigger | `Views/Pages/DragLeaveEventTriggerView` | C | 77 | placeholder | port the code-behind |
-| 194 | Gesture Event Triggers | `Views/Pages/GestureEventTriggersView` | C | 46 | placeholder |  |
-| 195 | Gesture Advanced Triggers | `Views/Pages/GestureAdvancedTriggersView` | C | 82 | placeholder | port the code-behind |
-| 196 | Pull Gesture Triggers | `Views/Pages/PullGestureTriggersView` | C | 82 | placeholder | port the code-behind |
-| 197 | Scroll Gesture Triggers | `Views/Pages/ScrollGestureTriggersView` | C | 78 | placeholder | port the code-behind |
-| 198 | TouchPad Gesture Triggers | `Views/Pages/TouchPadGestureTriggersView` | C | 78 | placeholder | port the code-behind |
-| 199 | Popup Event Triggers | `Views/Pages/PopupEventTriggersView` | C | 50 | placeholder |  |
-| 200 | Focus Triggers | `Views/Pages/FocusTriggersView` | C | 37 | placeholder |  |
-| 201 | Key Input Triggers | `Views/Pages/KeyInputTriggersView` | C | 43 | placeholder |  |
-| 202 | Pointer Extra Triggers | `Views/Pages/PointerExtraTriggersView` | C | 43 | placeholder |  |
-| 203 | Gesture Triggers | `Views/Pages/GestureTriggersView` | C | 57 | placeholder |  |
-| 204 | Icon Sample | `Views/Pages/IconView` | C | 49 | placeholder | own view model: IconViewModel (commented line in `ViewModels/mod.rs`); the reference names the upstream framework: write FerroUI; port the code-behind |
-| 205 | Automation | `Views/Pages/AutomationView` | C | 57 | placeholder | the reference names the upstream framework: write FerroUI |
-| 206 | ActualThemeVariantChangedBehavior | `Views/Pages/ActualThemeVariantChangedBehaviorView` | C | 45 | placeholder | owns: ActualThemeVariantChangedMessageBehavior (commented line in its folder) |
-| 207 | AttachedToLogicalTreeBehavior | `Views/Pages/AttachedToLogicalTreeBehaviorView` | C | 38 | placeholder | owns: AttachedToLogicalTreeMessageBehavior (commented line in its folder) |
-| 208 | AttachedToLogicalTreeTrigger | `Views/Pages/AttachedToLogicalTreeTriggerView` | C | 35 | placeholder |  |
-| 209 | AttachedToVisualTreeTrigger | `Views/Pages/AttachedToVisualTreeTriggerView` | C | 35 | placeholder |  |
-| 210 | BindingBehavior | `Views/Pages/BindingBehaviorView` | C | 38 | placeholder |  |
-| 211 | DataContextChangedBehavior | `Views/Pages/DataContextChangedBehaviorView` | C | 38 | placeholder | owns: DataContextChangedMessageBehavior (commented line in its folder) |
-| 212 | DataContextChangedTrigger | `Views/Pages/DataContextChangedTriggerView` | C | 35 | placeholder |  |
-| 213 | DetachedFromLogicalTreeTrigger | `Views/Pages/DetachedFromLogicalTreeTriggerView` | C | 49 | placeholder |  |
-| 214 | DetachedFromVisualTreeTrigger | `Views/Pages/DetachedFromVisualTreeTriggerView` | C | 49 | placeholder |  |
-| 215 | DisposingBehavior | `Views/Pages/DisposingBehaviorView` | C | 39 | placeholder | owns: DisposingMessageBehavior (commented line in its folder) |
-| 216 | DisposingTrigger | `Views/Pages/DisposingTriggerView` | C | 41 | placeholder | owns: PointerPressedDisposingTrigger (commented line in its folder) |
-| 217 | DisposableAction | `Views/Pages/DisposableActionView` | C | 39 | placeholder | owns: DisposableActionBehavior (commented line in its folder) |
-| 218 | InitializedBehavior | `Views/Pages/InitializedBehaviorView` | C | 39 | placeholder | owns: InitializedMessageBehavior (commented line in its folder) |
-| 219 | InitializedTrigger | `Views/Pages/InitializedTriggerView` | C | 40 | placeholder |  |
-| 220 | InvokeCommandActionBase | `Views/Pages/InvokeCommandActionBaseView` | C | 36 | placeholder |  |
-| 221 | LoadedBehavior | `Views/Pages/LoadedBehaviorView` | C | 37 | placeholder | owns: LoadedMessageBehavior (commented line in its folder) |
-| 222 | ResourcesChangedBehavior | `Views/Pages/ResourcesChangedBehaviorView` | C | 46 | placeholder | owns: ResourcesChangedMessageBehavior (commented line in its folder); port the code-behind |
-| 223 | ResourcesChangedTrigger | `Views/Pages/ResourcesChangedTriggerView` | C | 48 | placeholder | port the code-behind |
-| 224 | RoutedEventTriggerBase | `Views/Pages/RoutedEventTriggerBaseView` | C | 40 | placeholder |  |
-| 225 | UnloadedTrigger | `Views/Pages/UnloadedTriggerView` | C | 49 | placeholder |  |
-| 226 | FileSystem | `Views/Pages/FileSystemView` | C | 93 | placeholder | own view model: FileSystemViewModel (commented line in `ViewModels/mod.rs`) |
-| 227 | Network | `Views/Pages/NetworkView` | C | 70 | placeholder | own view model: NetworkViewModel (commented line in `ViewModels/mod.rs`) |
-| 228 | ToggleClassAction | `Views/Pages/ToggleClassActionView` | C | 40 | placeholder |  |
-| 229 | LaunchUriAction | `Views/Pages/LaunchUriActionView` | C | 34 | placeholder | the reference names the upstream framework: write FerroUI |
-| 230 | ScreenshotAction | `Views/Pages/ScreenshotActionView` | C | 34 | placeholder |  |
-| 231 | ScrollToControlAction | `Views/Pages/ScrollToControlActionView` | C | 40 | placeholder |  |
-| 232 | ConsoleBeepAction | `Views/Pages/ConsoleBeepActionView` | C | 34 | placeholder |  |
-| 233 | BreakAction | `Views/Pages/BreakActionView` | C | 34 | placeholder |  |
-| 234 | InactivityTrigger | `Views/Pages/InactivityTriggerView` | C | 34 | placeholder |  |
+| 192 | PointerEventsTrigger | `Views/Pages/PointerEventsTriggerView` | C | 69 | in progress | port the code-behind |
+| 193 | DragLeaveEventTrigger | `Views/Pages/DragLeaveEventTriggerView` | C | 77 | in progress | port the code-behind |
+| 194 | Gesture Event Triggers | `Views/Pages/GestureEventTriggersView` | C | 46 | in progress |  |
+| 195 | Gesture Advanced Triggers | `Views/Pages/GestureAdvancedTriggersView` | C | 82 | in progress | port the code-behind |
+| 196 | Pull Gesture Triggers | `Views/Pages/PullGestureTriggersView` | C | 82 | in progress | port the code-behind |
+| 197 | Scroll Gesture Triggers | `Views/Pages/ScrollGestureTriggersView` | C | 78 | in progress | port the code-behind |
+| 198 | TouchPad Gesture Triggers | `Views/Pages/TouchPadGestureTriggersView` | C | 78 | in progress | port the code-behind |
+| 199 | Popup Event Triggers | `Views/Pages/PopupEventTriggersView` | C | 50 | in progress |  |
+| 200 | Focus Triggers | `Views/Pages/FocusTriggersView` | C | 37 | in progress |  |
+| 201 | Key Input Triggers | `Views/Pages/KeyInputTriggersView` | C | 43 | in progress |  |
+| 202 | Pointer Extra Triggers | `Views/Pages/PointerExtraTriggersView` | C | 43 | in progress |  |
+| 203 | Gesture Triggers | `Views/Pages/GestureTriggersView` | C | 57 | in progress |  |
+| 204 | Icon Sample | `Views/Pages/IconView` | C | 49 | in progress | own view model: IconViewModel (commented line in `ViewModels/mod.rs`); the reference names the upstream framework: write FerroUI; port the code-behind |
+| 205 | Automation | `Views/Pages/AutomationView` | C | 57 | in progress | the reference names the upstream framework: write FerroUI |
+| 206 | ActualThemeVariantChangedBehavior | `Views/Pages/ActualThemeVariantChangedBehaviorView` | C | 45 | in progress | owns: ActualThemeVariantChangedMessageBehavior (commented line in its folder) |
+| 207 | AttachedToLogicalTreeBehavior | `Views/Pages/AttachedToLogicalTreeBehaviorView` | C | 38 | in progress | owns: AttachedToLogicalTreeMessageBehavior (commented line in its folder) |
+| 208 | AttachedToLogicalTreeTrigger | `Views/Pages/AttachedToLogicalTreeTriggerView` | C | 35 | in progress |  |
+| 209 | AttachedToVisualTreeTrigger | `Views/Pages/AttachedToVisualTreeTriggerView` | C | 35 | in progress |  |
+| 210 | BindingBehavior | `Views/Pages/BindingBehaviorView` | C | 38 | in progress |  |
+| 211 | DataContextChangedBehavior | `Views/Pages/DataContextChangedBehaviorView` | C | 38 | in progress | owns: DataContextChangedMessageBehavior (commented line in its folder) |
+| 212 | DataContextChangedTrigger | `Views/Pages/DataContextChangedTriggerView` | C | 35 | in progress |  |
+| 213 | DetachedFromLogicalTreeTrigger | `Views/Pages/DetachedFromLogicalTreeTriggerView` | C | 49 | in progress |  |
+| 214 | DetachedFromVisualTreeTrigger | `Views/Pages/DetachedFromVisualTreeTriggerView` | C | 49 | in progress |  |
+| 215 | DisposingBehavior | `Views/Pages/DisposingBehaviorView` | C | 39 | in progress | owns: DisposingMessageBehavior (commented line in its folder) |
+| 216 | DisposingTrigger | `Views/Pages/DisposingTriggerView` | C | 41 | in progress | owns: PointerPressedDisposingTrigger (commented line in its folder) |
+| 217 | DisposableAction | `Views/Pages/DisposableActionView` | C | 39 | in progress | owns: DisposableActionBehavior (commented line in its folder) |
+| 218 | InitializedBehavior | `Views/Pages/InitializedBehaviorView` | C | 39 | in progress | owns: InitializedMessageBehavior (commented line in its folder) |
+| 219 | InitializedTrigger | `Views/Pages/InitializedTriggerView` | C | 40 | in progress |  |
+| 220 | InvokeCommandActionBase | `Views/Pages/InvokeCommandActionBaseView` | C | 36 | in progress |  |
+| 221 | LoadedBehavior | `Views/Pages/LoadedBehaviorView` | C | 37 | in progress | owns: LoadedMessageBehavior (commented line in its folder) |
+| 222 | ResourcesChangedBehavior | `Views/Pages/ResourcesChangedBehaviorView` | C | 46 | in progress | owns: ResourcesChangedMessageBehavior (commented line in its folder); port the code-behind |
+| 223 | ResourcesChangedTrigger | `Views/Pages/ResourcesChangedTriggerView` | C | 48 | in progress | port the code-behind |
+| 224 | RoutedEventTriggerBase | `Views/Pages/RoutedEventTriggerBaseView` | C | 40 | in progress |  |
+| 225 | UnloadedTrigger | `Views/Pages/UnloadedTriggerView` | C | 49 | in progress |  |
+| 226 | FileSystem | `Views/Pages/FileSystemView` | C | 93 | in progress | own view model: FileSystemViewModel (commented line in `ViewModels/mod.rs`) |
+| 227 | Network | `Views/Pages/NetworkView` | C | 70 | in progress | own view model: NetworkViewModel (commented line in `ViewModels/mod.rs`) |
+| 228 | ToggleClassAction | `Views/Pages/ToggleClassActionView` | C | 40 | in progress |  |
+| 229 | LaunchUriAction | `Views/Pages/LaunchUriActionView` | C | 34 | in progress | the reference names the upstream framework: write FerroUI |
+| 230 | ScreenshotAction | `Views/Pages/ScreenshotActionView` | C | 34 | in progress |  |
+| 231 | ScrollToControlAction | `Views/Pages/ScrollToControlActionView` | C | 40 | in progress |  |
+| 232 | ConsoleBeepAction | `Views/Pages/ConsoleBeepActionView` | C | 34 | in progress |  |
+| 233 | BreakAction | `Views/Pages/BreakActionView` | C | 34 | in progress |  |
+| 234 | InactivityTrigger | `Views/Pages/InactivityTriggerView` | C | 34 | in progress |  |

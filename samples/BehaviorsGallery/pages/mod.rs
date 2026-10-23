@@ -167,96 +167,98 @@ pub mod drag_drop_commands_view;
 // pub mod interaction_trigger_behavior_view;
 // pub mod flyout_binding_view;
 // Group C (pages 145 to 234)
-// pub mod key_trigger_view;
-// pub mod tool_tip_helpers_view;
-// pub mod writeable_bitmap_view;
-// pub mod render_target_bitmap_view;
-// pub mod launch_uri_or_file_action_view;
-// pub mod reactive_navigation_view;
-// pub mod transitions_behavior_view;
-// pub mod transitions_actions_view;
-// pub mod transitions_changed_trigger_view;
-// pub mod notifications_view;
-// pub mod carousel_navigation_view;
-// pub mod carousel_selection_changed_trigger_view;
-// pub mod auto_complete_box_view;
-// pub mod focus_auto_complete_box_text_box_behavior_view;
-// pub mod tab_control_navigation_view;
-// pub mod tab_control_selection_changed_trigger_view;
-// pub mod theme_variant_view;
-// pub mod screen_view;
-// pub mod bind_pointer_over_behavior_view;
-// pub mod bind_tag_to_visual_root_data_context_behavior_view;
-// pub mod bounds_observer_behavior_view;
-// pub mod hide_attached_flyout_behavior_view;
-// pub mod button_hide_flyout_behavior_view;
-// pub mod button_hide_flyout_on_click_behavior_view;
-// pub mod hide_on_key_pressed_behavior_view;
-// pub mod hide_on_lost_focus_behavior_view;
-// pub mod size_changed_trigger_view;
-// pub mod fade_in_behavior_view;
-// pub mod delayed_load_behavior_view;
-// pub mod delayed_load_trigger_view;
-// pub mod delayed_show_control_action_view;
-// pub mod animate_on_attached_behavior_view;
-// pub mod async_loading_view;
-// pub mod theme_variant_trigger_view;
-// pub mod actual_theme_variant_changed_trigger_view;
-// pub mod toggle_is_expanded_on_double_tapped_behavior_view;
-// pub mod tree_view_filter_view;
-// pub mod viewport_behavior_view;
-// pub mod scroll_changed_trigger_view;
-// pub mod scroll_viewer_offset_behavior_view;
-// pub mod scroll_to_offset_action_view;
-// pub mod scroll_behaviors_view;
-// pub mod window_interactions_view;
-// pub mod events_behaviors_view;
-// pub mod focus_event_triggers_view;
-// pub mod key_event_triggers_view;
+pub mod key_trigger_view;
+pub mod tool_tip_helpers_view;
+pub mod writeable_bitmap_view;
+pub mod render_target_bitmap_view;
+pub mod launch_uri_or_file_action_view;
+pub mod reactive_navigation_view;
+pub mod home_page_view; // owner: ReactiveNavigationView
+pub mod detail_page_view; // owner: ReactiveNavigationView
+pub mod transitions_behavior_view;
+pub mod transitions_actions_view;
+pub mod transitions_changed_trigger_view;
+pub mod notifications_view;
+pub mod carousel_navigation_view;
+pub mod carousel_selection_changed_trigger_view;
+pub mod auto_complete_box_view;
+pub mod focus_auto_complete_box_text_box_behavior_view;
+pub mod tab_control_navigation_view;
+pub mod tab_control_selection_changed_trigger_view;
+pub mod theme_variant_view;
+pub mod screen_view;
+pub mod bind_pointer_over_behavior_view;
+pub mod bind_tag_to_visual_root_data_context_behavior_view;
+pub mod bounds_observer_behavior_view;
+pub mod hide_attached_flyout_behavior_view;
+pub mod button_hide_flyout_behavior_view;
+pub mod button_hide_flyout_on_click_behavior_view;
+pub mod hide_on_key_pressed_behavior_view;
+pub mod hide_on_lost_focus_behavior_view;
+pub mod size_changed_trigger_view;
+pub mod fade_in_behavior_view;
+pub mod delayed_load_behavior_view;
+pub mod delayed_load_trigger_view;
+pub mod delayed_show_control_action_view;
+pub mod animate_on_attached_behavior_view;
+pub mod async_loading_view;
+pub mod theme_variant_trigger_view;
+pub mod actual_theme_variant_changed_trigger_view;
+pub mod toggle_is_expanded_on_double_tapped_behavior_view;
+pub mod tree_view_filter_view;
+pub mod viewport_behavior_view;
+pub mod scroll_changed_trigger_view;
+pub mod scroll_viewer_offset_behavior_view;
+pub mod scroll_to_offset_action_view;
+pub mod scroll_behaviors_view;
+pub mod window_interactions_view;
+pub mod events_behaviors_view;
+pub mod focus_event_triggers_view;
+pub mod key_event_triggers_view;
 pub mod pointer_event_triggers_view;
-// pub mod pointer_events_trigger_view;
-// pub mod drag_leave_event_trigger_view;
-// pub mod gesture_event_triggers_view;
-// pub mod gesture_advanced_triggers_view;
-// pub mod pull_gesture_triggers_view;
-// pub mod scroll_gesture_triggers_view;
-// pub mod touch_pad_gesture_triggers_view;
-// pub mod popup_event_triggers_view;
-// pub mod focus_triggers_view;
-// pub mod key_input_triggers_view;
-// pub mod pointer_extra_triggers_view;
-// pub mod gesture_triggers_view;
-// pub mod icon_view;
-// pub mod automation_view;
-// pub mod actual_theme_variant_changed_behavior_view;
-// pub mod attached_to_logical_tree_behavior_view;
-// pub mod attached_to_logical_tree_trigger_view;
-// pub mod attached_to_visual_tree_trigger_view;
-// pub mod binding_behavior_view;
-// pub mod data_context_changed_behavior_view;
-// pub mod data_context_changed_trigger_view;
-// pub mod detached_from_logical_tree_trigger_view;
-// pub mod detached_from_visual_tree_trigger_view;
-// pub mod disposing_behavior_view;
-// pub mod disposing_trigger_view;
-// pub mod disposable_action_view;
-// pub mod initialized_behavior_view;
-// pub mod initialized_trigger_view;
-// pub mod invoke_command_action_base_view;
-// pub mod loaded_behavior_view;
-// pub mod resources_changed_behavior_view;
-// pub mod resources_changed_trigger_view;
-// pub mod routed_event_trigger_base_view;
-// pub mod unloaded_trigger_view;
-// pub mod file_system_view;
-// pub mod network_view;
-// pub mod toggle_class_action_view;
-// pub mod launch_uri_action_view;
-// pub mod screenshot_action_view;
-// pub mod scroll_to_control_action_view;
-// pub mod console_beep_action_view;
-// pub mod break_action_view;
-// pub mod inactivity_trigger_view;
+pub mod pointer_events_trigger_view;
+pub mod drag_leave_event_trigger_view;
+pub mod gesture_event_triggers_view;
+pub mod gesture_advanced_triggers_view;
+pub mod pull_gesture_triggers_view;
+pub mod scroll_gesture_triggers_view;
+pub mod touch_pad_gesture_triggers_view;
+pub mod popup_event_triggers_view;
+pub mod focus_triggers_view;
+pub mod key_input_triggers_view;
+pub mod pointer_extra_triggers_view;
+pub mod gesture_triggers_view;
+pub mod icon_view;
+pub mod automation_view;
+pub mod actual_theme_variant_changed_behavior_view;
+pub mod attached_to_logical_tree_behavior_view;
+pub mod attached_to_logical_tree_trigger_view;
+pub mod attached_to_visual_tree_trigger_view;
+pub mod binding_behavior_view;
+pub mod data_context_changed_behavior_view;
+pub mod data_context_changed_trigger_view;
+pub mod detached_from_logical_tree_trigger_view;
+pub mod detached_from_visual_tree_trigger_view;
+pub mod disposing_behavior_view;
+pub mod disposing_trigger_view;
+pub mod disposable_action_view;
+pub mod initialized_behavior_view;
+pub mod initialized_trigger_view;
+pub mod invoke_command_action_base_view;
+pub mod loaded_behavior_view;
+pub mod resources_changed_behavior_view;
+pub mod resources_changed_trigger_view;
+pub mod routed_event_trigger_base_view;
+pub mod unloaded_trigger_view;
+pub mod file_system_view;
+pub mod network_view;
+pub mod toggle_class_action_view;
+pub mod launch_uri_action_view;
+pub mod screenshot_action_view;
+pub mod scroll_to_control_action_view;
+pub mod console_beep_action_view;
+pub mod break_action_view;
+pub mod inactivity_trigger_view;
 
 /// A page of the gallery: an entry of the page table.
 pub struct PageInfo {
@@ -475,96 +477,96 @@ pub(crate) const PAGE_TABLE: &[PageInfo] = &[
     PageInfo::placeholder("InteractionTriggerBehavior", "Views/ReactiveUI/InteractionTriggerBehaviorView"),
     PageInfo::placeholder("Flyout Binding", "Views/Pages/FlyoutBindingView"),
     // Group C (pages 145 to 234)
-    PageInfo::placeholder("KeyTrigger", "Views/Pages/KeyTriggerView"),
-    PageInfo::placeholder("ToolTip Helpers", "Views/Pages/ToolTipHelpersView"),
-    PageInfo::placeholder("WriteableBitmap", "Views/Pages/WriteableBitmapView"),
-    PageInfo::placeholder("RenderTargetBitmap", "Views/Pages/RenderTargetBitmapView"),
-    PageInfo::placeholder("LaunchUriOrFileAction", "Views/Pages/LaunchUriOrFileActionView"),
-    PageInfo::placeholder("Reactive Navigation", "Views/ReactiveUI/ReactiveNavigationView"),
-    PageInfo::placeholder("Transitions Behavior", "Views/Pages/TransitionsBehaviorView"),
-    PageInfo::placeholder("Transitions Actions", "Views/Pages/TransitionsActionsView"),
-    PageInfo::placeholder("Transitions Trigger", "Views/Pages/TransitionsChangedTriggerView"),
-    PageInfo::placeholder("Notifications", "Views/Pages/NotificationsView"),
-    PageInfo::placeholder("Carousel Navigation", "Views/Pages/CarouselNavigationView"),
-    PageInfo::placeholder("CarouselSelectionChangedTrigger", "Views/Pages/CarouselSelectionChangedTriggerView"),
-    PageInfo::placeholder("AutoCompleteBox", "Views/Pages/AutoCompleteBoxView"),
-    PageInfo::placeholder("FocusAutoCompleteBoxTextBoxBehavior", "Views/Pages/FocusAutoCompleteBoxTextBoxBehaviorView"),
-    PageInfo::placeholder("TabControl Navigation", "Views/Pages/TabControlNavigationView"),
-    PageInfo::placeholder("TabControl Selection Trigger", "Views/Pages/TabControlSelectionChangedTriggerView"),
-    PageInfo::placeholder("Theme Variant", "Views/Pages/ThemeVariantView"),
-    PageInfo::placeholder("Screens", "Views/Pages/ScreenView"),
-    PageInfo::placeholder("BindPointerOverBehavior", "Views/Pages/BindPointerOverBehaviorView"),
-    PageInfo::placeholder("BindTagToVisualRootDataContextBehavior", "Views/Pages/BindTagToVisualRootDataContextBehaviorView"),
-    PageInfo::placeholder("BoundsObserverBehavior", "Views/Pages/BoundsObserverBehaviorView"),
-    PageInfo::placeholder("HideAttachedFlyoutBehavior", "Views/Pages/HideAttachedFlyoutBehaviorView"),
-    PageInfo::placeholder("ButtonHideFlyoutBehavior", "Views/Pages/ButtonHideFlyoutBehaviorView"),
-    PageInfo::placeholder("ButtonHideFlyoutOnClickBehavior", "Views/Pages/ButtonHideFlyoutOnClickBehaviorView"),
-    PageInfo::placeholder("HideOnKeyPressedBehavior", "Views/Pages/HideOnKeyPressedBehaviorView"),
-    PageInfo::placeholder("HideOnLostFocusBehavior", "Views/Pages/HideOnLostFocusBehaviorView"),
-    PageInfo::placeholder("SizeChangedTrigger", "Views/Pages/SizeChangedTriggerView"),
-    PageInfo::placeholder("FadeInBehavior", "Views/Pages/FadeInBehaviorView"),
-    PageInfo::placeholder("DelayedLoadBehavior", "Views/Pages/DelayedLoadBehaviorView"),
-    PageInfo::placeholder("DelayedLoadTrigger", "Views/Pages/DelayedLoadTriggerView"),
-    PageInfo::placeholder("DelayedShowControlAction", "Views/Pages/DelayedShowControlActionView"),
-    PageInfo::placeholder("AnimateOnAttachedBehavior", "Views/Pages/AnimateOnAttachedBehaviorView"),
-    PageInfo::placeholder("Async Loading", "Views/Pages/AsyncLoadingView"),
-    PageInfo::placeholder("ThemeVariantTrigger", "Views/Pages/ThemeVariantTriggerView"),
-    PageInfo::placeholder("ActualThemeVariantChangedTrigger", "Views/Pages/ActualThemeVariantChangedTriggerView"),
-    PageInfo::placeholder("ToggleIsExpandedOnDoubleTappedBehavior", "Views/Pages/ToggleIsExpandedOnDoubleTappedBehaviorView"),
-    PageInfo::placeholder("TreeView Filter", "Views/Pages/TreeViewFilterView"),
-    PageInfo::placeholder("ViewportBehavior", "Views/Pages/ViewportBehaviorView"),
-    PageInfo::placeholder("ScrollChangedTrigger", "Views/Pages/ScrollChangedTriggerView"),
-    PageInfo::placeholder("ScrollViewerOffsetBehavior", "Views/Pages/ScrollViewerOffsetBehaviorView"),
-    PageInfo::placeholder("ScrollToOffsetAction", "Views/Pages/ScrollToOffsetActionView"),
-    PageInfo::placeholder("Scroll Behaviors", "Views/Pages/ScrollBehaviorsView"),
-    PageInfo::placeholder("Window Interactions", "Views/Pages/WindowInteractionsView"),
-    PageInfo::placeholder("Events Behaviors", "Views/Pages/EventsBehaviorsView"),
-    PageInfo::placeholder("Focus Event Triggers", "Views/Pages/FocusEventTriggersView"),
-    PageInfo::placeholder("Key Event Triggers", "Views/Pages/KeyEventTriggersView"),
+    key_trigger_view::PAGE,
+    tool_tip_helpers_view::PAGE,
+    writeable_bitmap_view::PAGE,
+    render_target_bitmap_view::PAGE,
+    launch_uri_or_file_action_view::PAGE,
+    reactive_navigation_view::PAGE,
+    transitions_behavior_view::PAGE,
+    transitions_actions_view::PAGE,
+    transitions_changed_trigger_view::PAGE,
+    notifications_view::PAGE,
+    carousel_navigation_view::PAGE,
+    carousel_selection_changed_trigger_view::PAGE,
+    auto_complete_box_view::PAGE,
+    focus_auto_complete_box_text_box_behavior_view::PAGE,
+    tab_control_navigation_view::PAGE,
+    tab_control_selection_changed_trigger_view::PAGE,
+    theme_variant_view::PAGE,
+    screen_view::PAGE,
+    bind_pointer_over_behavior_view::PAGE,
+    bind_tag_to_visual_root_data_context_behavior_view::PAGE,
+    bounds_observer_behavior_view::PAGE,
+    hide_attached_flyout_behavior_view::PAGE,
+    button_hide_flyout_behavior_view::PAGE,
+    button_hide_flyout_on_click_behavior_view::PAGE,
+    hide_on_key_pressed_behavior_view::PAGE,
+    hide_on_lost_focus_behavior_view::PAGE,
+    size_changed_trigger_view::PAGE,
+    fade_in_behavior_view::PAGE,
+    delayed_load_behavior_view::PAGE,
+    delayed_load_trigger_view::PAGE,
+    delayed_show_control_action_view::PAGE,
+    animate_on_attached_behavior_view::PAGE,
+    async_loading_view::PAGE,
+    theme_variant_trigger_view::PAGE,
+    actual_theme_variant_changed_trigger_view::PAGE,
+    toggle_is_expanded_on_double_tapped_behavior_view::PAGE,
+    tree_view_filter_view::PAGE,
+    viewport_behavior_view::PAGE,
+    scroll_changed_trigger_view::PAGE,
+    scroll_viewer_offset_behavior_view::PAGE,
+    scroll_to_offset_action_view::PAGE,
+    scroll_behaviors_view::PAGE,
+    window_interactions_view::PAGE,
+    events_behaviors_view::PAGE,
+    focus_event_triggers_view::PAGE,
+    key_event_triggers_view::PAGE,
     pointer_event_triggers_view::PAGE,
-    PageInfo::placeholder("PointerEventsTrigger", "Views/Pages/PointerEventsTriggerView"),
-    PageInfo::placeholder("DragLeaveEventTrigger", "Views/Pages/DragLeaveEventTriggerView"),
-    PageInfo::placeholder("Gesture Event Triggers", "Views/Pages/GestureEventTriggersView"),
-    PageInfo::placeholder("Gesture Advanced Triggers", "Views/Pages/GestureAdvancedTriggersView"),
-    PageInfo::placeholder("Pull Gesture Triggers", "Views/Pages/PullGestureTriggersView"),
-    PageInfo::placeholder("Scroll Gesture Triggers", "Views/Pages/ScrollGestureTriggersView"),
-    PageInfo::placeholder("TouchPad Gesture Triggers", "Views/Pages/TouchPadGestureTriggersView"),
-    PageInfo::placeholder("Popup Event Triggers", "Views/Pages/PopupEventTriggersView"),
-    PageInfo::placeholder("Focus Triggers", "Views/Pages/FocusTriggersView"),
-    PageInfo::placeholder("Key Input Triggers", "Views/Pages/KeyInputTriggersView"),
-    PageInfo::placeholder("Pointer Extra Triggers", "Views/Pages/PointerExtraTriggersView"),
-    PageInfo::placeholder("Gesture Triggers", "Views/Pages/GestureTriggersView"),
-    PageInfo::placeholder("Icon Sample", "Views/Pages/IconView"),
-    PageInfo::placeholder("Automation", "Views/Pages/AutomationView"),
-    PageInfo::placeholder("ActualThemeVariantChangedBehavior", "Views/Pages/ActualThemeVariantChangedBehaviorView"),
-    PageInfo::placeholder("AttachedToLogicalTreeBehavior", "Views/Pages/AttachedToLogicalTreeBehaviorView"),
-    PageInfo::placeholder("AttachedToLogicalTreeTrigger", "Views/Pages/AttachedToLogicalTreeTriggerView"),
-    PageInfo::placeholder("AttachedToVisualTreeTrigger", "Views/Pages/AttachedToVisualTreeTriggerView"),
-    PageInfo::placeholder("BindingBehavior", "Views/Pages/BindingBehaviorView"),
-    PageInfo::placeholder("DataContextChangedBehavior", "Views/Pages/DataContextChangedBehaviorView"),
-    PageInfo::placeholder("DataContextChangedTrigger", "Views/Pages/DataContextChangedTriggerView"),
-    PageInfo::placeholder("DetachedFromLogicalTreeTrigger", "Views/Pages/DetachedFromLogicalTreeTriggerView"),
-    PageInfo::placeholder("DetachedFromVisualTreeTrigger", "Views/Pages/DetachedFromVisualTreeTriggerView"),
-    PageInfo::placeholder("DisposingBehavior", "Views/Pages/DisposingBehaviorView"),
-    PageInfo::placeholder("DisposingTrigger", "Views/Pages/DisposingTriggerView"),
-    PageInfo::placeholder("DisposableAction", "Views/Pages/DisposableActionView"),
-    PageInfo::placeholder("InitializedBehavior", "Views/Pages/InitializedBehaviorView"),
-    PageInfo::placeholder("InitializedTrigger", "Views/Pages/InitializedTriggerView"),
-    PageInfo::placeholder("InvokeCommandActionBase", "Views/Pages/InvokeCommandActionBaseView"),
-    PageInfo::placeholder("LoadedBehavior", "Views/Pages/LoadedBehaviorView"),
-    PageInfo::placeholder("ResourcesChangedBehavior", "Views/Pages/ResourcesChangedBehaviorView"),
-    PageInfo::placeholder("ResourcesChangedTrigger", "Views/Pages/ResourcesChangedTriggerView"),
-    PageInfo::placeholder("RoutedEventTriggerBase", "Views/Pages/RoutedEventTriggerBaseView"),
-    PageInfo::placeholder("UnloadedTrigger", "Views/Pages/UnloadedTriggerView"),
-    PageInfo::placeholder("FileSystem", "Views/Pages/FileSystemView"),
-    PageInfo::placeholder("Network", "Views/Pages/NetworkView"),
-    PageInfo::placeholder("ToggleClassAction", "Views/Pages/ToggleClassActionView"),
-    PageInfo::placeholder("LaunchUriAction", "Views/Pages/LaunchUriActionView"),
-    PageInfo::placeholder("ScreenshotAction", "Views/Pages/ScreenshotActionView"),
-    PageInfo::placeholder("ScrollToControlAction", "Views/Pages/ScrollToControlActionView"),
-    PageInfo::placeholder("ConsoleBeepAction", "Views/Pages/ConsoleBeepActionView"),
-    PageInfo::placeholder("BreakAction", "Views/Pages/BreakActionView"),
-    PageInfo::placeholder("InactivityTrigger", "Views/Pages/InactivityTriggerView"),
+    pointer_events_trigger_view::PAGE,
+    drag_leave_event_trigger_view::PAGE,
+    gesture_event_triggers_view::PAGE,
+    gesture_advanced_triggers_view::PAGE,
+    pull_gesture_triggers_view::PAGE,
+    scroll_gesture_triggers_view::PAGE,
+    touch_pad_gesture_triggers_view::PAGE,
+    popup_event_triggers_view::PAGE,
+    focus_triggers_view::PAGE,
+    key_input_triggers_view::PAGE,
+    pointer_extra_triggers_view::PAGE,
+    gesture_triggers_view::PAGE,
+    icon_view::PAGE,
+    automation_view::PAGE,
+    actual_theme_variant_changed_behavior_view::PAGE,
+    attached_to_logical_tree_behavior_view::PAGE,
+    attached_to_logical_tree_trigger_view::PAGE,
+    attached_to_visual_tree_trigger_view::PAGE,
+    binding_behavior_view::PAGE,
+    data_context_changed_behavior_view::PAGE,
+    data_context_changed_trigger_view::PAGE,
+    detached_from_logical_tree_trigger_view::PAGE,
+    detached_from_visual_tree_trigger_view::PAGE,
+    disposing_behavior_view::PAGE,
+    disposing_trigger_view::PAGE,
+    disposable_action_view::PAGE,
+    initialized_behavior_view::PAGE,
+    initialized_trigger_view::PAGE,
+    invoke_command_action_base_view::PAGE,
+    loaded_behavior_view::PAGE,
+    resources_changed_behavior_view::PAGE,
+    resources_changed_trigger_view::PAGE,
+    routed_event_trigger_base_view::PAGE,
+    unloaded_trigger_view::PAGE,
+    file_system_view::PAGE,
+    network_view::PAGE,
+    toggle_class_action_view::PAGE,
+    launch_uri_action_view::PAGE,
+    screenshot_action_view::PAGE,
+    scroll_to_control_action_view::PAGE,
+    console_beep_action_view::PAGE,
+    break_action_view::PAGE,
+    inactivity_trigger_view::PAGE,
 ];
 
 /// The pages, in the order of the reference.
