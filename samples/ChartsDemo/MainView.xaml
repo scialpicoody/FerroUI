@@ -31,7 +31,7 @@
             <Grid RowDefinitions="Auto,*">
               <TextBlock Text="Line · markers and per-point labels" FontWeight="SemiBold"
                          Foreground="{DynamicResource ChartsControlForegroundBrush}" />
-              <charts:Chart x:Name="LineChart" Grid.Row="1" MinHeight="230" ShowLegend="True" LegendTitle="Orders">
+              <charts:Chart x:Name="LineChart" AutomationProperties.Name="Weekly orders, line" Grid.Row="1" MinHeight="230" ShowLegend="True" LegendTitle="Orders">
                 <charts:Chart.Axes>
                   <charts:CategoryAxis Label="Period" />
                   <charts:LinearAxis Label="Orders" GridLines="Major" />
@@ -48,7 +48,7 @@
             <Grid RowDefinitions="Auto,*">
               <TextBlock Text="Area · shared Samples with the line chart" FontWeight="SemiBold"
                          Foreground="{DynamicResource ChartsControlForegroundBrush}" />
-              <charts:Chart x:Name="AreaChart" Grid.Row="1" MinHeight="230" ShowLegend="True" LegendTitle="Orders">
+              <charts:Chart x:Name="AreaChart" AutomationProperties.Name="Weekly orders, area" Grid.Row="1" MinHeight="230" ShowLegend="True" LegendTitle="Orders">
                 <charts:Chart.Axes>
                   <charts:CategoryAxis Label="Period" />
                   <charts:LinearAxis Label="Orders" GridLines="Major" />
@@ -64,7 +64,7 @@
             <Grid RowDefinitions="Auto,*">
               <TextBlock Text="Bars · grouped categories and orientation" FontWeight="SemiBold"
                          Foreground="{DynamicResource ChartsControlForegroundBrush}" />
-              <charts:Chart x:Name="BarChart" Grid.Row="1" MinHeight="230" ShowLegend="True">
+              <charts:Chart x:Name="BarChart" AutomationProperties.Name="Grouped bars" Grid.Row="1" MinHeight="230" ShowLegend="True">
                 <charts:Chart.Axes>
                   <charts:CategoryAxis Label="Period" />
                   <charts:LinearAxis Label="Orders" GridLines="Major" />
@@ -79,7 +79,7 @@
             <Grid RowDefinitions="Auto,*">
               <TextBlock Text="Calendar · DateTimeOffset values" FontWeight="SemiBold"
                          Foreground="{DynamicResource ChartsControlForegroundBrush}" />
-              <charts:Chart x:Name="DateChart" Grid.Row="1" MinHeight="230" ShowLegend="True">
+              <charts:Chart x:Name="DateChart" AutomationProperties.Name="Calendar values" Grid.Row="1" MinHeight="230" ShowLegend="True">
                 <charts:Chart.Axes>
                   <charts:DateTimeAxis Label="Date" IntervalType="Day" LabelFormat="MMM d" />
                   <charts:LinearAxis Label="Orders" GridLines="Major" />

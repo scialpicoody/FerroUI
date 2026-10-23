@@ -573,7 +573,7 @@ fn peer_queries_do_not_lay_out_the_chart() {
         peer.get_automation_control_type()
     );
     assert_eq!("Chart", peer.get_class_name());
-    let _localized = peer.get_localized_control_type();
+    assert_eq!("chart", peer.get_localized_control_type());
     assert_eq!(0.0, chart.bounds().width);
     assert_eq!(0.0, chart.desired_size().width);
     assert_eq!(0, chart.scene_build_count());
@@ -1545,4 +1545,25 @@ fn item_conversion_finishes_before_collection_bounds_and_ownership_checks() {
             assert!(chart.series().get(0).unwrap() == item);
         }
     }
+}
+
+#[test]
+fn an_unnamed_chart_is_named_by_its_legend_title_or_its_series() {
+    let chart = populated_chart();
+    let peer = ControlAutomationPeer::create_peer_for_element(&chart);
+    let titled: Vec<String> = chart
+        .series()
+        .snapshot()
+        .iter()
+        .map(|series| series.title())
+        .filter(|title| !title.is_empty())
+        .collect();
+    if !titled.is_empty() {
+        assert_eq!(titled.join(", "), peer.get_name());
+    }
+    chart.set_legend_title("Orders");
+    assert_eq!("Orders", peer.get_name());
+    AutomationProperties::set_name(&chart, Some("Weekly orders"));
+    assert_eq!("Weekly orders", peer.get_name());
+    assert_eq!(0, chart.scene_build_count());
 }

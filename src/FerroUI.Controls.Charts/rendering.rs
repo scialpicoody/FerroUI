@@ -681,9 +681,13 @@ impl ChartScene {
         for (group, &(side, offset)) in groups.iter().zip(&lanes) {
             scene.axis(chart, group, side, offset, foreground.clone(), dark);
         }
+        // The per-point labels of every series are drawn after the markers of every series,
+        // so that no marker covers a label.
+        let mut labels = Vec::new();
         for data in &series_data {
-            scene.plot_series(chart, data, &series_data, &groups, foreground.clone());
+            scene.plot_series(chart, data, &series_data, &groups, foreground.clone(), &mut labels);
         }
+        scene.annotations.extend(labels);
         for (title, color, position) in legend {
             let origin = Point::new(
                 position.x + padding.left + 8.0,
@@ -904,6 +908,7 @@ impl ChartScene {
         all: &[SeriesData],
         groups: &[AxisGroup],
         foreground: Rc<dyn IBrush>,
+        labels: &mut Vec<Draw>,
     ) {
         let series = &data.series;
         let plot = self.layout.plot_area;
@@ -1110,26 +1115,34 @@ impl ChartScene {
                         .or_else(|| series.data_label_brush())
                         .unwrap_or_else(|| foreground.clone());
                     let label = text(chart, &value_text, brush);
+                    // A label goes on the side of the point its value points to (above a
+                    // positive value, below a negative one; right or left on a horizontal bar),
+                    // and on the other side when there is no room for it inside the plot there,
+                    // so that it is not pushed back over its own point and marker.
                     let origin = if data.horizontal {
-                        Point::new(
-                            point.x
-                                + if value < 0.0 {
-                                    -label.width() - 6.0
-                                } else {
-                                    6.0
-                                },
-                            point.y - label.height() * 0.5,
-                        )
+                        let after = point.x + LABEL_GAP;
+                        let before = point.x - label.width() - LABEL_GAP;
+                        let fits_after = after + label.width() <= plot.x + plot.width;
+                        let fits_before = before >= plot.x;
+                        let x = match (value < 0.0, fits_before, fits_after) {
+                            (true, true, _) | (true, false, false) => before,
+                            (true, false, true) => after,
+                            (false, _, true) | (false, false, false) => after,
+                            (false, true, false) => before,
+                        };
+                        Point::new(x, point.y - label.height() * 0.5)
                     } else {
-                        Point::new(
-                            point.x - label.width() * 0.5,
-                            point.y
-                                + if value < 0.0 {
-                                    5.0
-                                } else {
-                                    -label.height() - 5.0
-                                },
-                        )
+                        let above = point.y - label.height() - LABEL_GAP;
+                        let below = point.y + LABEL_GAP;
+                        let fits_above = above >= plot.y;
+                        let fits_below = below + label.height() <= plot.y + plot.height;
+                        let y = match (value < 0.0, fits_above, fits_below) {
+                            (true, _, true) | (true, false, false) => below,
+                            (true, true, false) => above,
+                            (false, true, _) | (false, false, false) => above,
+                            (false, false, true) => below,
+                        };
+                        Point::new(point.x - label.width() * 0.5, y)
                     };
                     let origin = Point::new(
                         origin
@@ -1140,7 +1153,7 @@ impl ChartScene {
                             .clamp(plot.y, (plot.y + plot.height - label.height()).max(plot.y)),
                     );
                     if (0.0..=1.0).contains(&x) && (0.0..=1.0).contains(&y) {
-                        annotations.push(Draw::Text(label, origin, None));
+                        labels.push(Draw::Text(label, origin, None));
                     }
                     self.layout
                         .data_labels
@@ -1343,8 +1356,13 @@ fn legend_rows(
     rows
 }
 
+/// The distance between a point and its label: clear of the point's marker (radius 4 and
+/// half its 1.5 outline).
+const LABEL_GAP: f64 = MARKER_RADIUS + 1.5;
+const MARKER_RADIUS: f64 = 4.0;
+
 fn marker(draws: &mut Vec<Draw>, p: Point, shape: MarkerShape, brush: Rc<dyn IBrush>) {
-    let r = 4.0;
+    let r = MARKER_RADIUS;
     let outline = Some(pen(brush.clone(), 1.5, StrokeDashStyle::Solid));
     match shape {
         MarkerShape::None => {}

@@ -231,6 +231,11 @@ decisions rather than inferred implementation parity:
   dates and then divide that band among series. Duplicate dates do not collapse
   the spacing calculation to zero. Baselines include zero when auto-ranging
   area/bar values; explicit bounds still control the visible range.
+- A per-point label goes on the side its value points to (above a positive value,
+  below a negative one; right or left of a horizontal bar), 5.5 DIPs from the point so
+  that it clears the point's marker, and on the other side when it does not fit inside
+  the plot there. The labels of every series are drawn after the markers of every
+  series, so no marker covers a label.
 - Date ticks are aligned to UTC calendar boundaries (midnights, Mondays, the
   first of a month or a year), not to the offsets of the samples. With an empty
   `LabelFormat` the labels use the format of the interval the ticks were made
@@ -291,7 +296,10 @@ behavior, without pretending to specify Microsoft's unpublished algorithms.
    does not introduce a parallel theme system or write effective brushes into
    local axis properties.
 7. **Accessibility.** The native `HelpText` automation property and peer method
-   supply the description contract. The two source interaction tests become
+   supply the description contract. The peer's name is `AutomationProperties.Name`,
+   then `LabeledBy`, as the published tests require; without either it is the
+   legend title, then the titles of the series. The control type is `Custom` with
+   the localized type "chart" (the published tests do not specify a type). The two source interaction tests become
    in-process window/automation-tree tests that apply the source mutation
    sequence; they do not claim Windows UIA host discovery or OS input injection.
 8. **Sample hosts.** Four upstream Windows deployment variants share scenarios.

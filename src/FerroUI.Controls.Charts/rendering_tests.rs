@@ -301,7 +301,7 @@ fn normalized_polygon_clipping_preserves_area_with_either_winding() {
 }
 
 #[test]
-fn area_geometry_precedes_separate_marker_and_label_annotations() {
+fn area_geometry_precedes_the_markers_and_then_the_labels_of_every_series() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let chart = Chart::new();
     let axis = LinearAxis::new();
@@ -343,11 +343,15 @@ fn area_geometry_precedes_separate_marker_and_label_annotations() {
             }
         ));
     }
+    // The markers of both series come first and the labels after them, so that no marker
+    // covers a label.
     assert_eq!(scene.annotations.len(), 12);
-    for draws in scene.annotations.chunks_exact(2) {
-        assert!(matches!(&draws[0], Draw::Ellipse(..)));
-        assert!(matches!(&draws[1], Draw::Text(..)));
-    }
+    assert!(scene.annotations[..6]
+        .iter()
+        .all(|draw| matches!(draw, Draw::Ellipse(..))));
+    assert!(scene.annotations[6..]
+        .iter()
+        .all(|draw| matches!(draw, Draw::Text(..))));
     assert_eq!(scene.layout.data_labels.len(), 6);
     backend_scene(&scene);
 }
@@ -901,4 +905,44 @@ fn horizontal_date_tick_labels_stay_complete_and_separated_at_narrow_and_wide_si
             backend_scene(&scene);
         }
     }
+}
+
+#[test]
+fn a_label_with_no_room_above_its_point_goes_below_it_clear_of_its_marker() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = Chart::new();
+    let axis = LinearAxis::new();
+    axis.set_minimum(Some(0.0)).unwrap();
+    axis.set_maximum(Some(60.0)).unwrap();
+    chart.axes().add(&axis).unwrap();
+    let series = LineSeries::new();
+    series.set_y_axis(Some(axis.clone().upcast())).unwrap();
+    series.set_y_values(Some(Samples::from_values([20.0, 58.0, 60.0])));
+    series.set_show_data_labels(true);
+    series.set_show_data_markers(true);
+    chart.series().add(&series).unwrap();
+    let scene = ChartScene::build(&chart, Size::new(600.0, 400.0));
+    let plot = scene.layout.plot_area;
+    let points: Vec<_> = scene.layout.points.iter().map(|p| p.position).collect();
+    let labels: Vec<_> = scene
+        .annotations
+        .iter()
+        .filter_map(|draw| match draw {
+            Draw::Text(layout, origin, _) => Some(Rect::new(origin.x, origin.y, layout.width(), layout.height())),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(labels.len(), 3);
+    for (label, point) in labels.iter().zip(&points) {
+        assert!(label.y >= plot.y - 1e-9 && label.bottom() <= plot.bottom() + 1e-9);
+        // No label covers its own marker (radius 4).
+        let marker = Rect::new(point.x - 4.0, point.y - 4.0, 8.0, 8.0);
+        assert!(
+            label.bottom() <= marker.y || label.y >= marker.bottom(),
+            "the label {label:?} covers the marker {marker:?}"
+        );
+    }
+    // The first point has room above it; the top ones have their labels below.
+    assert!(labels[0].bottom() <= points[0].y);
+    assert!(labels[2].y >= points[2].y);
 }
