@@ -23,6 +23,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 - ControlCatalog's `mcp` feature, native and headless launch modes, a protocol smoke test for both transports, and [MCP/Claude Code setup documentation](docs/mcp.md).
 - `ferroui-dependency-injection` (#251): a port of Microsoft.Extensions.DependencyInjection (dotnet/runtime v10.0.13) with singleton, scoped, transient and keyed services, typed factories and the `service_factory!` macro for constructor injection, validation of scopes and of the graph on build, disposal in reverse order through FerroUI tasks, and an optional adapter to Splat's resolver for ReactiveUI ([docs/porting/dependency-injection.md](docs/porting/dependency-injection.md)).
 - `ferroui-devtools` (#236): an opt-in Chrome DevTools Protocol endpoint on loopback, for the Chrome DevTools front end and CDP clients such as Playwright, with DOM, read-only CSS, Overlay, Page, Input, Accessibility and Log, and a JavaScript bridge in the browser ([docs/devtools-cdp.md](docs/devtools-cdp.md)).
+- Platform settings: `IPlatformSettings::animations_enabled` (defaulted, `true`), whether the user lets the system play animations that are not essential, asked for each animation as WinUI's `SharedHelpers::IsAnimationsEnabled` does: the Windows backend reads `UISettings.AnimationsEnabled` (the interface `IUISettings`, now declared in `winrt.idl`, through one `UISettings` source that the colours use too), the browser `prefers-reduced-motion`; every other backend lets animations play.
 
 ### Changed
 
