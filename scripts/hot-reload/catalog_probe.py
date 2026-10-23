@@ -24,11 +24,17 @@ def frames(text):
     return values
 
 
+# The wall clock brackets the render time the application reports from its own, precise clock.
+# Before Python 3.13 the clock of Windows advances in ticks of 15.6 ms, so a render a few
+# milliseconds before the end of the bracket can read as after it: the bracket is one tick wider.
+WALL_CLOCK_TICK_NS = int(time.get_clock_info('time').resolution * 1e9)
+
+
 def save_and_render(process, log, page, source, atomic=False):
     previous = frames(log.read_text(encoding='utf-8', errors='replace'))
     before = len(previous)
     started = time.time_ns()
-    monotonic = time.monotonic_ns()
+    counter = time.perf_counter_ns()
     destination = page.with_suffix('.tmp') if atomic else page
     destination.write_text(source, encoding='utf-8')
     if atomic:
@@ -39,12 +45,12 @@ def save_and_render(process, log, page, source, atomic=False):
         raise RuntimeError('Render completion belongs to another document')
     if previous and previous[-1]['batch'] == frame['batch']:
         raise RuntimeError('Coalesced revisions cannot be measured as separate frames')
-    elapsed = time.monotonic_ns() - monotonic
+    elapsed = time.perf_counter_ns() - counter
     wall_elapsed = time.time_ns() - started
-    if abs(elapsed - wall_elapsed) > 100_000_000:
+    if abs(elapsed - wall_elapsed) > 100_000_000 + WALL_CLOCK_TICK_NS:
         raise RuntimeError('Wall clock changed during frame measurement')
     save_to_render = int(frame['rendered_unix_ns']) - started
-    if save_to_render < 0 or save_to_render > wall_elapsed:
+    if save_to_render < 0 or save_to_render > wall_elapsed + WALL_CLOCK_TICK_NS:
         raise RuntimeError('Render completion does not belong to this save')
     result = dict(frame, page=page.stem, save_to_render_us=save_to_render / 1000,
                   atomic_save=atomic)

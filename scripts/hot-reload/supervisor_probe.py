@@ -57,12 +57,12 @@ def main():
             program = source / PROGRAM
             program_source = program.read_text(encoding='utf-8')
             save_started = time.time_ns()
-            monotonic_started = time.monotonic_ns()
+            counter_started = time.perf_counter_ns()
             program.write_text(program_source.replace('hot_reload_demo::increment(1)', 'hot_reload_demo::increment(2)'), encoding='utf-8')
             view.write_text(view_source.replace('Spacing="12"', 'Spacing="24"'), encoding='utf-8')
-            capture_started = time.monotonic_ns()
+            capture_started = time.perf_counter_ns()
             revision = stable_capture(source)
-            capture_us = (time.monotonic_ns() - capture_started) / 1000
+            capture_us = (time.perf_counter_ns() - capture_started) / 1000
             result = owner.update(revision)
             assert result['status'] == 'applied', result
             log = app.directory / 'application.log'
@@ -70,10 +70,12 @@ def main():
                 frame['revision'] == result['markup_revision'] for frame in frames(text)))
             frame = next(frame for frame in frames(text) if frame['revision'] == result['markup_revision'])
             wall_elapsed = time.time_ns() - save_started
-            if abs(wall_elapsed - (time.monotonic_ns() - monotonic_started)) > 100_000_000:
+            # One tick of the wall clock of the probe, as in catalog_probe.save_and_render.
+            tick = int(time.get_clock_info('time').resolution * 1e9)
+            if abs(wall_elapsed - (time.perf_counter_ns() - counter_started)) > 100_000_000 + tick:
                 raise RuntimeError('Wall clock changed during patch measurement')
             rendered_elapsed = int(frame['rendered_unix_ns']) - save_started
-            assert 0 <= rendered_elapsed <= wall_elapsed, frame
+            assert 0 <= rendered_elapsed <= wall_elapsed + tick, frame
             print('FERROUI_PATCH_MEASUREMENT=' + json.dumps({
                 'scope': 'combined-rust-xaml-save-to-render',
                 'source_capture_us': capture_us,
