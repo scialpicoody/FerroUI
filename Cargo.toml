@@ -40,6 +40,8 @@ members = [
     "src/FerroUI.Fonts.Inter",
     "src/FerroUI.Dialogs",
     "src/FerroUI.Diagnostics",
+    "src/Behaviors/FerroUI.Xaml.Interactivity",
+    "src/Behaviors/FerroUI.Xaml.Behaviors.Animations",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
@@ -193,6 +195,8 @@ ferroui-winui = { version = "=0.4.0", path = "src/Windows/FerroUI.WinUI" }
 ferroui-fonts-inter = { version = "=0.4.0", path = "src/FerroUI.Fonts.Inter" }
 ferroui-dialogs = { version = "=0.4.0", path = "src/FerroUI.Dialogs" }
 ferroui-diagnostics = { version = "=0.4.0", path = "src/FerroUI.Diagnostics" }
+ferroui-xaml-interactivity = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Interactivity" }
+ferroui-xaml-behaviors-animations = { version = "=0.4.0", path = "src/Behaviors/FerroUI.Xaml.Behaviors.Animations" }
 ferroui-themes-simple = { version = "=0.4.0", path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { version = "=0.4.0", path = "src/FerroUI.Themes.Fluent" }
 ferroui-themes-winui = { version = "=0.4.0", path = "src/FerroUI.Themes.WinUI" }
