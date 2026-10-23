@@ -2,7 +2,9 @@
 //!
 //! - `Animations/` ([`animations`](self::animations)): key-frame animations;
 //! - `SplitView/` ([`split_view`](self::split_view)): the split view;
-//! - `Notifications/` ([`notifications`](self::notifications)): the notifications of a top level.
+//! - `Notifications/` ([`notifications`](self::notifications)): the notifications of a top level;
+//! - `RenderTarget/` ([`render_target`](self::render_target)): drawing into a render target bitmap, with its contracts;
+//! - `WriteableBitmap/` ([`writeable_bitmap`](self::writeable_bitmap)): rendering into a writeable bitmap, with its contract.
 //!
 //! The part owns its classes ([`TYPES`]), their public Rust paths and its markup types
 //! ([`register`]); `lib.rs` re-exports everything public of it.
@@ -19,12 +21,18 @@ use std::rc::Rc;
 mod animations;
 #[path = "notifications/mod.rs"]
 mod notifications;
+#[path = "render_target/mod.rs"]
+mod render_target;
 #[path = "split_view/mod.rs"]
 mod split_view;
+#[path = "writeable_bitmap/mod.rs"]
+mod writeable_bitmap;
 
 pub use self::animations::*;
 pub use self::notifications::*;
+pub use self::render_target::*;
 pub use self::split_view::*;
+pub use self::writeable_bitmap::*;
 
 macro_rules! types {
     ($($type_:ty),* $(,)?) => {
@@ -59,6 +67,17 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::ShowNotificationAction,
     crate::ShowSuccessNotificationAction,
     crate::ShowWarningNotificationAction,
+    // RenderTarget/
+    crate::RenderRenderTargetBitmapAction,
+    crate::RenderTargetBitmapBehavior,
+    crate::RenderTargetBitmapTrigger,
+    crate::StaticRenderTargetBitmapBehavior,
+    // WriteableBitmap/
+    crate::WriteableBitmapBehavior,
+    crate::WriteableBitmapRenderAction,
+    crate::WriteableBitmapRenderBehavior,
+    crate::WriteableBitmapTimerTrigger,
+    crate::WriteableBitmapTrigger,
 ];
 
 /// The types of this part that are not classes (lists, enumerations and contracts), declared for
@@ -66,6 +85,12 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
 const MARKUP_TYPES: &[&MarkupType] = &[
     // SplitView/
     <crate::SplitViewStateSetters as MarkupTyped>::MARKUP,
+    // RenderTarget/
+    <dyn crate::IRenderTargetBitmapRenderHost as MarkupTyped>::MARKUP,
+    <dyn crate::IRenderTargetBitmapRenderer as MarkupTyped>::MARKUP,
+    <dyn crate::IRenderTargetBitmapSimpleRenderer as MarkupTyped>::MARKUP,
+    // WriteableBitmap/
+    <dyn crate::IWriteableBitmapRenderer as MarkupTyped>::MARKUP,
 ];
 
 /// The public Rust paths of the classes of this part, by the shortest path another crate names
@@ -98,12 +123,29 @@ mod rust_paths {
             crate::ShowNotificationAction,
             crate::ShowSuccessNotificationAction,
             crate::ShowWarningNotificationAction,
+            // RenderTarget/
+            crate::RenderRenderTargetBitmapAction,
+            crate::RenderTargetBitmapBehavior,
+            crate::RenderTargetBitmapTrigger,
+            crate::StaticRenderTargetBitmapBehavior,
+            // WriteableBitmap/
+            crate::WriteableBitmapBehavior,
+            crate::WriteableBitmapRenderAction,
+            crate::WriteableBitmapRenderBehavior,
+            crate::WriteableBitmapTimerTrigger,
+            crate::WriteableBitmapTrigger,
         ],
         types: [
             // SplitView/
             crate::SplitViewStateSetters,
         ],
         contracts: [
+            // RenderTarget/
+            crate::IRenderTargetBitmapRenderHost,
+            crate::IRenderTargetBitmapRenderer,
+            crate::IRenderTargetBitmapSimpleRenderer,
+            // WriteableBitmap/
+            crate::IWriteableBitmapRenderer,
         ],
         generics: [
         ],
@@ -134,6 +176,13 @@ fn register_value_types() {
     ValueTypes::register_nullable::<Rc<dyn ferroui_controls::INotificationManager>>();
     ValueTypes::register_nullable::<Rc<dyn ferroui_controls::INotification>>();
     ValueTypes::register_element_ref::<ferroui_controls::NotificationCard>();
+    // RenderTarget/
+    ValueTypes::register_nullable::<Rc<dyn crate::IRenderTargetBitmapRenderHost>>();
+    ValueTypes::register_nullable::<Rc<dyn crate::IRenderTargetBitmapRenderer>>();
+    ValueTypes::register_nullable::<Rc<dyn crate::IRenderTargetBitmapSimpleRenderer>>();
+    // WriteableBitmap/
+    ValueTypes::register_nullable::<crate::WriteableBitmapRef>();
+    ValueTypes::register_nullable::<Rc<dyn crate::IWriteableBitmapRenderer>>();
 }
 
 /// The sender of an action as an object of class `T` (`sender as T` of the reference).
