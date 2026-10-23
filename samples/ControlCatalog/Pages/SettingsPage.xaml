@@ -70,17 +70,14 @@
     <Border Classes="card">
       <Grid ColumnSpacing="10" ColumnDefinitions="*,Auto">
         <Label>Theme</Label>
+        <!-- Not in the original: the themes the catalog is built with (App.AvailableThemes), in
+             place of the Fluent and Simple items, which need the feature `classic-themes`. -->
         <ComboBox HorizontalAlignment="Stretch"
                   Grid.Column="1"
+                  ItemsSource="{x:Static local:App.AvailableThemes}"
                   SelectedItem="{x:Static local:App.CurrentTheme}"
                   SelectionChanged="Themes_SelectionChanged"
-                  ToolTip.Tip="Catalog Theme">
-          <ComboBox.Items>
-            <models:CatalogTheme>Fluent</models:CatalogTheme>
-            <models:CatalogTheme>Simple</models:CatalogTheme>
-            <models:CatalogTheme>WinUI</models:CatalogTheme>
-          </ComboBox.Items>
-        </ComboBox>
+                  ToolTip.Tip="Catalog Theme" />
       </Grid>
     </Border>
 
