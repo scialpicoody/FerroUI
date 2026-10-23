@@ -78,7 +78,7 @@ Each stage ends with its ported tests passing on macOS and in CI.
 2. Interactivity, with its 124 tests (the lifecycle tests of `InteractionTest` verbatim).
 3. Interactions, Events, Responsive, Draggable, DragAndDrop and ReactiveUI, with the 149 tests of Interactions.
 4. Interactions.Custom, by folder.
-5. The facade crate, the gallery sample, the tracking pages (`docs/porting/tracking/behaviors/`), the README
+5. The facade crate, the gallery sample, the tracking pages ([`docs/porting/tracking/behaviors/`](tracking/behaviors/TRACKING.md)), the README
    table and the CHANGELOG.
 
 ## 5. Progress
@@ -90,3 +90,12 @@ Each stage ends with its ported tests passing on macOS and in CI.
 | 3 | Not started |
 | 4 | Not started |
 | 5 | Not started |
+
+## 6. Tracking
+
+[Generated tracking](tracking/behaviors/TRACKING.md) maps each project of the reference to its crate and counts
+the files, the public types and members, and the tests that are ported, missing and waived, with one page per
+project. It is the reference `behaviors` of `scripts/port-status/references.toml`; its data (the extraction, the
+path overrides, the waivers and aliases, the test aliases and the test reports) is in `docs/porting/data/behaviors/`.
+Regenerate it with `python3 scripts/port-status/test_gaps.py --reference behaviors --all`, then
+`scripts/port-status/run.sh --reference behaviors` (`scripts/port-status/README.md`).
