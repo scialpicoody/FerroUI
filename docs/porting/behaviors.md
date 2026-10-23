@@ -85,8 +85,8 @@ Each stage ends with its ported tests passing on macOS and in CI.
 
 | Stage | State |
 |---|---|
-| 1 | In progress |
-| 2 | In progress |
-| 3 | Not started |
-| 4 | Not started |
-| 5 | Not started |
+| 1 | Done: the framework additions; `ferroui-xaml-behaviors-animations` (40 tests) |
+| 2 | Done: `ferroui-xaml-interactivity` (121 tests) |
+| 3 | Done: `ferroui-xaml-interactions` (63), `-events` (55), `-responsive` (23), `-draggable` (22), `-draganddrop` (46), `-reactiveui` (44) |
+| 4 | Done: `ferroui-xaml-interactions-custom` (59 tests), in four parts (`part_a.rs` to `part_d.rs`) |
+| 5 | In progress: the facade crate `ferroui-xaml-behaviors` is done; the gallery, the tracking pages, the README and the CHANGELOG are under way |
