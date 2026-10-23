@@ -132,15 +132,22 @@ impl Mouse {
 
     /// Presses the left button over `target` at `position` with the keyboard modifiers.
     pub(crate) fn down_with(&self, target: &Control, position: Point, modifiers: KeyModifiers) {
+        self.down_over(target, target, position, modifiers);
+    }
+
+    /// Presses the left button at `position` relative to `relative_to`, raising the event on
+    /// `receiver` (the element under the pointer that the headless window of the reference finds
+    /// by hit testing).
+    pub(crate) fn down_over(&self, receiver: &Control, relative_to: &Control, position: Point, modifiers: KeyModifiers) {
         self.pressed_buttons.set(self.pressed_buttons.get() | RawInputModifiers::LEFT_MOUSE_BUTTON);
         self.pressed_button.set(MouseButton::Left);
         let properties = PointerPointProperties::new(self.pressed_buttons.get(), PointerUpdateKind::LeftButtonPressed);
-        let root = Self::root_of(target);
-        target.raise_event(&PointerPressedEventArgs::new(
-            target.to_ref(),
+        let root = Self::root_of(relative_to);
+        receiver.raise_event(&PointerPressedEventArgs::new(
+            receiver.to_ref(),
             self.pointer(),
             &root,
-            Self::root_position(target, &root, position),
+            Self::root_position(relative_to, &root, position),
             self.timestamp(),
             properties,
             modifiers,
@@ -150,13 +157,19 @@ impl Mouse {
 
     /// Moves the pointer over `target` to `position`.
     pub(crate) fn move_to(&self, target: &Control, position: Point) {
-        let root = Self::root_of(target);
-        target.raise_event(&PointerEventArgs::new(
+        self.move_over(target, target, position);
+    }
+
+    /// Moves the pointer to `position` relative to `relative_to`, raising the event on `receiver`
+    /// (the element that captured the pointer, or the element under it).
+    pub(crate) fn move_over(&self, receiver: &Control, relative_to: &Control, position: Point) {
+        let root = Self::root_of(relative_to);
+        receiver.raise_event(&PointerEventArgs::new(
             Some(InputElement::pointer_moved_event()),
-            target.to_ref(),
+            receiver.to_ref(),
             self.pointer(),
             Some(&*root),
-            Self::root_position(target, &root, position),
+            Self::root_position(relative_to, &root, position),
             self.timestamp(),
             PointerPointProperties::new(self.pressed_buttons.get(), PointerUpdateKind::Other),
             KeyModifiers::NONE,
@@ -165,16 +178,22 @@ impl Mouse {
 
     /// Releases the left button over `target` at `position`.
     pub(crate) fn up(&self, target: &Control, position: Point) {
+        self.up_over(target, target, position);
+    }
+
+    /// Releases the left button at `position` relative to `relative_to`, raising the event on
+    /// `receiver` (the element that captured the pointer, or the element under it).
+    pub(crate) fn up_over(&self, receiver: &Control, relative_to: &Control, position: Point) {
         let left = RawInputModifiers::LEFT_MOUSE_BUTTON;
         self.pressed_buttons.set((self.pressed_buttons.get() | left) ^ left);
         let properties =
             PointerPointProperties::new(self.pressed_buttons.get(), PointerUpdateKind::LeftButtonReleased);
-        let root = Self::root_of(target);
-        target.raise_event(&PointerReleasedEventArgs::new(
-            target.to_ref(),
+        let root = Self::root_of(relative_to);
+        receiver.raise_event(&PointerReleasedEventArgs::new(
+            receiver.to_ref(),
             self.pointer(),
             &root,
-            Self::root_position(target, &root, position),
+            Self::root_position(relative_to, &root, position),
             self.timestamp(),
             properties,
             KeyModifiers::NONE,
