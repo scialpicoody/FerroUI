@@ -22,7 +22,7 @@ impl RoutedHandlers {
     }
 
     /// `element.AddHandler(routedEvent, handler, routes, handledEventsToo)`.
-    pub(crate) fn add<TEventArgs: IRoutedEventArgs>(
+    pub(crate) fn add<TEventArgs: IRoutedEventArgs + 'static>(
         &self,
         element: &Interactive,
         routed_event: &'static RoutedEvent<TEventArgs>,
