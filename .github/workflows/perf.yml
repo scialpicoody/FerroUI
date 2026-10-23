@@ -200,5 +200,5 @@ jobs:
                   print(f"  {name.rstrip(bytes(1)).decode():8s} {raw / 1e6:8.2f} MB on disk, {virtual / 1e6:8.2f} MB in memory")
           PY
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
 
