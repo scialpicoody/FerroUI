@@ -6,8 +6,8 @@
 use ferroui_base::metadata::MarkupType;
 use ferroui_base::TypeInfo;
 
-// pub mod custom_string_animation_builder; // owner: AnimationBuilderView (also RunAnimationTriggerView, StartBuiltAnimationActionView)
-// pub mod custom_string_animator; // owner: AnimationBuilderView
+pub mod custom_string_animation_builder; // owner: AnimationBuilderView (also RunAnimationTriggerView, StartBuiltAnimationActionView)
+pub mod custom_string_animator; // owner: AnimationBuilderView
 
 /// The shared classes of this namespace: none.
 pub(crate) const TYPES: &[&TypeInfo] = &[];
