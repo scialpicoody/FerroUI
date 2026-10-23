@@ -36,7 +36,7 @@ ferroui_base::ferro_overrides! {
             };
 
             let trigger = this.to_ref().downgrade();
-            associated_object.get_observable(AutomationProperties::name_property()).subscribe_fn(
+            FerroObjectExtensions::get_observable(&*associated_object as &ferroui_base::FerroObject, AutomationProperties::name_property()).subscribe_fn(
                 move |_name: Option<String>| {
                     if let Some(trigger) = trigger.upgrade() {
                         trigger.execute();

@@ -77,7 +77,7 @@ ferroui_base::ferro_overrides! {
 
             if let Some(source_scroll_viewer) = this.source_scroll_viewer() {
                 let behavior = this.to_ref().downgrade();
-                let subscription = source_scroll_viewer.get_observable(ScrollViewer::offset_property()).subscribe_fn(
+                let subscription = FerroObjectExtensions::get_observable(&*source_scroll_viewer as &ferroui_base::FerroObject, ScrollViewer::offset_property()).subscribe_fn(
                     move |value: Vector| {
                         if let Some(behavior) = behavior.upgrade() {
                             behavior.on_next(value);

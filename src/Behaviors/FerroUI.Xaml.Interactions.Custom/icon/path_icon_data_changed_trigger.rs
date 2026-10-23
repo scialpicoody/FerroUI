@@ -32,7 +32,7 @@ ferroui_base::ferro_overrides! {
             };
 
             let trigger = this.to_ref().downgrade();
-            associated_object.get_observable(PathIcon::data_property()).subscribe_fn(move |_| {
+            FerroObjectExtensions::get_observable(&*associated_object as &ferroui_base::FerroObject, PathIcon::data_property()).subscribe_fn(move |_| {
                 if let Some(trigger) = trigger.upgrade() {
                     trigger.execute(None);
                 }

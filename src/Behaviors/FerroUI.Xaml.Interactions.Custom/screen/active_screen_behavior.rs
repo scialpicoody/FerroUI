@@ -66,7 +66,7 @@ ferroui_base::ferro_overrides! {
             // the client size; here it ends with the other subscriptions when the top level
             // leaves the visual tree or the behavior is detached.
             let behavior = this.to_ref().downgrade();
-            subscriptions.push(top_level.get_observable(TopLevel::client_size_property()).subscribe_fn(
+            subscriptions.push(FerroObjectExtensions::get_observable(&*top_level as &ferroui_base::FerroObject, TopLevel::client_size_property()).subscribe_fn(
                 move |_size: Size| {
                     if let Some(behavior) = behavior.upgrade() {
                         behavior.update();

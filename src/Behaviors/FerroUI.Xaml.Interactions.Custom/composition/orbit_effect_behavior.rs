@@ -1,10 +1,10 @@
 //! Port of `Composition/OrbitEffectBehavior.cs`.
 
-use ferroui_base::input::{IPointer, InputElement, PointerEventArgs, PointerPressedEventArgs, PointerReleasedEventArgs};
+use ferroui_base::input::{InputElement, PointerEventArgs, PointerPressedEventArgs, PointerReleasedEventArgs};
 use ferroui_base::interactivity::{Interactive, RoutedEventHandlerToken};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroObjectImpl, FerroProperty, Point, Ref,
-    StaticType, StyledElementImpl, StyledProperty, Upcast, Vector, Visual,
+    StaticType, StyledElementImpl, StyledProperty, Vector, Visual,
 };
 use ferroui_controls::{Control, SizeChangedEventArgs};
 use ferroui_xaml_behaviors_animations::OrbitAnimation;

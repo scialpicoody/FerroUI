@@ -18,6 +18,7 @@ pub(crate) const TYPES: &[&TypeInfo] = &[];
 ferro_markup_type!(class PointerEventArgsConverter {
     namespace: "FerroUI.Xaml.Interactions.Custom.Converters",
     handles: [Rc<PointerEventArgsConverter>, Option<Rc<PointerEventArgsConverter>>],
+    this: Rc<PointerEventArgsConverter>,
     interfaces: [Rc<dyn IValueConverter>],
     constructors: [() => || Rc::new(PointerEventArgsConverter)],
     fields: [Instance: Rc<PointerEventArgsConverter> => PointerEventArgsConverter::instance],
