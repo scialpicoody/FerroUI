@@ -329,10 +329,17 @@ lto = "thin"
 # (docs/porting/desktop-performance.md, section 6.2); the build takes about twice as long, because
 # every executable generates the code of the whole program on one core, and its link step needs
 # about 6 GB of memory.
+#
+# The symbol table is stripped (`strip = "symbols"`): it is a sixth to a quarter of an executable of
+# macOS or Linux, and nothing of the program reads it but the symbolisation of a panic backtrace, which
+# then shows addresses (docs/binary-size.md, section 4.3). On Windows the executable never holds the
+# symbols (they are in the PDB beside it), so the setting changes nothing there. Build with the
+# release profile for a backtrace with names.
 [profile.dist]
 inherits = "release"
 lto = "fat"
 codegen-units = 1
+strip = "symbols"
 
 # The WebAssembly module of the browser (scripts/build-browser.sh): optimised for size, because the
 # module is downloaded and compiled by every visitor (docs/porting/browser-platform.md, section 18).
