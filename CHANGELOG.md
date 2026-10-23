@@ -19,6 +19,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Changed
 
+- **Smaller executables** (#306, [docs/binary-size.md](docs/binary-size.md): the measurements, what an executable is made of, and the settings applications should ship with):
+  - the compiler of markup writes the statement sequences that recur at thousands of sites of a theme as calls of shared helpers of the runtime library (`rt::string_object`, `rt::static_resource_content`, `rt::add_deferred_resource`, `rt::bind_dynamic_resource`, `rt::add_dynamic_resource_setter_with_parent`, `rt::bind_template_binding`): the same calls in the same order, in one function instead of at each site. The compiled WinUI theme is 46 % smaller; the checked-in `compiled_xaml.rs` of the three themes and the emitter output of the markup tests are regenerated;
+  - the ControlCatalog is built with the WinUI theme alone: the Simple and Fluent themes of the original are behind the new feature `classic-themes` of `control-catalog` and `control-catalog-desktop` (`ClassicThemes.xaml`; the settings page lists the themes the catalog is built with), and the TreeDataGrid demo has its own application with the Fluent theme behind its new default feature `app`, which the catalog does not enable;
+  - the profile `dist`, the one to ship with, strips the symbols of the executable.
 - Composition, with the WinUI composition API (see `docs/porting/DEVIATIONS.md`, "WinUI composition"): a `CompositionPropertySet` made with `new` is live on the compositor; an animation that reads nothing (a constant expression) now applies; the operators of expressions combine the single- and double-precision forms of a vector; the expression functions `Matrix3x2.CreateTranslation` and `Matrix4x4.CreateTranslation` build translations, the 6- and 16-argument matrix constructors read every argument, and function names are matched ignoring case; in a window rendered by a compositor, `ConnectedAnimation` runs on the compositor with the engine of WinUI.
 
 ## [0.4.0] - 2026-10-22
