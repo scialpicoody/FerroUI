@@ -161,6 +161,49 @@ The start-up times are the same within the spread of the launches (hello_window,
 touches, moved as much as the others). The helpers of compiled markup are calls where the
 statements were calls too; the theme is populated as fast as before.
 
+### 3.6 Hello, World!: the floor of an application, against the catalog
+
+The samples `samples/HelloWorld` (one window with "Hello, World!" in the WinUI 3 theme, in XAML)
+and its versions in each style of the declarative API (`samples/HelloWorld.Builders`, `.Macros`,
+`.Hooks`, `.ComponentHost`; docs/declarative-ui.md) depend only on what they use, so they show
+what an application in the WinUI theme costs before it adds anything of its own. `hello_window`
+(`ferroui-desktop`'s example: a window without a theme and without markup) is the floor of the
+framework itself. Each is built by itself, as an application is.
+
+Windows x86-64 (run 40002097460 of the workflow `Performance`):
+
+| Application | Release | `dist` |
+|---|---:|---:|
+| `hello_window` (no theme, no markup) | 34.58 | 32.62 |
+| `hello-world` (XAML, WinUI theme) | 77.14 | 71.50 |
+| `hello-world-builders` | 77.54 | 71.79 |
+| `hello-world-macros` | 77.54 | 71.79 |
+| `hello-world-hooks` | 77.54 | 71.79 |
+| `hello-world-component-host` (XAML with a component) | 77.69 | 71.94 |
+| `winui-theme-gallery` | 80.14 | 74.04 |
+| `control-catalog-desktop` | 163.08 | 150.40 |
+
+MACOS_HELLO
+
+What the numbers say:
+
+- **The style of the API costs almost nothing.** The four declarative versions are within 0.6 MB
+  of the XAML one: `ferroui-view` (builders, the macros' output, the reactive runtime, the
+  reconciler) is about 0.4 MB, and a component in XAML another 0.15 MB.
+- **The theme is most of an application.** The WinUI theme takes a window from 32.6 to 71.5 MB
+  (`dist`). The theme has a control theme for every control, so every control and its code is
+  linked with it, and its compiled markup itself (about 6.4 MB of code on macOS, 15.6 MB of the
+  Windows catalog). The upstream framework does the same: a theme is a resource dictionary of
+  every control.
+- **What the catalog adds over a hello world** (`dist`, Windows: 150.4 against 71.5 MB, 78.9 MB):
+  its 219 compiled pages and their code, its 24 MB of embedded pictures, the TreeDataGrid with its
+  demo, the colour picker, the dialogs, and the VNC and headless hosts of its desktop entry point.
+  The per-crate attribution of the catalog (Windows, release, the linker map of run 40002097460):
+  `control_catalog` 62.9 MB (with the pictures), `ferroui_controls` 22.1, `ferroui_base` 18.4,
+  `ferroui_themes_winui` 15.6, `treedatagrid_demo` 7.4, the colour picker 5.2, Skia 5.1, the
+  TreeDataGrid 5.0, ANGLE 6.6 (`libGLESv2` 4.6, `libmozangle` 2.0), the runtime library of
+  markup 2.0, the dialogs 1.9, the Windows backend 1.4, HarfBuzz 0.8.
+
 ## 4. The changes
 
 ### 4.1 The themes of the catalog
@@ -357,8 +400,10 @@ CARGO_TARGET_DIR=<dir> cargo build --profile dist -j 4 -p control-catalog-deskto
 # Sections and the stripped size
 size -m <dir>/release/control-catalog-desktop
 strip -o control-catalog-desktop.stripped <dir>/release/control-catalog-desktop
-# Symbol table, for the attribution by crate and by generic family
-nm -n -m <dir>/release/control-catalog-desktop
+# Attribution by crate and by generic family, from the symbol table (an unstripped build)
+python3 scripts/symsize.py <dir>/release/control-catalog-desktop -n 30 --crates 30 --families 40
+# The same on GitHub's runners: the workflow Performance, inputs `samples` (macOS) and `windows`
+gh workflow run perf.yml -f ref=<branch> -f samples=true -f windows=true
 # Memory and start-up
 FERROUI_SMOKE_EXIT_MS=6000 /usr/bin/time -l <dir>/release/control-catalog-desktop
 FERROUI_SMOKE_EXIT_MS=6000 FERROUI_SMOKE_RENDERING=software /usr/bin/time -l <dir>/release/control-catalog-desktop
