@@ -184,7 +184,8 @@ separate validation requirements.
 The portable renderer constructs pressure-dependent circular or rectangular nib
 geometry using FerroUI points and matrices. The nib size is scaled by
 `0.25 + 1.5 * pressure`, so the nominal pressure 0.5 of mouse, touch and
-`InkStrokeBuilder` points draws the configured size (DEVIATIONS.md, "WinUI inking"). It preserves raw samples, caches
+`InkStrokeBuilder` points draws the configured size, and a sample without
+pressure (0, no contact) draws nothing (DEVIATIONS.md, "WinUI inking"). It preserves raw samples, caches
 derived smoothing/outline/bounds data and invalidates those caches when geometry
 inputs change. Selection alone does not need to rebuild tessellation.
 

@@ -83,15 +83,20 @@ impl InkDrawingAttributes {
 
     /// The factor of the nib size at `pressure`. The nominal pressure 0.5 (what devices without
     /// pressure report, and what `InkStrokeBuilder` gives its points) draws the configured
-    /// size; full pressure 1.75 times it and no pressure a quarter of it.
+    /// size, full pressure 1.75 times it and the lightest a quarter of it. A sample without
+    /// pressure (0, no contact) draws nothing: a stroke of such samples is invisible and has no
+    /// bounds.
     // Deviation (DEVIATIONS.md, WinUI inking): DirectInk's pressure curve is not published; the
     // port uses the linear curve of WPF's ink, `0.25 + 1.5 * pressure`, so that a mouse or touch
     // stroke has the width the toolbar shows.
     pub(crate) fn pressure_scale(&self, pressure: f32) -> f64 {
+        let pressure = f64::from(pressure);
         if self.ignore_pressure {
             1.0
+        } else if !(pressure > 0.0) {
+            0.0
         } else {
-            0.25 + 1.5 * f64::from(pressure).clamp(0.0, 1.0)
+            0.25 + 1.5 * pressure.min(1.0)
         }
     }
 }
