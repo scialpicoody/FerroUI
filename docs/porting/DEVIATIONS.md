@@ -7,6 +7,7 @@ Other pages hold the entries of their own area, and this page does not repeat th
 - `browser-platform.md` section 14: the browser backend and the browser hosts of the samples (host-level differences, upstream quirks not copied).
 - `xaml.md`: the markup pipeline and the ahead-of-time compiler.
 - `winui-composition.md` section 7: the port of the WinUI 3 composition API on top of the compositor (differences from WinUI). The changes it makes to upstream behaviour are listed in the section "WinUI composition" below.
+- `winui-controls.md`: the native ports of WinUI 3 controls in `ferroui-controls` (differences from WinUI, per control). The WinUI members added to upstream-ported controls are listed in the section "WinUI additions to upstream controls" below.
 - `winui-charts.md` section 4: the port of the WinUI Charts public contract (`src/FerroUI.Controls.Charts`; differences from the published API and tests). The decisions the port makes where the implementation is not published are in its section 3.1.
 - `PORTING-GUIDE.md`: the systematic mappings that apply everywhere (class model, nullability, events, generics, naming). An application of those rules is not a deviation and is not listed here.
 
@@ -1479,6 +1480,13 @@ The port of StaticViewLocator (<https://github.com/wieslawsoltes/StaticViewLocat
 | The generated `IViewLocator` assigns `IViewFor.ViewModel` of any view that implements `IViewFor`; it discovers views by `ReactiveUI.IViewFor<TViewModel>`. | A view of ReactiveUI is a control class that implements `IControlViewFor`, shown through a `ControlViewFor`; it is discovered by that `impl`. The generated locator implements FerroUI's `IViewLocator` (`resolve_view_typed`, `resolve_view`, `resolve_view_unsafe`) and the inherent `resolve_view_for::<VM>` and `resolve_view_default::<VM>`; the view locator needs the feature `reactiveui` (SVL0001 without it). | Representation | ReactiveUI's views are shared trait objects in FerroUI; the trait of the locator is the port's. | #310 |
 | The tests compile each source text into an assembly of its own; a test of the generator also compiles its output. | The tests of the generator check the text of the output; the runtime tests are modules of one crate whose build script generates their locators, so every locator sees the view models of every module. Tests of C# features Rust lacks (`ref` overloads, `dynamic`, sealed classes, run-time type tests, base-class contracts) check the Rust counterpart under the same names. | Test | A Rust test cannot compile a crate; the generated source of each shape is compiled and run by `tests/FerroUI.StaticViewLocator.Tests`. | #310 |
 | The demos write their views in markup (AXAML) with compiled bindings, and `MainWindow` is a window class. | The sample writes its views with the builders of `ferroui-view` in `UserControl` classes, from the view model of their data context; both demos are tabs of one window. | Behaviour | The sample shows the locators, which are independent of how a view is written. | #310 |
+
+### WinUI additions to upstream controls (`src/FerroUI.Controls/`)
+
+WinUI members added to upstream-ported controls (`winui-controls.md`, section 6). Each is opt-in: its default reproduces upstream exactly, and a test checks that default. The WinUI controls that FerroUI ports as separate types (`winui-controls.md`, section 3) are new controls, not deviations; their differences from WinUI are in `winui-controls.md`. Columns: the WinUI source member, the member added and the default that keeps upstream, the kind (**Behaviour (opt-in)**), why, and the pull request.
+
+| WinUI source | Addition and default | Kind | Why | Since |
+|---|---|---|---|---|
 
 ## Corrected divergences
 
