@@ -18,46 +18,46 @@
   <ControlTheme x:Key="NumberBoxSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DefaultRepeatButtonStyle}">
     <Setter Property="IsTabStop" Value="False"/>
     <Setter Property="Focusable" Value="False"/>
-    <Setter Property="MinWidth" Value="32"/>
+    <Setter Property="MinWidth" Value="48"/>
     <Setter Property="Padding" Value="0"/>
     <Setter Property="VerticalAlignment" Value="Stretch"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource NumberBoxSpinButtonBorderThickness}"/>
+    <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontSize" Value="12"/>
   </ControlTheme>
   <ControlTheme x:Key="NumberBoxPopupSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DefaultRepeatButtonStyle}">
     <Setter Property="IsTabStop" Value="False"/>
     <Setter Property="Focusable" Value="False"/>
-    <Setter Property="Width" Value="36"/>
-    <Setter Property="Height" Value="36"/>
+    <Setter Property="Width" Value="48"/>
+    <Setter Property="Height" Value="48"/>
     <Setter Property="Padding" Value="0"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource NumberBoxPopupSpinButtonBorderThickness}"/>
+    <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="FontSize" Value="16"/>
     <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
   </ControlTheme>
   <ControlTheme x:Key="NumericUpDownSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource NumberBoxSpinButtonStyle}">
-    <Setter Property="Background" Value="{DynamicResource TextControlButtonBackground}"/>
-    <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForeground}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrush}"/>
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="BorderBrush" Value="Transparent"/>
     <Style Selector="^:pointerover">
-      <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPointerOver}"/>
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
       <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPointerOver}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPointerOver}"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPointerOver}"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
       </Style>
     </Style>
     <Style Selector="^:pressed">
-      <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPressed}"/>
+      <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
       <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPressed}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPressed}"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextControlButtonForegroundPressed}"/>
+        <Setter Property="Background" Value="{DynamicResource MaterialOnSurfacePressedBrush}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
       </Style>
     </Style>
     <Style Selector="^:disabled">
       <Setter Property="Foreground" Value="{DynamicResource RepeatButtonForegroundDisabled}"/>
       <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrush}"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
       </Style>
     </Style>
   </ControlTheme>
@@ -66,7 +66,7 @@
       <ControlTemplate>
         <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto">
           <Border x:Name="BorderElement" Grid.Column="0" Grid.ColumnSpan="6" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" MinWidth="{TemplateBinding MinWidth}" MinHeight="{TemplateBinding MinHeight}"/>
-          <Border x:Name="SpinButtonsSpaceLeft" Grid.Column="0" Width="72" IsVisible="False"/>
+          <Border x:Name="SpinButtonsSpaceLeft" Grid.Column="0" Width="96" IsVisible="False"/>
           <ContentPresenter x:Name="InnerLeftContentPresenter" IsVisible="{TemplateBinding InnerLeftContent, Converter={x:Static ObjectConverters.IsNotNull}}" Grid.Column="1" Margin="{TemplateBinding BorderThickness}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding InnerLeftContent}"/>
           <ScrollViewer x:Name="PART_ScrollViewer" Grid.Column="2" HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}" VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}" IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}" Margin="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}" Foreground="{TemplateBinding Foreground}" Focusable="False">
             <TextPresenter x:Name="PART_TextPresenter" Text="{TemplateBinding Text, Mode=TwoWay}" CaretBlinkInterval="{TemplateBinding CaretBlinkInterval}" CaretIndex="{TemplateBinding CaretIndex}" SelectionStart="{TemplateBinding SelectionStart}" SelectionEnd="{TemplateBinding SelectionEnd}" TextAlignment="{TemplateBinding TextAlignment}" TextWrapping="{TemplateBinding TextWrapping}" LineHeight="{TemplateBinding LineHeight}" LetterSpacing="{TemplateBinding LetterSpacing}" PasswordChar="{TemplateBinding PasswordChar}" RevealPassword="{TemplateBinding RevealPassword}" SelectionBrush="{TemplateBinding SelectionBrush}" SelectionForegroundBrush="{TemplateBinding SelectionForegroundBrush}" CaretBrush="{TemplateBinding CaretBrush}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
@@ -86,7 +86,7 @@
           </TextBlock>
           <ContentPresenter x:Name="InnerRightContentPresenter" IsVisible="{TemplateBinding InnerRightContent, Converter={x:Static ObjectConverters.IsNotNull}}" Grid.Column="3" Margin="{TemplateBinding BorderThickness}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" Content="{TemplateBinding InnerRightContent}"/>
           <Button x:Name="DeleteButton" Grid.Column="4" Theme="{StaticResource TextBoxDeleteButtonStyle}" Command="{Binding $parent[TextBox].Clear}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" Padding="{DynamicResource HelperButtonThemePadding}" Focusable="False" IsVisible="False" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Right" MinWidth="40" VerticalAlignment="Stretch"/>
-          <Border x:Name="SpinButtonsSpace" Grid.Column="5" Width="72" IsVisible="False"/>
+          <Border x:Name="SpinButtonsSpace" Grid.Column="5" Width="96" IsVisible="False"/>
           <Path x:Name="PopupIndicator" Grid.Column="5" IsVisible="False" Margin="{StaticResource NumberBoxPopupIndicatorMargin}" Data="{StaticResource GlyphGeometryEC8F}" Fill="{DynamicResource NumberBoxPopupIndicatorForeground}" Stretch="Uniform" Width="10" VerticalAlignment="Center" HorizontalAlignment="Center"/>
         </Grid>
       </ControlTemplate>
@@ -129,11 +129,11 @@
     <Setter Property="IsTabStop" Value="False"/>
     <Setter Property="CornerRadius" Value="4"/>
     <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighestBrush}"/>
-    <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+    <Setter Property="BorderThickness" Value="0,0,0,1"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
     <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
-    <Setter Property="Padding" Value="{DynamicResource TextControlThemePadding}"/>
-    <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForeground}"/>
+    <Setter Property="Padding" Value="16,16"/>
+    <Setter Property="PlaceholderForeground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
     <Setter Property="Template">
       <ControlTemplate>
         <DataValidationErrors>

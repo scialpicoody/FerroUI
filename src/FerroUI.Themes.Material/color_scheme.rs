@@ -275,6 +275,15 @@ impl MaterialColorScheme {
         Color::from_uint32(0xFFEFB8C8), // TertiaryFixedDim
         Color::from_uint32(0xFFD0BCFF), // SurfaceTint
     ] } }
+    /// Native MaterialExpressiveTheme light baseline, including its four tone-30 container foregrounds.
+    pub const fn expressive_light() -> Self {
+        let mut scheme = Self::light();
+        scheme.colors[MaterialColorRole::OnPrimaryContainer as usize] = Color::from_uint32(0xFF4F378B);
+        scheme.colors[MaterialColorRole::OnSecondaryContainer as usize] = Color::from_uint32(0xFF4A4458);
+        scheme.colors[MaterialColorRole::OnTertiaryContainer as usize] = Color::from_uint32(0xFF633B48);
+        scheme.colors[MaterialColorRole::OnErrorContainer as usize] = Color::from_uint32(0xFF8C1D18);
+        scheme
+    }
     /// A fresh dictionary permits atomic replacement: no frame observes half a palette.
     pub fn resources(&self) -> Ref<ResourceDictionary> {
         let dictionary = ResourceDictionary::new();

@@ -24,6 +24,7 @@ use ferroui_controls::{
     Application, ComboBox, ContentControlImpl, ControlImpl, ListBox, TextBlock, TopLevelImpl, Window, WindowBaseImpl,
     WindowImpl,
 };
+use ferroui_themes_material::MaterialMotionScheme;
 use std::cell::Cell;
 use std::rc::Rc;
 use std::time::Duration;
@@ -31,8 +32,8 @@ use std::time::Duration;
 /// The flow directions of the toolbar: the name and whether it is right to left.
 pub const FLOWS: [(&str, bool); 2] = [("Left to right", false), ("Right to left", true)];
 
-/// The accent colours of the toolbar: the name and the colour (none: the accent colour of the
-/// platform). Each seed produces a complete HCT palette.
+/// Seed choices: None restores the AndroidX Expressive baseline; other choices
+/// generate complete HCT palettes.
 pub const ACCENTS: [(&str, Option<Color>); 6] = [
     ("Baseline", None),
     ("Blue", Some(Color::from_rgb(0x00, 0x78, 0xD4))),
@@ -40,6 +41,12 @@ pub const ACCENTS: [(&str, Option<Color>); 6] = [
     ("Purple", Some(Color::from_rgb(0x87, 0x64, 0xB8))),
     ("Orange", Some(Color::from_rgb(0xCA, 0x50, 0x10))),
     ("Red", Some(Color::from_rgb(0xC4, 0x2B, 0x1C))),
+];
+
+pub const MOTIONS: [(&str, MaterialMotionScheme, bool); 3] = [
+    ("Expressive", MaterialMotionScheme::Expressive, false),
+    ("Standard", MaterialMotionScheme::Standard, false),
+    ("Reduced", MaterialMotionScheme::Expressive, true),
 ];
 
 #[repr(C)]
@@ -100,6 +107,9 @@ impl MainWindow {
         for (name, _) in ACCENTS {
             this.accent_choice().items().add(text_item(name));
         }
+        for (name, _, _) in MOTIONS {
+            this.motion_choice().items().add(text_item(name));
+        }
         for page in PAGES {
             this.page_list().items().add(text_item(page.title));
         }
@@ -112,6 +122,7 @@ impl MainWindow {
             (this.density_choice().upcast(), MainWindow::on_density_changed),
             (this.flow_choice().upcast(), MainWindow::on_flow_changed),
             (this.accent_choice().upcast(), MainWindow::on_accent_changed),
+            (this.motion_choice().upcast(), MainWindow::on_motion_changed),
             (this.page_list().upcast(), MainWindow::show_selected_page),
         ] {
             let weak = this.downgrade();
@@ -128,6 +139,7 @@ impl MainWindow {
         this.density_choice().set_selected_index(0);
         this.flow_choice().set_selected_index(0);
         this.accent_choice().set_selected_index(0);
+        this.motion_choice().set_selected_index(0);
         this.page_list().set_selected_index(0);
         this
     }
@@ -146,6 +158,10 @@ impl MainWindow {
 
     fn accent_choice(&self) -> Ref<ComboBox> {
         self.get_control::<ComboBox>("AccentChoice")
+    }
+
+    fn motion_choice(&self) -> Ref<ComboBox> {
+        self.get_control::<ComboBox>("MotionChoice")
     }
 
     fn page_list(&self) -> Ref<ListBox> {
@@ -186,6 +202,15 @@ impl MainWindow {
         let Some((_, accent)) = selected(&ACCENTS, self.accent_choice().selected_index()) else { return };
         if let Some(gallery_theme) = App::current_theme() {
             theme::set_accent(&gallery_theme, accent);
+        }
+    }
+
+    fn on_motion_changed(&self) {
+        if let (Some((_, scheme, reduced)), Some(theme)) = (
+            selected(&MOTIONS, self.motion_choice().selected_index()), App::current_theme(),
+        ) {
+            theme.set_motion_scheme(scheme);
+            theme.set_reduced_motion(reduced);
         }
     }
 

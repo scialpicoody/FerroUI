@@ -8,7 +8,22 @@
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:ClassModifier="internal">
-  <ControlTheme x:Key="SplitButtonInnerButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}" />
+  <ControlTheme x:Key="SplitButtonInnerButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+    <Setter Property="MinWidth" Value="48" />
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSplitLeadingButton" TargetType="Button" BasedOn="{StaticResource SplitButtonInnerButtonStyle}">
+    <Style Selector="^:pressed /template/ Border#MaterialContainer"><Setter Property="CornerRadius" Value="20,12,12,20" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSplitTrailingButton" TargetType="Button" BasedOn="{StaticResource SplitButtonInnerButtonStyle}">
+    <Style Selector="^:pressed /template/ Border#MaterialContainer"><Setter Property="CornerRadius" Value="12,20,20,12" /></Style>
+  </ControlTheme>
+  <ControlTheme x:Key="MaterialSplitCheckedTrailingButton" TargetType="Button" BasedOn="{StaticResource SplitButtonInnerButtonStyle}">
+    <Style Selector="^:pressed /template/ Border#MaterialContainer"><Setter Property="CornerRadius" Value="20" /></Style>
+    <Style Selector="^ /template/ Border#MaterialStateLayer"><Setter Property="Opacity" Value="0.1" /></Style>
+    <Style Selector="^:pointerover /template/ Border#MaterialStateLayer"><Setter Property="Opacity" Value="0.172" /></Style>
+    <Style Selector="^:focus-visible /template/ Border#MaterialStateLayer"><Setter Property="Opacity" Value="0.19" /></Style>
+    <Style Selector="^:disabled /template/ Border#MaterialStateLayer"><Setter Property="Opacity" Value="0" /></Style>
+  </ControlTheme>
   <ControlTheme x:Key="SplitButtonStyle" TargetType="SplitButton">
     <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryBrush}" />
@@ -27,15 +42,15 @@
     <Setter Property="Template">
       <ControlTemplate>
         <Grid ColumnDefinitions="*,2,48" Background="Transparent">
-          <Button x:Name="PART_PrimaryButton" Theme="{StaticResource SplitButtonInnerButtonStyle}"
+          <Button x:Name="PART_PrimaryButton" Theme="{StaticResource MaterialSplitLeadingButton}"
                   Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}"
                   Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
                   Command="{TemplateBinding Command}" CommandParameter="{TemplateBinding CommandParameter}"
                   Padding="{TemplateBinding Padding}" CornerRadius="20,4,4,20"
                   HorizontalAlignment="Stretch" IsTabStop="False" Focusable="False" />
-          <Button x:Name="PART_SecondaryButton" Grid.Column="2" Theme="{StaticResource SplitButtonInnerButtonStyle}"
+          <Button x:Name="PART_SecondaryButton" Grid.Column="2" Theme="{StaticResource MaterialSplitTrailingButton}"
                   Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}"
-                  CornerRadius="4,20,20,4" Padding="13,8" HorizontalAlignment="Stretch"
+                  CornerRadius="4,20,20,4" Padding="13,8" MinWidth="48" HorizontalAlignment="Stretch"
                   IsTabStop="False" Focusable="False">
             <Path x:Name="MaterialSplitChevron" Data="M 6,9 L 12,15 L 18,9"
                   Stroke="{Binding #PART_SecondaryButton.Foreground}" StrokeThickness="2"
@@ -52,8 +67,7 @@
     </Style>
     <Style Selector="^:flyout-open /template/ Button#PART_SecondaryButton">
       <Setter Property="CornerRadius" Value="20" />
-      <Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
-      <Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" />
+      <Setter Property="Theme" Value="{StaticResource MaterialSplitCheckedTrailingButton}" />
     </Style>
     <Style Selector="^:checked">
       <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />

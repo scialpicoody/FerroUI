@@ -34,7 +34,7 @@
         <Border x:Name="LayoutRoot" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
           <StackPanel Spacing="4" VerticalAlignment="Center" HorizontalAlignment="Center">
             <Grid x:Name="IconContainer" Width="56" Height="32" TemplatedControl.IsTemplateFocusTarget="True">
-              <Border x:Name="SelectionIndicator" CornerRadius="16" Background="{DynamicResource MaterialSecondaryContainerBrush}" RenderTransformOrigin="50%,50%" RenderTransform="scaleX(0)" Opacity="0">
+              <Border x:Name="SelectionIndicator" IsVisible="{TemplateBinding IndicatorTemplate, Converter={x:Static ObjectConverters.IsNull}}" CornerRadius="16" Background="{DynamicResource MaterialSecondaryContainerBrush}" RenderTransformOrigin="50%,50%" RenderTransform="scaleX(0)" Opacity="0">
                 <Border.Transitions>
                   <Transitions>
                     <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
@@ -45,7 +45,7 @@
               </Border>
               <Border x:Name="StateLayer" Background="Transparent" CornerRadius="16" IsHitTestVisible="False" />
               <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="16" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
-              <ContentPresenter x:Name="CustomIndicator" Content="{TemplateBinding DataContext}" ContentTemplate="{TemplateBinding IndicatorTemplate}" />
+              <ContentPresenter x:Name="CustomIndicator" Content="{TemplateBinding DataContext}" ContentTemplate="{TemplateBinding IndicatorTemplate}" IsVisible="{TemplateBinding IndicatorTemplate, Converter={x:Static ObjectConverters.IsNotNull}}" Opacity="0" />
               <ContentPresenter x:Name="Icon" Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{TemplateBinding Icon}" ContentTemplate="{TemplateBinding IconTemplate}" Foreground="{TemplateBinding Foreground}" />
             </Grid>
             <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" HorizontalContentAlignment="Center" RecognizesAccessKey="True" />
@@ -66,6 +66,7 @@
         <Setter Property="RenderTransform" Value="scaleX(1)" />
         <Setter Property="Opacity" Value="1" />
       </Style>
+      <Style Selector="^ /template/ ContentPresenter#CustomIndicator"><Setter Property="Opacity" Value="1"/></Style>
       <Style Selector="^ /template/ ContentPresenter#Icon">
         <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
       </Style>
@@ -120,6 +121,13 @@
     </Setter>
     <Style Selector="^ /template/ Border#TabContainerGrid">
       <Setter Property="Width" Value="96" />
+    </Style>
+    <Style Selector="^[TabStripPlacement=Left], ^[TabStripPlacement=Right]">
+      <Setter Property="ItemsPanel">
+        <ItemsPanelTemplate>
+          <StackPanel Spacing="4" />
+        </ItemsPanelTemplate>
+      </Setter>
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialNavigationBarTallItem" TargetType="TabItem" BasedOn="{StaticResource TabbedPageTabItemTheme}">

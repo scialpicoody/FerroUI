@@ -6,10 +6,11 @@
 
 ferroui_base::ferro_rust_paths! {
     classes: [
-        crate::MaterialTheme,
-        crate::MaterialRipple,
-        crate::MaterialProgressIndicator,
         crate::MaterialLoadingIndicator,
+        crate::MaterialProgressIndicator,
+        crate::MaterialRipple,
+        crate::MaterialSelectionMark,
+        crate::MaterialTheme,
         crate::accents::SystemAccentColors,
         crate::primitives::InfoBarPanel,
         crate::primitives::TabViewEqualWidthPanel,

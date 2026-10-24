@@ -1430,5 +1430,12 @@
     "TertiaryFixed": "#FFD8E4",
     "TertiaryFixedDim": "#EFB8C8",
     "SurfaceTint": "#D0BCFF"
-  }
+  },
+  "expressive_light_overrides": {
+    "OnPrimaryContainer": "#4F378B",
+    "OnSecondaryContainer": "#4A4458",
+    "OnTertiaryContainer": "#633B48",
+    "OnErrorContainer": "#8C1D18"
+  },
+  "expressive_light_source": "ColorScheme.kt expressiveLightColorScheme / PaletteTokens.kt"
 }

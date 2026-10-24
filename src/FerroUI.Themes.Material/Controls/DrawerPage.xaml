@@ -66,7 +66,7 @@
     </Setter>
   </ControlTheme>
   <ControlTheme x:Key="{x:Type DrawerPage}" TargetType="DrawerPage">
-    <Setter Property="BackdropBrush" Value="#52000000"/>
+    <Setter Property="BackdropBrush" Value="{DynamicResource MaterialScrimBrush}"/>
     <Setter Property="Background" Value="{DynamicResource MaterialSurfaceBrush}"/>
     <Setter Property="CompactDrawerLength" Value="96"/>
     <Setter Property="DrawerLength" Value="360"/>
@@ -100,7 +100,7 @@
                 <ContentPresenter Name="PART_ContentPresenter" Margin="0" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
               </DockPanel>
             </Border>
-            <Border Name="PART_Backdrop" Background="{TemplateBinding BackdropBrush}" IsVisible="False" IsHitTestVisible="False"/>
+            <Border Name="PART_Backdrop" Background="{TemplateBinding BackdropBrush}" Opacity="0.32" IsVisible="False" IsHitTestVisible="False"/>
           </Grid>
         </SplitView>
       </ControlTemplate>
@@ -118,6 +118,9 @@
       <Setter Property="CornerRadius" Value="0"/>
       <Setter Property="Margin" Value="0"/>
     </Style>
+    <Style Selector="^:placement-right /template/ SplitView#PART_SplitView"><Setter Property="CornerRadius" Value="16,0,0,16"/></Style>
+    <Style Selector="^:placement-top /template/ SplitView#PART_SplitView"><Setter Property="CornerRadius" Value="0,0,16,16"/></Style>
+    <Style Selector="^:placement-bottom /template/ SplitView#PART_SplitView"><Setter Property="CornerRadius" Value="16,16,0,0"/></Style>
     <Style Selector="^:placement-right /template/ Border#ContentGrid">
       <Setter Property="BorderThickness" Value="0"/>
       <Setter Property="CornerRadius" Value="0"/>

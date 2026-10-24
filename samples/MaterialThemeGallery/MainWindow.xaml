@@ -8,7 +8,7 @@
   <!-- The toolbar (the theme variant, the density, the flow direction and the accent colour of
        the page), the list of the pages, and the selected page in its host. The choices of the
        toolbar and the list are filled by the class of the document (main_window.rs) from the
-       tables of the gallery, so that the toolbar, the capture mode and the comparison host name
+       tables of the gallery, so that the toolbar, the capture mode and the capture host name
        the same things. -->
   <DockPanel>
     <Border DockPanel.Dock="Top"
@@ -31,6 +31,10 @@
         <StackPanel Orientation="Horizontal">
           <TextBlock Classes="toolbar-label" Text="Seed" />
           <ComboBox x:Name="AccentChoice" Classes="toolbar-choice" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <TextBlock Classes="toolbar-label" Text="Motion" />
+          <ComboBox x:Name="MotionChoice" Classes="toolbar-choice" />
         </StackPanel>
       </StackPanel>
     </Border>

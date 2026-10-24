@@ -20,6 +20,8 @@ pub mod motion;
 pub mod ripple;
 mod progress_indicator;
 mod loading_indicator;
+mod selection_mark;
+pub use selection_mark::MaterialSelectionMark;
 pub use loading_indicator::{MaterialLoadingIndicator, loading_indeterminate_frame};
 pub use ripple::MaterialRipple;
 pub use progress_indicator::{MaterialProgressIndicator, linear_indeterminate_segments, circular_indeterminate_frame};

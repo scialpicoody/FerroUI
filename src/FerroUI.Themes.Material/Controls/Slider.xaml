@@ -9,66 +9,78 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:ClassModifier="internal">
   <ControlTheme x:Key="MaterialHorizontalSliderThumb" TargetType="Thumb">
+    <Setter Property="MinWidth" Value="4" />
     <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
     <Setter Property="Template"><ControlTemplate>
       <Grid Background="Transparent">
         <Border x:Name="MaterialHandle" Background="{TemplateBinding Background}"
-                CornerRadius="2" Width="4" Height="44"
+                CornerRadius="2" Width="{TemplateBinding MinWidth}" Height="44"
                 HorizontalAlignment="Center" VerticalAlignment="Center">
           <Border.Transitions><Transitions><DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Border.Transitions>
         </Border>
       </Grid>
     </ControlTemplate></Setter>
-    <Style Selector="^:pressed /template/ Border#MaterialHandle">
-    <Setter Property="Width" Value="2" />
+    <Style Selector="^:pressed">
+    <Setter Property="MinWidth" Value="2" />
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialHorizontalSliderDecrease" TargetType="RepeatButton">
+    <Setter Property="CornerRadius" Value="8,2,2,8" />
     <Setter Property="Template"><ControlTemplate>
       <Grid Background="Transparent">
         <Border x:Name="MaterialTrackSegment" Background="{TemplateBinding Background}"
-                Height="16" VerticalAlignment="Center" CornerRadius="8,2,2,8" />
+                Height="16" VerticalAlignment="Center" CornerRadius="{TemplateBinding CornerRadius}" />
       </Grid>
     </ControlTemplate></Setter>
   </ControlTheme>
   <ControlTheme x:Key="MaterialHorizontalSliderIncrease" TargetType="RepeatButton">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="HorizontalContentAlignment" Value="Right" />
+    <Setter Property="Padding" Value="0,0,6,0" />
+    <Setter Property="CornerRadius" Value="2,8,8,2" />
     <Setter Property="Template"><ControlTemplate>
       <Grid Background="Transparent">
         <Border x:Name="MaterialTrackSegment" Background="{TemplateBinding Background}"
-                Height="16" VerticalAlignment="Center" CornerRadius="2,8,8,2" />
-        <Ellipse x:Name="MaterialSliderStop" Width="4" Height="4" Fill="{DynamicResource MaterialPrimaryBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,6,0" />
+                Height="16" VerticalAlignment="Center" CornerRadius="{TemplateBinding CornerRadius}" />
+        <Ellipse x:Name="MaterialSliderStop" Width="4" Height="4" Fill="{TemplateBinding Foreground}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" />
       </Grid>
     </ControlTemplate></Setter>
   </ControlTheme>
   <ControlTheme x:Key="MaterialVerticalSliderThumb" TargetType="Thumb">
+    <Setter Property="MinHeight" Value="4" />
     <Setter Property="Background" Value="{DynamicResource MaterialPrimaryBrush}" />
     <Setter Property="Template"><ControlTemplate>
       <Grid Background="Transparent">
         <Border x:Name="MaterialHandle" Background="{TemplateBinding Background}"
-                CornerRadius="2" Width="44" Height="4"
+                CornerRadius="2" Width="44" Height="{TemplateBinding MinHeight}"
                 HorizontalAlignment="Center" VerticalAlignment="Center">
           <Border.Transitions><Transitions><DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Border.Transitions>
         </Border>
       </Grid>
     </ControlTemplate></Setter>
-    <Style Selector="^:pressed /template/ Border#MaterialHandle">
-    <Setter Property="Height" Value="2" />
+    <Style Selector="^:pressed">
+    <Setter Property="MinHeight" Value="2" />
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialVerticalSliderDecrease" TargetType="RepeatButton">
+    <Setter Property="CornerRadius" Value="2,2,8,8" />
     <Setter Property="Template"><ControlTemplate>
       <Grid Background="Transparent">
         <Border x:Name="MaterialTrackSegment" Background="{TemplateBinding Background}"
-                Width="16" HorizontalAlignment="Center" CornerRadius="2,2,8,8" />
+                Width="16" HorizontalAlignment="Center" CornerRadius="{TemplateBinding CornerRadius}" />
       </Grid>
     </ControlTemplate></Setter>
   </ControlTheme>
   <ControlTheme x:Key="MaterialVerticalSliderIncrease" TargetType="RepeatButton">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="Padding" Value="0,6,0,0" />
+    <Setter Property="CornerRadius" Value="8,8,2,2" />
     <Setter Property="Template"><ControlTemplate>
       <Grid Background="Transparent">
         <Border x:Name="MaterialTrackSegment" Background="{TemplateBinding Background}"
-                Width="16" HorizontalAlignment="Center" CornerRadius="8,8,2,2" />
-        <Ellipse x:Name="MaterialSliderStop" Width="4" Height="4" Fill="{DynamicResource MaterialPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,6,0,0" />
+                Width="16" HorizontalAlignment="Center" CornerRadius="{TemplateBinding CornerRadius}" />
+        <Ellipse x:Name="MaterialSliderStop" Width="4" Height="4" Fill="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Margin="{TemplateBinding Padding}" />
       </Grid>
     </ControlTemplate></Setter>
   </ControlTheme>
@@ -176,37 +188,37 @@
     <Style Selector="^ /template/ Thumb#MaterialSliderThumb:pressed">
     <Setter Property="ToolTip.IsOpen" Value="True" />
     </Style>
-    <Style Selector="^:horizontal:focus-visible /template/ Thumb /template/ Border#MaterialHandle">
-    <Setter Property="Width" Value="2" />
+    <Style Selector="^:horizontal:focus-visible /template/ Thumb#MaterialSliderThumb">
+    <Setter Property="MinWidth" Value="2" />
     </Style>
-    <Style Selector="^:vertical:focus-visible /template/ Thumb /template/ Border#MaterialHandle">
-    <Setter Property="Height" Value="2" />
+    <Style Selector="^:vertical:focus-visible /template/ Thumb#MaterialSliderThumb">
+    <Setter Property="MinHeight" Value="2" />
     </Style>
     <Style Selector="^:disabled /template/ RepeatButton#PART_DecreaseButton, ^:disabled /template/ Thumb#MaterialSliderThumb">
     <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceBrush}" />
     <Setter Property="Opacity" Value="0.38" />
     </Style>
     <Style Selector="^:disabled /template/ RepeatButton#PART_IncreaseButton">
-    <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceBrush}" />
-    <Setter Property="Opacity" Value="0.12" />
+      <Setter Property="Background"><SolidColorBrush Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.12" /></Setter>
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
     </Style>
-    <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_DecreaseButton /template/ Border#MaterialTrackSegment">
+    <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_DecreaseButton">
       <Setter Property="CornerRadius" Value="2,8,8,2" />
     </Style>
-    <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_IncreaseButton /template/ Border#MaterialTrackSegment">
+    <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_IncreaseButton">
       <Setter Property="CornerRadius" Value="8,2,2,8" />
     </Style>
-    <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_IncreaseButton /template/ Ellipse#MaterialSliderStop">
-      <Setter Property="HorizontalAlignment" Value="Left" /><Setter Property="Margin" Value="6,0,0,0" />
+    <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_IncreaseButton">
+      <Setter Property="HorizontalContentAlignment" Value="Left" /><Setter Property="Padding" Value="6,0,0,0" />
     </Style>
-    <Style Selector="^[IsDirectionReversed=True]:vertical /template/ RepeatButton#PART_DecreaseButton /template/ Border#MaterialTrackSegment">
+    <Style Selector="^[IsDirectionReversed=True]:vertical /template/ RepeatButton#PART_DecreaseButton">
       <Setter Property="CornerRadius" Value="8,8,2,2" />
     </Style>
-    <Style Selector="^[IsDirectionReversed=True]:vertical /template/ RepeatButton#PART_IncreaseButton /template/ Border#MaterialTrackSegment">
+    <Style Selector="^[IsDirectionReversed=True]:vertical /template/ RepeatButton#PART_IncreaseButton">
       <Setter Property="CornerRadius" Value="2,2,8,8" />
     </Style>
-    <Style Selector="^[IsDirectionReversed=True]:vertical /template/ RepeatButton#PART_IncreaseButton /template/ Ellipse#MaterialSliderStop">
-      <Setter Property="VerticalAlignment" Value="Bottom" /><Setter Property="Margin" Value="0,0,0,6" />
+    <Style Selector="^[IsDirectionReversed=True]:vertical /template/ RepeatButton#PART_IncreaseButton">
+      <Setter Property="VerticalContentAlignment" Value="Bottom" /><Setter Property="Padding" Value="0,0,0,6" />
     </Style>
     <Style Selector="^:error">
     <Setter Property="Foreground" Value="{DynamicResource MaterialErrorBrush}" />

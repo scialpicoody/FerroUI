@@ -13,7 +13,38 @@ use ferroui_base::animation::easings::{Easing, IEasing, SharedEasing};
 use ferroui_base::animation::TimeSpan;
 use ferroui_base::platform::IPlatformSettings;
 use ferroui_base::{FerroLocator, LocatorExtensions};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+
+/// Shared per-theme cancellation state. The low bit is the current accessibility setting;
+/// the remaining bits count entries into reduced motion. An easing retains its creation
+/// generation, so a canceled transition cannot resume part-way through if motion is enabled
+/// again before FerroUI's original duration expires. The same state is safe on render threads.
+#[derive(Clone, Debug, Default)]
+pub(crate) struct MaterialMotionPolicy {
+    state: Arc<AtomicU64>,
+}
+
+impl MaterialMotionPolicy {
+    pub(crate) fn set_reduced_motion(&self, reduced: bool) {
+        let _ = self
+            .state
+            .fetch_update(Ordering::AcqRel, Ordering::Acquire, |state| {
+                if (state & 1 != 0) == reduced {
+                    None
+                } else if reduced {
+                    Some(state.wrapping_add(2) | 1)
+                } else {
+                    Some(state & !1)
+                }
+            });
+    }
+
+    fn interrupted_since(&self, generation: u64) -> bool {
+        let state = self.state.load(Ordering::Acquire);
+        state & 1 != 0 || state >> 1 != generation
+    }
+}
 
 /// The two motion schemes published by Material Design.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -107,6 +138,21 @@ impl MaterialMotionScheme {
             self.duration(role, reduced_motion),
             reduced_motion,
         ))
+    }
+
+    /// Theme resources share a live accessibility policy even after a running transition has
+    /// copied its easing. Merely replacing a DynamicResource cannot cancel that old copy.
+    pub(crate) fn easing_with_policy(
+        self,
+        role: MaterialMotionRole,
+        policy: &MaterialMotionPolicy,
+    ) -> Easing {
+        let state = policy.state.load(Ordering::Acquire);
+        let reduced = state & 1 != 0;
+        let mut easing =
+            MaterialSpringEasing::new(self.spring(role), self.duration(role, reduced), reduced);
+        easing.policy = Some((policy.clone(), state >> 1));
+        Easing::new(easing)
     }
 }
 
@@ -407,12 +453,13 @@ impl MaterialSpringState {
 /// Use the matching duration; the same spring with an unrelated duration changes its physical
 /// speed. This adapter starts with zero velocity because `IEasing` has no velocity channel.
 /// Controls needing interruption continuity use [`MaterialSpringState`] instead.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct MaterialSpringEasing {
     spec: MaterialSpringSpec,
     seconds: f64,
     reduced_motion: bool,
     check_platform: bool,
+    policy: Option<(MaterialMotionPolicy, u64)>,
 }
 
 impl MaterialSpringEasing {
@@ -423,11 +470,18 @@ impl MaterialSpringEasing {
             seconds: duration.total_seconds(),
             reduced_motion,
             check_platform: true,
+            policy: None,
         }
     }
 
     fn evaluate(&self, progress: f64, reduced_motion: bool) -> f64 {
-        if reduced_motion || self.seconds == 0.0 {
+        if reduced_motion
+            || self.seconds == 0.0
+            || self
+                .policy
+                .as_ref()
+                .is_some_and(|(policy, generation)| policy.interrupted_since(*generation))
+        {
             return 1.0;
         }
         if progress.is_nan() || progress <= 0.0 {
@@ -453,7 +507,7 @@ impl IEasing for MaterialSpringEasing {
             reduced_motion: self.reduced_motion
                 || (self.check_platform && !animations_enabled(false)),
             check_platform: false,
-            ..*self
+            ..self.clone()
         })
     }
 }
@@ -463,6 +517,65 @@ pub(crate) fn animations_enabled(reduced_motion: bool) -> bool {
         && FerroLocator::current()
             .get_service::<dyn IPlatformSettings>()
             .is_none_or(|settings| settings.animations_enabled())
+}
+
+/// Reusable platform-accessibility fixture for the theme's motion and indicator tests.
+#[cfg(test)]
+pub(crate) struct MotionTestSettings {
+    base: ferroui_base::platform::DefaultPlatformSettings,
+    pub animations_enabled: std::cell::Cell<bool>,
+}
+
+#[cfg(test)]
+impl MotionTestSettings {
+    pub fn new() -> std::rc::Rc<Self> {
+        std::rc::Rc::new(Self {
+            base: ferroui_base::platform::DefaultPlatformSettings::new(),
+            animations_enabled: std::cell::Cell::new(true),
+        })
+    }
+}
+
+#[cfg(test)]
+impl IPlatformSettings for MotionTestSettings {
+    fn get_tap_size(&self, kind: ferroui_base::input::PointerType) -> ferroui_base::Size {
+        self.base.get_tap_size(kind)
+    }
+    fn get_double_tap_size(&self, kind: ferroui_base::input::PointerType) -> ferroui_base::Size {
+        self.base.get_double_tap_size(kind)
+    }
+    fn get_double_tap_time(&self, kind: ferroui_base::input::PointerType) -> std::time::Duration {
+        self.base.get_double_tap_time(kind)
+    }
+    fn hold_wait_duration(&self) -> std::time::Duration {
+        self.base.hold_wait_duration()
+    }
+    fn hotkey_configuration(
+        &self,
+    ) -> std::rc::Rc<ferroui_base::input::platform::PlatformHotkeyConfiguration> {
+        self.base.hotkey_configuration()
+    }
+    fn preferred_application_language(&self) -> String {
+        self.base.preferred_application_language()
+    }
+    fn animations_enabled(&self) -> bool {
+        self.animations_enabled.get()
+    }
+    fn get_color_values(&self) -> ferroui_base::platform::PlatformColorValues {
+        self.base.get_color_values()
+    }
+    fn color_values_changed(
+        &self,
+        handler: std::rc::Rc<dyn Fn(&ferroui_base::platform::PlatformColorValues)>,
+    ) -> std::rc::Rc<dyn ferroui_base::reactive::IDisposable> {
+        self.base.color_values_changed(handler)
+    }
+    fn preferred_application_language_changed(
+        &self,
+        handler: std::rc::Rc<dyn Fn()>,
+    ) -> std::rc::Rc<dyn ferroui_base::reactive::IDisposable> {
+        self.base.preferred_application_language_changed(handler)
+    }
 }
 
 #[cfg(test)]
@@ -634,6 +747,48 @@ mod tests {
             },
             state.current()
         );
+    }
+
+    #[test]
+    fn reducing_motion_cancels_captured_ui_and_render_easings_without_resuming_old_motion() {
+        let scheme = MaterialMotionScheme::Expressive;
+        let role = MaterialMotionRole::DefaultSpatial;
+        let policy = MaterialMotionPolicy::default();
+        let easing = scheme.easing_with_policy(role, &policy);
+        let shared = easing.to_shared();
+        assert!(easing.ease(0.1) < 1.0);
+        assert!(shared.ease(0.1) < 1.0);
+        policy.set_reduced_motion(true);
+        assert_eq!(1.0, easing.ease(0.2));
+        assert_eq!(1.0, shared.ease(0.2));
+        policy.set_reduced_motion(false);
+        assert_eq!(
+            1.0,
+            easing.ease(0.3),
+            "a canceled transition must not jump backwards"
+        );
+        assert_eq!(1.0, shared.ease(0.3));
+        let fresh = scheme.easing_with_policy(role, &policy);
+        assert!(
+            fresh.ease(0.1) < 1.0,
+            "new interactions animate after motion is reenabled"
+        );
+        assert!(fresh.to_shared().ease(0.1) < 1.0);
+    }
+
+    #[test]
+    fn platform_motion_preference_is_observed_during_a_running_ui_easing() {
+        use ferroui_controls::testing::{TestServices, UnitTestApplication};
+        let settings = MotionTestSettings::new();
+        let _application = UnitTestApplication::start(
+            TestServices::default().with_platform_settings(settings.clone()),
+        );
+        let easing =
+            MaterialMotionScheme::Expressive.easing(MaterialMotionRole::DefaultSpatial, false);
+        assert!(easing.ease(0.1) < 1.0);
+        settings.animations_enabled.set(false);
+        assert_eq!(1.0, easing.ease(0.2));
+        assert_eq!(1.0, easing.to_shared().ease(0.2));
     }
 
     #[test]

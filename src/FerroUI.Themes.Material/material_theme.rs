@@ -47,6 +47,7 @@ pub struct MaterialTheme {
     density_style: Cell<DensityStyle>,
     motion_scheme: Cell<MaterialMotionScheme>,
     reduced_motion: Cell<bool>,
+    pub(crate) motion_policy: crate::motion::MaterialMotionPolicy,
     pub(crate) android_color_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 
@@ -126,6 +127,7 @@ impl MaterialTheme {
             density_style: Cell::new(DensityStyle::Normal),
             motion_scheme: Cell::new(MaterialMotionScheme::Expressive),
             reduced_motion: Cell::new(false),
+            motion_policy: Default::default(),
             android_color_subscription: RefCell::new(None),
         }
     }
@@ -160,7 +162,7 @@ impl MaterialTheme {
                 });
         let _ = this.compact_styles.set(compact_styles);
 
-        this.set_color_scheme(ThemeVariant::light(), &MaterialColorScheme::light());
+        this.set_color_scheme(ThemeVariant::light(), &MaterialColorScheme::expressive_light());
         this.set_color_scheme(ThemeVariant::dark(), &MaterialColorScheme::dark());
         this.set_color_scheme(ThemeVariant::default(), &MaterialColorScheme::dark());
         let high_contrast = MaterialColorScheme::from_seed_color(
@@ -225,6 +227,7 @@ impl MaterialTheme {
         let resources = self.resources();
         let scheme = self.motion_scheme();
         let reduced = self.reduced_motion();
+        self.motion_policy.set_reduced_motion(reduced);
         for role in MaterialMotionRole::ALL {
             resources.set(
                 format!("MaterialMotion{}Duration", role.resource_name()),
@@ -232,10 +235,11 @@ impl MaterialTheme {
             );
             resources.set(
                 format!("MaterialMotion{}Easing", role.resource_name()),
-                into_markup_value(scheme.easing(role, reduced)),
+                into_markup_value(scheme.easing_with_policy(role, &self.motion_policy)),
             );
         }
         resources.set("MaterialReducedMotion", into_markup_value(reduced));
+        resources.set("MaterialMotionScheme", into_markup_value(scheme));
         // PageSlide has ordinary Rust properties, so build it here rather than
         // attaching DynamicResource to its Duration in compiled XAML. Replacing
         // these resources also updates existing NavigationPage instances.
@@ -246,8 +250,8 @@ impl MaterialTheme {
         ] {
             let role = MaterialMotionRole::DefaultSpatial;
             let slide = PageSlide::with_duration(scheme.duration(role, reduced), axis);
-            slide.set_slide_in_easing(scheme.easing(role, reduced));
-            slide.set_slide_out_easing(scheme.easing(role, reduced));
+            slide.set_slide_in_easing(scheme.easing_with_policy(role, &self.motion_policy));
+            slide.set_slide_out_easing(scheme.easing_with_policy(role, &self.motion_policy));
             let transition: Rc<dyn IPageTransition> = Rc::new(slide);
             resources.set(key, into_markup_value(transition));
         }

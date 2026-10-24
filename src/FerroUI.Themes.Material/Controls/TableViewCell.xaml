@@ -6,12 +6,12 @@
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
   <ControlTheme x:Key="{x:Type TableViewCell}" TargetType="TableViewCell">
-    <Setter Property="Padding" Value="{DynamicResource TableViewCellPadding}"/>
+    <Setter Property="Padding" Value="16,12"/>
     <Setter Property="MinHeight" Value="48"/>
-    <Setter Property="FontSize" Value="{DynamicResource TableViewCellFontSize}"/>
+    <Setter Property="FontSize" Value="14"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource TabularSurfaceGridLineBrush}"/>
-    <Setter Property="BorderThickness" Value="0,0,1,0"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}"/>
+    <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="CellWrapper" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">

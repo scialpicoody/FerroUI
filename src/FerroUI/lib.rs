@@ -26,6 +26,7 @@
 //! | `themes_fluent` | `ferroui-themes-fluent` | `fluent` | yes |
 //! | `themes_simple` | `ferroui-themes-simple` | `simple` | no |
 //! | `themes_winui` | `ferroui-themes-winui` | `winui-theme` | no |
+//! | `themes_material` | `ferroui-themes-material` | `material-theme` | no |
 //! | `markup_xaml`, `markup_xaml_loader` | `ferroui-markup-xaml`, `ferroui-markup-xaml-loader` (run-time loading) | `xaml` | no |
 //! | `controls_color_picker` | `ferroui-controls-color-picker` | `color-picker` | no |
 //! | `controls_charts` | `ferroui-controls-charts` | `charts` | no |
@@ -212,7 +213,8 @@ pub mod prelude {
     //!   [`HorizontalAlignment`], [`VerticalAlignment`], [`Orientation`] and
     //!   [`Color`].
     //! - The theme of the features that are on: `FluentTheme` (`fluent`),
-    //!   `SimpleTheme` (`simple`) and `WinUITheme` (`winui-theme`).
+    //!   `SimpleTheme` (`simple`), `WinUITheme` (`winui-theme`), and
+    //!   `MaterialTheme` with bundled fonts (`material-theme`).
     //!
     //! Everything else is reached through the modules of the crate
     //! ([`crate::base`], [`crate::controls`], ...).

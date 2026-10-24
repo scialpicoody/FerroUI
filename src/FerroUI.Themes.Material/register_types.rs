@@ -6,7 +6,7 @@ use crate::accents::SystemAccentColors;
 use crate::converters::{CornerRadiusToThicknessConverter, CornerRadiusToThicknessConverterKind};
 use crate::primitives::{InfoBarPanel, TabViewEqualWidthPanel};
 use crate::material_theme::{DensityStyle, MaterialTheme};
-use crate::{MaterialMotionScheme, MaterialRipple, MaterialProgressIndicator, MaterialLoadingIndicator};
+use crate::{MaterialMotionScheme, MaterialRipple, MaterialProgressIndicator, MaterialLoadingIndicator, MaterialSelectionMark};
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition, FERRO_XML_NAMESPACE};
@@ -20,6 +20,7 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_themes_material::ripple", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::progress_indicator", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::loading_indicator", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::selection_mark", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::motion", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::accents", "FerroUI.Themes.Material.Accents"),
     ("ferroui_themes_material::converters", "FerroUI.Themes.Material.Converters"),
@@ -37,7 +38,7 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 };
 
 const TYPES: &[&TypeInfo] =
-    &[MaterialTheme::TYPE, MaterialRipple::TYPE, MaterialProgressIndicator::TYPE, MaterialLoadingIndicator::TYPE, SystemAccentColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
+    &[MaterialTheme::TYPE, MaterialRipple::TYPE, MaterialProgressIndicator::TYPE, MaterialLoadingIndicator::TYPE, MaterialSelectionMark::TYPE, SystemAccentColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
 
 const MARKUP_TYPES: &[&MarkupType] = &[
     <DensityStyle as MarkupTyped>::MARKUP,

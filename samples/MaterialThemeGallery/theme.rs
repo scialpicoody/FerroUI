@@ -59,7 +59,7 @@ pub fn set_density(theme: &GalleryTheme, density: Density) {
 
 /// Rebuilds complete HCT color schemes for a seed; None restores official baseline colors.
 pub fn set_accent(theme: &GalleryTheme, accent: Option<Color>) {
-    let light = accent.map_or_else(MaterialColorScheme::light, |seed| {
+    let light = accent.map_or_else(MaterialColorScheme::expressive_light, |seed| {
         MaterialColorScheme::from_seed(seed, false)
     });
     let dark = accent.map_or_else(MaterialColorScheme::dark, |seed| {

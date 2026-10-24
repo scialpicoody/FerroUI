@@ -97,8 +97,10 @@ rasterizer merely by using the same font and metrics.
 ## Color and state layers
 
 `MaterialColorRole::ALL` names all **48** roles of the pinned AndroidX scheme,
-including fixed accents and all surface-container levels. Both baseline schemes
-are literal upstream token values. A role such as `Primary` supplies
+including fixed accents and all surface-container levels. The default light scheme is AndroidX `expressiveLightColorScheme()`, including
+its four tone-30 container-foreground overrides; dark is `darkColorScheme()`.
+`MaterialColorScheme::light()` also exposes the standard non-expressive light
+tokens, while `expressive_light()` supplies the theme default. A role such as `Primary` supplies
 `MaterialPrimaryColor`, `MaterialPrimaryBrush`, and state-layer brushes named
 `MaterialPrimaryHoverBrush`, `MaterialPrimaryFocusBrush`,
 `MaterialPrimaryPressedBrush`, and `MaterialPrimaryDraggedBrush`.
@@ -224,8 +226,11 @@ transitions update when the scheme changes.
 | Slow effects | 1.0 / 800 | 1.0 / 800 |
 
 `MaterialRipple` handles pointer and keyboard activation, multiple contacts,
-bounded/unbounded geometry, and rounded clipping. It follows the pinned Android
-75ms fade-in, 225ms radius/center expansion and 150ms fade-out. Subscriptions are
+bounded/unbounded geometry, and rounded clipping. It follows the pinned portable
+AndroidX `RippleAnimation`'s 75ms fade-in, 225ms radius/center expansion and 150ms
+fade-out. The Android-specific Compose implementation delegates to the platform's
+`RippleDrawable`; matching the portable reference does not establish identical
+native ripple pixels or frame timing on every Android release. Subscriptions are
 weak and released on detachment; a settled held ripple does not continuously
 schedule frames. Effectively disabled controls cannot start a new ripple.
 
@@ -241,6 +246,15 @@ continue to work. The custom indicator renderers stop their clocks when detached
 hidden or reduced; a host must expose its accessibility preference for automatic
 platform behavior.
 
+Changing `MaterialTheme::ReducedMotion` while a transition is running also snaps
+the easing copies already held by the UI or compositor on their next frame. A
+per-theme cancellation generation prevents an old transition from resuming if
+motion is quickly enabled again; subsequent interactions use the new setting.
+FerroUI's duration-based transition engine still owns those transitions' original
+finite clock lifetimes. Snapping the visible result does not claim immediate
+disposal of every existing engine subscription. The custom continuous indicators
+and ripple scheduler stop their own work when hidden, detached or reduced.
+
 ## Gallery and verification
 
 ```sh
@@ -248,8 +262,8 @@ cargo run -p material-theme-gallery --bin material-theme-gallery
 ```
 
 The gallery includes a Material overview and the inherited control-family pages.
-Its toolbar changes light/dark/high-contrast mode, density, text direction and
-seed color. The same controls are rendered for capture; capture failures include
+Its toolbar changes light/dark/high-contrast mode, density, text direction,
+seed color and Expressive/Standard/reduced motion. The same controls are rendered for capture; capture failures include
 missing templates, failed page loads and binding diagnostics.
 
 ```sh
@@ -275,6 +289,56 @@ complete Android palette imports, live scheme replacement, motion and ripple
 math/lifecycle, rounded-path/morph invariants, arranged component geometry,
 selection and editor bindings, and inherited panel layout contracts. Test
 expectations for native dimensions are independent of the generated XAML.
+
+### Native comparison configuration
+
+The following is the configuration checklist for a future Android comparison.
+It is not a record of a device run. Save the settings and exact input/clock trace
+beside every reference capture so changes in the host are not mistaken for theme
+regressions.
+
+| Setting | Reference configuration |
+| --- | --- |
+| AndroidX dependency | `androidx.compose.material3:material3:1.5.0-beta02`, with resolved dependency versions recorded; source revision `e4d933c98df7baa7ea2b83eea6e086915961e0ff` |
+| Theme | `MaterialExpressiveTheme`; explicitly supply `MotionScheme.expressive()` for the default comparison or `MotionScheme.standard()` when testing `MaterialMotionScheme::Standard` |
+| Baseline light colors | `expressiveLightColorScheme()` versus `MaterialColorScheme::expressive_light()`; this includes the four tone-30 container foreground overrides below |
+| Baseline dark colors | `darkColorScheme()` versus `MaterialColorScheme::dark()` |
+| Standard light colors | Test separately with explicit `lightColorScheme()` versus `MaterialColorScheme::light()`; selecting the standard **motion** scheme does not change the palette |
+| Dynamic colors | Run both implementations on the same Android device/user/configuration and record every resolved ARGB role. Use API 31–33 tonal mapping or API 34+ direct roles consistently. A seed-generated desktop palette is a different comparison case |
+| Checkbox branch | Set `ComposeMaterial3Flags.isCheckboxStylingFixEnabled = true` **before** composition. The pinned release defaults this to false, which uses the legacy 20dp checkbox; the Material 3 branch is 18dp |
+| Precision-pointer sizing | Keep `ComposeMaterial3Flags.isPrecisionPointerComponentSizingEnabled = false`, its pinned default, and keep the 48dp minimum interactive target. Record any other changed flags explicitly |
+| Display density | Record native `densityDpi`, logical content bounds and physical output size. Set FerroUI's render scale to the same pixels-per-dp ratio; for example 320dpi corresponds to scale 2. Compare unscaled PNGs with the same content crop |
+| Font scaling | Start at Android font scale 1.0 and FerroUI text scale 1.0; test enlarged text as a separate case. Record Android font-weight adjustment/bold-text settings and any host text overrides |
+| Font files | Record actual font file hashes, fallback fonts and variation axes. For a controlled typography comparison, install the bundled Roboto faces in the Android fixture with the same weights/width. Also retain a separate platform-font comparison when assessing Android's default appearance |
+| Layout | Use `DensityStyle::Normal`, identical dp constraints and padding, the same locale, identical text/icon content, and separately captured LTR and RTL. Exclude system bars/IME from the crop or match their insets explicitly |
+| Component state | Compare enabled, disabled, focused, hovered, pressed, selected and indeterminate states independently. Reproduce touch coordinates, pointer type, key events, focus source, release/cancel events and drag path |
+| Animation settings | Keep native animation duration scale at 1 for motion comparisons, disable battery-driven frame restrictions, and record refresh rate. Test zero/reduced motion independently with both the explicit setting and the host accessibility setting |
+| Capture timing | Use controlled frame clocks with a shared time zero at the first animation frame. Advance to the same elapsed milliseconds after the same input event. A wall-clock sleep or the gallery's `SETTLE_MS` alone does not synchronize continuously animated controls |
+| Renderer/device | Record Android API/build fingerprint, emulator or physical device, GPU/software mode, FerroUI backend and screenshot color space. Native `RippleDrawable`, text rasterization and elevation shadows must be evaluated as renderer-dependent results |
+
+The expressive light overrides are `OnPrimaryContainer = #4F378B`,
+`OnSecondaryContainer = #4A4458`, `OnTertiaryContainer = #633B48`, and
+`OnErrorContainer = #8C1D18`. They come from `expressiveLightColorScheme()` in the
+pinned [`ColorScheme.kt`](https://android.googlesource.com/platform/frameworks/support/+/e4d933c98df7baa7ea2b83eea6e086915961e0ff/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/ColorScheme.kt)
+and the corresponding `PaletteTokens` tone-30 values; they do not replace the
+standard-light or Android dynamic-color mappings.
+
+At minimum, retain these timestamped traces in addition to settled images:
+
+| Motion | Useful checkpoints |
+| --- | --- |
+| Press ripple | 0, 37.5, 75, 112.5 and 225ms from press; release at both 10ms and 300ms, then sample the complete fade. Record native `RippleDrawable` output separately from portable-ripple conformance |
+| Spatial/effects springs | 0, 50, 100, 200, 300 and 600ms; reverse the target at 80ms to expose interruption/velocity differences, and report settling thresholds rather than assuming all transition hosts end at the same time |
+| Linear indeterminate progress | Include the 250, 650 and 900ms head/tail offsets and the 1750ms wrap |
+| Circular indeterminate progress | Capture increasing and decreasing arc phases and the 6000ms wrap |
+| Loading morph | Capture the 0.6-damped, stiffness-200 spring before and at its 297ms unit-step finish, the 650ms shape boundary, the seven-shape sequence wrap and the separate 4666ms global rotation wrap |
+| Hidden/unloaded/reduced state | Hide or detach during motion, restore, and toggle reduced motion while active; verify that callbacks stop and document the resumed/reset phase on each implementation |
+
+Measure geometry, resource colors, semantic state and animation trajectories as
+well as pixel differences. Report the number and magnitude of differing pixels,
+the allowed text/shadow rasterization tolerances, and any behavior discrepancy.
+Do not turn a successful build or a visually similar settled image into a claim
+of full native equivalence.
 
 ### Fidelity boundaries
 
@@ -307,6 +371,8 @@ output and application behavior.
 - `motion.rs`, `ripple.rs`, `progress_indicator.rs`, `rounded_geometry.rs`,
   `loading_indicator.rs`: native motion/geometry ports and FerroUI integration.
 - `dynamic_color.rs`, `color_scheme.rs`: seed/palette imports and live resources.
+- `android_colors.rs`, `android_palette_math.rs`: optional native system-color
+  import, subscription lifecycle and AndroidX float CAM16/HCT neutral tones.
 - `samples/MaterialThemeGallery`: interactive gallery and strict render capture.
 - `scripts/material-theme`: pinned data, generator and font provenance.
 

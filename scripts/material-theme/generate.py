@@ -34,7 +34,9 @@ def colors() -> str:
     result = HEADER + "  <ResourceDictionary.ThemeDictionaries>\n"
     for variant, name in (("Default", "dark"), ("Dark", "dark"), ("Light", "light")):
         result += f'    <ResourceDictionary x:Key="{variant}">\n'
-        for role, value in DATA[name].items():
+        scheme = dict(DATA[name])
+        if name == "light": scheme.update(DATA["expressive_light_overrides"])
+        for role, value in scheme.items():
             result += resource("Color", f"Material{role}Color", value, "      ")
             result += f'      <SolidColorBrush x:Key="Material{role}Brush" Color="{{DynamicResource Material{role}Color}}" />\n'
             for state, opacity in (("Hover", .08), ("Focus", .10), ("Pressed", .10), ("Dragged", .16)):
@@ -125,6 +127,11 @@ impl MaterialColorScheme {{
         result += f"    pub const fn {variant}() -> Self {{ Self {{ colors: [\n"
         result += "".join(f'        Color::from_uint32(0xFF{DATA[variant][r][1:]}), // {r}\n' for r in roles)
         result += "    ] } }\n"
+    result += "    /// Native MaterialExpressiveTheme light baseline, including its four tone-30 container foregrounds.\n"
+    result += "    pub const fn expressive_light() -> Self {\n        let mut scheme = Self::light();\n"
+    for role, color in DATA["expressive_light_overrides"].items():
+        result += f"        scheme.colors[MaterialColorRole::{role} as usize] = Color::from_uint32(0xFF{color[1:]});\n"
+    result += "        scheme\n    }\n"
     result += '''    /// A fresh dictionary permits atomic replacement: no frame observes half a palette.
     pub fn resources(&self) -> Ref<ResourceDictionary> {
         let dictionary = ResourceDictionary::new();
@@ -168,9 +175,9 @@ impl Default for MaterialColorScheme { fn default() -> Self { Self::light() } }
 
 def compatibility() -> str:
     result = HEADER
-    for key, entry in COMPATIBILITY.items():
-        if entry['kind'] == 'Brush':
-            result += f'  <SolidColorBrush x:Key="{key}" Color="{{DynamicResource Material{entry["role"]}Color}}" Opacity="{entry["opacity"]}" />\n'
+    # Color/brush aliases belong to each runtime color-scheme dictionary. A root
+    # brush would shadow that dictionary and share one mutable color across windows
+    # requesting different variants. Only variant-independent metrics live here.
     for key, kind, value in (
         ('ContentControlThemeFontFamily','FontFamily','fonts:MaterialRoboto#Roboto, Roboto, $Default'),
         ('ControlContentThemeFontSize','x:Double',14), ('ContentControlFontSize','x:Double',14),

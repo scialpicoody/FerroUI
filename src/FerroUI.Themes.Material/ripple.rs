@@ -781,6 +781,29 @@ mod tests {
     }
 
     #[test]
+    fn platform_reduced_motion_finishes_active_expansion_and_removes_released_waves() {
+        use crate::motion::MotionTestSettings;
+        use ferroui_controls::testing::{TestServices, UnitTestApplication};
+        let settings = MotionTestSettings::new();
+        let _application = UnitTestApplication::start(
+            TestServices::default().with_platform_settings(settings.clone()),
+        );
+        let ripple = MaterialRipple::new();
+        ripple.press(PressId::Pointer(1), Point::default());
+        ripple.press(PressId::Pointer(2), Point::default());
+        ripple.advance(0.05);
+        ripple.release(PressId::Pointer(1));
+        assert_eq!(2, ripple.active_ripple_count());
+        settings.animations_enabled.set(false);
+        ripple.advance(0.01);
+        assert_eq!(1, ripple.active_ripple_count());
+        assert_eq!(RADIUS_SECONDS, ripple.waves.borrow()[0].elapsed);
+        assert!(!ripple.waves.borrow()[0].animating());
+        ripple.release(PressId::Pointer(2));
+        assert_eq!(0, ripple.active_ripple_count());
+    }
+
+    #[test]
     fn handled_parent_input_drives_ripple_and_disconnect_removes_handlers() {
         let host = Control::new();
         let ripple = MaterialRipple::new();

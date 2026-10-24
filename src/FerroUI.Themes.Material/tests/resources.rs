@@ -27,7 +27,7 @@ fn compiled_theme_resolves_every_role_in_both_variants() {
     crate::register_types();
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let theme = MaterialTheme::new();
-    for (variant, expected) in [(ThemeVariant::light(), MaterialColorScheme::light()), (ThemeVariant::dark(), MaterialColorScheme::dark())] {
+    for (variant, expected) in [(ThemeVariant::light(), MaterialColorScheme::expressive_light()), (ThemeVariant::dark(), MaterialColorScheme::dark())] {
         for role in MaterialColorRole::ALL {
             let key = ResourceKey::from(format!("Material{}Color", role.name()));
             let color = theme.try_get_resource(&key, Some(&variant)).flatten();
@@ -49,6 +49,37 @@ fn replacing_palette_updates_role_and_compatibility_brushes_together() {
     assert_eq!(from_markup_value::<Color>(&color), Some(Color::from_rgb(14, 78, 44)));
     let dark = theme.try_get_resource(&ResourceKey::from("MaterialPrimaryColor"), Some(&ThemeVariant::dark())).flatten();
     assert_eq!(from_markup_value::<Color>(&dark), Some(MaterialColorScheme::dark().color(MaterialColorRole::Primary)));
+    let legacy = theme.try_get_resource(&ResourceKey::from("AccentButtonBackground"), Some(&ThemeVariant::light())).flatten();
+    let legacy = from_markup_value::<Rc<dyn IBrush>>(&legacy).expect("compatibility brush");
+    assert_eq!(legacy.as_solid_color_brush().unwrap().color(), Color::from_rgb(14, 78, 44));
+}
+
+#[test]
+fn existing_button_updates_when_its_complete_scheme_is_replaced() {
+    use ferroui_controls::{Application, Control, Window};
+    crate::register_types();
+    let mut services = TestServices::styled_window();
+    services.theme = None;
+    let _app = UnitTestApplication::start(services);
+    let theme = MaterialTheme::new();
+    theme.set_reduced_motion(true);
+    Application::current().unwrap().styles().add(theme.as_style());
+    let button = Button::new();
+    button.set_content(Some(Rc::new("Save".to_string())));
+    let window = Window::new();
+    window.set_requested_theme_variant(Some(ThemeVariant::light()));
+    window.set_content(Some(Control::boxed(&button)));
+    window.show();
+    window.update_layout();
+    let before = button.background().unwrap().as_solid_color_brush().unwrap().color();
+    assert_eq!(before, MaterialColorScheme::light().color(MaterialColorRole::Primary));
+    let primary = Color::from_rgb(14, 78, 44);
+    let foreground = Color::from_rgb(250, 255, 250);
+    theme.set_color_scheme(ThemeVariant::light(), &MaterialColorScheme::light()
+        .with_color(MaterialColorRole::Primary, primary)
+        .with_color(MaterialColorRole::OnPrimary, foreground));
+    assert_eq!(button.background().unwrap().as_solid_color_brush().unwrap().color(), primary);
+    assert_eq!(button.foreground().unwrap().as_solid_color_brush().unwrap().color(), foreground);
 }
 
 #[test]

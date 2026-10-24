@@ -15,15 +15,15 @@
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Setter Property="Margin" Value="4,0"/>
-    <Setter Property="CornerRadius" Value="24"/>
+    <Setter Property="CornerRadius" Value="20"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="Padding" Value="0"/>
     <Setter Property="FocusAdorner">
-      <FocusAdornerTemplate><Border BorderThickness="3" BorderBrush="{DynamicResource MaterialSecondaryBrush}" CornerRadius="24" Margin="-3"/></FocusAdornerTemplate>
+      <FocusAdornerTemplate><Border BorderThickness="3" BorderBrush="{DynamicResource MaterialSecondaryBrush}" CornerRadius="20" Margin="-3"/></FocusAdornerTemplate>
     </Setter>
     <Setter Property="Template">
       <ControlTemplate>
-        <Border x:Name="RootGrid" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
+        <Border x:Name="RootGrid" Margin="4" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" TemplatedControl.IsTemplateFocusTarget="True">
           <Panel>
             <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
             <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>

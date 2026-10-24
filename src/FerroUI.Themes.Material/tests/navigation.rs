@@ -10,8 +10,12 @@ use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSub
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::{ObjectType, Ref, Visual};
 use ferroui_controls::page::{ContentPage, TabPlacement, TabbedPage};
-use ferroui_controls::testing::{MockWindowingPlatform, TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::{Application, Border, ComboBox, ComboBoxItem, Control, Dock, TabControl, TabItem, Window};
+use ferroui_controls::testing::{
+    MockWindowingPlatform, TestServices, UnitTestApplication, UnitTestApplicationScope,
+};
+use ferroui_controls::{
+    Application, Border, ComboBox, ComboBoxItem, Control, Dock, TabControl, TabItem, Window,
+};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -26,16 +30,25 @@ impl IObservable<TimeSpan> for FrozenClock {
     }
 }
 impl IClock for FrozenClock {
-    fn play_state(&self) -> PlayState { self.state.get() }
-    fn set_play_state(&self, state: PlayState) { self.state.set(state); }
+    fn play_state(&self) -> PlayState {
+        self.state.get()
+    }
+    fn set_play_state(&self, state: PlayState) {
+        self.state.set(state);
+    }
 }
 impl IGlobalClock for FrozenClock {}
 
 fn app() -> UnitTestApplicationScope {
     register_types();
-    UnitTestApplication::start(TestServices::styled_window()
-        .with_global_clock(Rc::new(FrozenClock { subject: LightweightSubject::new(), state: Cell::new(PlayState::Run) }))
-        .with_theme(|| MaterialTheme::new().as_style()))
+    UnitTestApplication::start(
+        TestServices::styled_window()
+            .with_global_clock(Rc::new(FrozenClock {
+                subject: LightweightSubject::new(),
+                state: Cell::new(PlayState::Run),
+            }))
+            .with_theme(|| MaterialTheme::new().as_style()),
+    )
 }
 
 fn named<T: ObjectType>(root: &Visual, name: &str) -> Ref<T> {
@@ -46,7 +59,9 @@ fn named<T: ObjectType>(root: &Visual, name: &str) -> Ref<T> {
 }
 
 fn window(content: impl Into<ferroui_base::BoxedValue>) -> Ref<Window> {
-    let window = Window::with_impl(MockWindowingPlatform::create_window_mock_with_size(360.0, 640.0));
+    let window = Window::with_impl(MockWindowingPlatform::create_window_mock_with_size(
+        360.0, 640.0,
+    ));
     window.set_content(Some(content.into()));
     window.show();
     window.update_layout();
@@ -67,17 +82,40 @@ fn bottom_navigation_shares_width_and_updates_selected_page() {
     assert_eq!(pages.tab_placement(), TabPlacement::Bottom);
     let tabs: Ref<TabControl> = named(&pages, "PART_TabControl");
     assert_eq!(tabs.tab_strip_placement(), Dock::Bottom);
-    let realized: Vec<Ref<TabItem>> = tabs.get_visual_descendants().filter_map(|node| node.cast()).collect();
+    let realized: Vec<Ref<TabItem>> = tabs
+        .get_visual_descendants()
+        .filter_map(|node| node.cast())
+        .collect();
     assert_eq!(realized.len(), 3);
     for item in &realized {
-        assert!((item.bounds().width - 120.0).abs() <= 1.0, "navigation items share the 360dp viewport");
-        assert!((item.bounds().height - 64.0).abs() <= 1.0, "Expressive navigation bar has a 64dp target");
+        let custom: Ref<ferroui_controls::presenters::ContentPresenter> =
+            named(item, "CustomIndicator");
+        assert!(
+            !custom.is_visible(),
+            "no fallback data-context text should render when IndicatorTemplate is absent"
+        );
+        assert!(
+            (item.bounds().width - 120.0).abs() <= 1.0,
+            "navigation items share the 360dp viewport"
+        );
+        assert!(
+            (item.bounds().height - 64.0).abs() <= 1.0,
+            "Expressive navigation bar has a 64dp target"
+        );
     }
     tabs.set_selected_index(2);
     window.update_layout();
-    assert_eq!(pages.selected_index(), 2, "template selection must reach the logical page controller");
+    assert_eq!(
+        pages.selected_index(),
+        2,
+        "template selection must reach the logical page controller"
+    );
     pages.set_selected_index(1);
-    assert_eq!(tabs.selected_index(), 1, "programmatic page navigation must reach the visual bar");
+    assert_eq!(
+        tabs.selected_index(),
+        1,
+        "programmatic page navigation must reach the visual bar"
+    );
     window.close();
 }
 
@@ -85,7 +123,10 @@ fn bottom_navigation_shares_width_and_updates_selected_page() {
 fn rail_theme_keeps_navigation_and_96dp_container_after_placement_changes() {
     let _app = app();
     let tabs = TabControl::new();
-    let resource = Application::current().unwrap().try_get_resource(&ResourceKey::from("MaterialNavigationRail"), None).flatten();
+    let resource = Application::current()
+        .unwrap()
+        .try_get_resource(&ResourceKey::from("MaterialNavigationRail"), None)
+        .flatten();
     let theme = from_markup_value::<Ref<ControlTheme>>(&resource).expect("Material rail theme");
     tabs.set_theme(theme);
     for label in ["First", "Second"] {
@@ -103,7 +144,10 @@ fn rail_theme_keeps_navigation_and_96dp_container_after_placement_changes() {
     assert_eq!(tabs.selected_index(), 1);
     tabs.set_tab_strip_placement(Dock::Right);
     window.update_layout();
-    assert!(strip.bounds().x > 0.0, "rail follows right placement without a mirrored content transform");
+    assert!(
+        strip.bounds().x > 0.0,
+        "rail follows right placement without a mirrored content transform"
+    );
     assert_eq!(tabs.selected_index(), 1);
     window.close();
 }
@@ -129,5 +173,84 @@ fn exposed_dropdown_retains_selection_and_editable_text_box_parts() {
     field.set_text(Some("search".to_owned()));
     window.update_layout();
     assert_eq!(editor.text().as_deref(), Some("search"));
+    window.close();
+}
+
+#[test]
+fn tall_bar_and_narrow_rail_keep_their_published_sizes() {
+    let _app = app();
+    for (key, expected_width, expected_height) in [
+        ("MaterialNavigationBarTall", 180.0, 80.0),
+        ("MaterialNavigationRailNarrow", 80.0, 64.0),
+    ] {
+        let tabs = TabControl::new();
+        let resource = Application::current()
+            .unwrap()
+            .try_get_resource(&ResourceKey::from(key), None)
+            .flatten();
+        tabs.set_theme(
+            from_markup_value::<Ref<ControlTheme>>(&resource).expect("sized navigation theme"),
+        );
+        for label in ["First", "Second"] {
+            let item = TabItem::new();
+            item.set_header(Some(Rc::new(label.to_string())));
+            tabs.items().add(Some(Control::boxed(item)));
+        }
+        let window = window(Control::boxed(&tabs));
+        let realized: Vec<Ref<TabItem>> = tabs
+            .get_visual_descendants()
+            .filter_map(|node| node.cast())
+            .collect();
+        assert_eq!(realized.len(), 2);
+        for item in &realized {
+            assert!(
+                (item.bounds().width - expected_width).abs() <= 1.0,
+                "{key} width: {:?}",
+                item.bounds()
+            );
+            assert!(
+                (item.bounds().height - expected_height).abs() <= 1.0,
+                "{key} height: {:?}",
+                item.bounds()
+            );
+            let icon: Ref<ferroui_controls::presenters::ContentPresenter> = named(item, "Icon");
+            assert_eq!(icon.bounds().size(), ferroui_base::Size::new(24.0, 24.0));
+            assert!(
+                (icon.transform_to_visual(item).unwrap().m11 - 1.0).abs() < 0.001,
+                "selection indicator animation must not scale the icon"
+            );
+        }
+        if key == "MaterialNavigationRailNarrow" {
+            assert!(
+                (realized[1].bounds().y - realized[0].bounds().bottom() - 4.0).abs() <= 1.0,
+                "narrow rail keeps the native 4dp spacing"
+            );
+        }
+        window.close();
+    }
+}
+
+#[test]
+fn navigation_back_icon_follows_platform_rtl_mirroring_once() {
+    let _app = app();
+    let button = ferroui_controls::Button::new();
+    let resource = Application::current()
+        .unwrap()
+        .try_get_resource(&ResourceKey::from("NavigationBackButtonNormalStyle"), None)
+        .flatten();
+    button.set_theme(
+        from_markup_value::<Ref<ControlTheme>>(&resource).expect("navigation icon button"),
+    );
+    button.set_flow_direction(ferroui_base::media::FlowDirection::RightToLeft);
+    let window = window(Control::boxed(&button));
+    let arrow: Ref<ferroui_controls::shapes::Path> = named(&button, "Content");
+    let transform = arrow.transform_to_visual(&window).expect("rooted arrow");
+    assert!(
+        transform.m11 < 0.0,
+        "RTL layout must mirror the back arrow once, without a second theme flip"
+    );
+    button.set_flow_direction(ferroui_base::media::FlowDirection::LeftToRight);
+    window.update_layout();
+    assert!(arrow.transform_to_visual(&window).unwrap().m11 > 0.0);
     window.close();
 }
