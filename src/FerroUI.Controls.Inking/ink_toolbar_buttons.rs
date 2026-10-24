@@ -990,6 +990,17 @@ impl InkToolbarStencilButton {
             let weak = self.to_ref().downgrade();
             item.unchecked(move |_| {
                 if let Some(button) = weak.upgrade() {
+                    // An item unchecked because the other item of the radio group was checked:
+                    // the checked item selects its stencil (WinUI selects through the click of
+                    // an item, after which the group is unchecked).
+                    let other_checked = button
+                        .menu_items
+                        .borrow()
+                        .iter()
+                        .any(|(other, item)| *other != kind && item.is_checked() == Some(true));
+                    if other_checked {
+                        return;
+                    }
                     if button.syncing_menu.replace(true) {
                         return;
                     }

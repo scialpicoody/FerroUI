@@ -281,8 +281,15 @@ fn toolbar_in_visual_tree_drives_canvas_and_legacy_ruler_toggle() {
     assert!(ink.ink_presenter().ruler_visible());
     toolbar.set_is_stencil_button_checked(false);
     assert!(!ink.ink_presenter().ruler_visible());
+    // As WinUI, `IsRulerButtonChecked` shows the ruler through a ruler button only.
     toolbar.set_is_ruler_button_checked(true);
     assert!(toolbar.is_ruler_button_checked());
+    assert!(!ink.ink_presenter().ruler_visible());
+    toolbar.set_is_ruler_button_checked(false);
+    let ruler = InkToolbarRulerButton::new();
+    toolbar.children().add(&ruler);
+    toolbar.set_is_ruler_button_checked(true);
+    assert_eq!(ruler.is_checked(), Some(true));
     assert!(ink.ink_presenter().ruler_visible());
     toolbar.set_is_ruler_button_checked(false);
     assert!(!toolbar.is_ruler_button_checked());
@@ -410,13 +417,16 @@ fn interaction_page_selectors_and_checkboxes_drive_the_live_toolbar() {
         placement.set_selected_index(index as i32);
         assert_eq!(toolbar.button_flyout_placement(), expected);
     }
-    for checkbox in [&ruler, &stencil] {
+    // The default controls have the stencil button and no ruler button, so, as WinUI, the
+    // ruler check box sets `IsRulerButtonChecked` without showing the ruler, and the stencil
+    // check box shows it.
+    for (checkbox, shows_ruler) in [(&ruler, false), (&stencil, true)] {
         let toggle = peer(checkbox)
             .get_provider::<dyn IToggleProvider>()
             .unwrap();
         toggle.toggle().unwrap();
         assert_eq!(checkbox.is_checked(), Some(true));
-        assert!(ink.ink_presenter().ruler_visible());
+        assert_eq!(ink.ink_presenter().ruler_visible(), shows_ruler);
         toggle.toggle().unwrap();
         assert_eq!(checkbox.is_checked(), Some(false));
         assert!(!ink.ink_presenter().ruler_visible());

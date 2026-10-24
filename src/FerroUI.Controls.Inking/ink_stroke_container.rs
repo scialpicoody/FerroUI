@@ -644,8 +644,9 @@ mod tests {
     fn stroke(x: f64) -> Rc<InkStroke> {
         InkStroke::new(
             vec![
-                InkPoint::new(Point::new(x, 0.0), 1.0).unwrap(),
-                InkPoint::new(Point::new(x + 10.0, 0.0), 1.0).unwrap(),
+                // The nominal pressure, which draws the configured size.
+                InkPoint::new(Point::new(x, 0.0), 0.5).unwrap(),
+                InkPoint::new(Point::new(x + 10.0, 0.0), 0.5).unwrap(),
             ],
             InkDrawingAttributes::default(),
         )

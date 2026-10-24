@@ -251,8 +251,10 @@ fn pressure_controls_drawn_nib_and_pencil_opacity_reaches_the_brush() {
         fit_to_curve: false,
         ..Default::default()
     };
-    let full = InkStroke::new(
-        vec![InkPoint::new(Point::new(20.0, 30.0), 1.0).unwrap()],
+    // The nominal pressure 0.5 draws the configured size; the nib scales by
+    // `0.25 + 1.5 * pressure` (DEVIATIONS, the pressure curve).
+    let nominal = InkStroke::new(
+        vec![InkPoint::new(Point::new(20.0, 30.0), 0.5).unwrap()],
         attributes,
     )
     .unwrap();
@@ -273,12 +275,12 @@ fn pressure_controls_drawn_nib_and_pencil_opacity_reaches_the_brush() {
     canvas
         .ink_presenter()
         .stroke_container()
-        .add_strokes([full, light, pencil])
+        .add_strokes([nominal, light, pencil])
         .unwrap();
     let drawn = render(&canvas);
     assert_eq!(drawn.geometries.len(), 3);
     assert!((drawn.geometries[0].geometry.bounds().height - 8.0).abs() < 1e-9);
-    assert!((drawn.geometries[1].geometry.bounds().height - 2.0).abs() < 1e-9);
+    assert!((drawn.geometries[1].geometry.bounds().height - 8.0 * (0.25 + 1.5 * 0.25)).abs() < 1e-9);
     assert_eq!(drawn.geometries[0].brush.opacity(), 1.0);
     assert!((drawn.geometries[2].brush.opacity() - 0.3).abs() < 1e-6);
 }

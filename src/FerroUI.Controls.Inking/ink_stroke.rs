@@ -613,7 +613,8 @@ mod tests {
         InkStroke::new(
             points
                 .iter()
-                .map(|&(x, y)| InkPoint::new(Point::new(x, y), 1.0).unwrap())
+                // The nominal pressure, which draws the configured size.
+                .map(|&(x, y)| InkPoint::new(Point::new(x, y), 0.5).unwrap())
                 .collect(),
             InkDrawingAttributes {
                 fit_to_curve: false,
@@ -649,7 +650,7 @@ mod tests {
             pen_tip_transform: Matrix::create_rotation(std::f64::consts::FRAC_PI_4),
             ..Default::default()
         };
-        let s = InkStroke::new(vec![InkPoint::new(Point::default(), 1.0).unwrap()], a).unwrap();
+        let s = InkStroke::new(vec![InkPoint::new(Point::default(), 0.5).unwrap()], a).unwrap();
         assert!((s.bounding_rect().width - 3.0 * 2.0_f64.sqrt()).abs() < 1.0e-9);
         s.set_point_transform(Matrix::create_scale(2.0, 3.0))
             .unwrap();
