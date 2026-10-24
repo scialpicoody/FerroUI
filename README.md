@@ -477,6 +477,7 @@ The layout follows the upstream project so that files can be compared side by si
 - [Deviations](docs/porting/DEVIATIONS.md): every place where the port differs from upstream, and why.
 - [XAML design](docs/porting/xaml.md): the markup pipeline, the run-time loader and the compiler of markup to Rust.
 - [WinUI Charts port](docs/porting/winui-charts.md): the published-contract boundary, native implementation, complete source/test mapping, adaptations and [compiled sample](samples/ChartsDemo/README.md).
+- [WinUI controls](docs/porting/winui-controls.md): the plan, inventory and rules of the native ports of WinUI 3 controls (icons, InfoBar, NumberBox, NavigationView and others), the WinUI-only templates, the symbol font and the two navigation models.
 - [Declarative Rust UI](docs/declarative-ui.md): `ferroui-view`, its builders, `rsx!`, signals, components, hooks, the reconciler, XAML interoperation, tools and the phases of the work; [compared with React](docs/declarative-ui-react.md).
 - [Developer tools](docs/porting/tracking/diagnostics/TRACKING.md): the port of upstream's developer tools, attached with F12, member by member.
 - [MVVM on FerroUI](docs/mvvm.md): ReactiveUI, DynamicData and System.Reactive on FerroUI, with the samples ReactiveDemo and ReactiveUIExample.
