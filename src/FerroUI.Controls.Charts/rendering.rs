@@ -908,7 +908,7 @@ impl ChartScene {
         all: &[SeriesData],
         groups: &[AxisGroup],
         foreground: Rc<dyn IBrush>,
-        labels: &mut Vec<Draw>,
+        label_draws: &mut Vec<Draw>,
     ) {
         let series = &data.series;
         let plot = self.layout.plot_area;
@@ -1153,7 +1153,7 @@ impl ChartScene {
                             .clamp(plot.y, (plot.y + plot.height - label.height()).max(plot.y)),
                     );
                     if (0.0..=1.0).contains(&x) && (0.0..=1.0).contains(&y) {
-                        labels.push(Draw::Text(label, origin, None));
+                        label_draws.push(Draw::Text(label, origin, None));
                     }
                     self.layout
                         .data_labels
