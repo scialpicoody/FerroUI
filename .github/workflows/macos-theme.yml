@@ -146,14 +146,14 @@ jobs:
     defaults:
       run:
         shell: bash
-    env:
-      MACOS_THEME_CAPTURE_DIR: ${{ runner.temp }}/macos26-reference
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           persist-credentials: false
       - name: Verify the reference OS and record toolchain
         run: |
+          MACOS_THEME_CAPTURE_DIR="$RUNNER_TEMP/macos26-reference"
+          echo "MACOS_THEME_CAPTURE_DIR=$MACOS_THEME_CAPTURE_DIR" >> "$GITHUB_ENV"
           mkdir -p "$MACOS_THEME_CAPTURE_DIR"
           macos_theme_version="$(sw_vers -productVersion)"
           if [[ "${macos_theme_version%%.*}" != "26" ]]; then
@@ -181,6 +181,6 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: macos26-native-reference
-          path: ${{ env.MACOS_THEME_CAPTURE_DIR }}
+          path: ${{ runner.temp }}/macos26-reference
           if-no-files-found: error
           retention-days: 14
