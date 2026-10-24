@@ -7,6 +7,7 @@ Other pages hold the entries of their own area, and this page does not repeat th
 - `browser-platform.md` section 14: the browser backend and the browser hosts of the samples (host-level differences, upstream quirks not copied).
 - `xaml.md`: the markup pipeline and the ahead-of-time compiler.
 - `winui-composition.md` section 7: the port of the WinUI 3 composition API on top of the compositor (differences from WinUI). The changes it makes to upstream behaviour are listed in the section "WinUI composition" below.
+- `winui-controls.md`: the native ports of WinUI 3 controls in `ferroui-controls` (differences from WinUI, per control). The WinUI members added to upstream-ported controls are listed in the section "WinUI additions to upstream controls" below.
 - `winui-charts.md` section 4: the port of the WinUI Charts public contract (`src/FerroUI.Controls.Charts`; differences from the published API and tests). The decisions the port makes where the implementation is not published are in its section 3.1.
 - `PORTING-GUIDE.md`: the systematic mappings that apply everywhere (class model, nullability, events, generics, naming). An application of those rules is not a deviation and is not listed here.
 
@@ -1448,8 +1449,14 @@ The port of the inking controls and services of WinUI (`docs/porting/winui-inkin
 | `InkDrawingAttributesPencilProperties.Opacity` ranges from 0.01 to 5.0, default 1.0. | `pencil_opacity` ranges from 0.0 to 1.0, default 0.5 (`ink_drawing_attributes.rs`). | Behaviour | The portable pencil is drawn with an alpha. The Windows adapter reads both on one scale: it sends 0 as the Windows minimum 0.01 and reads a Windows opacity above 1 as 1, so a document of Windows loads instead of failing validation (`windows_ink_services.rs`; review of #283, S2). | #283 |
 | `InkPresenter.ActivateCustomDrying` fails once the presenter's input has been activated by the OS. | `activate_custom_drying` fails once the canvas has had a non-empty size (`InkPresenter::set_size`), which stands for that activation. | Behaviour | There is no OS input activation in the portable presenter; the first layout with a size is the closest observable point. | #283 |
 | The toolbar buttons show glyphs of the Segoe symbol fonts. | The icons are vector geometries of the WinUI styles of the crate (`Themes/WinUI/InkToolbarResources.xaml`). | Representation | The symbol fonts are not available on every platform. | #283 |
-
 | `InkStrokeContainer` and the other ink services of Windows are reached through the projections of C++/WinRT. | The interfaces in `windows_ink.idl` for the MicroCom generator (the ink engine, the in-memory stream with its reader and writer, the collections and asynchronous operations it uses), written from the metadata of the Windows SDK; activation, the await of an operation and the `IIterable<InkPoint>` of the stroke builder written in `windows_ink_interop.rs`. | Design | The port has one COM model on Windows (owner decision D3 of the core plan). The identifiers and slot orders were compared with the declarations of the `windows` crate 0.62.2, which the adapter called before; a test derives the identifiers of the parameterized instances again from their signatures. | #283 |
+
+### WinUI additions to upstream controls (`src/FerroUI.Controls/`)
+
+WinUI members added to upstream-ported controls (`winui-controls.md`, section 6). Each is opt-in: its default reproduces upstream exactly, and a test checks that default. The WinUI controls that FerroUI ports as separate types (`winui-controls.md`, section 3) are new controls, not deviations; their differences from WinUI are in `winui-controls.md`. Columns: the WinUI source member, the member added and the default that keeps upstream, the kind (**Behaviour (opt-in)**), why, and the pull request.
+
+| WinUI source | Addition and default | Kind | Why | Since |
+|---|---|---|---|---|
 
 ## Corrected divergences
 
