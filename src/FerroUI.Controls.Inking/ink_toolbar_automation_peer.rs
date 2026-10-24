@@ -13,7 +13,7 @@ use ferroui_controls::automation::peers::{
 };
 use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, IInvokeProvider, ISelectionItemProvider, ISelectionProvider,
-    IToggleProvider, IValueProvider, ProviderAdapter, ProviderError,
+    IToggleProvider, IValueProvider, ProviderError,
 };
 use ferroui_controls::automation::{
     AutomationProperties, ElementNotEnabledException, ExpandCollapsePatternIdentifiers,
@@ -24,9 +24,37 @@ use ferroui_controls::{Button, Panel};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl,
-    FerroObjectImplExt, FerroPropertyChangedEventArgs, Ref,
+    FerroObjectImplExt, FerroPropertyChangedEventArgs, ObjectType, Ref,
 };
 use std::rc::Rc;
+
+/// The handle through which a peer of this crate implements a provider contract, as
+/// `ferroui_controls::automation::provider::Provider` does in the controls crate (whose
+/// implementations cannot be written outside it): the peer class lists the conversion of this
+/// type in the `interfaces` of its class information.
+struct Provider<T: ObjectType>(Ref<T>);
+
+macro_rules! conversions {
+    ($($name:ident: $provider:ident),* $(,)?) => {
+        impl<T: ObjectType> Provider<T> {
+            $(
+                fn $name(peer: Ref<T>) -> Rc<dyn $provider>
+                where
+                    Self: $provider,
+                {
+                    Rc::new(Self(peer))
+                }
+            )*
+        }
+    };
+}
+
+conversions! {
+    as_expand_collapse_provider: IExpandCollapseProvider,
+    as_invoke_provider: IInvokeProvider,
+    as_selection_item_provider: ISelectionItemProvider,
+    as_value_provider: IValueProvider,
+}
 
 fn button_state(owner: &Button) -> ExpandCollapseState {
     match owner.flyout() {
@@ -190,7 +218,7 @@ pub struct InkToolbarToolButtonAutomationPeer {
     base: RadioButtonAutomationPeer,
 }
 ferro_class!(InkToolbarToolButtonAutomationPeer:RadioButtonAutomationPeer);
-ferro_class_info!(InkToolbarToolButtonAutomationPeer{interfaces:[Rc<dyn IExpandCollapseProvider> => ProviderAdapter::as_expand_collapse_provider,Rc<dyn ISelectionItemProvider> => ProviderAdapter::as_selection_item_provider]});
+ferro_class_info!(InkToolbarToolButtonAutomationPeer{interfaces:[Rc<dyn IExpandCollapseProvider> => Provider::as_expand_collapse_provider,Rc<dyn ISelectionItemProvider> => Provider::as_selection_item_provider]});
 ferro_impl_classes!(InkToolbarToolButtonAutomationPeer:ControlAutomationPeerImpl,RadioButtonAutomationPeerImpl);
 impl FerroObjectImpl for InkToolbarToolButtonAutomationPeer {
     fn constructed(this: &Self) {
@@ -262,7 +290,7 @@ impl InkToolbarToolButtonAutomationPeer {
             .expect("tool button peer owner")
     }
 }
-impl IExpandCollapseProvider for ProviderAdapter<InkToolbarToolButtonAutomationPeer> {
+impl IExpandCollapseProvider for Provider<InkToolbarToolButtonAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
@@ -283,7 +311,7 @@ impl IExpandCollapseProvider for ProviderAdapter<InkToolbarToolButtonAutomationP
         collapse(&self.0.owner_button())
     }
 }
-impl ISelectionItemProvider for ProviderAdapter<InkToolbarToolButtonAutomationPeer> {
+impl ISelectionItemProvider for Provider<InkToolbarToolButtonAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
@@ -333,7 +361,7 @@ pub struct InkToolbarMenuButtonAutomationPeer {
     base: ToggleButtonAutomationPeer,
 }
 ferro_class!(InkToolbarMenuButtonAutomationPeer:ToggleButtonAutomationPeer);
-ferro_class_info!(InkToolbarMenuButtonAutomationPeer{interfaces:[Rc<dyn IExpandCollapseProvider> => ProviderAdapter::as_expand_collapse_provider]});
+ferro_class_info!(InkToolbarMenuButtonAutomationPeer{interfaces:[Rc<dyn IExpandCollapseProvider> => Provider::as_expand_collapse_provider]});
 ferro_impl_classes!(InkToolbarMenuButtonAutomationPeer:ControlAutomationPeerImpl);
 impl FerroObjectImpl for InkToolbarMenuButtonAutomationPeer {
     fn constructed(this: &Self) {
@@ -404,7 +432,7 @@ impl InkToolbarMenuButtonAutomationPeer {
             .expect("menu button peer owner")
     }
 }
-impl IExpandCollapseProvider for ProviderAdapter<InkToolbarMenuButtonAutomationPeer> {
+impl IExpandCollapseProvider for Provider<InkToolbarMenuButtonAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
@@ -437,7 +465,7 @@ pub struct InkToolbarFlyoutItemAutomationPeer {
     base: ToggleButtonAutomationPeer,
 }
 ferro_class!(InkToolbarFlyoutItemAutomationPeer:ToggleButtonAutomationPeer);
-ferro_class_info!(InkToolbarFlyoutItemAutomationPeer{interfaces:[Rc<dyn ISelectionItemProvider> => ProviderAdapter::as_selection_item_provider,Rc<dyn IInvokeProvider> => ProviderAdapter::as_invoke_provider]});
+ferro_class_info!(InkToolbarFlyoutItemAutomationPeer{interfaces:[Rc<dyn ISelectionItemProvider> => Provider::as_selection_item_provider,Rc<dyn IInvokeProvider> => Provider::as_invoke_provider]});
 ferro_impl_classes!(InkToolbarFlyoutItemAutomationPeer:FerroObjectImpl,ControlAutomationPeerImpl);
 impl AutomationPeerImpl for InkToolbarFlyoutItemAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
@@ -487,7 +515,7 @@ impl InkToolbarFlyoutItemAutomationPeer {
         Ok(owner)
     }
 }
-impl IInvokeProvider for ProviderAdapter<InkToolbarFlyoutItemAutomationPeer> {
+impl IInvokeProvider for Provider<InkToolbarFlyoutItemAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
@@ -496,11 +524,11 @@ impl IInvokeProvider for ProviderAdapter<InkToolbarFlyoutItemAutomationPeer> {
         if !owner.is_effectively_enabled() {
             return Err(ElementNotEnabledException::new());
         }
-        owner.perform_click();
+        owner.on_click();
         Ok(())
     }
 }
-impl ISelectionItemProvider for ProviderAdapter<InkToolbarFlyoutItemAutomationPeer> {
+impl ISelectionItemProvider for Provider<InkToolbarFlyoutItemAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }
@@ -532,7 +560,7 @@ impl ISelectionItemProvider for ProviderAdapter<InkToolbarFlyoutItemAutomationPe
         {
             return Err(invalid_selection());
         }
-        owner.perform_click();
+        owner.on_click();
         Ok(())
     }
     fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
@@ -541,14 +569,14 @@ impl ISelectionItemProvider for ProviderAdapter<InkToolbarFlyoutItemAutomationPe
             if owner.kind() == InkToolbarFlyoutItemKind::Radio {
                 return Err(invalid_selection());
             }
-            owner.perform_click();
+            owner.on_click();
         }
         Ok(())
     }
     fn select(&self) -> Result<(), ElementNotEnabledException> {
         let owner = self.0.ensure_selection_enabled()?;
         if owner.is_checked() != Some(true) {
-            owner.perform_click();
+            owner.on_click();
         }
         Ok(())
     }
@@ -559,7 +587,7 @@ pub struct InkToolbarStrokeWidthSliderAutomationPeer {
     base: SliderAutomationPeer,
 }
 ferro_class!(InkToolbarStrokeWidthSliderAutomationPeer:SliderAutomationPeer);
-ferro_class_info!(InkToolbarStrokeWidthSliderAutomationPeer{interfaces:[Rc<dyn IValueProvider> => ProviderAdapter::as_value_provider]});
+ferro_class_info!(InkToolbarStrokeWidthSliderAutomationPeer{interfaces:[Rc<dyn IValueProvider> => Provider::as_value_provider]});
 ferro_impl_classes!(InkToolbarStrokeWidthSliderAutomationPeer:FerroObjectImpl,ControlAutomationPeerImpl);
 impl RangeBaseAutomationPeerImpl for InkToolbarStrokeWidthSliderAutomationPeer {
     fn owner_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -602,7 +630,7 @@ impl InkToolbarStrokeWidthSliderAutomationPeer {
             .expect("stroke width peer owner")
     }
 }
-impl IValueProvider for ProviderAdapter<InkToolbarStrokeWidthSliderAutomationPeer> {
+impl IValueProvider for Provider<InkToolbarStrokeWidthSliderAutomationPeer> {
     fn peer(&self) -> Ref<AutomationPeer> {
         self.0.clone().upcast()
     }

@@ -472,10 +472,10 @@ fn normal_and_secondary_activation_follow_source_flyout_sequence() {
         .unwrap();
     let flyout = stencil.flyout().unwrap();
     assert_ne!(stencil.is_checked(), Some(true));
-    stencil.perform_click();
+    stencil.on_click();
     assert_eq!(stencil.is_checked(), Some(true));
     assert!(!flyout.is_open(), "First activation selects the stencil");
-    stencil.perform_click();
+    stencil.on_click();
     assert_eq!(stencil.is_checked(), Some(true));
     assert!(
         flyout.is_open(),
@@ -508,10 +508,10 @@ fn normal_and_secondary_activation_follow_source_flyout_sequence() {
     );
     flyout.hide();
     stencil.set_is_protractor_item_visible(false);
-    stencil.perform_click();
+    stencil.on_click();
     assert_eq!(stencil.is_checked(), Some(false));
     assert!(!flyout.is_open());
-    stencil.perform_click();
+    stencil.on_click();
     assert_eq!(stencil.is_checked(), Some(true));
     assert!(!flyout.is_open(), "A single stencil is only a toggle");
 
@@ -541,7 +541,7 @@ fn custom_configuration_requires_content_and_refreshes_it_on_each_open() {
         tool.clone().upcast(),
     ] {
         toolbar.set_active_tool(Some(button.clone()));
-        button.perform_click();
+        button.on_click();
         assert!(!button.flyout().unwrap().is_open());
         for _ in 0..2 {
             let content = Control::new();
@@ -550,7 +550,7 @@ fn custom_configuration_requires_content_and_refreshes_it_on_each_open() {
             } else {
                 tool.set_configuration_content(Some(content.clone()));
             }
-            button.perform_click();
+            button.on_click();
             let flyout = button.flyout().unwrap().cast::<Flyout>().unwrap();
             assert!(flyout.is_open());
             assert_eq!(
@@ -564,7 +564,7 @@ fn custom_configuration_requires_content_and_refreshes_it_on_each_open() {
         } else {
             tool.set_configuration_content(None);
         }
-        button.perform_click();
+        button.on_click();
         assert!(
             !button.flyout().unwrap().is_open(),
             "Removing content suppresses the popup"
