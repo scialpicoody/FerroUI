@@ -2,8 +2,8 @@
 
 use super::items::{item_list, ItemList};
 use super::{DragItemViewModel, DragNodeViewModel, ViewModelBase};
-use ferroui_base::collections::FerroList;
-use ferroui_base::{ferro_markup_type, BoxedValue};
+use ferroui_base::ferro_markup_type;
+use ferroui_controls::primitives::SelectedItemsList;
 use ferroui_controls::ItemsSource;
 use ferroui_reactiveui::reactive_object;
 use std::cell::RefCell;
@@ -15,7 +15,7 @@ pub struct DragAndDropSampleViewModel {
     base: ViewModelBase,
     items: RefCell<ItemList>,
     nodes: RefCell<ItemList>,
-    selected_tree_nodes: ItemList,
+    selected_tree_nodes: SelectedItemsList,
     managed_source_items: RefCell<ItemList>,
     managed_target_items: RefCell<ItemList>,
     has_multiple_tree_nodes_selected: RefCell<bool>,
@@ -62,7 +62,7 @@ impl DragAndDropSampleViewModel {
                 node_with_children("Node1"),
                 node_with_children("Node2"),
             ])),
-            selected_tree_nodes: Rc::new(FerroList::new()),
+            selected_tree_nodes: SelectedItemsList::new(),
             managed_source_items: RefCell::new(item_list(
                 (0..4).map(|index| DragItemViewModel::new(&format!("PreviewItem{index}"))),
             )),
@@ -84,7 +84,11 @@ impl DragAndDropSampleViewModel {
     }
 
     /// `SelectedTreeNodes`.
-    pub fn selected_tree_nodes(&self) -> ItemList {
+    ///
+    /// Deviation (DEVIATIONS.md, Behaviors gallery): the list is the selected items list of the
+    /// controls (a list of optional untyped values), so that the two-way binding of the selected
+    /// items of the tree view of the drag and drop page shares it.
+    pub fn selected_tree_nodes(&self) -> SelectedItemsList {
         self.selected_tree_nodes.clone()
     }
 
@@ -102,7 +106,7 @@ ferro_markup_type!(class DragAndDropSampleViewModel {
     properties: [
         Items: ItemsSource { get: |this: &Vm| ItemsSource::from(this.items()) },
         Nodes: ItemsSource { get: |this: &Vm| ItemsSource::from(this.nodes()) },
-        SelectedTreeNodes: Rc<FerroList<BoxedValue>> { get: |this: &Vm| this.selected_tree_nodes() },
+        SelectedTreeNodes: Option<SelectedItemsList> { get: |this: &Vm| Some(this.selected_tree_nodes()) },
         ManagedSourceItems: ItemsSource { get: |this: &Vm| ItemsSource::from(this.managed_source_items()) },
         ManagedTargetItems: ItemsSource { get: |this: &Vm| ItemsSource::from(this.managed_target_items()) },
         HasMultipleTreeNodesSelected: bool {

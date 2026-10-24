@@ -108,64 +108,64 @@ pub mod sliding_animation_view;
 pub mod fade_animation_view;
 pub mod scale_animation_view;
 // Group B (pages 87 to 144)
-// pub mod rotate_animation_view;
-// pub mod entrance_animations_view;
-// pub mod attention_animations_view;
-// pub mod exit_animations_view;
-// pub mod framer_motion_animations_view;
-// pub mod special_animations_view;
-// pub mod animation_behavior_view;
-// pub mod animation_completed_trigger_view;
-// pub mod start_animation_action_view;
-// pub mod animation_builder_view;
-// pub mod start_built_animation_action_view;
-// pub mod run_animation_trigger_view;
-// pub mod fluid_move_behavior_view;
-// pub mod selecting_items_control_behavior_view;
-// pub mod list_box_selection_behaviors_view;
-// pub mod behavior_collection_template_view;
+pub mod rotate_animation_view;
+pub mod entrance_animations_view;
+pub mod attention_animations_view;
+pub mod exit_animations_view;
+pub mod framer_motion_animations_view;
+pub mod special_animations_view;
+pub mod animation_behavior_view;
+pub mod animation_completed_trigger_view;
+pub mod start_animation_action_view;
+pub mod animation_builder_view;
+pub mod start_built_animation_action_view;
+pub mod run_animation_trigger_view;
+pub mod fluid_move_behavior_view;
+pub mod selecting_items_control_behavior_view;
+pub mod list_box_selection_behaviors_view;
+pub mod behavior_collection_template_view;
 pub mod action_collection_template_view;
-// pub mod template_binding_view;
-// pub mod one_time_binding;
-// pub mod pointer_triggers_view;
-// pub mod key_gesture_trigger_view;
-// pub mod execute_command_behaviors_view;
-// pub mod button_execute_command_on_key_down_behavior_view;
-// pub mod storage_provider_view;
-// pub mod picker_can_execute_command_view;
-// pub mod clipboard_view;
-// pub mod get_clipboard_data_action_view;
-// pub mod get_clipboard_formats_action_view;
-// pub mod set_clipboard_data_object_action_view;
-// pub mod focus_control_action_view;
-// pub mod hide_show_control_action_view;
-// pub mod show_hide_flyout_action_view;
-// pub mod show_context_menu_action_view;
-// pub mod context_dialog_view;
-// pub mod show_hide_popup_action_view;
-// pub mod show_on_event_behaviors_view;
-// pub mod set_enabled_action_view;
-// pub mod show_notification_action_view;
-// pub mod dialog_action_view;
-// pub mod file_drop_handler_view;
-// pub mod upload_file_view;
-// pub mod content_control_files_drop_behavior_view;
-// pub mod drag_and_drop_view;
+pub mod template_binding_view;
+pub mod one_time_binding;
+pub mod pointer_triggers_view;
+pub mod key_gesture_trigger_view;
+pub mod execute_command_behaviors_view;
+pub mod button_execute_command_on_key_down_behavior_view;
+pub mod storage_provider_view;
+pub mod picker_can_execute_command_view;
+pub mod clipboard_view;
+pub mod get_clipboard_data_action_view;
+pub mod get_clipboard_formats_action_view;
+pub mod set_clipboard_data_object_action_view;
+pub mod focus_control_action_view;
+pub mod hide_show_control_action_view;
+pub mod show_hide_flyout_action_view;
+pub mod show_context_menu_action_view;
+pub mod context_dialog_view;
+pub mod show_hide_popup_action_view;
+pub mod show_on_event_behaviors_view;
+pub mod set_enabled_action_view;
+pub mod show_notification_action_view;
+pub mod dialog_action_view;
+pub mod file_drop_handler_view;
+pub mod upload_file_view;
+pub mod content_control_files_drop_behavior_view;
+pub mod drag_and_drop_view;
 pub mod drag_drop_commands_view;
-// pub mod files_preview_view;
-// pub mod typed_drag_behavior_view;
-// pub mod draggable_view;
-// pub mod mouse_drag_behavior_view;
-// pub mod canvas_drag_behavior_view;
-// pub mod auto_scroll_during_drag_behavior_view;
-// pub mod drag_between_panels_view;
-// pub mod cursor_view;
-// pub mod drawn_cursor_view;
-// pub mod if_else_trigger_view;
+pub mod files_preview_view;
+pub mod typed_drag_behavior_view;
+pub mod draggable_view;
+pub mod mouse_drag_behavior_view;
+pub mod canvas_drag_behavior_view;
+pub mod auto_scroll_during_drag_behavior_view;
+pub mod drag_between_panels_view;
+pub mod cursor_view;
+pub mod drawn_cursor_view;
+pub mod if_else_trigger_view;
 // pub mod execute_script_action_view;
 // pub mod observable_trigger_behavior_view;
-// pub mod interaction_trigger_behavior_view;
-// pub mod flyout_binding_view;
+pub mod interaction_trigger_behavior_view;
+pub mod flyout_binding_view;
 // Group C (pages 145 to 234)
 pub mod key_trigger_view;
 pub mod tool_tip_helpers_view;
@@ -418,64 +418,64 @@ pub(crate) const PAGE_TABLE: &[PageInfo] = &[
     fade_animation_view::PAGE,
     scale_animation_view::PAGE,
     // Group B (pages 87 to 144)
-    PageInfo::placeholder("Rotate Animation", "Views/Pages/RotateAnimationView"),
-    PageInfo::placeholder("Entrance Animations", "Views/Pages/EntranceAnimationsView"),
-    PageInfo::placeholder("Attention Animations", "Views/Pages/AttentionAnimationsView"),
-    PageInfo::placeholder("Exit Animations", "Views/Pages/ExitAnimationsView"),
-    PageInfo::placeholder("Framer Motion Animations", "Views/Pages/FramerMotionAnimationsView"),
-    PageInfo::placeholder("Special Animations", "Views/Pages/SpecialAnimationsView"),
-    PageInfo::placeholder("Animation Behaviors", "Views/Pages/AnimationBehaviorView"),
-    PageInfo::placeholder("Animation Completed Trigger", "Views/Pages/AnimationCompletedTriggerView"),
-    PageInfo::placeholder("StartAnimationAction", "Views/Pages/StartAnimationActionView"),
-    PageInfo::placeholder("AnimationBuilder", "Views/Pages/AnimationBuilderView"),
-    PageInfo::placeholder("StartBuiltAnimationAction", "Views/Pages/StartBuiltAnimationActionView"),
-    PageInfo::placeholder("RunAnimationTrigger", "Views/Pages/RunAnimationTriggerView"),
-    PageInfo::placeholder("FluidMoveBehavior", "Views/Pages/FluidMoveBehaviorView"),
-    PageInfo::placeholder("SelectingItemsControlBehavior", "Views/Pages/SelectingItemsControlBehaviorView"),
-    PageInfo::placeholder("ListBox Selection Behaviors", "Views/Pages/ListBoxSelectionBehaviorsView"),
-    PageInfo::placeholder("BehaviorCollectionTemplate", "Views/Pages/BehaviorCollectionTemplateView"),
+    rotate_animation_view::PAGE,
+    entrance_animations_view::PAGE,
+    attention_animations_view::PAGE,
+    exit_animations_view::PAGE,
+    framer_motion_animations_view::PAGE,
+    special_animations_view::PAGE,
+    animation_behavior_view::PAGE,
+    animation_completed_trigger_view::PAGE,
+    start_animation_action_view::PAGE,
+    animation_builder_view::PAGE,
+    start_built_animation_action_view::PAGE,
+    run_animation_trigger_view::PAGE,
+    fluid_move_behavior_view::PAGE,
+    selecting_items_control_behavior_view::PAGE,
+    list_box_selection_behaviors_view::PAGE,
+    behavior_collection_template_view::PAGE,
     action_collection_template_view::PAGE,
-    PageInfo::placeholder("TemplateBinding", "Views/Pages/TemplateBindingView"),
-    PageInfo::placeholder("OneTime Binding", "Views/Pages/OneTimeBinding"),
-    PageInfo::placeholder("Pointer Triggers", "Views/Pages/PointerTriggersView"),
-    PageInfo::placeholder("KeyGestureTrigger", "Views/Pages/KeyGestureTriggerView"),
-    PageInfo::placeholder("ExecuteCommand Behaviors", "Views/Pages/ExecuteCommandBehaviorsView"),
-    PageInfo::placeholder("ButtonExecuteCommandOnKeyDownBehavior", "Views/Pages/ButtonExecuteCommandOnKeyDownBehaviorView"),
-    PageInfo::placeholder("Storage Provider", "Views/Pages/StorageProviderView"),
-    PageInfo::placeholder("Picker CanExecuteCommand", "Views/Pages/PickerCanExecuteCommandView"),
-    PageInfo::placeholder("Clipboard", "Views/Pages/ClipboardView"),
-    PageInfo::placeholder("GetClipboardDataAction", "Views/Pages/GetClipboardDataActionView"),
-    PageInfo::placeholder("GetClipboardFormatsAction", "Views/Pages/GetClipboardFormatsActionView"),
-    PageInfo::placeholder("SetClipboardDataObjectAction", "Views/Pages/SetClipboardDataObjectActionView"),
-    PageInfo::placeholder("FocusControlAction", "Views/Pages/FocusControlActionView"),
-    PageInfo::placeholder("Hide/ShowControlAction", "Views/Pages/HideShowControlActionView"),
-    PageInfo::placeholder("ShowHideFlyoutAction", "Views/Pages/ShowHideFlyoutActionView"),
-    PageInfo::placeholder("ShowContextMenuAction", "Views/Pages/ShowContextMenuActionView"),
-    PageInfo::placeholder("ContextDialog", "Views/Pages/ContextDialogView"),
-    PageInfo::placeholder("ShowHidePopupAction", "Views/Pages/ShowHidePopupActionView"),
-    PageInfo::placeholder("ShowOn Event Behaviors", "Views/Pages/ShowOnEventBehaviorsView"),
-    PageInfo::placeholder("SetEnabledAction", "Views/Pages/SetEnabledActionView"),
-    PageInfo::placeholder("ShowNotificationAction", "Views/Pages/ShowNotificationActionView"),
-    PageInfo::placeholder("Dialog Actions", "Views/Pages/DialogActionView"),
-    PageInfo::placeholder("File Drop Handler", "Views/Pages/FileDropHandlerView"),
-    PageInfo::placeholder("Upload File", "Views/Pages/UploadFileView"),
-    PageInfo::placeholder("ContentControlFilesDropBehavior", "Views/Pages/ContentControlFilesDropBehaviorView"),
-    PageInfo::placeholder("Drag and Drop", "Views/Pages/DragAndDropView"),
+    template_binding_view::PAGE,
+    one_time_binding::PAGE,
+    pointer_triggers_view::PAGE,
+    key_gesture_trigger_view::PAGE,
+    execute_command_behaviors_view::PAGE,
+    button_execute_command_on_key_down_behavior_view::PAGE,
+    storage_provider_view::PAGE,
+    picker_can_execute_command_view::PAGE,
+    clipboard_view::PAGE,
+    get_clipboard_data_action_view::PAGE,
+    get_clipboard_formats_action_view::PAGE,
+    set_clipboard_data_object_action_view::PAGE,
+    focus_control_action_view::PAGE,
+    hide_show_control_action_view::PAGE,
+    show_hide_flyout_action_view::PAGE,
+    show_context_menu_action_view::PAGE,
+    context_dialog_view::PAGE,
+    show_hide_popup_action_view::PAGE,
+    show_on_event_behaviors_view::PAGE,
+    set_enabled_action_view::PAGE,
+    show_notification_action_view::PAGE,
+    dialog_action_view::PAGE,
+    file_drop_handler_view::PAGE,
+    upload_file_view::PAGE,
+    content_control_files_drop_behavior_view::PAGE,
+    drag_and_drop_view::PAGE,
     drag_drop_commands_view::PAGE,
-    PageInfo::placeholder("Files Preview", "Views/Pages/FilesPreviewView"),
-    PageInfo::placeholder("TypedDragBehavior", "Views/Pages/TypedDragBehaviorView"),
-    PageInfo::placeholder("Draggable", "Views/Pages/DraggableView"),
-    PageInfo::placeholder("Mouse Drag Behaviors", "Views/Pages/MouseDragBehaviorView"),
-    PageInfo::placeholder("Canvas Drag Behavior", "Views/Pages/CanvasDragBehaviorView"),
-    PageInfo::placeholder("Auto Scroll During Drag", "Views/Pages/AutoScrollDuringDragBehaviorView"),
-    PageInfo::placeholder("Drag Between Panels", "Views/Pages/DragBetweenPanelsView"),
-    PageInfo::placeholder("Cursor Behavior", "Views/Pages/CursorView"),
-    PageInfo::placeholder("Drawn Cursor", "Views/Pages/DrawnCursorView"),
-    PageInfo::placeholder("IfElseTrigger", "Views/Pages/IfElseTriggerView"),
+    files_preview_view::PAGE,
+    typed_drag_behavior_view::PAGE,
+    draggable_view::PAGE,
+    mouse_drag_behavior_view::PAGE,
+    canvas_drag_behavior_view::PAGE,
+    auto_scroll_during_drag_behavior_view::PAGE,
+    drag_between_panels_view::PAGE,
+    cursor_view::PAGE,
+    drawn_cursor_view::PAGE,
+    if_else_trigger_view::PAGE,
     PageInfo::placeholder("ExecuteScriptAction", "Views/Pages/ExecuteScriptActionView"),
     PageInfo::placeholder("Observable Trigger", "Views/ReactiveUI/ObservableTriggerBehaviorView"),
-    PageInfo::placeholder("InteractionTriggerBehavior", "Views/ReactiveUI/InteractionTriggerBehaviorView"),
-    PageInfo::placeholder("Flyout Binding", "Views/Pages/FlyoutBindingView"),
+    interaction_trigger_behavior_view::PAGE,
+    flyout_binding_view::PAGE,
     // Group C (pages 145 to 234)
     key_trigger_view::PAGE,
     tool_tip_helpers_view::PAGE,

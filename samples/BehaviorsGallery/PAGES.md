@@ -239,64 +239,64 @@ until the page is ported.
 | 84 | Sliding Animation | `Views/Pages/SlidingAnimationView` | A | 77 | ported |  |
 | 85 | Fade Animation | `Views/Pages/FadeAnimationView` | A | 49 | ported | attached properties of the Custom crate (`custom:FadeAnimation`): an animation page |
 | 86 | Scale Animation | `Views/Pages/ScaleAnimationView` | A | 91 | ported |  |
-| 87 | Rotate Animation | `Views/Pages/RotateAnimationView` | B | 105 | placeholder |  |
-| 88 | Entrance Animations | `Views/Pages/EntranceAnimationsView` | B | 198 | placeholder |  |
-| 89 | Attention Animations | `Views/Pages/AttentionAnimationsView` | B | 117 | placeholder |  |
-| 90 | Exit Animations | `Views/Pages/ExitAnimationsView` | B | 195 | placeholder |  |
-| 91 | Framer Motion Animations | `Views/Pages/FramerMotionAnimationsView` | B | 157 | placeholder |  |
-| 92 | Special Animations | `Views/Pages/SpecialAnimationsView` | B | 34 | placeholder |  |
-| 93 | Animation Behaviors | `Views/Pages/AnimationBehaviorView` | B | 69 | placeholder |  |
-| 94 | Animation Completed Trigger | `Views/Pages/AnimationCompletedTriggerView` | B | 49 | placeholder |  |
-| 95 | StartAnimationAction | `Views/Pages/StartAnimationActionView` | B | 50 | placeholder |  |
-| 96 | AnimationBuilder | `Views/Pages/AnimationBuilderView` | B | 40 | placeholder | own view model: CustomAnimatorViewModel (commented line in `ViewModels/mod.rs`); the reference names the upstream framework: write FerroUI; port the code-behind |
-| 97 | StartBuiltAnimationAction | `Views/Pages/StartBuiltAnimationActionView` | B | 41 | placeholder | own view model: CustomAnimatorViewModel (commented line in `ViewModels/mod.rs`); port the code-behind |
-| 98 | RunAnimationTrigger | `Views/Pages/RunAnimationTriggerView` | B | 40 | placeholder | own view model: CustomAnimatorViewModel (commented line in `ViewModels/mod.rs`); the reference names the upstream framework: write FerroUI; port the code-behind |
-| 99 | FluidMoveBehavior | `Views/Pages/FluidMoveBehaviorView` | B | 51 | placeholder | own view model: FluidMoveBehaviorViewModel (commented line in `ViewModels/mod.rs`); port the code-behind |
-| 100 | SelectingItemsControlBehavior | `Views/Pages/SelectingItemsControlBehaviorView` | B | 40 | placeholder |  |
-| 101 | ListBox Selection Behaviors | `Views/Pages/ListBoxSelectionBehaviorsView` | B | 103 | placeholder |  |
-| 102 | BehaviorCollectionTemplate | `Views/Pages/BehaviorCollectionTemplateView` | B | 70 | placeholder | the reference names the upstream framework: write FerroUI |
+| 87 | Rotate Animation | `Views/Pages/RotateAnimationView` | B | 105 | ported | attached properties of the Custom crate (`custom:RotateAnimation`): an animation page |
+| 88 | Entrance Animations | `Views/Pages/EntranceAnimationsView` | B | 198 | ported | attached properties of the Custom crate (`EntranceAnimations`): an animation page |
+| 89 | Attention Animations | `Views/Pages/AttentionAnimationsView` | B | 117 | ported | attached properties of the Custom crate (`AttentionAnimations`): an animation page |
+| 90 | Exit Animations | `Views/Pages/ExitAnimationsView` | B | 195 | ported | attached properties of the Custom crate (`ExitAnimations`): an animation page |
+| 91 | Framer Motion Animations | `Views/Pages/FramerMotionAnimationsView` | B | 157 | ported | attached properties of the Custom crate (`FramerMotionAnimations`): an animation page |
+| 92 | Special Animations | `Views/Pages/SpecialAnimationsView` | B | 34 | ported | attached properties of the Custom crate (`SpecialAnimations`) |
+| 93 | Animation Behaviors | `Views/Pages/AnimationBehaviorView` | B | 69 | ported | PlayAnimationBehavior and BeginAnimationAction with key frame animations |
+| 94 | Animation Completed Trigger | `Views/Pages/AnimationCompletedTriggerView` | B | 49 | ported | AnimationCompletedTrigger with ChangePropertyAction |
+| 95 | StartAnimationAction | `Views/Pages/StartAnimationActionView` | B | 50 | ported | StartAnimationAction from a click |
+| 96 | AnimationBuilder | `Views/Pages/AnimationBuilderView` | B | 40 | ported | RunAnimationTrigger with the builder of the view model; owns `ViewModels/custom_animator_view_model.rs` and `Animations/custom_string_animation_builder.rs`, `Animations/custom_string_animator.rs` (registered by this page); deviations: the builder is a plain type handed out as the builder handle `AnimationBuilderRef`, the animator interpolates the optional text of a text block |
+| 97 | StartBuiltAnimationAction | `Views/Pages/StartBuiltAnimationActionView` | B | 41 | ported | StartBuiltAnimationAction with the builder of the view model (`CustomAnimatorViewModel`, registered by AnimationBuilder) |
+| 98 | RunAnimationTrigger | `Views/Pages/RunAnimationTriggerView` | B | 40 | ported | RunAnimationTrigger with the builder of the view model (`CustomAnimatorViewModel`, registered by AnimationBuilder) |
+| 99 | FluidMoveBehavior | `Views/Pages/FluidMoveBehaviorView` | B | 51 | ported | FluidMoveBehavior; own view model (`ViewModels/fluid_move_behavior_view_model.rs`; the shuffle uses a small clock-seeded generator, no random number crate) |
+| 100 | SelectingItemsControlBehavior | `Views/Pages/SelectingItemsControlBehaviorView` | B | 40 | ported | SelectingItemsControlBehavior.EnableSelectionAnimation on a tab control |
+| 101 | ListBox Selection Behaviors | `Views/Pages/ListBoxSelectionBehaviorsView` | B | 103 | ported | ListBoxSelectAll, ListBoxUnselectAll, SelectListBoxItemOnPointerMoved and TextBoxSelectAllText behaviors |
+| 102 | BehaviorCollectionTemplate | `Views/Pages/BehaviorCollectionTemplateView` | B | 70 | ported | BehaviorCollectionTemplate in a style, ChangeFerroPropertyAction, PopupAction |
 | 103 | ActionCollectionTemplate | `Views/Pages/ActionCollectionTemplateView` | B | 90 | ported | BehaviorCollectionTemplate and ActionCollectionTemplate in styles, ChangeFerroPropertyAction, PopupAction |
-| 104 | TemplateBinding | `Views/Pages/TemplateBindingView` | B | 30 | placeholder | uses the shared `Controls/CustomControl` (its styles are in `App.xaml`) |
-| 105 | OneTime Binding | `Views/Pages/OneTimeBinding` | B | 55 | placeholder |  |
-| 106 | Pointer Triggers | `Views/Pages/PointerTriggersView` | B | 51 | placeholder | own view model: PointerTriggersViewModel (commented line in `ViewModels/mod.rs`); port the code-behind |
-| 107 | KeyGestureTrigger | `Views/Pages/KeyGestureTriggerView` | B | 40 | placeholder | own view model: KeyGestureTriggerViewModel (commented line in `ViewModels/mod.rs`); port the code-behind |
-| 108 | ExecuteCommand Behaviors | `Views/Pages/ExecuteCommandBehaviorsView` | B | 176 | placeholder | own view model: ExecuteCommandBehaviorsViewModel (commented line in `ViewModels/mod.rs`); port the code-behind |
-| 109 | ButtonExecuteCommandOnKeyDownBehavior | `Views/Pages/ButtonExecuteCommandOnKeyDownBehaviorView` | B | 36 | placeholder | own view model: ExecuteCommandBehaviorsViewModel (commented line in `ViewModels/mod.rs`); port the code-behind |
-| 110 | Storage Provider | `Views/Pages/StorageProviderView` | B | 203 | placeholder | port the code-behind |
-| 111 | Picker CanExecuteCommand | `Views/Pages/PickerCanExecuteCommandView` | B | 188 | placeholder |  |
-| 112 | Clipboard | `Views/Pages/ClipboardView` | B | 52 | placeholder | the reference names the upstream framework: write FerroUI |
-| 113 | GetClipboardDataAction | `Views/Pages/GetClipboardDataActionView` | B | 38 | placeholder |  |
-| 114 | GetClipboardFormatsAction | `Views/Pages/GetClipboardFormatsActionView` | B | 38 | placeholder |  |
-| 115 | SetClipboardDataObjectAction | `Views/Pages/SetClipboardDataObjectActionView` | B | 38 | placeholder |  |
-| 116 | FocusControlAction | `Views/Pages/FocusControlActionView` | B | 39 | placeholder |  |
-| 117 | Hide/ShowControlAction | `Views/Pages/HideShowControlActionView` | B | 46 | placeholder |  |
-| 118 | ShowHideFlyoutAction | `Views/Pages/ShowHideFlyoutActionView` | B | 48 | placeholder |  |
-| 119 | ShowContextMenuAction | `Views/Pages/ShowContextMenuActionView` | B | 42 | placeholder |  |
-| 120 | ContextDialog | `Views/Pages/ContextDialogView` | B | 60 | placeholder |  |
-| 121 | ShowHidePopupAction | `Views/Pages/ShowHidePopupActionView` | B | 47 | placeholder |  |
-| 122 | ShowOn Event Behaviors | `Views/Pages/ShowOnEventBehaviorsView` | B | 138 | placeholder |  |
-| 123 | SetEnabledAction | `Views/Pages/SetEnabledActionView` | B | 44 | placeholder |  |
-| 124 | ShowNotificationAction | `Views/Pages/ShowNotificationActionView` | B | 49 | placeholder |  |
-| 125 | Dialog Actions | `Views/Pages/DialogActionView` | B | 52 | placeholder | uses the shared `Dialogs/SimpleDialog` |
-| 126 | File Drop Handler | `Views/Pages/FileDropHandlerView` | B | 55 | placeholder | owns: FilesDropHandler (commented line in its folder); BLOCKED: a drop handler as a resource (IDropHandler has no markup metadata) |
-| 127 | Upload File | `Views/Pages/UploadFileView` | B | 102 | placeholder |  |
-| 128 | ContentControlFilesDropBehavior | `Views/Pages/ContentControlFilesDropBehaviorView` | B | 51 | placeholder |  |
-| 129 | Drag and Drop | `Views/Pages/DragAndDropView` | B | 426 | placeholder | owns: ItemsDataGridDropHandler, ManagedItemsListBoxDropHandler, NodesListBoxDropHandler (commented line in its folder); uses DataGrid, which the framework has not: leave those parts out (deviation); BLOCKED: a drop handler as a resource (IDropHandler has no markup metadata); port the code-behind |
+| 104 | TemplateBinding | `Views/Pages/TemplateBindingView` | B | 30 | ported | the shared `Controls/CustomControl` (its styles are in `App.xaml`) |
+| 105 | OneTime Binding | `Views/Pages/OneTimeBinding` | B | 55 | ported | one-time bindings in a carousel with InvokeCommandAction |
+| 106 | Pointer Triggers | `Views/Pages/PointerTriggersView` | B | 51 | ported | pointer triggers with InvokeCommandAction and PointerEventArgsConverter; own view model (`ViewModels/pointer_triggers_view_model.rs`) |
+| 107 | KeyGestureTrigger | `Views/Pages/KeyGestureTriggerView` | B | 40 | ported | KeyGestureTrigger; own view model (`ViewModels/key_gesture_trigger_view_model.rs`) |
+| 108 | ExecuteCommand Behaviors | `Views/Pages/ExecuteCommandBehaviorsView` | B | 176 | ported | the execute command behaviors; own view model (`ViewModels/execute_command_behaviors_view_model.rs`, shared with ButtonExecuteCommandOnKeyDownBehavior) |
+| 109 | ButtonExecuteCommandOnKeyDownBehavior | `Views/Pages/ButtonExecuteCommandOnKeyDownBehaviorView` | B | 36 | ported | ButtonExecuteCommandOnKeyDownBehavior (`ExecuteCommandBehaviorsViewModel`, registered by ExecuteCommand Behaviors) |
+| 110 | Storage Provider | `Views/Pages/StorageProviderView` | B | 203 | ported | the picker behaviors and actions; code-behind: the `Pick` handler of the folder picker behavior is subscribed in the constructor (deviation: `Pick` is an event of the Rust API, the button of the behavior is named `OpenFoldersBehaviorButton`); deviation: `StorageProvider="{Binding $parent[TopLevel].StorageProvider}"` left out (the top level does not declare its storage provider to markup; the default is the same provider) |
+| 111 | Picker CanExecuteCommand | `Views/Pages/PickerCanExecuteCommandView` | B | 188 | ported | picker behaviors with can-execute commands; deviation: `StorageProvider="{Binding $parent[TopLevel].StorageProvider}"` left out (as Storage Provider) |
+| 112 | Clipboard | `Views/Pages/ClipboardView` | B | 52 | ported | the clipboard text actions; the text names FerroUI |
+| 113 | GetClipboardDataAction | `Views/Pages/GetClipboardDataActionView` | B | 38 | ported | GetClipboardDataAction |
+| 114 | GetClipboardFormatsAction | `Views/Pages/GetClipboardFormatsActionView` | B | 38 | ported | GetClipboardFormatsAction |
+| 115 | SetClipboardDataObjectAction | `Views/Pages/SetClipboardDataObjectActionView` | B | 38 | ported | SetClipboardDataObjectAction |
+| 116 | FocusControlAction | `Views/Pages/FocusControlActionView` | B | 39 | ported | FocusControlAction |
+| 117 | Hide/ShowControlAction | `Views/Pages/HideShowControlActionView` | B | 46 | ported | HideControlAction and ShowControlAction |
+| 118 | ShowHideFlyoutAction | `Views/Pages/ShowHideFlyoutActionView` | B | 48 | ported | ShowFlyoutAction and HideFlyoutAction |
+| 119 | ShowContextMenuAction | `Views/Pages/ShowContextMenuActionView` | B | 42 | ported | ShowContextMenuAction |
+| 120 | ContextDialog | `Views/Pages/ContextDialogView` | B | 60 | ported | ContextDialogBehavior with its show and hide actions and its opened and closed triggers |
+| 121 | ShowHidePopupAction | `Views/Pages/ShowHidePopupActionView` | B | 47 | ported | ShowPopupAction and HidePopupAction |
+| 122 | ShowOn Event Behaviors | `Views/Pages/ShowOnEventBehaviorsView` | B | 138 | ported | ShowOnTapped, ShowOnDoubleTapped and ShowOnKeyDown behaviors |
+| 123 | SetEnabledAction | `Views/Pages/SetEnabledActionView` | B | 44 | ported | SetEnabledAction |
+| 124 | ShowNotificationAction | `Views/Pages/ShowNotificationActionView` | B | 49 | ported | NotificationManagerBehavior and ShowNotificationAction; deviation: the `Notification` of the framework is not declared to markup, the code-behind sets the notification of the action |
+| 125 | Dialog Actions | `Views/Pages/DialogActionView` | B | 52 | ported | the dialog actions with the shared `Dialogs/SimpleDialog` |
+| 126 | File Drop Handler | `Views/Pages/FileDropHandlerView` | B | 55 | ported | ContextDropBehavior with a drop handler resource, FilesDropBehavior, TextDropBehavior; owns `Behaviors/files_drop_handler.rs` (registered by this page) |
+| 127 | Upload File | `Views/Pages/UploadFileView` | B | 102 | ported | ButtonUploadFileBehavior, UploadFileAction and UploadCompletedTrigger |
+| 128 | ContentControlFilesDropBehavior | `Views/Pages/ContentControlFilesDropBehaviorView` | B | 51 | ported | ContentControlFilesDropBehavior |
+| 129 | Drag and Drop | `Views/Pages/DragAndDropView` | B | 426 | ported | the drag and drop behaviors of lists and trees (context, managed with preview, reorder, item drag, nudge); owns `Behaviors/managed_items_list_box_drop_handler.rs`, `Behaviors/nodes_list_box_drop_handler.rs` (registered by this page); deviation: the DataGrid styles and tab are left out (no DataGrid, no DataGrid drag and drop crate), the styles of the crate have its port name; the shared `DragAndDropSampleViewModel` holds `SelectedTreeNodes` as the selected items list of the controls, which the two-way binding of the tree view needs |
 | 130 | DragDrop Commands | `Views/Pages/DragDropCommandsView` | B | 50 | ported | drag and drop: DragDropCommandsBehavior and ContextDragBehavior; own view model (`ViewModels/drag_drop_commands_view_model.rs`, registered by the page) |
-| 131 | Files Preview | `Views/Pages/FilesPreviewView` | B | 51 | placeholder |  |
-| 132 | TypedDragBehavior | `Views/Pages/TypedDragBehaviorView` | B | 66 | placeholder | BLOCKED: a drop handler as a resource (IDropHandler has no markup metadata); shared parts ported (`DragAndDropSampleViewModel`, `ItemsListBoxDropHandler`) |
-| 133 | Draggable | `Views/Pages/DraggableView` | B | 232 | placeholder | own view model: DraggableViewModel (commented line in `ViewModels/mod.rs`); owns: DraggableCustomStyles (commented line in its folder); the reference names the upstream framework: write FerroUI; port the code-behind |
-| 134 | Mouse Drag Behaviors | `Views/Pages/MouseDragBehaviorView` | B | 69 | placeholder | port the code-behind |
-| 135 | Canvas Drag Behavior | `Views/Pages/CanvasDragBehaviorView` | B | 72 | placeholder |  |
-| 136 | Auto Scroll During Drag | `Views/Pages/AutoScrollDuringDragBehaviorView` | B | 45 | placeholder |  |
-| 137 | Drag Between Panels | `Views/Pages/DragBetweenPanelsView` | B | 54 | placeholder |  |
-| 138 | Cursor Behavior | `Views/Pages/CursorView` | B | 67 | placeholder | own view model: CursorViewModel (commented line in `ViewModels/mod.rs`); port the code-behind |
-| 139 | Drawn Cursor | `Views/Pages/DrawnCursorView` | B | 51 | placeholder | own view model: DrawnCursorViewModel (commented line in `ViewModels/mod.rs`); port the code-behind |
-| 140 | IfElseTrigger | `Views/Pages/IfElseTriggerView` | B | 49 | placeholder |  |
-| 141 | ExecuteScriptAction | `Views/Pages/ExecuteScriptActionView` | B | 53 | placeholder | ExecuteScriptAction has no port (no scripting): port the rest, state the deviation |
-| 142 | Observable Trigger | `Views/ReactiveUI/ObservableTriggerBehaviorView` | B | 46 | placeholder |  |
-| 143 | InteractionTriggerBehavior | `Views/ReactiveUI/InteractionTriggerBehaviorView` | B | 45 | placeholder | own view model: InteractionTriggerBehaviorViewModel (commented line in `ViewModels/mod.rs`); BLOCKED: needs ferroui-xaml-interactions-reactiveui (not a dependency yet); port the code-behind |
-| 144 | Flyout Binding | `Views/Pages/FlyoutBindingView` | B | 48 | placeholder |  |
+| 131 | Files Preview | `Views/Pages/FilesPreviewView` | B | 51 | ported | FilesPreviewBehavior and AddPreviewFilesAction on DragOverEventTrigger |
+| 132 | TypedDragBehavior | `Views/Pages/TypedDragBehaviorView` | B | 66 | ported | TypedDragBehavior with the shared `DragAndDropSampleViewModel` and `ItemsListBoxDropHandler` |
+| 133 | Draggable | `Views/Pages/DraggableView` | B | 232 | ported | the draggable behaviors; own view model (`ViewModels/draggable_view_model.rs`); owns `Styles/DraggableCustomStyles.xaml`, included by its resource URI; the text names FerroUI |
+| 134 | Mouse Drag Behaviors | `Views/Pages/MouseDragBehaviorView` | B | 69 | ported | mouse drag behaviors; code-behind: the multi drag behavior of the first rectangle also moves the two others |
+| 135 | Canvas Drag Behavior | `Views/Pages/CanvasDragBehaviorView` | B | 72 | ported | CanvasDragBehavior |
+| 136 | Auto Scroll During Drag | `Views/Pages/AutoScrollDuringDragBehaviorView` | B | 45 | ported | AutoScrollDuringDragBehavior |
+| 137 | Drag Between Panels | `Views/Pages/DragBetweenPanelsView` | B | 54 | ported | PanelDragBehavior and PanelDropBehavior with drag event triggers |
+| 138 | Cursor Behavior | `Views/Pages/CursorView` | B | 67 | ported | the cursor behaviors and actions; own view model (`ViewModels/cursor_view_model.rs`, with `StandardCursorModel`); deviations: the standard cursor types are listed by the view model (the enumeration has no public list of values), the item template states its data type |
+| 139 | Drawn Cursor | `Views/Pages/DrawnCursorView` | B | 51 | ported | SetCursorFromProvider behavior and action; own view model (`ViewModels/drawn_cursor_view_model.rs`) |
+| 140 | IfElseTrigger | `Views/Pages/IfElseTriggerView` | B | 49 | ported | IfElseTrigger |
+| 141 | ExecuteScriptAction | `Views/Pages/ExecuteScriptActionView` | B | 53 | placeholder | NOT PORTED: ExecuteScriptAction needs a C# script run time, which the port has not (waived) |
+| 142 | Observable Trigger | `Views/ReactiveUI/ObservableTriggerBehaviorView` | B | 46 | placeholder | NOT PORTED: the binding `Observable="{Binding Values}"` hands the trigger the stream value of the view model (`ObservableValue`), which `ObservableTriggerBehavior` does not read (`src/Behaviors/FerroUI.Xaml.Interactions.Custom/core/observable_trigger_behavior.rs`, `observable_of`); x:TypeArguments must also go (the trigger is not generic) |
+| 143 | InteractionTriggerBehavior | `Views/ReactiveUI/InteractionTriggerBehaviorView` | B | 45 | ported | InteractionTriggerBehavior; own view model (`ViewModels/ReactiveUI/interaction_trigger_behavior_view_model.rs`, namespace `BehaviorsGallery.ViewModels.ReactiveUI`); deviation: no x:TypeArguments (the behavior is not generic) |
+| 144 | Flyout Binding | `Views/Pages/FlyoutBindingView` | B | 48 | ported | InvokeCommandAction in a flyout bound to the data context |
 | 145 | KeyTrigger | `Views/Pages/KeyTriggerView` | C | 49 | ported |  |
 | 146 | ToolTip Helpers | `Views/Pages/ToolTipHelpersView` | C | 62 | ported |  |
 | 147 | WriteableBitmap | `Views/Pages/WriteableBitmapView` | C | 123 | ported | owns `Renderers/sample_writeable_bitmap_renderer.rs` (registered by the page, cast to `IWriteableBitmapRenderer`) |

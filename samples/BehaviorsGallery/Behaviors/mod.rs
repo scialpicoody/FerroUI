@@ -19,13 +19,13 @@ pub mod attached_to_logical_tree_message_behavior; // owner: AttachedToLogicalTr
 pub mod data_context_changed_message_behavior; // owner: DataContextChangedBehaviorView
 pub mod disposable_action_behavior; // owner: DisposableActionView
 pub mod disposing_message_behavior; // owner: DisposingBehaviorView
-// pub mod files_drop_handler; // owner: FileDropHandlerView
+pub mod files_drop_handler; // owner: FileDropHandlerView
 pub mod initialized_message_behavior; // owner: InitializedBehaviorView
 // pub mod items_data_grid_drop_handler; // owner: DragAndDropView (no DataGrid in the framework: not ported)
 pub mod items_list_box_drop_handler;
 pub mod loaded_message_behavior; // owner: LoadedBehaviorView
-// pub mod managed_items_list_box_drop_handler; // owner: DragAndDropView
-// pub mod nodes_list_box_drop_handler; // owner: DragAndDropView
+pub mod managed_items_list_box_drop_handler; // owner: DragAndDropView
+pub mod nodes_list_box_drop_handler; // owner: DragAndDropView
 pub mod nodes_tree_view_drop_handler;
 pub mod resources_changed_message_behavior; // owner: ResourcesChangedBehaviorView
 

@@ -4,5 +4,5 @@
 
 pub mod detail_page_view_model; // owner: ReactiveNavigationView
 pub mod home_page_view_model; // owner: ReactiveNavigationView
-// pub mod interaction_trigger_behavior_view_model; // owner: InteractionTriggerBehaviorView
+pub mod interaction_trigger_behavior_view_model; // owner: InteractionTriggerBehaviorView
 pub mod reactive_navigation_view_model; // owner: ReactiveNavigationView
