@@ -2,18 +2,18 @@
 //! Tests use the existing FerroUI root, popup and automation services; Windows
 //! COM aggregation and native pixels are separate platform boundaries.
 use super::*;
-use crate::automation::peers::{AutomationControlType, ControlAutomationPeer};
-use crate::automation::provider::{
+use ferroui_controls::automation::peers::{AutomationControlType, ControlAutomationPeer};
+use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, IInvokeProvider, ISelectionItemProvider, IToggleProvider,
     IValueProvider, ToggleState,
 };
-use crate::automation::{AutomationProperties, ExpandCollapseState, ValuePatternIdentifiers};
-use crate::presenters::ScrollContentPresenter;
-use crate::primitives::PopupFlyoutBase;
-use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
+use ferroui_controls::automation::{AutomationProperties, ExpandCollapseState, ValuePatternIdentifiers};
+use ferroui_controls::presenters::ScrollContentPresenter;
+use ferroui_controls::primitives::PopupFlyoutBase;
+use ferroui_controls::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions};
 use crate::test_support::{test_scope, TestRoot};
-use crate::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use crate::{
+use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
+use ferroui_controls::{
     Button, Canvas, CheckBox, ComboBox, Control, Flyout, Panel, PlacementMode, ScrollViewer,
     StackPanel, TextBlock, ToolTip, Window,
 };
@@ -39,7 +39,7 @@ fn attach(control: &Control, size: Size) -> Ref<TestRoot> {
     root.arrange(Rect::new(0.0, 0.0, size.width, size.height));
     root
 }
-fn peer(control: &Control) -> Ref<crate::automation::peers::AutomationPeer> {
+fn peer(control: &Control) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
     ControlAutomationPeer::create_peer_for_element(control)
 }
 fn create_window_services() -> UnitTestApplicationScope {

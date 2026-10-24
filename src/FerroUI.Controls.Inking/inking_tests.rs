@@ -619,7 +619,7 @@ fn canvas_peer_is_a_pane_and_respects_ancestor_clipping() {
     let peer = InkCanvasAutomationPeer::new(&canvas);
     assert_eq!(
         peer.get_automation_control_type(),
-        crate::automation::peers::AutomationControlType::Pane
+        ferroui_controls::automation::peers::AutomationControlType::Pane
     );
     let bounds = peer.get_bounding_rectangle();
     assert!(bounds.width <= 100.0);

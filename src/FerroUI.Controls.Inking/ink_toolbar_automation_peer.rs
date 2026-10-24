@@ -5,22 +5,22 @@ use super::{
     InkToolbarStencilButton, InkToolbarStencilKind, InkToolbarStrokeWidthSlider, InkToolbarTool,
     InkToolbarToolButton,
 };
-use crate::automation::peers::{
+use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt,
     ControlAutomationPeer, ControlAutomationPeerImpl, RadioButtonAutomationPeer,
     RadioButtonAutomationPeerImpl, RangeBaseAutomationPeerImpl, RangeBaseAutomationPeerImplExt,
     SliderAutomationPeer, ToggleButtonAutomationPeer,
 };
-use crate::automation::provider::{
+use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, IInvokeProvider, ISelectionItemProvider, ISelectionProvider,
     IToggleProvider, IValueProvider, ProviderAdapter, ProviderError,
 };
-use crate::automation::{
+use ferroui_controls::automation::{
     AutomationProperties, ElementNotEnabledException, ExpandCollapsePatternIdentifiers,
     ExpandCollapseState, ValuePatternIdentifiers,
 };
-use crate::primitives::{RangeBase, ToggleButton};
-use crate::{Button, Panel};
+use ferroui_controls::primitives::{RangeBase, ToggleButton};
+use ferroui_controls::{Button, Panel};
 use ferroui_base::data::core::ValueType;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl,

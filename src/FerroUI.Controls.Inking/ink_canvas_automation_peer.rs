@@ -1,7 +1,7 @@
-use crate::automation::peers::{
+use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
-use crate::Control;
+use ferroui_controls::Control;
 use ferroui_base::{ferro_class, instantiate, FerroObjectImpl, Rect, Ref, Visual};
 
 /// Pane peer using FerroUI transforms and ancestor clips, independent of ink content.

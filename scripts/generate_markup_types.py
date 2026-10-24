@@ -37,7 +37,8 @@ How to rerun (from the repository root; Python 3, standard library only):
 Options:
     --upstream P   the reference checkout of the upstream project (its `src`
                    directory is read); default: $FERROUI_UPSTREAM, else the
-                   sibling directory `Avalonia` of the repository
+                   sibling directory `Avalonia` of the repository; not
+                   needed when `rust-paths` is the only target
     --check        do not write; exit with status 1 and name the stale files
                    (with a line-count summary of the difference) if a
                    generated file differs from what would be generated
@@ -86,6 +87,7 @@ RUST_PATH_CRATES = [
     "FerroUI.Base",
     "FerroUI.Controls",
     "FerroUI.Controls.ColorPicker",
+    "FerroUI.Controls.Inking",
     os.path.join("Markup", "FerroUI.Markup.Xaml"),
     "FerroUI.Dialogs",
     "FerroUI.Themes.Simple",

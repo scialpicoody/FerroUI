@@ -1,10 +1,10 @@
 //! Live toolbar orchestration over FerroUI controls and the portable ink presenter.
 use super::ink_toolbar_buttons::strings;
 use super::*;
-use crate::primitives::{PopupFlyoutBase, ToggleButton};
-use crate::utils::BorderRenderHelper;
-use crate::{
-    Border, Button, Control, ControlImpl, Controls, Decorator, Flyout, PanelImpl, PanelImplExt,
+use ferroui_controls::primitives::{PopupFlyoutBase, ToggleButton};
+use ferroui_controls::utils::BorderRenderHelper;
+use ferroui_controls::{
+    Border, Button, Control, ControlImpl, Controls, Decorator, PanelImpl, PanelImplExt,
     PlacementMode, StackPanel, StackPanelImpl,
 };
 use ferroui_base::collections::{NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs};
@@ -181,7 +181,7 @@ impl InputElementImpl for InkToolbar {
     }
 }
 impl ControlImpl for InkToolbar {
-    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+    fn on_create_automation_peer(this: &Self) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
         super::InkToolbarAutomationPeer::new(this).upcast()
     }
 }
@@ -697,7 +697,7 @@ impl InkToolbar {
             .borrow_mut()
             .push((child.downgrade(), subscription));
         if let Some(pen) = child.cast::<InkToolbarPenButton>() {
-            let flyout = Flyout::new();
+            let flyout = super::ink_toolbar_buttons::toolbar_flyout(child);
             let weak_pen = pen.downgrade();
             let weak_flyout = flyout.downgrade();
             flyout.opening(move |_| {
@@ -730,11 +730,11 @@ impl InkToolbar {
                     toolbar.erase_all();
                 }
             });
-            let flyout = Flyout::new();
+            let flyout = super::ink_toolbar_buttons::toolbar_flyout(child);
             flyout.set_content(Some(Rc::new(button.upcast::<Control>())));
             eraser.set_flyout(flyout);
         } else if let Some(tool) = child.cast::<InkToolbarCustomToolButton>() {
-            let flyout = Flyout::new();
+            let flyout = super::ink_toolbar_buttons::toolbar_flyout(child);
             let weak_tool = tool.downgrade();
             let weak_flyout = flyout.downgrade();
             flyout.opening(move |_| {

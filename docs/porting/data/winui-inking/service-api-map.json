@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "commit": "9427b7216337ea3d7b19ac32d48c327286ee7138",
+  "commit": "7e4b0c2096be402f51cc8f7d203ebf67cff183d0",
   "scope": "All public methods in the Windows 0.62.2 Rust projection for the twelve explicitly listed external classes. Getters/setters count separately. The control_role distinguishes methods directly invoked by the pinned WinUI source from additional public dependency APIs, portable engine support, and optional extensions. This is not the entire Windows.UI.Input.Inking namespace.",
   "projection": {
     "repository": "microsoft/windows-rs",
@@ -40,7 +40,7 @@
       "projection_signature": "pub fn Position(&self) -> windows_core::Result<super::super::super::Foundation::Point>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_point.rs"
+        "src/FerroUI.Controls.Inking/ink_point.rs"
       ],
       "symbols": [
         "position"
@@ -56,7 +56,7 @@
       "projection_signature": "pub fn Pressure(&self) -> windows_core::Result<f32>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_point.rs"
+        "src/FerroUI.Controls.Inking/ink_point.rs"
       ],
       "symbols": [
         "pressure"
@@ -72,7 +72,7 @@
       "projection_signature": "pub fn TiltX(&self) -> windows_core::Result<f32>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_point.rs"
+        "src/FerroUI.Controls.Inking/ink_point.rs"
       ],
       "symbols": [
         "tilt_x"
@@ -88,7 +88,7 @@
       "projection_signature": "pub fn TiltY(&self) -> windows_core::Result<f32>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_point.rs"
+        "src/FerroUI.Controls.Inking/ink_point.rs"
       ],
       "symbols": [
         "tilt_y"
@@ -104,7 +104,7 @@
       "projection_signature": "pub fn Timestamp(&self) -> windows_core::Result<u64>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_point.rs"
+        "src/FerroUI.Controls.Inking/ink_point.rs"
       ],
       "symbols": [
         "timestamp"
@@ -120,7 +120,7 @@
       "projection_signature": "pub fn CreateInkPoint(position: super::super::super::Foundation::Point, pressure: f32) -> windows_core::Result<InkPoint>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_point.rs"
+        "src/FerroUI.Controls.Inking/ink_point.rs"
       ],
       "symbols": [
         "new"
@@ -136,7 +136,7 @@
       "projection_signature": "pub fn CreateInkPointWithTiltAndTimestamp(position: super::super::super::Foundation::Point, pressure: f32, tiltx: f32, tilty: f32, timestamp: u64) -> windows_core::Result<InkPoint>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_point.rs"
+        "src/FerroUI.Controls.Inking/ink_point.rs"
       ],
       "symbols": [
         "validate"
@@ -152,7 +152,7 @@
       "projection_signature": "pub fn new() -> windows_core::Result<Self>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "new"
@@ -171,7 +171,7 @@
       "projection_signature": "pub fn Color(&self) -> windows_core::Result<super::super::Color>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "color"
@@ -190,7 +190,7 @@
       "projection_signature": "pub fn SetColor(&self, value: super::super::Color) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "color"
@@ -209,7 +209,7 @@
       "projection_signature": "pub fn PenTip(&self) -> windows_core::Result<PenTipShape>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "pen_tip"
@@ -228,7 +228,7 @@
       "projection_signature": "pub fn SetPenTip(&self, value: PenTipShape) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "pen_tip"
@@ -247,7 +247,7 @@
       "projection_signature": "pub fn Size(&self) -> windows_core::Result<super::super::super::Foundation::Size>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "size"
@@ -266,7 +266,7 @@
       "projection_signature": "pub fn SetSize(&self, value: super::super::super::Foundation::Size) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "size"
@@ -285,7 +285,7 @@
       "projection_signature": "pub fn IgnorePressure(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "ignore_pressure"
@@ -304,7 +304,7 @@
       "projection_signature": "pub fn SetIgnorePressure(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "ignore_pressure"
@@ -323,7 +323,7 @@
       "projection_signature": "pub fn FitToCurve(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "fit_to_curve"
@@ -342,7 +342,7 @@
       "projection_signature": "pub fn SetFitToCurve(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "fit_to_curve"
@@ -361,7 +361,7 @@
       "projection_signature": "pub fn PenTipTransform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "pen_tip_transform"
@@ -380,7 +380,7 @@
       "projection_signature": "pub fn SetPenTipTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "pen_tip_transform"
@@ -399,7 +399,7 @@
       "projection_signature": "pub fn DrawAsHighlighter(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "draw_as_highlighter"
@@ -418,7 +418,7 @@
       "projection_signature": "pub fn SetDrawAsHighlighter(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "draw_as_highlighter"
@@ -437,7 +437,7 @@
       "projection_signature": "pub fn Kind(&self) -> windows_core::Result<InkDrawingAttributesKind>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "kind"
@@ -453,7 +453,7 @@
       "projection_signature": "pub fn PencilProperties(&self) -> windows_core::Result<InkDrawingAttributesPencilProperties>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "pencil_opacity"
@@ -469,7 +469,7 @@
       "projection_signature": "pub fn IgnoreTilt(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "ignore_tilt"
@@ -485,7 +485,7 @@
       "projection_signature": "pub fn SetIgnoreTilt(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "ignore_tilt"
@@ -513,7 +513,7 @@
       "projection_signature": "pub fn CreateForPencil() -> windows_core::Result<InkDrawingAttributes>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "create_for_pencil"
@@ -532,7 +532,7 @@
       "projection_signature": "pub fn Opacity(&self) -> windows_core::Result<f64>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "pencil_opacity"
@@ -548,7 +548,7 @@
       "projection_signature": "pub fn SetOpacity(&self, value: f64) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_drawing_attributes.rs"
+        "src/FerroUI.Controls.Inking/ink_drawing_attributes.rs"
       ],
       "symbols": [
         "pencil_opacity"
@@ -636,7 +636,7 @@
       "projection_signature": "pub fn DrawingAttributes(&self) -> windows_core::Result<InkDrawingAttributes>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "drawing_attributes"
@@ -652,7 +652,7 @@
       "projection_signature": "pub fn SetDrawingAttributes<P0>(&self, value: P0) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "set_drawing_attributes"
@@ -668,7 +668,7 @@
       "projection_signature": "pub fn BoundingRect(&self) -> windows_core::Result<super::super::super::Foundation::Rect>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "bounding_rect"
@@ -684,7 +684,7 @@
       "projection_signature": "pub fn Selected(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "selected"
@@ -700,7 +700,7 @@
       "projection_signature": "pub fn SetSelected(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "set_selected"
@@ -740,7 +740,7 @@
       "projection_signature": "pub fn Clone(&self) -> windows_core::Result<InkStroke>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "clone_stroke"
@@ -756,7 +756,7 @@
       "projection_signature": "pub fn PointTransform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "point_transform"
@@ -772,7 +772,7 @@
       "projection_signature": "pub fn SetPointTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "set_point_transform"
@@ -788,7 +788,7 @@
       "projection_signature": "pub fn GetInkPoints(&self) -> windows_core::Result<windows_collections::IVectorView<InkPoint>>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "get_ink_points"
@@ -804,7 +804,7 @@
       "projection_signature": "pub fn Id(&self) -> windows_core::Result<u32>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke.rs"
       ],
       "symbols": [
         "id"
@@ -964,7 +964,7 @@
       "projection_signature": "pub fn new() -> windows_core::Result<Self>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_builder.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
       ],
       "symbols": [
         "new"
@@ -980,7 +980,7 @@
       "projection_signature": "pub fn BeginStroke<P0>(&self, pointerpoint: P0) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_builder.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
       ],
       "symbols": [
         "begin_stroke"
@@ -996,7 +996,7 @@
       "projection_signature": "pub fn AppendToStroke<P0>(&self, pointerpoint: P0) -> windows_core::Result<super::PointerPoint>",
       "status": "partial",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_builder.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
       ],
       "symbols": [
         "append_to_stroke"
@@ -1012,7 +1012,7 @@
       "projection_signature": "pub fn EndStroke<P0>(&self, pointerpoint: P0) -> windows_core::Result<InkStroke>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_builder.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
       ],
       "symbols": [
         "end_stroke"
@@ -1028,7 +1028,7 @@
       "projection_signature": "pub fn CreateStroke<P0>(&self, points: P0) -> windows_core::Result<InkStroke>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_builder.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
       ],
       "symbols": [
         "create_stroke"
@@ -1044,7 +1044,7 @@
       "projection_signature": "pub fn SetDefaultDrawingAttributes<P0>(&self, drawingattributes: P0) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_builder.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
       ],
       "symbols": [
         "set_default_drawing_attributes"
@@ -1060,7 +1060,7 @@
       "projection_signature": "pub fn CreateStrokeFromInkPoints<P0>(&self, inkpoints: P0, transform: windows_numerics::Matrix3x2) -> windows_core::Result<InkStroke>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_builder.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
       ],
       "symbols": [
         "create_stroke_from_ink_points"
@@ -1076,7 +1076,7 @@
       "projection_signature": "pub fn CreateStrokeFromInkPoints2<P0, P2, P3>(&self, inkpoints: P0, transform: windows_numerics::Matrix3x2, strokestartedtime: P2, strokeduration: P3) -> windows_core::Result<InkStroke>",
       "status": "partial",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_builder.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_builder.rs"
       ],
       "symbols": [
         "create_stroke_from_ink_points"
@@ -1092,7 +1092,7 @@
       "projection_signature": "pub fn new() -> windows_core::Result<Self>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "new"
@@ -1108,7 +1108,7 @@
       "projection_signature": "pub fn BoundingRect(&self) -> windows_core::Result<super::super::super::Foundation::Rect>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "bounding_rect"
@@ -1126,7 +1126,7 @@
       "projection_signature": "pub fn AddStroke<P0>(&self, stroke: P0) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "add_stroke"
@@ -1144,7 +1144,7 @@
       "projection_signature": "pub fn DeleteSelected(&self) -> windows_core::Result<super::super::super::Foundation::Rect>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "delete_selected"
@@ -1162,8 +1162,8 @@
       "projection_signature": "pub fn MoveSelected(&self, translation: super::super::super::Foundation::Point) -> windows_core::Result<super::super::super::Foundation::Rect>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "move_selected"
@@ -1181,7 +1181,7 @@
       "projection_signature": "pub fn SelectWithPolyLine<P0>(&self, polyline: P0) -> windows_core::Result<super::super::super::Foundation::Rect>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "select_with_poly_line"
@@ -1199,7 +1199,7 @@
       "projection_signature": "pub fn SelectWithLine(&self, from: super::super::super::Foundation::Point, to: super::super::super::Foundation::Point) -> windows_core::Result<super::super::super::Foundation::Rect>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "select_with_line"
@@ -1217,8 +1217,8 @@
       "projection_signature": "pub fn CopySelectedToClipboard(&self) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "copy_selected_to_clipboard"
@@ -1236,8 +1236,8 @@
       "projection_signature": "pub fn PasteFromClipboard(&self, position: super::super::super::Foundation::Point) -> windows_core::Result<super::super::super::Foundation::Rect>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "paste_from_clipboard"
@@ -1255,8 +1255,8 @@
       "projection_signature": "pub fn CanPasteFromClipboard(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "can_paste_from_clipboard"
@@ -1274,8 +1274,8 @@
       "projection_signature": "pub fn LoadAsync<P0>(&self, inputstream: P0) -> windows_core::Result<windows_future::IAsyncActionWithProgress<u64>>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "load_async"
@@ -1293,8 +1293,8 @@
       "projection_signature": "pub fn SaveAsync<P0>(&self, outputstream: P0) -> windows_core::Result<windows_future::IAsyncOperationWithProgress<u32, u32>>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "save_async"
@@ -1324,7 +1324,7 @@
       "projection_signature": "pub fn GetStrokes(&self) -> windows_core::Result<windows_collections::IVectorView<InkStroke>>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "get_strokes"
@@ -1354,7 +1354,7 @@
       "projection_signature": "pub fn AddStrokes<P0>(&self, strokes: P0) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "add_strokes"
@@ -1372,7 +1372,7 @@
       "projection_signature": "pub fn Clear(&self) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "clear"
@@ -1390,8 +1390,8 @@
       "projection_signature": "pub fn SaveWithFormatAsync<P0>(&self, outputstream: P0, inkpersistenceformat: InkPersistenceFormat) -> windows_core::Result<windows_future::IAsyncOperationWithProgress<u32, u32>>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "save_with_format_async"
@@ -1409,7 +1409,7 @@
       "projection_signature": "pub fn GetStrokeById(&self, id: u32) -> windows_core::Result<InkStroke>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "symbols": [
         "get_stroke_by_id"
@@ -1427,7 +1427,7 @@
       "projection_signature": "pub fn Length(&self) -> windows_core::Result<f64>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "length"
@@ -1443,7 +1443,7 @@
       "projection_signature": "pub fn SetLength(&self, value: f64) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_length"
@@ -1459,7 +1459,7 @@
       "projection_signature": "pub fn Width(&self) -> windows_core::Result<f64>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "width"
@@ -1475,7 +1475,7 @@
       "projection_signature": "pub fn SetWidth(&self, value: f64) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_width"
@@ -1491,7 +1491,7 @@
       "projection_signature": "pub fn AreTickMarksVisible(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "are_tick_marks_visible"
@@ -1507,7 +1507,7 @@
       "projection_signature": "pub fn SetAreTickMarksVisible(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_are_tick_marks_visible"
@@ -1523,7 +1523,7 @@
       "projection_signature": "pub fn IsCompassVisible(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "is_compass_visible"
@@ -1539,7 +1539,7 @@
       "projection_signature": "pub fn SetIsCompassVisible(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_is_compass_visible"
@@ -1555,7 +1555,7 @@
       "projection_signature": "pub fn Create<P0>(inkpresenter: P0) -> windows_core::Result<InkPresenterRuler>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter.rs"
       ],
       "symbols": [
         "ruler"
@@ -1573,7 +1573,7 @@
       "projection_signature": "pub fn Kind(&self) -> windows_core::Result<InkPresenterStencilKind>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "kind"
@@ -1589,7 +1589,7 @@
       "projection_signature": "pub fn IsVisible(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "is_visible"
@@ -1605,7 +1605,7 @@
       "projection_signature": "pub fn SetIsVisible(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_is_visible"
@@ -1623,7 +1623,7 @@
       "projection_signature": "pub fn BackgroundColor(&self) -> windows_core::Result<super::super::Color>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "background_color"
@@ -1639,7 +1639,7 @@
       "projection_signature": "pub fn SetBackgroundColor(&self, value: super::super::Color) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_background_color"
@@ -1655,7 +1655,7 @@
       "projection_signature": "pub fn ForegroundColor(&self) -> windows_core::Result<super::super::Color>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "foreground_color"
@@ -1671,7 +1671,7 @@
       "projection_signature": "pub fn SetForegroundColor(&self, value: super::super::Color) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_foreground_color"
@@ -1687,7 +1687,7 @@
       "projection_signature": "pub fn Transform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "transform"
@@ -1703,7 +1703,7 @@
       "projection_signature": "pub fn SetTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_transform"
@@ -1719,7 +1719,7 @@
       "projection_signature": "pub fn AreTickMarksVisible(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "are_tick_marks_visible"
@@ -1735,7 +1735,7 @@
       "projection_signature": "pub fn SetAreTickMarksVisible(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_are_tick_marks_visible"
@@ -1751,7 +1751,7 @@
       "projection_signature": "pub fn AreRaysVisible(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "are_rays_visible"
@@ -1767,7 +1767,7 @@
       "projection_signature": "pub fn SetAreRaysVisible(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_are_rays_visible"
@@ -1783,7 +1783,7 @@
       "projection_signature": "pub fn IsCenterMarkerVisible(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "is_center_marker_visible"
@@ -1799,7 +1799,7 @@
       "projection_signature": "pub fn SetIsCenterMarkerVisible(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_is_center_marker_visible"
@@ -1815,7 +1815,7 @@
       "projection_signature": "pub fn IsAngleReadoutVisible(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "is_angle_readout_visible"
@@ -1831,7 +1831,7 @@
       "projection_signature": "pub fn SetIsAngleReadoutVisible(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_is_angle_readout_visible"
@@ -1847,7 +1847,7 @@
       "projection_signature": "pub fn IsResizable(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "is_resizable"
@@ -1863,7 +1863,7 @@
       "projection_signature": "pub fn SetIsResizable(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_is_resizable"
@@ -1879,7 +1879,7 @@
       "projection_signature": "pub fn Radius(&self) -> windows_core::Result<f64>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "radius"
@@ -1895,7 +1895,7 @@
       "projection_signature": "pub fn SetRadius(&self, value: f64) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_radius"
@@ -1911,7 +1911,7 @@
       "projection_signature": "pub fn AccentColor(&self) -> windows_core::Result<super::super::Color>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "accent_color"
@@ -1927,7 +1927,7 @@
       "projection_signature": "pub fn SetAccentColor(&self, value: super::super::Color) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_accent_color"
@@ -1943,7 +1943,7 @@
       "projection_signature": "pub fn Create<P0>(inkpresenter: P0) -> windows_core::Result<InkPresenterProtractor>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter.rs"
       ],
       "symbols": [
         "protractor"
@@ -1961,7 +1961,7 @@
       "projection_signature": "pub fn Kind(&self) -> windows_core::Result<InkPresenterStencilKind>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "kind"
@@ -1977,7 +1977,7 @@
       "projection_signature": "pub fn IsVisible(&self) -> windows_core::Result<bool>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "is_visible"
@@ -1993,7 +1993,7 @@
       "projection_signature": "pub fn SetIsVisible(&self, value: bool) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_is_visible"
@@ -2011,7 +2011,7 @@
       "projection_signature": "pub fn BackgroundColor(&self) -> windows_core::Result<super::super::Color>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "background_color"
@@ -2027,7 +2027,7 @@
       "projection_signature": "pub fn SetBackgroundColor(&self, value: super::super::Color) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_background_color"
@@ -2043,7 +2043,7 @@
       "projection_signature": "pub fn ForegroundColor(&self) -> windows_core::Result<super::super::Color>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "foreground_color"
@@ -2059,7 +2059,7 @@
       "projection_signature": "pub fn SetForegroundColor(&self, value: super::super::Color) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_foreground_color"
@@ -2075,7 +2075,7 @@
       "projection_signature": "pub fn Transform(&self) -> windows_core::Result<windows_numerics::Matrix3x2>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "transform"
@@ -2091,7 +2091,7 @@
       "projection_signature": "pub fn SetTransform(&self, value: windows_numerics::Matrix3x2) -> windows_core::Result<()>",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
       ],
       "symbols": [
         "set_transform"
@@ -2107,7 +2107,7 @@
       "projection_signature": "pub fn new() -> windows_core::Result<Self>",
       "status": "partial",
       "rust_files": [
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "new"
@@ -2123,7 +2123,7 @@
       "projection_signature": "pub fn SetDefaultRecognizer<P0>(&self, recognizer: P0) -> windows_core::Result<()>",
       "status": "partial",
       "rust_files": [
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "recognize"
@@ -2139,7 +2139,7 @@
       "projection_signature": "pub fn RecognizeAsync<P0>(&self, strokecollection: P0, recognitiontarget: InkRecognitionTarget) -> windows_core::Result<windows_future::IAsyncOperation<windows_collections::IVectorView<InkRecognitionResult>>>",
       "status": "partial",
       "rust_files": [
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "recognize"
@@ -2155,7 +2155,7 @@
       "projection_signature": "pub fn GetRecognizers(&self) -> windows_core::Result<windows_collections::IVectorView<InkRecognizer>>",
       "status": "partial",
       "rust_files": [
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "recognizers"
@@ -2171,7 +2171,7 @@
       "projection_signature": "pub fn BoundingRect(&self) -> windows_core::Result<super::super::super::Foundation::Rect>",
       "status": "partial",
       "rust_files": [
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "bounding_rect"
@@ -2187,7 +2187,7 @@
       "projection_signature": "pub fn GetTextCandidates(&self) -> windows_core::Result<windows_collections::IVectorView<windows_core::HSTRING>>",
       "status": "partial",
       "rust_files": [
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "text_candidates"
@@ -2203,7 +2203,7 @@
       "projection_signature": "pub fn GetStrokes(&self) -> windows_core::Result<windows_collections::IVectorView<InkStroke>>",
       "status": "partial",
       "rust_files": [
-        "src/Windows/FerroUI.WinUI/inking.rs"
+        "src/FerroUI.Controls.Inking/windows_ink_services.rs"
       ],
       "symbols": [
         "stroke_ids"

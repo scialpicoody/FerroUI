@@ -1,6 +1,6 @@
 use super::ink_stencil_input::InkStencilInput;
 use super::*;
-use crate::{Control, ControlImpl};
+use ferroui_controls::{Control, ControlImpl};
 use ferroui_base::input::{
     IPointer, InputElement, InputElementImpl, InputElementImplExt, PointerCaptureLostEventArgs,
     PointerEventArgs, PointerPressedEventArgs, PointerReleasedEventArgs,
@@ -81,7 +81,7 @@ impl FerroObjectImpl for InkCanvas {
 }
 
 impl ControlImpl for InkCanvas {
-    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+    fn on_create_automation_peer(this: &Self) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
         InkCanvasAutomationPeer::new(this).upcast()
     }
 }

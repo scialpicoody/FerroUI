@@ -95,8 +95,6 @@ macro_rules! document_tests {
 }
 
 document_tests! {
-    controls_ink_toolbar => "/Controls/InkToolbar.xaml";
-    resources_ink_toolbar => "/Resources/InkToolbar.xaml";
     controls_adorner_layer => "/Controls/AdornerLayer.xaml";
     controls_auto_complete_box => "/Controls/AutoCompleteBox.xaml";
     controls_button => "/Controls/Button.xaml";

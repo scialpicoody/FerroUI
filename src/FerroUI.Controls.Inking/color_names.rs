@@ -1,7 +1,7 @@
 //! Default palettes from the pinned WinUI InkToolbarPenButton and HighlighterButton sources.
 use super::ink_toolbar_buttons::strings;
 use super::InkHighContrastAdjustment;
-use crate::Control;
+use ferroui_controls::Control;
 use ferroui_base::collections::FerroList;
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
@@ -89,8 +89,8 @@ pub(crate) fn color_name(control: &StyledElement, color: Color) -> String {
 
 /// Accessible swatch names and tooltips update with application resource overrides.
 pub(crate) fn bind_color_name(control: &Control, color: Option<Color>) {
-    use crate::automation::AutomationProperties;
-    use crate::ToolTip;
+    use ferroui_controls::automation::AutomationProperties;
+    use ferroui_controls::ToolTip;
     use ferroui_base::data::BindingPriority;
     use ferroui_base::reactive::ObservableExt;
     use ferroui_base::BoxedValue;

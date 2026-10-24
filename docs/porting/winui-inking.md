@@ -1,7 +1,7 @@
 # WinUI inking port
 
 This is the source, architecture and compatibility record for the inking work in
-`src/FerroUI.Controls/inking`. The goal is the full WinUI control surface with
+`src/FerroUI.Controls.Inking`. The goal is the full WinUI control surface with
 FerroUI input, rendering, properties, layout and accessibility. The work includes
 portable replacements for services supplied by Windows rather than present in
 the WinUI source. Those replacements have explicit compatibility boundaries;
@@ -24,16 +24,16 @@ ledger checks.
 ## 1. Pinned sources and accounting
 
 - WinUI repository: <https://github.com/microsoft/microsoft-ui-xaml>.
-- WinUI revision: `9427b7216337ea3d7b19ac32d48c327286ee7138`, committed
+- WinUI revision: `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`, committed
   2026-10-21 at 04:22:04 UTC.
 - FerroUI starting revision: `86b6b4ab41669bf830fba681504a4ee94752a4e6`.
 - Branch: `feat/winui-inking-port`.
 - Review: <https://github.com/wieslawsoltes/FerroUI/pull/283>.
 
 The exact source roots are
-[`controls/dev/InkCanvas`](https://github.com/microsoft/microsoft-ui-xaml/tree/9427b7216337ea3d7b19ac32d48c327286ee7138/controls/dev/InkCanvas)
+[`controls/dev/InkCanvas`](https://github.com/microsoft/microsoft-ui-xaml/tree/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/InkCanvas)
 and
-[`controls/dev/InkToolbar`](https://github.com/microsoft/microsoft-ui-xaml/tree/9427b7216337ea3d7b19ac32d48c327286ee7138/controls/dev/InkToolbar).
+[`controls/dev/InkToolbar`](https://github.com/microsoft/microsoft-ui-xaml/tree/7e4b0c2096be402f51cc8f7d203ebf67cff183d0/controls/dev/InkToolbar).
 They contain 164 files, totaling 2,040,931 bytes at this revision:
 
 | Category | Files | Accounting decision |
@@ -72,7 +72,7 @@ The data is under [`data/winui-inking`](data/winui-inking/README.md):
 
 The implementation follows [`PORTING-GUIDE.md`](PORTING-GUIDE.md). The source is
 MIT licensed; the complete Microsoft notice is retained beside the implementation
-in [`NOTICE.md`](../../src/FerroUI.Controls/inking/NOTICE.md). No OS implementation
+in [`NOTICE.md`](../../src/FerroUI.Controls.Inking/NOTICE.md). No OS implementation
 or Windows binary is copied into the portable library.
 
 ## 2. What WinUI actually supplies
@@ -108,7 +108,7 @@ required control gate covers the services actually called by the control source.
 
 ## 3. Implementation organization
 
-All paths below are relative to `src/FerroUI.Controls/inking`. Their exact status
+All paths below are relative to `src/FerroUI.Controls.Inking`. Their exact status
 and individual missing members are in the ledger.
 
 | Upstream responsibility | Rust organization | Framework services |
@@ -130,8 +130,9 @@ and individual missing members are in the ledger.
 | Localized resources | `ink_toolbar_strings.rs`, generated `ink_toolbar_strings_data.rs` | Existing `CultureInfo`, culture fallback and observable resource overrides |
 | Live pen configuration and width slider | `ink_toolbar_configuration.rs` | Existing flyout, toggle, panel and slider controls |
 | Toolbar accessibility | `ink_toolbar_automation_peer.rs` | Named peers with invoke, selection, toggle, expand/collapse, range and text-value providers |
-| Optional native persistence/clipboard | `ink_platform_services.rs`; `src/Windows/FerroUI.WinUI/inking.rs` outside this directory | Local Rust futures and safe Windows Runtime projections |
-| XAML and declarative construction | `markup.rs`; `src/FerroUI.View` metadata outside this directory | Existing service/type registration, event binding and view builders |
+| Optional native persistence/clipboard | `ink_platform_services.rs`; `windows_ink_services.rs` (Windows only) | Local Rust futures and the Windows Runtime |
+| XAML and declarative construction | `markup.rs`, `register_types.rs`; the builders of `ferroui-view` with its feature `inking` | Existing service/type registration, event binding and view builders |
+| WinUI styles of the toolbar | `Themes/WinUI.xaml`, `Themes/WinUI/InkToolbar.xaml`, `Themes/WinUI/InkToolbarResources.xaml`, compiled by `build.rs` | The compiled markup of the crate, the WinUI theme's resources and its high-contrast variant |
 
 The shared toolbar module is an intentional file mapping: the small C++ headers
 share control inheritance and boilerplate, while the source ledger retains their
@@ -387,7 +388,17 @@ square attributes without dispatching to the helper. Using the chisel helper
 and the custom-pen virtual is recorded as a deliberate correction.
 
 The 130,900-byte upstream `InkToolbar.xaml` maps to dedicated control and
-resource dictionaries in `src/FerroUI.Themes.WinUI`. Seventeen typed themes and
+resource dictionaries of the crate (`Themes/WinUI/`), which `Themes/WinUI.xaml`
+merges. They are not part of the WinUI theme, which does not depend on the inking
+crate: an application on the WinUI theme that shows the toolbar includes them
+after the theme,
+
+```xml
+<StyleInclude Source="ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml" />
+```
+
+as the ControlCatalog does in `App.xaml` (without the include the toolbar
+controls have no control themes). Seventeen typed themes and
 a shared base use FerroUI template parts, pseudo classes, palette controls and
 flyouts. Default, Light and HighContrast brush resources preserve their source
 roles. Tool icons are framework vector geometry instead of Windows symbol-font

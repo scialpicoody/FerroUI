@@ -19,7 +19,7 @@
 
 use ferroui_base::media::Color;
 use ferroui_base::{Matrix, Point, Rect, Size};
-use ferroui_controls::inking::{
+use crate::{
     IInkPlatformServices, InkDrawingAttributes, InkDrawingAttributesKind, InkError,
     InkPersistenceFormat, InkPersistenceLimits, InkPoint, InkServiceFuture, InkStroke,
     InkStrokeContainer, PenTipShape,

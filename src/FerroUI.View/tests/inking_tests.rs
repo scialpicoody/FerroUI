@@ -1,12 +1,14 @@
 //! Inking must work through the public builders and the runtime XAML model.
 use crate::generated::builders::*;
+use crate::generated::inking::*;
 use crate::IntoElement;
 use ferroui_base::input::PointerType;
 use ferroui_base::{Point, Size};
-use ferroui_controls::{
-    Control, CoreInputDeviceTypes, InkCanvas, InkDrawingAttributes, InkInputProcessingMode,
-    InkPoint, InkPointerEventArgs, InkPointerPhase, InkPresenter, InkToolbar,
-    InkToolbarBallpointPenButton, InkToolbarInitialControls, InkToolbarTool,
+use ferroui_controls::Control;
+use ferroui_controls_inking::{
+    CoreInputDeviceTypes, InkCanvas, InkDrawingAttributes, InkInputProcessingMode, InkPoint,
+    InkPointerEventArgs, InkPointerPhase, InkPresenter, InkToolbar, InkToolbarBallpointPenButton,
+    InkToolbarInitialControls, InkToolbarTool,
 };
 use std::rc::Rc;
 
@@ -45,6 +47,7 @@ fn inking_builders_construct_and_target_real_controls() {
 #[test]
 fn inking_xaml_populates_stable_plain_services_and_custom_children() {
     ferroui_controls::register_types();
+    ferroui_controls_inking::register_types();
     ferroui_markup_xaml::register_types();
     ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::register();
     let loaded = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(

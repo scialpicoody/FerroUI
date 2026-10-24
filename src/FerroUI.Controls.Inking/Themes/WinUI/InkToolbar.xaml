@@ -1,16 +1,28 @@
 <!--
   Adapted from controls/dev/InkToolbar/InkToolbar.xaml, microsoft-ui-xaml
-  commit 9427b7216337ea3d7b19ac32d48c327286ee7138.
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
   Copyright (c) Microsoft Corporation. MIT license; see NOTICE.md.
   Visual states become FerroUI pseudo-class styles. Tool geometry replaces Windows-only
   symbol glyphs, and palette/layout/preview use the shared FerroUI control implementation.
   Built-in icon grids are genuine PART_ContentPresenter content: their bindings and scoped
   styles use the logical button ancestor instead of crossing a control-template boundary.
-  The complete source brush dictionaries are Resources/InkToolbar.xaml.
+  The resources are Themes/WinUI/InkToolbarResources.xaml (written by convert.py) and the
+  outlines of the icons Themes/WinUI/InkToolbarGlyphs.xaml.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:ClassModifier="internal">
+  <!-- InkToolbarFlyoutStyle of WinUI: the presenter of every flyout of the toolbar's buttons,
+       based on the presenter's own control theme for its template. -->
+  <ControlTheme x:Key="InkToolbarFlyoutStyle" TargetType="FlyoutPresenter" BasedOn="{StaticResource {x:Type FlyoutPresenter}}">
+    <Setter Property="Padding" Value="0,0,0,0" />
+    <Setter Property="Background" Value="{DynamicResource AcrylicBackgroundFillColorDefaultBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SurfaceStrokeColorDefaultBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="MinWidth" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+  </ControlTheme>
   <ControlTheme x:Key="InkToolbarCommonButtonStyle" TargetType="ToggleButton">
     <Setter Property="MinWidth" Value="{StaticResource InkToolbarButtonWidth}" />
     <Setter Property="MinHeight" Value="{StaticResource InkToolbarButtonHeight}" />
@@ -569,26 +581,9 @@
         </Border>
       </ControlTemplate>
     </Setter>
-    <Style Selector="^:checked">
-      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundChecked}" />
-      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundChecked}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushChecked}" />
-    </Style>
-    <Style Selector="^:checked:pointerover">
-      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundCheckedPointerOver}" />
-      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundCheckedPointerOver}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushCheckedPointerOver}" />
-    </Style>
-    <Style Selector="^:checked:pressed">
-      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundCheckedPressed}" />
-      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundCheckedPressed}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushCheckedPressed}" />
-    </Style>
-    <Style Selector="^:checked:disabled">
-      <Setter Property="Background" Value="{DynamicResource InkToolbarToggleButtonBackgroundCheckedDisabled}" />
-      <Setter Property="Foreground" Value="{DynamicResource InkToolbarToggleButtonForegroundCheckedDisabled}" />
-      <Setter Property="BorderBrush" Value="{DynamicResource InkToolbarToggleButtonBorderBrushCheckedDisabled}" />
-    </Style>
+    <!-- As WinUI (InkToolBar.xaml, the Checked states of the ruler): a checked ruler takes the
+         subtle selected fills of InkToolbarCommonButtonStyle, not the accent fills of the custom
+         toggle. -->
   </ControlTheme>
   <ControlTheme x:Key="{x:Type InkToolbarMenuButton}" TargetType="InkToolbarMenuButton" BasedOn="{StaticResource InkToolbarCommonButtonStyle}">
     <Setter Property="Template">

@@ -1,6 +1,6 @@
 //! The source resource keys, translated through FerroUI culture and resource APIs.
-use crate::automation::AutomationProperties;
-use crate::{ContentControl, Control, TextBlock, ToolTip};
+use ferroui_controls::automation::AutomationProperties;
+use ferroui_controls::{ContentControl, Control, TextBlock, ToolTip};
 use ferroui_base::controls::{ResourceHostRef, ResourceKey};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::reactive::{IObservable, ObservableExt};

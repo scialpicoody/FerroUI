@@ -21,7 +21,7 @@ import sys
 STATUSES = {"implemented", "adapted", "partial", "not_ported", "not_applicable", "external"}
 CODE_STATUSES = {"implemented", "adapted", "partial"}
 GAPS = {"partial", "not_ported", "external"}
-COMMIT = "9427b7216337ea3d7b19ac32d48c327286ee7138"
+COMMIT = "7e4b0c2096be402f51cc8f7d203ebf67cff183d0"
 WINDOWS_COMMIT = "32c3144490c016fe496a0aed769bce60987a2e9d"
 WINDOWS_CONTRACT_SHA256 = "358cd1f51721ad240af28f80d4a3a825c757eb1fd3d87c8f1dc716f3184e974c"
 SERVICE_ROLES = {"required_by_controls", "returned_service_api", "portable_engine_support", "optional_extension"}

@@ -3,11 +3,11 @@ use super::color_names::{bind_color_name, high_contrast_colors};
 use super::ink_toolbar::round_panel_thickness;
 use super::ink_toolbar_buttons::{strings, toolbar_style_key};
 use super::{InkToolbarFlyoutItemKind, InkToolbarPenButton};
-use crate::automation::AutomationProperties;
-use crate::primitives::{RangeBase, TemplatedControlImpl, ToggleButton, ToggleButtonImpl};
-use crate::shapes::{Ellipse, Path};
-use crate::utils::BorderRenderHelper;
-use crate::{
+use ferroui_controls::automation::AutomationProperties;
+use ferroui_controls::primitives::{RangeBase, TemplatedControlImpl, ToggleButton, ToggleButtonImpl};
+use ferroui_controls::shapes::{Ellipse, Path};
+use ferroui_controls::utils::BorderRenderHelper;
+use ferroui_controls::{
     Border, ButtonImpl, Canvas, ContentControlImpl, Control, ControlImpl, Decorator, PanelImpl,
     Slider, SliderImpl, StackPanel, StackPanelImpl, TextBlock, WrapPanel,
 };
@@ -49,7 +49,7 @@ ferro_class_info!(InkToolbarStrokeWidthSlider {
 });
 ferro_impl_classes!(InkToolbarStrokeWidthSlider: VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, TemplatedControlImpl, SliderImpl);
 impl ControlImpl for InkToolbarStrokeWidthSlider {
-    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+    fn on_create_automation_peer(this: &Self) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
         super::InkToolbarStrokeWidthSliderAutomationPeer::new(this).upcast()
     }
 }
@@ -625,7 +625,7 @@ ferro_class_info!(InkToolbarFlyoutItem {
 });
 ferro_impl_classes!(InkToolbarFlyoutItem: VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, TemplatedControlImpl, ContentControlImpl, ButtonImpl);
 impl ControlImpl for InkToolbarFlyoutItem {
-    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+    fn on_create_automation_peer(this: &Self) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
         super::InkToolbarFlyoutItemAutomationPeer::new(this).upcast()
     }
 }
@@ -687,7 +687,7 @@ impl InkToolbarFlyoutItem {
         ) {
             return;
         }
-        let Some(panel) = self.parent().and_then(|parent| parent.cast::<crate::Panel>()) else {
+        let Some(panel) = self.parent().and_then(|parent| parent.cast::<ferroui_controls::Panel>()) else {
             return;
         };
         let this: Ref<Control> = self.to_ref().upcast();

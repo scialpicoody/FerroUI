@@ -3,8 +3,8 @@
 
 use super::*;
 use crate::test_support::{test_scope, TestRoot};
-use crate::test_support_shapes::MockRenderInterfaceScope;
-use crate::Control;
+use crate::test_support::MockRenderInterfaceScope;
+use ferroui_controls::Control;
 use ferroui_base::input::raw::RawPointerPoint;
 use ferroui_base::input::{
     IPointer, InputElement, IntermediatePoints, KeyModifiers, MouseButton, Pointer,

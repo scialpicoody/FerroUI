@@ -16,7 +16,6 @@ mod buttons_page;
 mod calendar_date_picker_page;
 mod calendar_page;
 mod canvas_page;
-mod inking_page;
 mod carousel_demo_page;
 mod carousel_page;
 mod check_box_page;
@@ -41,6 +40,7 @@ mod focus_page;
 mod headered_content_page;
 mod home_page;
 mod image_page;
+mod inking_page;
 mod labels_page;
 mod layout_transform_control_page;
 mod list_box_page;
@@ -128,7 +128,6 @@ pub use buttons_page::{ButtonsPage, RelayCommand};
 pub use calendar_date_picker_page::CalendarDatePickerPage;
 pub use calendar_page::CalendarPage;
 pub use canvas_page::CanvasPage;
-pub use inking_page::InkingPage;
 pub use carousel_demo_page::CarouselDemoPage;
 pub use carousel_page::CarouselPage;
 pub use check_box_page::CheckBoxPage;
@@ -175,6 +174,7 @@ pub use gestures::{GesturePinchRotationPage, GesturePinchZoomPage, GesturePullPa
 pub use headered_content_page::HeaderedContentPage;
 pub use home_page::HomePage;
 pub use image_page::ImagePage;
+pub use inking_page::InkingPage;
 pub use labels_page::LabelsPage;
 pub use layout_transform_control_page::LayoutTransformControlPage;
 pub use list_box_page::ListBoxPage;
@@ -268,6 +268,7 @@ pub(crate) fn register_lists() {
 
 /// The classes of the files directly under `Pages/`.
 const ROOT_TYPES: &[&TypeInfo] = &[
+    InkingPage::TYPE,
     ScrollViewerPage::TYPE,
     PointersPage::TYPE,
     CompositionPage::TYPE,
@@ -293,7 +294,6 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     ButtonSpinnerPage::TYPE,
     ButtonsPage::TYPE,
     CanvasPage::TYPE,
-    InkingPage::TYPE,
     CheckBoxPage::TYPE,
     ClipboardPage::TYPE,
     ColorPickerPage::TYPE,
@@ -354,6 +354,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
 ];
 
 const ROOT_CLASSES: &[&XamlClass] = &[
+    &InkingPage::XAML_CLASS,
     &ScrollViewerPage::XAML_CLASS,
     &PointersPage::XAML_CLASS,
     &CompositionPage::XAML_CLASS,
@@ -379,7 +380,6 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &ButtonSpinnerPage::XAML_CLASS,
     &ButtonsPage::XAML_CLASS,
     &CanvasPage::XAML_CLASS,
-    &InkingPage::XAML_CLASS,
     &CheckBoxPage::XAML_CLASS,
     &ClipboardPage::XAML_CLASS,
     &ColorPickerPage::XAML_CLASS,

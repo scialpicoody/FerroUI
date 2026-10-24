@@ -5,7 +5,7 @@ preview sample points and matching behavioral tests
 in this directory are derived from or informed by the Microsoft WinUI sources:
 
 - Repository: https://github.com/microsoft/microsoft-ui-xaml
-- Revision: `9427b7216337ea3d7b19ac32d48c327286ee7138`
+- Revision: `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`
 - Source directories: `controls/dev/InkCanvas` and `controls/dev/InkToolbar`
 
 The complete source and member mapping is recorded in
@@ -19,8 +19,8 @@ and has not been copied here.
 The generated `ink_toolbar_strings_data.rs` retains all 86 source cultures and
 59 resource keys per culture. `scripts/winui-inking/generate-strings.py` checks
 each source Git blob before regenerating those tables. The dedicated toolbar
-themes in `src/FerroUI.Themes.WinUI/Controls/InkToolbar.xaml` and
-`src/FerroUI.Themes.WinUI/Resources/InkToolbar.xaml` are adaptations of the same
+themes in `src/FerroUI.Controls.Inking/Themes/WinUI/InkToolbar.xaml` and
+`src/FerroUI.Controls.Inking/Themes/WinUI/InkToolbarResources.xaml` are adaptations of the same
 pinned WinUI XAML and use the Microsoft notice below. Their tool icons use
 FerroUI vector geometry; this port does not redistribute the Windows symbol
 font.
@@ -51,7 +51,7 @@ SOFTWARE.
 
 ## Optional Windows interoperability dependencies
 
-`src/Windows/FerroUI.WinUI/inking.rs` calls the installed Windows ink APIs through
+`src/FerroUI.Controls.Inking/windows_ink_services.rs` calls the installed Windows ink APIs through
 the Microsoft Rust for Windows projections: `windows` 0.62.2,
 `windows-collections` 0.3.2 and `windows-numerics` 0.3.1. These dependencies are
 licensed under MIT OR Apache-2.0 and retain their license files in the published

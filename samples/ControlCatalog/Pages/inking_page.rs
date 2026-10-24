@@ -3,10 +3,8 @@ use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::Point;
 use ferroui_base::{ferro_class_info, instantiate, Ref};
-use ferroui_controls::{
-    Button, ContentPage, CoreInputDeviceTypes, InkCanvas, InkClipboard, InkToolbar, TextBlock,
-    TopLevel,
-};
+use ferroui_controls::{Button, ContentPage, TextBlock, TopLevel};
+use ferroui_controls_inking::{CoreInputDeviceTypes, InkCanvas, InkClipboard, InkToolbar};
 use std::cell::RefCell;
 
 #[derive(Clone, Copy)]

@@ -1,7 +1,7 @@
 # Inking source and compatibility ledger
 
 Baseline: Microsoft WinUI
-`9427b7216337ea3d7b19ac32d48c327286ee7138` (2026-10-21).
+`7e4b0c2096be402f51cc8f7d203ebf67cff183d0` (2026-10-21).
 
 | File | What it records |
 |---|---|
@@ -95,4 +95,4 @@ The IDL/test snapshots and WinUI-derived declarations are Copyright (c) Microsof
 Corporation. All rights reserved, under the MIT License. The Windows dependency
 declaration extract is from Microsoft Rust for Windows, MIT OR Apache-2.0; its
 MIT notice is retained with the other Microsoft attribution. The full notice is in
-[`../../../../src/FerroUI.Controls/inking/NOTICE.md`](../../../../src/FerroUI.Controls/inking/NOTICE.md).
+[`../../../../src/FerroUI.Controls.Inking/NOTICE.md`](../../../../src/FerroUI.Controls.Inking/NOTICE.md).

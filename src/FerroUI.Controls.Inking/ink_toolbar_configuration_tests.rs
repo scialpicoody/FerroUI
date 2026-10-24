@@ -1,7 +1,8 @@
 //! Lifecycle tests for the portable configuration entrance and its weak pen owner.
 use super::*;
 use crate::test_support::{test_scope, TestRoot};
-use crate::{Flyout, InkToolbarBallpointPenButton};
+use ferroui_controls::Flyout;
+use crate::InkToolbarBallpointPenButton;
 use ferroui_base::animation::PlayState;
 use ferroui_base::reactive::{IObservable, IObserver, LightweightSubject};
 use ferroui_base::threading::Dispatcher;
@@ -139,7 +140,7 @@ fn pen_owned_flyout_configuration_has_no_reverse_ownership_cycle() {
 #[test]
 fn checking_a_radio_item_unchecks_the_others_of_its_group() {
     let _scope = test_scope();
-    let panel = crate::StackPanel::new();
+    let panel = ferroui_controls::StackPanel::new();
     let items: Vec<_> = (0..3)
         .map(|_| {
             let item = InkToolbarFlyoutItem::new();

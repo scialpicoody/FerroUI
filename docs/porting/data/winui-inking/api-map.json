@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "repository": "microsoft/microsoft-ui-xaml",
-  "commit": "9427b7216337ea3d7b19ac32d48c327286ee7138",
+  "commit": "7e4b0c2096be402f51cc8f7d203ebf67cff183d0",
   "scope": "All six public IDL files in the two source directories, including enums and property registrations.",
   "snapshots": [
     {
@@ -43,7 +43,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -54,7 +54,7 @@
           "id": "InkStrokesCollectedEventArgs.Strokes",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "strokes"
@@ -70,7 +70,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -81,7 +81,7 @@
           "id": "InkStrokesErasedEventArgs.Strokes",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "strokes"
@@ -97,7 +97,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+        "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
       ],
       "notes": "Portable collection/selection operations and bounded FERROINK persistence use FerroUI values and atomic mutations. Real Windows ISF/GIF, malformed-load and STA clipboard fixtures pass. Native import coordinates/IDs/twist policy and the public container selected-new/clear-old paste normalization are explicit adaptations.",
       "members": [
@@ -108,7 +108,7 @@
           "id": "InkStrokeContainer.Clear",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "clear"
@@ -122,7 +122,7 @@
           "id": "InkStrokeContainer.GetStrokes",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "get_strokes"
@@ -136,7 +136,7 @@
           "id": "InkStrokeContainer.AddStroke",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "add_stroke"
@@ -150,7 +150,7 @@
           "id": "InkStrokeContainer.AddStrokes",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "add_strokes"
@@ -164,10 +164,10 @@
           "id": "InkStrokeContainer.SaveAsync",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-            "src/FerroUI.Controls/inking/ink_platform_services.rs",
-            "src/FerroUI.Controls/inking/persistence.rs",
-            "src/Windows/FerroUI.WinUI/inking.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+            "src/FerroUI.Controls.Inking/ink_platform_services.rs",
+            "src/FerroUI.Controls.Inking/persistence.rs",
+            "src/FerroUI.Controls.Inking/windows_ink_services.rs"
           ],
           "symbols": [
             "save_async"
@@ -181,10 +181,10 @@
           "id": "InkStrokeContainer.SaveWithFormatAsync",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-            "src/FerroUI.Controls/inking/ink_platform_services.rs",
-            "src/FerroUI.Controls/inking/persistence.rs",
-            "src/Windows/FerroUI.WinUI/inking.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+            "src/FerroUI.Controls.Inking/ink_platform_services.rs",
+            "src/FerroUI.Controls.Inking/persistence.rs",
+            "src/FerroUI.Controls.Inking/windows_ink_services.rs"
           ],
           "symbols": [
             "save_with_format_async"
@@ -198,10 +198,10 @@
           "id": "InkStrokeContainer.LoadAsync",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-            "src/FerroUI.Controls/inking/ink_platform_services.rs",
-            "src/FerroUI.Controls/inking/persistence.rs",
-            "src/Windows/FerroUI.WinUI/inking.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+            "src/FerroUI.Controls.Inking/ink_platform_services.rs",
+            "src/FerroUI.Controls.Inking/persistence.rs",
+            "src/FerroUI.Controls.Inking/windows_ink_services.rs"
           ],
           "symbols": [
             "load_async"
@@ -215,7 +215,7 @@
           "id": "InkStrokeContainer.GetStrokeById",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "get_stroke_by_id"
@@ -229,7 +229,7 @@
           "id": "InkStrokeContainer.DeleteSelected",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "delete_selected"
@@ -243,7 +243,7 @@
           "id": "InkStrokeContainer.MoveSelected",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "move_selected"
@@ -257,7 +257,7 @@
           "id": "InkStrokeContainer.SelectWithLine",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "select_with_line"
@@ -271,7 +271,7 @@
           "id": "InkStrokeContainer.SelectWithPolyLine",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "select_with_poly_line"
@@ -285,7 +285,7 @@
           "id": "InkStrokeContainer.BoundingRect",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs"
           ],
           "symbols": [
             "bounding_rect"
@@ -299,10 +299,10 @@
           "id": "InkStrokeContainer.CopySelectedToClipboard",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-            "src/FerroUI.Controls/inking/ink_platform_services.rs",
-            "src/FerroUI.Controls/inking/persistence.rs",
-            "src/Windows/FerroUI.WinUI/inking.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+            "src/FerroUI.Controls.Inking/ink_platform_services.rs",
+            "src/FerroUI.Controls.Inking/persistence.rs",
+            "src/FerroUI.Controls.Inking/windows_ink_services.rs"
           ],
           "symbols": [
             "copy_selected_to_clipboard"
@@ -316,10 +316,10 @@
           "id": "InkStrokeContainer.PasteFromClipboard",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-            "src/FerroUI.Controls/inking/ink_platform_services.rs",
-            "src/FerroUI.Controls/inking/persistence.rs",
-            "src/Windows/FerroUI.WinUI/inking.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+            "src/FerroUI.Controls.Inking/ink_platform_services.rs",
+            "src/FerroUI.Controls.Inking/persistence.rs",
+            "src/FerroUI.Controls.Inking/windows_ink_services.rs"
           ],
           "symbols": [
             "paste_from_clipboard"
@@ -333,10 +333,10 @@
           "id": "InkStrokeContainer.CanPasteFromClipboard",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_stroke_container.rs",
-            "src/FerroUI.Controls/inking/ink_platform_services.rs",
-            "src/FerroUI.Controls/inking/persistence.rs",
-            "src/Windows/FerroUI.WinUI/inking.rs"
+            "src/FerroUI.Controls.Inking/ink_stroke_container.rs",
+            "src/FerroUI.Controls.Inking/ink_platform_services.rs",
+            "src/FerroUI.Controls.Inking/persistence.rs",
+            "src/FerroUI.Controls.Inking/windows_ink_services.rs"
           ],
           "symbols": [
             "can_paste_from_clipboard"
@@ -352,7 +352,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_input.rs"
+        "src/FerroUI.Controls.Inking/ink_input.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -364,7 +364,7 @@
           "id": "InkInputProcessingMode.None",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "None"
@@ -379,7 +379,7 @@
           "id": "InkInputProcessingMode.Inking",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "Inking"
@@ -394,7 +394,7 @@
           "id": "InkInputProcessingMode.Erasing",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "Erasing"
@@ -410,7 +410,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_input.rs"
+        "src/FerroUI.Controls.Inking/ink_input.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -422,7 +422,7 @@
           "id": "InkInputRightDragAction.LeaveUnprocessed",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "LeaveUnprocessed"
@@ -437,7 +437,7 @@
           "id": "InkInputRightDragAction.AllowProcessing",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "AllowProcessing"
@@ -453,7 +453,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_input.rs"
+        "src/FerroUI.Controls.Inking/ink_input.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -464,7 +464,7 @@
           "id": "InkInputProcessingConfiguration.Mode",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "mode"
@@ -478,7 +478,7 @@
           "id": "InkInputProcessingConfiguration.RightDragAction",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "right_drag_action"
@@ -494,7 +494,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_input.rs"
+        "src/FerroUI.Controls.Inking/ink_input.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -505,7 +505,7 @@
           "id": "InkInputConfiguration.IsPrimaryBarrelButtonInputEnabled",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "is_primary_barrel_button_input_enabled"
@@ -519,7 +519,7 @@
           "id": "InkInputConfiguration.IsEraserInputEnabled",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "is_eraser_input_enabled"
@@ -535,7 +535,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_input.rs"
+        "src/FerroUI.Controls.Inking/ink_input.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -547,7 +547,7 @@
           "id": "InkHighContrastAdjustment.UseSystemColorsWhenNecessary",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "UseSystemColorsWhenNecessary"
@@ -562,7 +562,7 @@
           "id": "InkHighContrastAdjustment.UseSystemColors",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "UseSystemColors"
@@ -577,7 +577,7 @@
           "id": "InkHighContrastAdjustment.UseOriginalColors",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "UseOriginalColors"
@@ -593,7 +593,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_input.rs"
+        "src/FerroUI.Controls.Inking/ink_input.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -604,7 +604,7 @@
           "id": "InkStrokeInput.StrokeStarted",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "stroke_started"
@@ -618,7 +618,7 @@
           "id": "InkStrokeInput.StrokeContinued",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "stroke_continued"
@@ -632,7 +632,7 @@
           "id": "InkStrokeInput.StrokeEnded",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "stroke_ended"
@@ -646,7 +646,7 @@
           "id": "InkStrokeInput.StrokeCanceled",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "stroke_canceled"
@@ -660,7 +660,7 @@
           "id": "InkStrokeInput.InkPresenter",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "ink_presenter"
@@ -676,7 +676,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_input.rs"
+        "src/FerroUI.Controls.Inking/ink_input.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -687,7 +687,7 @@
           "id": "InkUnprocessedInput.PointerEntered",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "pointer_entered"
@@ -701,7 +701,7 @@
           "id": "InkUnprocessedInput.PointerHovered",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "pointer_hovered"
@@ -715,7 +715,7 @@
           "id": "InkUnprocessedInput.PointerExited",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "pointer_exited"
@@ -729,7 +729,7 @@
           "id": "InkUnprocessedInput.PointerPressed",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "pointer_pressed"
@@ -743,7 +743,7 @@
           "id": "InkUnprocessedInput.PointerMoved",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "pointer_moved"
@@ -757,7 +757,7 @@
           "id": "InkUnprocessedInput.PointerReleased",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "pointer_released"
@@ -771,7 +771,7 @@
           "id": "InkUnprocessedInput.PointerLost",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "pointer_lost"
@@ -785,7 +785,7 @@
           "id": "InkUnprocessedInput.InkPresenter",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_input.rs"
+            "src/FerroUI.Controls.Inking/ink_input.rs"
           ],
           "symbols": [
             "ink_presenter"
@@ -801,7 +801,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_synchronizer.rs"
+        "src/FerroUI.Controls.Inking/ink_synchronizer.rs"
       ],
       "notes": "Explicit begin/end dry transactions retain wet ink until the matching snapshot is retired. FerroUI redraws replace separately composited Windows ink-thread coordination; invalid ordering returns InkError.",
       "members": [
@@ -812,7 +812,7 @@
           "id": "InkSynchronizer.BeginDry",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_synchronizer.rs"
+            "src/FerroUI.Controls.Inking/ink_synchronizer.rs"
           ],
           "symbols": [
             "begin_dry"
@@ -826,7 +826,7 @@
           "id": "InkSynchronizer.EndDry",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_synchronizer.rs"
+            "src/FerroUI.Controls.Inking/ink_synchronizer.rs"
           ],
           "symbols": [
             "end_dry"
@@ -842,7 +842,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_presenter.rs"
+        "src/FerroUI.Controls.Inking/ink_presenter.rs"
       ],
       "notes": "Stable UI-thread service and all pinned presenter configuration/input/event members use FerroUI. DirectInk rendering/prediction and native host scheduling are separate external dependency records, not missing presenter property implementations.",
       "members": [
@@ -853,7 +853,7 @@
           "id": "InkPresenter.InputDeviceTypes",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "input_device_types"
@@ -867,7 +867,7 @@
           "id": "InkPresenter.IsInputEnabled",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "is_input_enabled"
@@ -881,7 +881,7 @@
           "id": "InkPresenter.UpdateDefaultDrawingAttributes",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "update_default_drawing_attributes"
@@ -895,7 +895,7 @@
           "id": "InkPresenter.CopyDefaultDrawingAttributes",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "copy_default_drawing_attributes"
@@ -909,8 +909,8 @@
           "id": "InkPresenter.SetPredefinedConfiguration",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs",
-            "src/FerroUI.Controls/inking/ink_canvas.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs",
+            "src/FerroUI.Controls.Inking/ink_canvas.rs"
           ],
           "symbols": [
             "set_predefined_configuration"
@@ -924,8 +924,8 @@
           "id": "InkPresenter.HighContrastAdjustment",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs",
-            "src/FerroUI.Controls/inking/ink_canvas.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs",
+            "src/FerroUI.Controls.Inking/ink_canvas.rs"
           ],
           "symbols": [
             "high_contrast_adjustment"
@@ -939,7 +939,7 @@
           "id": "InkPresenter.StrokeContainer",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "stroke_container"
@@ -953,7 +953,7 @@
           "id": "InkPresenter.InputProcessingConfiguration",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "input_processing_configuration"
@@ -967,7 +967,7 @@
           "id": "InkPresenter.InputConfiguration",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "input_configuration"
@@ -981,7 +981,7 @@
           "id": "InkPresenter.StrokeInput",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "stroke_input"
@@ -995,7 +995,7 @@
           "id": "InkPresenter.UnprocessedInput",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "unprocessed_input"
@@ -1009,7 +1009,7 @@
           "id": "InkPresenter.ActivateCustomDrying",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "activate_custom_drying"
@@ -1023,7 +1023,7 @@
           "id": "InkPresenter.StrokesCollected",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "strokes_collected"
@@ -1037,7 +1037,7 @@
           "id": "InkPresenter.StrokesErased",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_presenter.rs"
+            "src/FerroUI.Controls.Inking/ink_presenter.rs"
           ],
           "symbols": [
             "strokes_erased"
@@ -1053,7 +1053,7 @@
       "source": "controls/dev/InkCanvas/InkCanvas.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_canvas.rs"
+        "src/FerroUI.Controls.Inking/ink_canvas.rs"
       ],
       "notes": "Ordinary FerroUI Control supplies drawing, routed/coalesced input, capture, layout, clipping and automation. DirectComposition host replacement is a documented framework adaptation; native renderer parity is separately recorded.",
       "members": [
@@ -1064,7 +1064,7 @@
           "id": "InkCanvas.InkCanvas",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_canvas.rs"
+            "src/FerroUI.Controls.Inking/ink_canvas.rs"
           ],
           "symbols": [
             "new"
@@ -1078,7 +1078,7 @@
           "id": "InkCanvas.InkPresenter",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_canvas.rs"
+            "src/FerroUI.Controls.Inking/ink_canvas.rs"
           ],
           "symbols": [
             "ink_presenter"
@@ -1094,7 +1094,7 @@
       "source": "controls/dev/InkCanvas/InkCanvasAutomationPeer.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_canvas_automation_peer.rs"
+        "src/FerroUI.Controls.Inking/ink_canvas_automation_peer.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -1105,7 +1105,7 @@
           "id": "InkCanvasAutomationPeer.InkCanvasAutomationPeer",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_canvas_automation_peer.rs"
+            "src/FerroUI.Controls.Inking/ink_canvas_automation_peer.rs"
           ],
           "symbols": [
             "new"
@@ -1121,7 +1121,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -1133,7 +1133,7 @@
           "id": "InkToolbarButtonFlyoutPlacement.Auto",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Auto"
@@ -1148,7 +1148,7 @@
           "id": "InkToolbarButtonFlyoutPlacement.Top",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Top"
@@ -1163,7 +1163,7 @@
           "id": "InkToolbarButtonFlyoutPlacement.Bottom",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Bottom"
@@ -1178,7 +1178,7 @@
           "id": "InkToolbarButtonFlyoutPlacement.Left",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Left"
@@ -1193,7 +1193,7 @@
           "id": "InkToolbarButtonFlyoutPlacement.Right",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Right"
@@ -1209,7 +1209,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -1221,7 +1221,7 @@
           "id": "InkToolbarFlyoutItemKind.Simple",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Simple"
@@ -1236,7 +1236,7 @@
           "id": "InkToolbarFlyoutItemKind.Radio",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Radio"
@@ -1251,7 +1251,7 @@
           "id": "InkToolbarFlyoutItemKind.Check",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Check"
@@ -1266,7 +1266,7 @@
           "id": "InkToolbarFlyoutItemKind.RadioCheck",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "RadioCheck"
@@ -1282,7 +1282,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -1294,7 +1294,7 @@
           "id": "InkToolbarInitialControls.All",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "All"
@@ -1309,7 +1309,7 @@
           "id": "InkToolbarInitialControls.None",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "None"
@@ -1324,7 +1324,7 @@
           "id": "InkToolbarInitialControls.PensOnly",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "PensOnly"
@@ -1339,7 +1339,7 @@
           "id": "InkToolbarInitialControls.AllExceptPens",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "AllExceptPens"
@@ -1355,7 +1355,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -1367,7 +1367,7 @@
           "id": "InkToolbarMenuKind.Stencil",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Stencil"
@@ -1383,7 +1383,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -1395,7 +1395,7 @@
           "id": "InkToolbarStencilKind.Ruler",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Ruler"
@@ -1410,7 +1410,7 @@
           "id": "InkToolbarStencilKind.Protractor",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Protractor"
@@ -1426,7 +1426,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -1438,7 +1438,7 @@
           "id": "InkToolbarToggle.Ruler",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Ruler"
@@ -1453,7 +1453,7 @@
           "id": "InkToolbarToggle.Custom",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Custom"
@@ -1469,7 +1469,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "implemented",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
       ],
       "notes": "Rust enum preserves all pinned IDL names and numeric values.",
       "members": [
@@ -1481,7 +1481,7 @@
           "id": "InkToolbarTool.BallpointPen",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "BallpointPen"
@@ -1496,7 +1496,7 @@
           "id": "InkToolbarTool.Pencil",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Pencil"
@@ -1511,7 +1511,7 @@
           "id": "InkToolbarTool.Highlighter",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Highlighter"
@@ -1526,7 +1526,7 @@
           "id": "InkToolbarTool.Eraser",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "Eraser"
@@ -1541,7 +1541,7 @@
           "id": "InkToolbarTool.CustomPen",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "CustomPen"
@@ -1556,7 +1556,7 @@
           "id": "InkToolbarTool.CustomTool",
           "status": "implemented",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_types.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_types.rs"
           ],
           "symbols": [
             "CustomTool"
@@ -1572,7 +1572,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -1583,7 +1583,7 @@
           "id": "InkToolbarIsStencilButtonCheckedChangedEventArgs.StencilButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "stencil_button"
@@ -1597,7 +1597,7 @@
           "id": "InkToolbarIsStencilButtonCheckedChangedEventArgs.StencilKind",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "stencil_kind"
@@ -1613,7 +1613,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -1624,7 +1624,7 @@
           "id": "InkToolbarCustomPen.InkToolbarCustomPen",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -1638,7 +1638,7 @@
           "id": "InkToolbarCustomPen.CreateInkDrawingAttributes",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "create_ink_drawing_attributes"
@@ -1652,7 +1652,7 @@
           "id": "InkToolbarCustomPen.CreateInkDrawingAttributesCore",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "create_ink_drawing_attributes_core"
@@ -1668,7 +1668,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar.rs"
       ],
       "notes": "The complete public toolbar surface maps to FerroUI classes/properties/events, actual flyouts, localized resources and contrast-aware palettes. Source singleton/identity/unsupported-child rules retain public Children separately from accepted visuals; all four new registration regressions pass at 7fbffd0.",
       "members": [
@@ -1679,7 +1679,7 @@
           "id": "InkToolbar.InkToolbar",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "new"
@@ -1693,7 +1693,7 @@
           "id": "InkToolbar.InitialControls",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "initial_controls"
@@ -1707,7 +1707,7 @@
           "id": "InkToolbar.Children",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "children"
@@ -1721,7 +1721,7 @@
           "id": "InkToolbar.ActiveTool",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "active_tool"
@@ -1735,7 +1735,7 @@
           "id": "InkToolbar.InkDrawingAttributes",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "ink_drawing_attributes"
@@ -1749,7 +1749,7 @@
           "id": "InkToolbar.IsRulerButtonChecked",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "is_ruler_button_checked"
@@ -1763,7 +1763,7 @@
           "id": "InkToolbar.TargetInkCanvas",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "target_ink_canvas"
@@ -1777,7 +1777,7 @@
           "id": "InkToolbar.IsStencilButtonChecked",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "is_stencil_button_checked"
@@ -1791,7 +1791,7 @@
           "id": "InkToolbar.ButtonFlyoutPlacement",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "button_flyout_placement"
@@ -1805,7 +1805,7 @@
           "id": "InkToolbar.Orientation",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs",
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs",
             "src/FerroUI.Controls/stack_panel.rs"
           ],
           "symbols": [
@@ -1820,7 +1820,7 @@
           "id": "InkToolbar.TargetInkPresenter",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "target_ink_presenter"
@@ -1834,7 +1834,7 @@
           "id": "InkToolbar.ActiveToolChanged",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "active_tool_changed"
@@ -1848,7 +1848,7 @@
           "id": "InkToolbar.InkDrawingAttributesChanged",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "ink_drawing_attributes_changed"
@@ -1862,7 +1862,7 @@
           "id": "InkToolbar.EraseAllClicked",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "erase_all_clicked"
@@ -1876,7 +1876,7 @@
           "id": "InkToolbar.IsStencilButtonCheckedChanged",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "is_stencil_button_checked_changed"
@@ -1890,7 +1890,7 @@
           "id": "InkToolbar.GetToolButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "get_tool_button"
@@ -1904,7 +1904,7 @@
           "id": "InkToolbar.GetToggleButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "get_toggle_button"
@@ -1918,7 +1918,7 @@
           "id": "InkToolbar.GetMenuButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "get_menu_button"
@@ -1932,7 +1932,7 @@
           "id": "InkToolbar.InitialControlsProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "initial_controls_property"
@@ -1946,7 +1946,7 @@
           "id": "InkToolbar.ChildrenProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "children_property"
@@ -1960,7 +1960,7 @@
           "id": "InkToolbar.ActiveToolProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "active_tool_property"
@@ -1974,7 +1974,7 @@
           "id": "InkToolbar.InkDrawingAttributesProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "ink_drawing_attributes_property"
@@ -1988,7 +1988,7 @@
           "id": "InkToolbar.IsRulerButtonCheckedProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "is_ruler_button_checked_property"
@@ -2002,7 +2002,7 @@
           "id": "InkToolbar.TargetInkCanvasProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "target_ink_canvas_property"
@@ -2016,7 +2016,7 @@
           "id": "InkToolbar.IsStencilButtonCheckedProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "is_stencil_button_checked_property"
@@ -2030,7 +2030,7 @@
           "id": "InkToolbar.ButtonFlyoutPlacementProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "button_flyout_placement_property"
@@ -2044,7 +2044,7 @@
           "id": "InkToolbar.OrientationProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "orientation_property"
@@ -2058,7 +2058,7 @@
           "id": "InkToolbar.TargetInkPresenterProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar.rs"
           ],
           "symbols": [
             "target_ink_presenter_property"
@@ -2074,7 +2074,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
       ],
       "notes": "Actual palette, slider, localized headings and all 103 preview points use FerroUI controls. The source entrance transition maps to framework-clock staggered opacity/translation with safe cancellation, base-transform restoration and weak-owner lifetime cleanup; dedicated progression/lifetime regressions pass at 7fbffd0.",
       "members": [
@@ -2085,7 +2085,7 @@
           "id": "InkToolbarPenConfigurationControl.InkToolbarPenConfigurationControl",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
           ],
           "symbols": [
             "new"
@@ -2099,7 +2099,7 @@
           "id": "InkToolbarPenConfigurationControl.PenButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
           ],
           "symbols": [
             "pen_button"
@@ -2113,7 +2113,7 @@
           "id": "InkToolbarPenConfigurationControl.PenButtonProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
           ],
           "symbols": [
             "pen_button_property"
@@ -2129,7 +2129,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2140,7 +2140,7 @@
           "id": "InkToolbarFlyoutItem.InkToolbarFlyoutItem",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
           ],
           "symbols": [
             "new"
@@ -2154,7 +2154,7 @@
           "id": "InkToolbarFlyoutItem.Kind",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
           ],
           "symbols": [
             "kind"
@@ -2168,7 +2168,7 @@
           "id": "InkToolbarFlyoutItem.IsChecked",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs",
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
             "src/FerroUI.Controls/primitives/toggle_button.rs"
           ],
           "symbols": [
@@ -2183,7 +2183,7 @@
           "id": "InkToolbarFlyoutItem.Checked",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
           ],
           "symbols": [
             "checked"
@@ -2197,7 +2197,7 @@
           "id": "InkToolbarFlyoutItem.Unchecked",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
           ],
           "symbols": [
             "unchecked"
@@ -2211,7 +2211,7 @@
           "id": "InkToolbarFlyoutItem.KindProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
           ],
           "symbols": [
             "kind_property"
@@ -2225,7 +2225,7 @@
           "id": "InkToolbarFlyoutItem.IsCheckedProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs",
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs",
             "src/FerroUI.Controls/primitives/toggle_button.rs"
           ],
           "symbols": [
@@ -2242,7 +2242,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2253,7 +2253,7 @@
           "id": "InkToolbarMenuButton.MenuKind",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "menu_kind"
@@ -2267,7 +2267,7 @@
           "id": "InkToolbarMenuButton.IsExtensionGlyphShown",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_extension_glyph_shown"
@@ -2281,7 +2281,7 @@
           "id": "InkToolbarMenuButton.IsExtensionGlyphShownProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_extension_glyph_shown_property"
@@ -2297,7 +2297,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "The complete public menu/guide contract maps to stable FerroUI ruler/protractor services, selected and visible item state, target synchronization and real flyouts. Portable guide drawing/manipulation is a deliberate renderer/input adaptation; native pixel comparisons are not a missing property implementation.",
       "members": [
@@ -2308,7 +2308,7 @@
           "id": "InkToolbarStencilButton.InkToolbarStencilButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -2322,8 +2322,8 @@
           "id": "InkToolbarStencilButton.Ruler",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs",
-            "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+            "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
           ],
           "symbols": [
             "ruler"
@@ -2337,8 +2337,8 @@
           "id": "InkToolbarStencilButton.Protractor",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs",
-            "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+            "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
           ],
           "symbols": [
             "protractor"
@@ -2352,7 +2352,7 @@
           "id": "InkToolbarStencilButton.SelectedStencil",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "selected_stencil"
@@ -2366,7 +2366,7 @@
           "id": "InkToolbarStencilButton.IsRulerItemVisible",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_ruler_item_visible"
@@ -2380,7 +2380,7 @@
           "id": "InkToolbarStencilButton.IsProtractorItemVisible",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_protractor_item_visible"
@@ -2394,8 +2394,8 @@
           "id": "InkToolbarStencilButton.RulerProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs",
-            "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+            "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
           ],
           "symbols": [
             "ruler_property"
@@ -2409,8 +2409,8 @@
           "id": "InkToolbarStencilButton.ProtractorProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs",
-            "src/FerroUI.Controls/inking/ink_presenter_stencil.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs",
+            "src/FerroUI.Controls.Inking/ink_presenter_stencil.rs"
           ],
           "symbols": [
             "protractor_property"
@@ -2424,7 +2424,7 @@
           "id": "InkToolbarStencilButton.SelectedStencilProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "selected_stencil_property"
@@ -2438,7 +2438,7 @@
           "id": "InkToolbarStencilButton.IsRulerItemVisibleProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_ruler_item_visible_property"
@@ -2452,7 +2452,7 @@
           "id": "InkToolbarStencilButton.IsProtractorItemVisibleProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_protractor_item_visible_property"
@@ -2468,7 +2468,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2479,7 +2479,7 @@
           "id": "InkToolbarToggleButton.ToggleKind",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "toggle_kind"
@@ -2495,7 +2495,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2506,7 +2506,7 @@
           "id": "InkToolbarToolButton.ToolKind",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "tool_kind"
@@ -2520,7 +2520,7 @@
           "id": "InkToolbarToolButton.IsExtensionGlyphShown",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_extension_glyph_shown"
@@ -2534,7 +2534,7 @@
           "id": "InkToolbarToolButton.IsExtensionGlyphShownProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_extension_glyph_shown_property"
@@ -2550,7 +2550,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2561,7 +2561,7 @@
           "id": "InkToolbarCustomToggleButton.InkToolbarCustomToggleButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -2577,7 +2577,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "The legacy checked-state toggle controls the stable FerroUI ruler with target synchronization, source defaults and framework provider behavior. Native guide rasterization is replaced by the documented portable renderer.",
       "members": [
@@ -2588,7 +2588,7 @@
           "id": "InkToolbarRulerButton.InkToolbarRulerButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -2604,7 +2604,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2615,7 +2615,7 @@
           "id": "InkToolbarCustomToolButton.InkToolbarCustomToolButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -2629,7 +2629,7 @@
           "id": "InkToolbarCustomToolButton.ConfigurationContent",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "configuration_content"
@@ -2643,7 +2643,7 @@
           "id": "InkToolbarCustomToolButton.ConfigurationContentProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "configuration_content_property"
@@ -2659,7 +2659,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2670,7 +2670,7 @@
           "id": "InkToolbarEraserButton.InkToolbarEraserButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -2684,7 +2684,7 @@
           "id": "InkToolbarEraserButton.IsClearAllVisible",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_clear_all_visible"
@@ -2698,7 +2698,7 @@
           "id": "InkToolbarEraserButton.IsClearAllVisibleProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "is_clear_all_visible_property"
@@ -2714,7 +2714,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2725,7 +2725,7 @@
           "id": "InkToolbarPenButton.Palette",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "palette"
@@ -2739,7 +2739,7 @@
           "id": "InkToolbarPenButton.MinStrokeWidth",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "min_stroke_width"
@@ -2753,7 +2753,7 @@
           "id": "InkToolbarPenButton.MaxStrokeWidth",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "max_stroke_width"
@@ -2767,7 +2767,7 @@
           "id": "InkToolbarPenButton.SelectedBrush",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "selected_brush"
@@ -2781,7 +2781,7 @@
           "id": "InkToolbarPenButton.SelectedBrushIndex",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "selected_brush_index"
@@ -2795,7 +2795,7 @@
           "id": "InkToolbarPenButton.SelectedStrokeWidth",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "selected_stroke_width"
@@ -2809,7 +2809,7 @@
           "id": "InkToolbarPenButton.PaletteProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "palette_property"
@@ -2823,7 +2823,7 @@
           "id": "InkToolbarPenButton.MinStrokeWidthProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "min_stroke_width_property"
@@ -2837,7 +2837,7 @@
           "id": "InkToolbarPenButton.MaxStrokeWidthProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "max_stroke_width_property"
@@ -2851,7 +2851,7 @@
           "id": "InkToolbarPenButton.SelectedBrushProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "selected_brush_property"
@@ -2865,7 +2865,7 @@
           "id": "InkToolbarPenButton.SelectedBrushIndexProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "selected_brush_index_property"
@@ -2879,7 +2879,7 @@
           "id": "InkToolbarPenButton.SelectedStrokeWidthProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "selected_stroke_width_property"
@@ -2895,7 +2895,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2906,7 +2906,7 @@
           "id": "InkToolbarBallpointPenButton.InkToolbarBallpointPenButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -2922,7 +2922,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -2933,7 +2933,7 @@
           "id": "InkToolbarCustomPenButton.InkToolbarCustomPenButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -2947,7 +2947,7 @@
           "id": "InkToolbarCustomPenButton.CustomPen",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "custom_pen"
@@ -2961,7 +2961,7 @@
           "id": "InkToolbarCustomPenButton.ConfigurationContent",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "configuration_content"
@@ -2975,7 +2975,7 @@
           "id": "InkToolbarCustomPenButton.CustomPenProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "custom_pen_property"
@@ -2989,7 +2989,7 @@
           "id": "InkToolbarCustomPenButton.ConfigurationContentProperty",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "configuration_content_property"
@@ -3005,7 +3005,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -3016,7 +3016,7 @@
           "id": "InkToolbarHighlighterButton.InkToolbarHighlighterButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -3032,7 +3032,7 @@
       "source": "controls/dev/InkToolbar/InkToolbar.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
       ],
       "notes": "Pencil tool kind, palette, width, opacity, localized metadata and configuration are implemented with passed source constructor/state assertions. Portable opacity and tilt response deliberately approximate the proprietary native pencil renderer and do not reproduce its grain.",
       "members": [
@@ -3043,7 +3043,7 @@
           "id": "InkToolbarPencilButton.InkToolbarPencilButton",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_buttons.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_buttons.rs"
           ],
           "symbols": [
             "new"
@@ -3059,7 +3059,7 @@
       "source": "controls/dev/InkToolbar/InkToolbarAutomationPeer.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
       ],
       "notes": "FerroUI exposes the semantic ToolBar role, a deliberate accessibility adaptation from the pinned native peer's Pane role. Child tool/menu peers preserve their specific source patterns, names and help.",
       "members": [
@@ -3070,7 +3070,7 @@
           "id": "InkToolbarAutomationPeer.InkToolbarAutomationPeer",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
           ],
           "symbols": [
             "new"
@@ -3086,7 +3086,7 @@
       "source": "controls/dev/InkToolbar/InkToolbarAutomationPeer.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -3097,7 +3097,7 @@
           "id": "InkToolbarToolButtonAutomationPeer.InkToolbarToolButtonAutomationPeer",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
           ],
           "symbols": [
             "new"
@@ -3113,7 +3113,7 @@
       "source": "controls/dev/InkToolbar/InkToolbarAutomationPeer.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -3124,7 +3124,7 @@
           "id": "InkToolbarMenuButtonAutomationPeer.InkToolbarMenuButtonAutomationPeer",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
           ],
           "symbols": [
             "new"
@@ -3140,7 +3140,7 @@
       "source": "controls/dev/InkToolbar/InkToolbarAutomationPeer.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
       ],
       "notes": "Invoke plus conditional radio SelectionItem providers and MenuItem role are adapted to framework automation. Invalid selection operations return the existing provider error with an explicit message; the native UIA_E_INVALIDOPERATION HRESULT category is not separately represented.",
       "members": [
@@ -3151,7 +3151,7 @@
           "id": "InkToolbarFlyoutItemAutomationPeer.InkToolbarFlyoutItemAutomationPeer",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
           ],
           "symbols": [
             "new"
@@ -3167,7 +3167,7 @@
       "source": "controls/dev/InkToolbar/InkToolbarStrokeWidthSlider.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -3178,7 +3178,7 @@
           "id": "InkToolbarStrokeWidthSlider.InkToolbarStrokeWidthSlider",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_configuration.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_configuration.rs"
           ],
           "symbols": [
             "new"
@@ -3194,7 +3194,7 @@
       "source": "controls/dev/InkToolbar/InkToolbarStrokeWidthSliderAutomationPeer.idl",
       "status": "adapted",
       "rust_files": [
-        "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+        "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
       ],
       "notes": "Public surface is expressed using FerroUI classes/properties or Rc service values; per-member adaptations are recorded below. A type mapping does not establish visual or Windows-runtime parity.",
       "members": [
@@ -3205,7 +3205,7 @@
           "id": "InkToolbarStrokeWidthSliderAutomationPeer.InkToolbarStrokeWidthSliderAutomationPeer",
           "status": "adapted",
           "rust_files": [
-            "src/FerroUI.Controls/inking/ink_toolbar_automation_peer.rs"
+            "src/FerroUI.Controls.Inking/ink_toolbar_automation_peer.rs"
           ],
           "symbols": [
             "new"

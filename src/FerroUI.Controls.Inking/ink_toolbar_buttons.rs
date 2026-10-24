@@ -9,9 +9,9 @@ use super::{
     InkToolbarFlyoutItemKind, InkToolbarMenuKind, InkToolbarStencilKind, InkToolbarToggle,
     InkToolbarTool, PenTipShape,
 };
-use crate::automation::AutomationProperties;
-use crate::primitives::{TemplatedControlImpl, ToggleButton, ToggleButtonImpl};
-use crate::{
+use ferroui_controls::automation::AutomationProperties;
+use ferroui_controls::primitives::{TemplatedControlImpl, ToggleButton, ToggleButtonImpl};
+use ferroui_controls::{
     Button, ButtonImpl, ButtonImplExt, CheckBox, ContentControlImpl, Control, ControlImpl, Flyout,
     RadioButton, StackPanel,
 };
@@ -79,7 +79,7 @@ impl ButtonImpl for InkToolbarToolButton {
     }
 }
 impl ControlImpl for InkToolbarToolButton {
-    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+    fn on_create_automation_peer(this: &Self) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
         super::InkToolbarToolButtonAutomationPeer::new(this).upcast()
     }
 }
@@ -805,7 +805,7 @@ ferro_class!(InkToolbarMenuButton:ToggleButton);
 ferro_class_info!(InkToolbarMenuButton{new:InkToolbarMenuButton::new,markup:{properties:[MenuKind:InkToolbarMenuKind{get:InkToolbarMenuButton::menu_kind}],}});
 ferro_impl_classes!(InkToolbarMenuButton: FerroObjectImpl, VisualImpl, LayoutableImpl, InteractiveImpl, InputElementImpl, TemplatedControlImpl, ContentControlImpl, ButtonImpl, ToggleButtonImpl);
 impl ControlImpl for InkToolbarMenuButton {
-    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+    fn on_create_automation_peer(this: &Self) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
         super::InkToolbarMenuButtonAutomationPeer::new(this).upcast()
     }
 }
@@ -1012,7 +1012,7 @@ impl InkToolbarStencilButton {
             items.push((kind, item));
         }
         *self.menu_items.borrow_mut() = items;
-        let flyout = Flyout::new();
+        let flyout = toolbar_flyout(self);
         flyout.set_content(Some(Rc::new(panel.upcast::<Control>())));
         self.set_flyout(flyout);
         self.synchronize_stencil_menu();
@@ -1089,6 +1089,27 @@ impl InkToolbarStencilButton {
     pub fn set_is_protractor_item_visible(&self, value: bool) {
         self.set_value(Self::is_protractor_item_visible_property(), value);
     }
+}
+
+/// A flyout of a toolbar button. As WinUI (`InkToolbarFlyoutStyle`, applied by the tool and menu
+/// buttons), its presenter takes the control theme `InkToolbarFlyoutStyle` of the button's
+/// resources when it opens, if the styles of the toolbar define one.
+pub(crate) fn toolbar_flyout(owner: &Control) -> Ref<Flyout> {
+    let flyout = Flyout::new();
+    let weak_owner = owner.to_ref().downgrade();
+    let weak_flyout = flyout.downgrade();
+    let _ = flyout.opening(move |_| {
+        let (Some(owner), Some(flyout)) = (weak_owner.upgrade(), weak_flyout.upgrade()) else {
+            return;
+        };
+        let theme = owner
+            .try_find_resource(&ResourceKey::from("InkToolbarFlyoutStyle"), None)
+            .flatten();
+        if let Some(theme) = ferroui_base::metadata::from_markup_value::<Ref<ControlTheme>>(&theme) {
+            flyout.set_flyout_presenter_theme(theme);
+        }
+    });
+    flyout
 }
 
 pub(crate) fn toolbar_is_inking(control: &Control) -> bool {

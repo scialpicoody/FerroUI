@@ -1,6 +1,6 @@
 use super::*;
-use crate::automation::peers::ControlAutomationPeer;
-use crate::automation::provider::{
+use ferroui_controls::automation::peers::ControlAutomationPeer;
+use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, IRangeValueProvider, ISelectionItemProvider, IValueProvider,
 };
 use crate::test_support::test_scope;
@@ -8,8 +8,8 @@ use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::Point;
 
-fn toolbar_window_services() -> crate::testing::UnitTestApplicationScope {
-    use crate::testing::{TestServices, UnitTestApplication};
+fn toolbar_window_services() -> ferroui_controls::testing::UnitTestApplicationScope {
+    use ferroui_controls::testing::{TestServices, UnitTestApplication};
     use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
     UnitTestApplication::start(
         TestServices::styled_window()
@@ -17,8 +17,8 @@ fn toolbar_window_services() -> crate::testing::UnitTestApplicationScope {
     )
 }
 
-fn toolbar_window(toolbar: &InkToolbar) -> Ref<crate::Window> {
-    let window = crate::Window::new();
+fn toolbar_window(toolbar: &InkToolbar) -> Ref<ferroui_controls::Window> {
+    let window = ferroui_controls::Window::new();
     window.set_content(Some(Control::boxed(toolbar.to_ref())));
     window.show();
     window
@@ -26,7 +26,7 @@ fn toolbar_window(toolbar: &InkToolbar) -> Ref<crate::Window> {
 
 #[test]
 fn localized_names_update_from_resources_without_overwriting_local_values() {
-    use crate::automation::AutomationProperties;
+    use ferroui_controls::automation::AutomationProperties;
     use ferroui_base::controls::ResourceKey;
     use ferroui_base::utilities::CultureInfo;
     let _scope = test_scope();
@@ -68,9 +68,9 @@ fn localized_names_update_from_resources_without_overwriting_local_values() {
 
 #[test]
 fn configuration_headings_slider_and_palette_use_live_localized_resources() {
-    use crate::automation::AutomationProperties;
+    use ferroui_controls::automation::AutomationProperties;
     use crate::test_support::TestRoot;
-    use crate::{TextBlock, ToolTip, WrapPanel};
+    use ferroui_controls::{TextBlock, ToolTip, WrapPanel};
     let _scope = test_scope();
     let host = StackPanel::new();
     for (key, text) in [
@@ -166,8 +166,8 @@ fn color_names_quantize_known_families_and_format_unknown_rgb() {
 
 #[test]
 fn palette_descriptions_cover_known_nearby_rgb_and_gradient_brushes() {
-    use crate::automation::AutomationProperties;
-    use crate::{ToolTip, WrapPanel};
+    use ferroui_controls::automation::AutomationProperties;
+    use ferroui_controls::{ToolTip, WrapPanel};
     use ferroui_base::collections::FerroList;
     use ferroui_base::media::immutable::ImmutableLinearGradientBrush;
     let _app = toolbar_window_services();
@@ -300,7 +300,7 @@ fn high_contrast_adjustment_obeys_original_system_and_seven_to_one_policy() {
 
 #[test]
 fn contrast_palette_switch_restores_normal_selection_and_tracks_presenter_policy() {
-    use crate::ThemeVariantScope;
+    use ferroui_controls::ThemeVariantScope;
     use ferroui_base::styling::ThemeVariant;
     let _scope = test_scope();
     let scope = ThemeVariantScope::new();
@@ -377,7 +377,7 @@ fn pen_preview_uses_source_path_and_follows_attributes() {
 
 #[test]
 fn toolbar_style_key_tracks_available_theme_and_returns_to_native_fallback() {
-    use crate::RadioButton;
+    use ferroui_controls::RadioButton;
     use ferroui_base::controls::ResourceKey;
     use ferroui_base::styling::ControlTheme;
     let _scope = test_scope();
@@ -407,7 +407,7 @@ fn toolbar_style_key_tracks_available_theme_and_returns_to_native_fallback() {
 #[test]
 fn palette_arrow_keys_follow_six_column_layout_and_tab_keeps_selection() {
     use crate::test_support::TestRoot;
-    use crate::WrapPanel;
+    use ferroui_controls::WrapPanel;
     use ferroui_base::input::{InputElement, Key, KeyEventArgs};
     let _app = toolbar_window_services();
     let pen = InkToolbarBallpointPenButton::new();
@@ -575,7 +575,7 @@ fn custom_configuration_requires_content_and_refreshes_it_on_each_open() {
 
 #[test]
 fn panel_adaptation_includes_native_border_and_padding_in_measure_and_arrange() {
-    use crate::Border;
+    use ferroui_controls::Border;
     use ferroui_base::{CornerRadius, Rect, Size, Thickness};
     let _scope = test_scope();
     let toolbar = InkToolbar::new();
@@ -1033,7 +1033,7 @@ fn configuration_slider_and_palette_stay_synchronized() {
         .children()
         .snapshot()
         .iter()
-        .find_map(|child| child.cast::<crate::WrapPanel>())
+        .find_map(|child| child.cast::<ferroui_controls::WrapPanel>())
         .unwrap();
     assert_eq!(
         palette
