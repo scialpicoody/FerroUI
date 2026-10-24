@@ -16,33 +16,40 @@
 //! Imported strokes get fresh FerroUI identities; OS-only custom properties,
 //! stroke-start wall-clock times and recognition state have no portable field.
 //! Use the portable format for an exact FerroUI document round trip.
+//!
+//! The ink engine is called through the MicroCom bindings of the crate
+//! (`windows_ink.idl`, `windows_ink_interop.rs`), as the WinUI integration
+//! calls the Windows Runtime; WinUI's own ink control calls it in C++/WinRT.
 
 use ferroui_base::media::Color;
 use ferroui_base::{Matrix, Point, Rect, Size};
+use crate::windows_ink_interop as winrt;
+use crate::windows_ink_interop::{from_abi, object, take_string, to_abi, wait};
 use crate::{
     IInkPlatformServices, InkDrawingAttributes, InkDrawingAttributesKind, InkError,
     InkPersistenceFormat, InkPersistenceLimits, InkPoint, InkServiceFuture, InkStroke,
     InkStrokeContainer, PenTipShape,
 };
-use ferroui_microcom::IUnknown;
+use ferroui_microcom::{ComPtr, HResult, IUnknown};
 use ferroui_win32::interop::unmanaged_methods::{
     co_get_apartment_type, APTTYPE_MAINSTA, APTTYPE_STA,
 };
-use ferroui_win32::win_rt::NativeWinRTMethods;
 use std::collections::HashMap;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use windows::Foundation::{Point as NativePoint, Size as NativeSize};
-use windows::Storage::Streams::{DataReader, DataWriter, InMemoryRandomAccessStream};
-use windows::UI::Color as NativeColor;
-use windows::UI::Input::Inking::{
-    InkDrawingAttributes as NativeAttributes, InkDrawingAttributesKind as NativeAttributesKind,
-    InkPersistenceFormat as NativeFormat, InkPoint as NativeInkPoint, InkRecognitionTarget,
-    InkRecognizerContainer, InkStroke as NativeStroke, InkStrokeBuilder,
-    InkStrokeContainer as NativeContainer, PenTipShape as NativePenTip,
-};
-use windows_collections::IIterable;
-use windows_numerics::Matrix3x2;
+
+type NativeContainer = ComPtr<winrt::IInkStrokeContainer>;
+type NativeStroke = ComPtr<winrt::IInkStroke>;
+type NativeAttributes = ComPtr<winrt::IInkDrawingAttributes>;
+
+const INK_STROKE_CONTAINER: &str = "Windows.UI.Input.Inking.InkStrokeContainer";
+const INK_STROKE_BUILDER: &str = "Windows.UI.Input.Inking.InkStrokeBuilder";
+const INK_POINT: &str = "Windows.UI.Input.Inking.InkPoint";
+const INK_DRAWING_ATTRIBUTES: &str = "Windows.UI.Input.Inking.InkDrawingAttributes";
+const INK_RECOGNIZER_CONTAINER: &str = "Windows.UI.Input.Inking.InkRecognizerContainer";
+const IN_MEMORY_RANDOM_ACCESS_STREAM: &str = "Windows.Storage.Streams.InMemoryRandomAccessStream";
+const DATA_READER: &str = "Windows.Storage.Streams.DataReader";
+const DATA_WRITER: &str = "Windows.Storage.Streams.DataWriter";
 
 /// One recognized word/group, with candidates ordered by the Windows engine.
 /// `stroke_ids` refer to the input FerroUI strokes, not temporary native IDs.
@@ -72,10 +79,8 @@ pub struct WindowsInkServices {
 
 impl WindowsInkServices {
     pub fn new() -> Result<Self, InkError> {
-        NativeWinRTMethods::create_instance::<IUnknown>(
-            "Windows.UI.Input.Inking.InkStrokeContainer",
-        )
-        .map_err(|error| InkError::Platform(format!("Windows ink activation failed: {error:?}")))?;
+        winrt::activate::<IUnknown>(INK_STROKE_CONTAINER)
+            .map_err(|error| InkError::Platform(format!("Windows ink activation failed: {error:?}")))?;
         Ok(Self {
             limits: InkPersistenceLimits::DEFAULT,
             allow_twist_loss: false,
@@ -101,18 +106,12 @@ impl WindowsInkServices {
 
     /// Display names of the handwriting recognizers installed in Windows.
     pub fn recognizers(&self) -> Result<Vec<String>, InkError> {
-        let container = InkRecognizerContainer::new().map_err(platform)?;
-        let recognizers = container.GetRecognizers().map_err(platform)?;
+        let container = winrt::activate::<winrt::IInkRecognizerContainer>(INK_RECOGNIZER_CONTAINER).map_err(platform)?;
+        let recognizers = object(container.get_recognizers()).map_err(platform)?;
         let mut result = Vec::new();
-        for index in 0..recognizers.Size().map_err(platform)? {
-            result.push(
-                recognizers
-                    .GetAt(index)
-                    .map_err(platform)?
-                    .Name()
-                    .map_err(platform)?
-                    .to_string(),
-            );
+        for index in 0..recognizers.size().map_err(platform)? {
+            let recognizer = object(recognizers.get_at(index)).map_err(platform)?;
+            result.push(take_string(recognizer.name().map_err(platform)?));
         }
         Ok(result)
     }
@@ -131,21 +130,15 @@ impl WindowsInkServices {
             if strokes.is_empty() {
                 return Ok(Vec::new());
             }
-            let source = native.GetStrokes().map_err(platform)?;
+            let source = object(native.get_strokes()).map_err(platform)?;
             let mut identities = HashMap::with_capacity(strokes.len());
             for (index, stroke) in strokes.iter().enumerate() {
-                identities.insert(
-                    source
-                        .GetAt(index as u32)
-                        .map_err(platform)?
-                        .Id()
-                        .map_err(platform)?,
-                    stroke.id(),
-                );
+                let native_stroke = object(source.get_at(index as u32)).map_err(platform)?;
+                identities.insert(stroke_id(&native_stroke)?, stroke.id());
             }
-            let recognizer = InkRecognizerContainer::new().map_err(platform)?;
-            let installed = recognizer.GetRecognizers().map_err(platform)?;
-            let count = installed.Size().map_err(platform)?;
+            let recognizer = winrt::activate::<winrt::IInkRecognizerContainer>(INK_RECOGNIZER_CONTAINER).map_err(platform)?;
+            let installed = object(recognizer.get_recognizers()).map_err(platform)?;
+            let count = installed.size().map_err(platform)?;
             if count == 0 {
                 return Err(InkError::Platform(
                     "No Windows ink recognizer is installed".into(),
@@ -154,10 +147,10 @@ impl WindowsInkServices {
             if let Some(name) = recognizer_name {
                 let mut found = false;
                 for index in 0..count {
-                    let candidate = installed.GetAt(index).map_err(platform)?;
-                    if candidate.Name().map_err(platform)?.to_string() == name {
+                    let candidate = object(installed.get_at(index)).map_err(platform)?;
+                    if take_string(candidate.name().map_err(platform)?) == name {
                         recognizer
-                            .SetDefaultRecognizer(&candidate)
+                            .set_default_recognizer(Some(&candidate))
                             .map_err(platform)?;
                         found = true;
                         break;
@@ -169,38 +162,32 @@ impl WindowsInkServices {
                     )));
                 }
             }
-            let recognized = recognizer
-                .RecognizeAsync(&native, InkRecognitionTarget::All)
-                .map_err(platform)?
-                .await
+            let operation = object(recognizer.recognize_async(Some(&native), winrt::InkRecognitionTarget::All))
                 .map_err(platform)?;
+            let recognized = object(wait(operation).await).map_err(platform)?;
             let mut result = Vec::new();
-            for index in 0..recognized.Size().map_err(platform)? {
-                let group = recognized.GetAt(index).map_err(platform)?;
-                let bounds = group.BoundingRect().map_err(platform)?;
-                let candidates = group.GetTextCandidates().map_err(platform)?;
+            for index in 0..recognized.size().map_err(platform)? {
+                let group = object(recognized.get_at(index)).map_err(platform)?;
+                let bounds = group.bounding_rect().map_err(platform)?;
+                let candidates = object(group.get_text_candidates()).map_err(platform)?;
                 let mut text_candidates = Vec::new();
-                for index in 0..candidates.Size().map_err(platform)? {
-                    text_candidates.push(candidates.GetAt(index).map_err(platform)?.to_string());
+                for index in 0..candidates.size().map_err(platform)? {
+                    text_candidates.push(take_string(candidates.get_at(index).map_err(platform)?));
                 }
-                let native_strokes = group.GetStrokes().map_err(platform)?;
+                let native_strokes = object(group.get_strokes()).map_err(platform)?;
                 let mut stroke_ids = Vec::new();
-                for index in 0..native_strokes.Size().map_err(platform)? {
-                    let id = native_strokes
-                        .GetAt(index)
-                        .map_err(platform)?
-                        .Id()
-                        .map_err(platform)?;
+                for index in 0..native_strokes.size().map_err(platform)? {
+                    let id = stroke_id(&object(native_strokes.get_at(index)).map_err(platform)?)?;
                     if let Some(id) = identities.get(&id) {
                         stroke_ids.push(*id);
                     }
                 }
                 result.push(WindowsInkRecognitionResult {
                     bounding_rect: Rect::new(
-                        bounds.X as f64,
-                        bounds.Y as f64,
-                        bounds.Width as f64,
-                        bounds.Height as f64,
+                        bounds.x as f64,
+                        bounds.y as f64,
+                        bounds.width as f64,
+                        bounds.height as f64,
                     ),
                     text_candidates,
                     stroke_ids,
@@ -212,36 +199,39 @@ impl WindowsInkServices {
 
     fn native_container(&self, strokes: &[Rc<InkStroke>]) -> Result<NativeContainer, InkError> {
         validate_export(strokes, self.limits, self.allow_twist_loss)?;
-        let container = NativeContainer::new().map_err(platform)?;
-        let builder = InkStrokeBuilder::new().map_err(platform)?;
+        let container = new_container()?;
+        let builder = winrt::activate::<winrt::IInkStrokeBuilder>(INK_STROKE_BUILDER).map_err(platform)?;
+        let builder2 = builder.cast::<winrt::IInkStrokeBuilder2>().map_err(platform)?;
+        let point_factory = winrt::factory::<winrt::IInkPointFactory2>(INK_POINT).map_err(platform)?;
         for stroke in strokes {
             let attributes = to_native_attributes(stroke.drawing_attributes())?;
             builder
-                .SetDefaultDrawingAttributes(&attributes)
+                .set_default_drawing_attributes(Some(&attributes))
                 .map_err(platform)?;
             let mut points = Vec::with_capacity(stroke.ink_points().len());
             for point in stroke.ink_points() {
-                points.push(Some(
-                    NativeInkPoint::CreateInkPointWithTiltAndTimestamp(
+                points.push(
+                    object(point_factory.create_ink_point_with_tilt_and_timestamp(
                         to_native_point(point.position)?,
                         point.pressure,
                         point.tilt_x,
                         point.tilt_y,
                         point.timestamp,
-                    )
+                    ))
                     .map_err(platform)?,
-                ));
+                );
             }
-            let points: IIterable<NativeInkPoint> = points.into();
+            let points = winrt::InkPointIterable::new(points);
             // Keep raw points and the editable point transform as distinct values.
-            let native = builder
-                .CreateStrokeFromInkPoints(&points, Matrix3x2::identity())
+            let native = object(builder2.create_stroke_from_ink_points(Some(&points), IDENTITY))
                 .map_err(platform)?;
+            let point_transform = to_native_matrix(stroke.point_transform())?;
             native
-                .SetPointTransform(to_native_matrix(stroke.point_transform())?)
+                .cast::<winrt::IInkStroke2>()
+                .and_then(|native| native.set_point_transform(point_transform))
                 .map_err(platform)?;
-            native.SetSelected(stroke.selected()).map_err(platform)?;
-            container.AddStroke(&native).map_err(platform)?;
+            native.set_selected(to_abi(stroke.selected())).map_err(platform)?;
+            container.add_stroke(Some(&native)).map_err(platform)?;
         }
         Ok(container)
     }
@@ -265,44 +255,41 @@ impl IInkPlatformServices for WindowsInkServices {
         let native = self.native_container(&strokes);
         Box::pin(async move {
             let native = native?;
-            let stream = InMemoryRandomAccessStream::new().map_err(platform)?;
-            let output = stream.GetOutputStreamAt(0).map_err(platform)?;
+            let stream = winrt::activate::<winrt::IRandomAccessStream>(IN_MEMORY_RANDOM_ACCESS_STREAM).map_err(platform)?;
+            let output = object(stream.get_output_stream_at(0)).map_err(platform)?;
             match format {
                 InkPersistenceFormat::Isf => {
-                    native
-                        .SaveWithFormatAsync(&output, NativeFormat::Isf)
-                        .map_err(platform)?
-                        .await
+                    let operation = native
+                        .cast::<winrt::IInkStrokeContainer3>()
+                        .and_then(|native| object(native.save_with_format_async(Some(&output), winrt::InkPersistenceFormat::Isf)))
                         .map_err(platform)?;
+                    wait(operation).await.map_err(platform)?;
                 }
                 InkPersistenceFormat::GifWithEmbeddedIsf => {
                     // GIF rasterization is also bounded: at most a 16K side and
                     // a BGRA backing surface no larger than the byte budget.
                     validate_gif_bounds(&native, limits)?;
-                    native
-                        .SaveAsync(&output)
-                        .map_err(platform)?
-                        .await
-                        .map_err(platform)?;
+                    let operation = object(native.save_async(Some(&output))).map_err(platform)?;
+                    wait(operation).await.map_err(platform)?;
                 }
                 InkPersistenceFormat::Portable => unreachable!(),
             }
-            let size = stream.Size().map_err(platform)?;
+            let size = stream.size().map_err(platform)?;
             if size > limits.max_bytes as u64 || size > u32::MAX as u64 {
                 return Err(InkError::LimitExceeded);
             }
-            let input = stream.GetInputStreamAt(0).map_err(platform)?;
-            let reader = DataReader::CreateDataReader(&input).map_err(platform)?;
-            let loaded = reader
-                .LoadAsync(size as u32)
-                .map_err(platform)?
-                .await
+            let input = object(stream.get_input_stream_at(0)).map_err(platform)?;
+            let reader = winrt::factory::<winrt::IDataReaderFactory>(DATA_READER)
+                .and_then(|factory| object(factory.create_data_reader(Some(&input))))
                 .map_err(platform)?;
+            let operation = object(reader.load_async(size as u32)).map_err(platform)?;
+            let loaded = wait(operation).await.map_err(platform)?;
             if loaded as u64 != size {
                 return Err(InkError::InvalidData("Truncated native ink stream"));
             }
             let mut data = vec![0; size as usize];
-            reader.ReadBytes(&mut data).map_err(platform)?;
+            // SAFETY: the buffer has room for the count of bytes passed.
+            unsafe { reader.read_bytes(data.len() as u32, data.as_mut_ptr()) }.map_err(platform)?;
             Ok(data)
         })
     }
@@ -313,25 +300,22 @@ impl IInkPlatformServices for WindowsInkServices {
             if data.len() > limits.max_bytes || data.len() > u32::MAX as usize {
                 return Err(InkError::LimitExceeded);
             }
-            let stream = InMemoryRandomAccessStream::new().map_err(platform)?;
-            let output = stream.GetOutputStreamAt(0).map_err(platform)?;
-            let writer = DataWriter::CreateDataWriter(&output).map_err(platform)?;
-            writer.WriteBytes(&data).map_err(platform)?;
-            let stored = writer
-                .StoreAsync()
-                .map_err(platform)?
-                .await
+            let stream = winrt::activate::<winrt::IRandomAccessStream>(IN_MEMORY_RANDOM_ACCESS_STREAM).map_err(platform)?;
+            let output = object(stream.get_output_stream_at(0)).map_err(platform)?;
+            let writer = winrt::factory::<winrt::IDataWriterFactory>(DATA_WRITER)
+                .and_then(|factory| object(factory.create_data_writer(Some(&output))))
                 .map_err(platform)?;
+            // SAFETY: the buffer holds the count of bytes passed; the writer copies them.
+            unsafe { writer.write_bytes(data.len() as u32, data.as_ptr()) }.map_err(platform)?;
+            let operation = object(writer.store_async()).map_err(platform)?;
+            let stored = wait(operation).await.map_err(platform)?;
             if stored as usize != data.len() {
                 return Err(InkError::InvalidData("Truncated native ink stream"));
             }
-            let native = NativeContainer::new().map_err(platform)?;
-            let input = stream.GetInputStreamAt(0).map_err(platform)?;
-            native
-                .LoadAsync(&input)
-                .map_err(platform)?
-                .await
-                .map_err(platform)?;
+            let native = new_container()?;
+            let input = object(stream.get_input_stream_at(0)).map_err(platform)?;
+            let operation = object(native.load_async(Some(&input))).map_err(platform)?;
+            wait(operation).await.map_err(platform)?;
             from_native_container(&native, limits)
         })
     }
@@ -341,36 +325,57 @@ impl IInkPlatformServices for WindowsInkServices {
         let native = self.native_container(strokes)?;
         // The trait receives the strokes chosen for copying. The native method
         // only copies Selected strokes, so select the temporary native copies.
-        let selected = native.GetStrokes().map_err(platform)?;
-        for index in 0..selected.Size().map_err(platform)? {
-            selected
-                .GetAt(index)
-                .map_err(platform)?
-                .SetSelected(true)
+        let selected = object(native.get_strokes()).map_err(platform)?;
+        for index in 0..selected.size().map_err(platform)? {
+            object(selected.get_at(index))
+                .and_then(|stroke| stroke.set_selected(to_abi(true)))
                 .map_err(platform)?;
         }
-        native.CopySelectedToClipboard().map_err(platform)
+        native.copy_selected_to_clipboard().map_err(platform)
     }
 
     fn can_paste(&self) -> Result<bool, InkError> {
         ensure_clipboard_apartment()?;
-        NativeContainer::new()
-            .map_err(platform)?
-            .CanPasteFromClipboard()
+        new_container()?
+            .can_paste_from_clipboard()
+            .map(from_abi)
             .map_err(platform)
     }
 
     fn paste(&self, position: Point) -> Result<Vec<Rc<InkStroke>>, InkError> {
         ensure_clipboard_apartment()?;
         let position = to_native_point(position)?;
-        let native = NativeContainer::new().map_err(platform)?;
-        native.PasteFromClipboard(position).map_err(platform)?;
+        let native = new_container()?;
+        native.paste_from_clipboard(position).map_err(platform)?;
         from_native_container(&native, self.limits)
     }
 }
 
-fn platform(error: windows::core::Error) -> InkError {
+fn platform(error: HResult) -> InkError {
     InkError::Platform(format!("Windows ink: {error}"))
+}
+
+/// The identity matrix of the ink engine.
+const IDENTITY: winrt::Matrix3x2 = winrt::Matrix3x2 {
+    m11: 1.0,
+    m12: 0.0,
+    m21: 0.0,
+    m22: 1.0,
+    m31: 0.0,
+    m32: 0.0,
+};
+
+/// A new, empty `InkStrokeContainer` of the ink engine.
+fn new_container() -> Result<NativeContainer, InkError> {
+    winrt::activate::<winrt::IInkStrokeContainer>(INK_STROKE_CONTAINER).map_err(platform)
+}
+
+/// `InkStroke.Id` (`IInkStroke3`).
+fn stroke_id(stroke: &NativeStroke) -> Result<u32, InkError> {
+    stroke
+        .cast::<winrt::IInkStroke3>()
+        .and_then(|stroke| stroke.id())
+        .map_err(platform)
 }
 
 fn ensure_clipboard_apartment() -> Result<(), InkError> {
@@ -414,9 +419,9 @@ fn validate_gif_bounds(
     native: &NativeContainer,
     limits: InkPersistenceLimits,
 ) -> Result<(), InkError> {
-    let bounds = native.BoundingRect().map_err(platform)?;
-    let width = (bounds.Width as f64).ceil().max(1.0);
-    let height = (bounds.Height as f64).ceil().max(1.0);
+    let bounds = native.bounding_rect().map_err(platform)?;
+    let width = (bounds.width as f64).ceil().max(1.0);
+    let height = (bounds.height as f64).ceil().max(1.0);
     if !width.is_finite()
         || !height.is_finite()
         || width > 16_384.0
@@ -428,7 +433,7 @@ fn validate_gif_bounds(
     Ok(())
 }
 
-fn to_native_point(point: Point) -> Result<NativePoint, InkError> {
+fn to_native_point(point: Point) -> Result<winrt::Point, InkError> {
     if !point.x.is_finite()
         || !point.y.is_finite()
         || point.x.abs() > 1.0e12
@@ -436,13 +441,13 @@ fn to_native_point(point: Point) -> Result<NativePoint, InkError> {
     {
         return Err(InkError::InvalidPoint);
     }
-    Ok(NativePoint {
-        X: point.x as f32,
-        Y: point.y as f32,
+    Ok(winrt::Point {
+        x: point.x as f32,
+        y: point.y as f32,
     })
 }
 
-fn to_native_matrix(matrix: Matrix) -> Result<Matrix3x2, InkError> {
+fn to_native_matrix(matrix: Matrix) -> Result<winrt::Matrix3x2, InkError> {
     let entries = [
         matrix.m11, matrix.m12, matrix.m21, matrix.m22, matrix.m31, matrix.m32,
     ];
@@ -453,118 +458,122 @@ fn to_native_matrix(matrix: Matrix) -> Result<Matrix3x2, InkError> {
     {
         return Err(InkError::InvalidTransform);
     }
-    Ok(Matrix3x2 {
-        M11: matrix.m11 as f32,
-        M12: matrix.m12 as f32,
-        M21: matrix.m21 as f32,
-        M22: matrix.m22 as f32,
-        M31: matrix.m31 as f32,
-        M32: matrix.m32 as f32,
+    Ok(winrt::Matrix3x2 {
+        m11: matrix.m11 as f32,
+        m12: matrix.m12 as f32,
+        m21: matrix.m21 as f32,
+        m22: matrix.m22 as f32,
+        m31: matrix.m31 as f32,
+        m32: matrix.m32 as f32,
     })
 }
 
-fn from_native_matrix(matrix: Matrix3x2) -> Matrix {
+fn from_native_matrix(matrix: winrt::Matrix3x2) -> Matrix {
     Matrix::new(
-        matrix.M11 as f64,
-        matrix.M12 as f64,
-        matrix.M21 as f64,
-        matrix.M22 as f64,
-        matrix.M31 as f64,
-        matrix.M32 as f64,
+        matrix.m11 as f64,
+        matrix.m12 as f64,
+        matrix.m21 as f64,
+        matrix.m22 as f64,
+        matrix.m31 as f64,
+        matrix.m32 as f64,
     )
 }
 
 fn to_native_attributes(attributes: InkDrawingAttributes) -> Result<NativeAttributes, InkError> {
     attributes.validate()?;
     let native = match attributes.kind {
-        InkDrawingAttributesKind::Default => NativeAttributes::new(),
-        InkDrawingAttributesKind::Pencil => NativeAttributes::CreateForPencil(),
+        InkDrawingAttributesKind::Default => winrt::activate::<winrt::IInkDrawingAttributes>(INK_DRAWING_ATTRIBUTES),
+        InkDrawingAttributesKind::Pencil => winrt::factory::<winrt::IInkDrawingAttributesStatics>(INK_DRAWING_ATTRIBUTES)
+            .and_then(|statics| object(statics.create_for_pencil())),
     }
     .map_err(platform)?;
+    let native2 = native.cast::<winrt::IInkDrawingAttributes2>().map_err(platform)?;
     native
-        .SetColor(NativeColor {
-            A: attributes.color.a,
-            R: attributes.color.r,
-            G: attributes.color.g,
-            B: attributes.color.b,
+        .set_color(winrt::Color {
+            a: attributes.color.a,
+            r: attributes.color.r,
+            g: attributes.color.g,
+            b: attributes.color.b,
         })
         .map_err(platform)?;
     native
-        .SetSize(NativeSize {
-            Width: attributes.size.width as f32,
-            Height: attributes.size.height as f32,
+        .set_size(winrt::Size {
+            width: attributes.size.width as f32,
+            height: attributes.size.height as f32,
         })
         .map_err(platform)?;
     // Avoid redundant setters: pencil has fixed characteristics in some OS
     // versions. If an actual requested change is unsupported, report its HRESULT.
     let pen_tip = match attributes.pen_tip {
-        PenTipShape::Circle => NativePenTip::Circle,
-        PenTipShape::Rectangle => NativePenTip::Rectangle,
+        PenTipShape::Circle => winrt::PenTipShape::Circle,
+        PenTipShape::Rectangle => winrt::PenTipShape::Rectangle,
     };
-    if native.PenTip().map_err(platform)? != pen_tip {
-        native.SetPenTip(pen_tip).map_err(platform)?;
+    if native.pen_tip().map_err(platform)? != pen_tip {
+        native.set_pen_tip(pen_tip).map_err(platform)?;
     }
     let transform = to_native_matrix(attributes.pen_tip_transform)?;
-    if native.PenTipTransform().map_err(platform)? != transform {
-        native.SetPenTipTransform(transform).map_err(platform)?;
+    if native2.pen_tip_transform().map_err(platform)? != transform {
+        native2.set_pen_tip_transform(transform).map_err(platform)?;
     }
-    if native.IgnorePressure().map_err(platform)? != attributes.ignore_pressure {
+    if from_abi(native.ignore_pressure().map_err(platform)?) != attributes.ignore_pressure {
         native
-            .SetIgnorePressure(attributes.ignore_pressure)
+            .set_ignore_pressure(to_abi(attributes.ignore_pressure))
             .map_err(platform)?;
     }
-    if native.FitToCurve().map_err(platform)? != attributes.fit_to_curve {
+    if from_abi(native.fit_to_curve().map_err(platform)?) != attributes.fit_to_curve {
         native
-            .SetFitToCurve(attributes.fit_to_curve)
+            .set_fit_to_curve(to_abi(attributes.fit_to_curve))
             .map_err(platform)?;
     }
-    if native.DrawAsHighlighter().map_err(platform)? != attributes.draw_as_highlighter {
-        native
-            .SetDrawAsHighlighter(attributes.draw_as_highlighter)
+    if from_abi(native2.draw_as_highlighter().map_err(platform)?) != attributes.draw_as_highlighter {
+        native2
+            .set_draw_as_highlighter(to_abi(attributes.draw_as_highlighter))
             .map_err(platform)?;
     }
-    if native.IgnoreTilt().map_err(platform)? != attributes.ignore_tilt {
-        native
-            .SetIgnoreTilt(attributes.ignore_tilt)
+    let native4 = native.cast::<winrt::IInkDrawingAttributes4>().map_err(platform)?;
+    if from_abi(native4.ignore_tilt().map_err(platform)?) != attributes.ignore_tilt {
+        native4
+            .set_ignore_tilt(to_abi(attributes.ignore_tilt))
             .map_err(platform)?;
     }
     if attributes.kind == InkDrawingAttributesKind::Pencil {
         native
-            .PencilProperties()
-            .map_err(platform)?
-            .SetOpacity(attributes.pencil_opacity)
+            .cast::<winrt::IInkDrawingAttributes3>()
+            .and_then(|native| object(native.pencil_properties()))
+            .and_then(|pencil| pencil.set_opacity(attributes.pencil_opacity))
             .map_err(platform)?;
     }
     Ok(native)
 }
 
 fn from_native_attributes(native: &NativeAttributes) -> Result<InkDrawingAttributes, InkError> {
-    let color = native.Color().map_err(platform)?;
-    let size = native.Size().map_err(platform)?;
-    let kind = match native.Kind().map_err(platform)? {
-        NativeAttributesKind::Default => InkDrawingAttributesKind::Default,
-        NativeAttributesKind::Pencil => InkDrawingAttributesKind::Pencil,
+    let native2 = native.cast::<winrt::IInkDrawingAttributes2>().map_err(platform)?;
+    let native3 = native.cast::<winrt::IInkDrawingAttributes3>().map_err(platform)?;
+    let native4 = native.cast::<winrt::IInkDrawingAttributes4>().map_err(platform)?;
+    let color = native.color().map_err(platform)?;
+    let size = native.size().map_err(platform)?;
+    let kind = match native3.kind().map_err(platform)? {
+        winrt::InkDrawingAttributesKind::Default => InkDrawingAttributesKind::Default,
+        winrt::InkDrawingAttributesKind::Pencil => InkDrawingAttributesKind::Pencil,
         _ => return Err(InkError::UnsupportedFormat),
     };
     let attributes = InkDrawingAttributes {
-        color: Color::from_argb(color.A, color.R, color.G, color.B),
-        size: Size::new(size.Width as f64, size.Height as f64),
-        pen_tip: match native.PenTip().map_err(platform)? {
-            NativePenTip::Circle => PenTipShape::Circle,
-            NativePenTip::Rectangle => PenTipShape::Rectangle,
+        color: Color::from_argb(color.a, color.r, color.g, color.b),
+        size: Size::new(size.width as f64, size.height as f64),
+        pen_tip: match native.pen_tip().map_err(platform)? {
+            winrt::PenTipShape::Circle => PenTipShape::Circle,
+            winrt::PenTipShape::Rectangle => PenTipShape::Rectangle,
             _ => return Err(InkError::UnsupportedFormat),
         },
-        pen_tip_transform: from_native_matrix(native.PenTipTransform().map_err(platform)?),
-        draw_as_highlighter: native.DrawAsHighlighter().map_err(platform)?,
-        ignore_pressure: native.IgnorePressure().map_err(platform)?,
-        fit_to_curve: native.FitToCurve().map_err(platform)?,
-        ignore_tilt: native.IgnoreTilt().map_err(platform)?,
+        pen_tip_transform: from_native_matrix(native2.pen_tip_transform().map_err(platform)?),
+        draw_as_highlighter: from_abi(native2.draw_as_highlighter().map_err(platform)?),
+        ignore_pressure: from_abi(native.ignore_pressure().map_err(platform)?),
+        fit_to_curve: from_abi(native.fit_to_curve().map_err(platform)?),
+        ignore_tilt: from_abi(native4.ignore_tilt().map_err(platform)?),
         kind,
         pencil_opacity: if kind == InkDrawingAttributesKind::Pencil {
-            native
-                .PencilProperties()
-                .map_err(platform)?
-                .Opacity()
+            object(native3.pencil_properties())
+                .and_then(|pencil| pencil.opacity())
                 .map_err(platform)?
         } else {
             1.0
@@ -578,15 +587,15 @@ fn from_native_container(
     native: &NativeContainer,
     limits: InkPersistenceLimits,
 ) -> Result<Vec<Rc<InkStroke>>, InkError> {
-    let strokes = native.GetStrokes().map_err(platform)?;
-    let count = strokes.Size().map_err(platform)? as usize;
+    let strokes = object(native.get_strokes()).map_err(platform)?;
+    let count = strokes.size().map_err(platform)? as usize;
     if count > limits.max_strokes {
         return Err(InkError::LimitExceeded);
     }
     let mut result = Vec::with_capacity(count);
     let mut total = 0usize;
     for index in 0..count {
-        let native = strokes.GetAt(index as u32).map_err(platform)?;
+        let native = object(strokes.get_at(index as u32)).map_err(platform)?;
         result.push(from_native_stroke(&native, limits, &mut total)?);
     }
     Ok(result)
@@ -597,33 +606,35 @@ fn from_native_stroke(
     limits: InkPersistenceLimits,
     total: &mut usize,
 ) -> Result<Rc<InkStroke>, InkError> {
-    let source = native.GetInkPoints().map_err(platform)?;
-    let count = source.Size().map_err(platform)? as usize;
+    let native2 = native.cast::<winrt::IInkStroke2>().map_err(platform)?;
+    let source = object(native2.get_ink_points()).map_err(platform)?;
+    let count = source.size().map_err(platform)? as usize;
     *total = total.checked_add(count).ok_or(InkError::LimitExceeded)?;
     if count > limits.max_points_per_stroke || *total > limits.max_total_points {
         return Err(InkError::LimitExceeded);
     }
     let mut points = Vec::with_capacity(count);
     for index in 0..count {
-        let point = source.GetAt(index as u32).map_err(platform)?;
-        let position = point.Position().map_err(platform)?;
+        let point = object(source.get_at(index as u32)).map_err(platform)?;
+        let point2 = point.cast::<winrt::IInkPoint2>().map_err(platform)?;
+        let position = point.position().map_err(platform)?;
         points.push(InkPoint {
-            position: Point::new(position.X as f64, position.Y as f64),
-            pressure: point.Pressure().map_err(platform)?,
-            tilt_x: point.TiltX().map_err(platform)?,
-            tilt_y: point.TiltY().map_err(platform)?,
+            position: Point::new(position.x as f64, position.y as f64),
+            pressure: point.pressure().map_err(platform)?,
+            tilt_x: point2.tilt_x().map_err(platform)?,
+            tilt_y: point2.tilt_y().map_err(platform)?,
             twist: 0.0,
-            timestamp: point.Timestamp().map_err(platform)?,
+            timestamp: point2.timestamp().map_err(platform)?,
         });
     }
     let stroke = InkStroke::new(
         points,
-        from_native_attributes(&native.DrawingAttributes().map_err(platform)?)?,
+        from_native_attributes(&object(native.drawing_attributes()).map_err(platform)?)?,
     )?;
     stroke.set_point_transform(from_native_matrix(
-        native.PointTransform().map_err(platform)?,
+        native2.point_transform().map_err(platform)?,
     ))?;
-    stroke.set_selected(native.Selected().map_err(platform)?);
+    stroke.set_selected(from_abi(native.selected().map_err(platform)?));
     Ok(stroke)
 }
 
@@ -741,6 +752,22 @@ mod tests {
         vec![first, second, third]
     }
 
+    /// The strokes of a native container, through its own getters.
+    fn native_strokes(container: &NativeContainer) -> Vec<NativeStroke> {
+        let strokes = object(container.get_strokes()).unwrap();
+        (0..strokes.size().unwrap()).map(|index| object(strokes.get_at(index)).unwrap()).collect()
+    }
+
+    /// The points of a native stroke, through its own getters.
+    fn native_points(stroke: &NativeStroke) -> Vec<ComPtr<winrt::IInkPoint>> {
+        let points = object(stroke.cast::<winrt::IInkStroke2>().unwrap().get_ink_points()).unwrap();
+        (0..points.size().unwrap()).map(|index| object(points.get_at(index)).unwrap()).collect()
+    }
+
+    fn native_point_transform(stroke: &NativeStroke) -> winrt::Matrix3x2 {
+        stroke.cast::<winrt::IInkStroke2>().unwrap().point_transform().unwrap()
+    }
+
     fn near(actual: f64, expected: f64, tolerance: f64) {
         assert!(
             (actual - expected).abs() <= tolerance,
@@ -753,7 +780,7 @@ mod tests {
         let matrix = Matrix::new(2.0, 3.0, 4.0, 5.0, 6.0, 7.0);
         let native = to_native_matrix(matrix).unwrap();
         assert_eq!(
-            [native.M11, native.M12, native.M21, native.M22, native.M31, native.M32],
+            [native.m11, native.m12, native.m21, native.m22, native.m31, native.m32],
             [2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
         );
         assert_eq!(from_native_matrix(native), matrix);
@@ -795,7 +822,7 @@ mod tests {
         );
         assert_eq!(
             to_native_point(Point::new(1.5, -2.0)).unwrap(),
-            NativePoint { X: 1.5, Y: -2.0 }
+            winrt::Point { x: 1.5, y: -2.0 }
         );
     }
 
@@ -807,18 +834,18 @@ mod tests {
             let native = services.native_container(&source).unwrap();
             // Assert through the actual Windows getters as well as our inverse
             // adapter, so a symmetric conversion bug cannot pass a round trip.
-            let first = native.GetStrokes().unwrap().GetAt(0).unwrap();
-            assert!(first.Selected().unwrap());
-            let transform = first.PointTransform().unwrap();
+            let first = native_strokes(&native).remove(0);
+            assert!(from_abi(first.selected().unwrap()));
+            let transform = native_point_transform(&first);
             assert_eq!(
-                [transform.M11, transform.M22, transform.M31, transform.M32],
+                [transform.m11, transform.m22, transform.m31, transform.m32],
                 [1.25, 0.75, 30.0, 40.0]
             );
-            let color = first.DrawingAttributes().unwrap().Color().unwrap();
-            assert_eq!([color.A, color.R, color.G, color.B], [255, 12, 34, 56]);
-            let point = first.GetInkPoints().unwrap().GetAt(0).unwrap();
-            near(point.Position().unwrap().X as f64, 10.0, 0.05);
-            near(point.Position().unwrap().Y as f64, 20.0, 0.05);
+            let color = object(first.drawing_attributes()).unwrap().color().unwrap();
+            assert_eq!([color.a, color.r, color.g, color.b], [255, 12, 34, 56]);
+            let point = native_points(&first).remove(0);
+            near(point.position().unwrap().x as f64, 10.0, 0.05);
+            near(point.position().unwrap().y as f64, 20.0, 0.05);
             let imported = from_native_container(&native, InkPersistenceLimits::DEFAULT).unwrap();
             assert_eq!(imported.len(), source.len());
             for (expected, actual) in source.iter().zip(&imported) {
@@ -845,22 +872,22 @@ mod tests {
             let services = WindowsInkServices::new().expect("Windows ink activation");
             let source = fixture_strokes();
             let native = services.native_container(&source).unwrap();
-            let native_strokes = native.GetStrokes().unwrap();
-            let selected = native_strokes.GetAt(0).unwrap();
-            let unselected = native_strokes.GetAt(1).unwrap();
-            let before = selected.BoundingRect().unwrap();
-            let untouched = unselected.BoundingRect().unwrap();
+            let strokes = native_strokes(&native);
+            let selected = &strokes[0];
+            let unselected = &strokes[1];
+            let before = selected.bounding_rect().unwrap();
+            let untouched = unselected.bounding_rect().unwrap();
             // The Learn parameter description calls this a destination, while
             // the API names it translation. Pin the installed OS behavior with
             // nonzero initial coordinates instead of assuming either wording.
             let moved = native
-                .MoveSelected(NativePoint { X: 25.0, Y: -10.0 })
+                .move_selected(winrt::Point { x: 25.0, y: -10.0 })
                 .unwrap();
-            let after = selected.BoundingRect().unwrap();
-            near(after.X as f64, before.X as f64 + 25.0, 0.01);
-            near(after.Y as f64, before.Y as f64 - 10.0, 0.01);
+            let after = selected.bounding_rect().unwrap();
+            near(after.x as f64, before.x as f64 + 25.0, 0.01);
+            near(after.y as f64, before.y as f64 - 10.0, 0.01);
             assert_eq!(moved, after);
-            assert_eq!(unselected.BoundingRect().unwrap(), untouched);
+            assert_eq!(unselected.bounding_rect().unwrap(), untouched);
 
             let portable = InkStrokeContainer::new();
             portable.add_strokes(source).unwrap();
@@ -982,7 +1009,7 @@ mod tests {
 
     /// Explicit opt-in: this replaces the current user's system clipboard.
     /// Run only in an isolated interactive Windows test session with:
-    /// `cargo test -p ferroui-winui native_clipboard_round_trip -- --ignored`.
+    /// `cargo test -p ferroui-controls-inking native_clipboard_round_trip -- --ignored`.
     #[test]
     #[ignore = "replaces the system clipboard; requires an isolated interactive Windows session"]
     fn native_clipboard_round_trip() {
@@ -991,14 +1018,14 @@ mod tests {
             let source = fixture_strokes();
             services.copy_to_clipboard(&source).unwrap();
             assert!(services.can_paste().unwrap());
-            let position = NativePoint { X: 300.0, Y: 200.0 };
-            let reference = NativeContainer::new().unwrap();
-            let native_paste_bounds = reference.PasteFromClipboard(position).unwrap();
-            let expected = reference.GetStrokes().unwrap();
-            assert_eq!(expected.Size().unwrap() as usize, source.len());
+            let position = winrt::Point { x: 300.0, y: 200.0 };
+            let reference = new_container().unwrap();
+            let native_paste_bounds = reference.paste_from_clipboard(position).unwrap();
+            let expected = native_strokes(&reference);
+            assert_eq!(expected.len(), source.len());
             println!(
                 "Native paste bounds at (300, 200): {native_paste_bounds:?}; collection: {:?}",
-                reference.BoundingRect().unwrap()
+                reference.bounding_rect().unwrap()
             );
             let pasted = services.paste(Point::new(300.0, 200.0)).unwrap();
             assert_eq!(pasted.len(), source.len());
@@ -1006,51 +1033,49 @@ mod tests {
                 // Compare with actual native getters, including Selected. The
                 // installed OS can return unselected pasted ink despite the
                 // Learn remark promising a selected result.
-                let native = expected.GetAt(index as u32).unwrap();
-                assert_eq!(actual.selected(), native.Selected().unwrap());
+                let native = &expected[index];
+                assert_eq!(actual.selected(), from_abi(native.selected().unwrap()));
                 assert_eq!(
                     actual.drawing_attributes(),
-                    from_native_attributes(&native.DrawingAttributes().unwrap()).unwrap()
+                    from_native_attributes(&object(native.drawing_attributes()).unwrap()).unwrap()
                 );
-                let transform = native.PointTransform().unwrap();
-                let native_points = native.GetInkPoints().unwrap();
-                assert_eq!(
-                    actual.ink_points().len(),
-                    native_points.Size().unwrap() as usize
-                );
+                let transform = native_point_transform(native);
+                let native_points = native_points(native);
+                assert_eq!(actual.ink_points().len(), native_points.len());
                 for (point_index, point) in actual.ink_points().iter().enumerate() {
-                    let native_point = native_points.GetAt(point_index as u32).unwrap();
-                    let position = native_point.Position().unwrap();
+                    let native_point = &native_points[point_index];
+                    let native_point2 = native_point.cast::<winrt::IInkPoint2>().unwrap();
+                    let position = native_point.position().unwrap();
                     let actual_position = actual.point_transform().transform(point.position);
                     // Apply the native matrix directly rather than running it
                     // through the same conversion that the adapter uses.
                     near(
                         actual_position.x,
-                        position.X as f64 * transform.M11 as f64
-                            + position.Y as f64 * transform.M21 as f64
-                            + transform.M31 as f64,
+                        position.x as f64 * transform.m11 as f64
+                            + position.y as f64 * transform.m21 as f64
+                            + transform.m31 as f64,
                         0.001,
                     );
                     near(
                         actual_position.y,
-                        position.X as f64 * transform.M12 as f64
-                            + position.Y as f64 * transform.M22 as f64
-                            + transform.M32 as f64,
+                        position.x as f64 * transform.m12 as f64
+                            + position.y as f64 * transform.m22 as f64
+                            + transform.m32 as f64,
                         0.001,
                     );
                     near(
                         point.pressure as f64,
-                        native_point.Pressure().unwrap() as f64,
+                        native_point.pressure().unwrap() as f64,
                         0.00001,
                     );
                     near(
                         point.tilt_x as f64,
-                        native_point.TiltX().unwrap() as f64,
+                        native_point2.tilt_x().unwrap() as f64,
                         0.001,
                     );
                     near(
                         point.tilt_y as f64,
-                        native_point.TiltY().unwrap() as f64,
+                        native_point2.tilt_y().unwrap() as f64,
                         0.001,
                     );
                     assert_eq!(point.twist, 0.0);
@@ -1075,23 +1100,22 @@ mod tests {
             // wrapper; an empty-container result alone does not establish
             // whether an earlier selection survives a native paste.
             let populated = services.native_container(&source[..1]).unwrap();
-            let sentinel = populated.GetStrokes().unwrap().GetAt(0).unwrap();
-            let sentinel_id = sentinel.Id().unwrap();
-            sentinel.SetSelected(true).unwrap();
-            populated.PasteFromClipboard(position).unwrap();
-            let after = populated.GetStrokes().unwrap();
-            assert_eq!(after.Size().unwrap() as usize, source.len() + 1);
+            let sentinel = native_strokes(&populated).remove(0);
+            let sentinel_id = stroke_id(&sentinel).unwrap();
+            sentinel.set_selected(to_abi(true)).unwrap();
+            populated.paste_from_clipboard(position).unwrap();
+            let after = native_strokes(&populated);
+            assert_eq!(after.len(), source.len() + 1);
             let mut pasted_selection = Vec::new();
-            for index in 0..after.Size().unwrap() {
-                let stroke = after.GetAt(index).unwrap();
-                if stroke.Id().unwrap() != sentinel_id {
-                    pasted_selection.push(stroke.Selected().unwrap());
+            for stroke in &after {
+                if stroke_id(stroke).unwrap() != sentinel_id {
+                    pasted_selection.push(from_abi(stroke.selected().unwrap()));
                 }
             }
             assert_eq!(pasted_selection.len(), source.len());
             println!(
                 "Native populated paste selection: old={}, new={pasted_selection:?}",
-                sentinel.Selected().unwrap()
+                from_abi(sentinel.selected().unwrap())
             );
         });
     }

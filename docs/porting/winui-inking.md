@@ -289,17 +289,26 @@ Both portable and native save paths capture the requested strokes' values at
 method invocation, so edits made before the returned future is polled do not
 silently change the saved document.
 
-The optional `ferroui-winui::WindowsInkServices` adapter is compiled only on
-Windows. It uses `windows = 0.62.2`, `windows-collections = 0.3.2` and
-`windows-numerics = 0.3.1`, with the Windows 10 1703 contracts for tilt/time and
+The optional `ferroui_controls_inking::WindowsInkServices` adapter
+(`windows_ink_services.rs`) is compiled only on Windows. It calls the ink engine
+through the MicroCom bindings of the crate, as the WinUI integration calls the
+Windows Runtime (owner decision D3 of the core plan): `windows_ink.idl` declares
+the interfaces of `Windows.UI.Input.Inking`, the in-memory stream with its reader
+and writer, and the collections and asynchronous operations it uses, and the
+build script generates the bindings from it on every host, where a test checks
+the identifiers of the parameterized instances against their signatures.
+`windows_ink_interop.rs` adds activation, the await of an operation and the
+`IIterable<InkPoint>` the stroke builder reads. The slot orders and identifiers
+were compared with the declarations of the `windows` crate 0.62.2, which the
+adapter called before. It uses the Windows 10 1703 contracts for tilt/time and
 explicit ISF saving. Construction initializes WinRT through the existing
 FerroUI Windows backend and verifies native ink activation. The service stays on
 its creating thread and is not `Send`. Persistence works on the framework's
 local executor; the synchronous Windows clipboard APIs specifically require an
 STA, normally the existing Windows UI thread. The adapter checks this condition
 and returns a clear error instead of attempting to change a caller's apartment.
-No new `unsafe` code, cross-thread COM marshaling or blocking async wait is
-introduced.
+The only `unsafe` calls are the two byte copies of the stream reader and
+writer; there is no cross-thread COM marshaling or blocking async wait.
 
 | Request | Native operation |
 |---|---|
@@ -323,8 +332,7 @@ To attach the service in a Windows application:
 
 ```rust,ignore
 use std::rc::Rc;
-use ferroui_controls::{InkCanvas, InkError, InkPersistenceFormat};
-use ferroui_winui::WindowsInkServices;
+use ferroui_controls_inking::{InkCanvas, InkError, InkPersistenceFormat, WindowsInkServices};
 
 fn enable_windows_ink(canvas: &InkCanvas) -> Result<(), InkError> {
     canvas.ink_presenter().stroke_container()
@@ -522,12 +530,10 @@ or compares pixels.
 Rust validation is targeted at the controls crate and inking modules:
 
 ```sh
-cargo check -p ferroui-controls
-cargo test -p ferroui-controls --lib inking::
-cargo check -p ferroui-winui --target x86_64-pc-windows-gnu
-cargo check -p ferroui-winui --tests --target x86_64-pc-windows-gnu
+cargo test -p ferroui-controls-inking --lib
+cargo check -p ferroui-controls-inking --tests --target x86_64-pc-windows-msvc
 # On Windows (does not touch the clipboard):
-cargo test -p ferroui-winui --lib inking::
+cargo test -p ferroui-controls-inking --lib windows_ink_services::
 ```
 
 Execution results belong in the PR work log after the commands complete. A test
@@ -600,7 +606,7 @@ runs because it replaces the user's global clipboard. The focused workflow runs
 it explicitly on its disposable Windows runner:
 
 ```sh
-cargo test --locked -p ferroui-winui --lib inking::tests::native_clipboard_round_trip -- --ignored --exact --test-threads=1 --nocapture
+cargo test --locked -p ferroui-controls-inking --lib windows_ink_services::tests::native_clipboard_round_trip -- --ignored --exact --test-threads=1 --nocapture
 ```
 
 Its first dedicated run found the native clipboard's STA requirement
