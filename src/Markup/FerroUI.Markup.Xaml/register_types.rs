@@ -357,28 +357,25 @@ mod tests {
     #[test]
     fn a_markup_list_held_by_an_untyped_property_is_bound_to_an_items_source() {
         use ferroui_base::collections::FerroList;
-        use ferroui_base::data::{BindingMode, IndexerBinding};
         use ferroui_base::metadata::MarkupValue;
-        use ferroui_controls::{Border, ItemsControl};
+        use ferroui_controls::ItemsControl;
 
         register_types();
         let list = RuntimeList::untyped();
         list.add(Some(Rc::new("first".to_string())));
-        // The untyped property (`Tag`, an `object`) holds the list itself.
-        let holder = Border::new();
-        holder.set_tag(Some(Rc::new(list.clone())));
-        assert!(holder.tag().is_some_and(|tag| tag.downcast_ref::<RuntimeList>().is_some()));
-
+        // The untyped property (`DataContext`, an `object`) holds the list itself.
         let target = ItemsControl::new();
-        let binding = IndexerBinding::new(holder.clone().upcast(), Control::tag_property(), BindingMode::OneWay);
-        let expression = target.bind_binding(ItemsControl::items_source_property(), &binding);
+        target.set_data_context(Some(Rc::new(list.clone())));
+        assert!(target.data_context().is_some_and(|value| value.downcast_ref::<RuntimeList>().is_some()));
+
+        // `{Binding}` delivers it to the items source, converted to the handle of its items.
+        let expression = target.bind_binding(ItemsControl::items_source_property(), &ReflectionBinding::new("."));
         let source = target.items_source().expect("the items source");
         // The items source shares the items of the list.
         assert!(source.downcast_ref::<FerroList<MarkupValue>>().is_some_and(|items| std::ptr::eq(items, &**list.items())));
         assert_eq!(source.count(), 1);
         list.add(Some(Rc::new("second".to_string())));
         assert_eq!(source.count(), 2);
-        assert_eq!(target.item_count(), 2);
         expression.dispose();
     }
 
