@@ -165,6 +165,7 @@ pub mod if_else_trigger_view;
 // pub mod execute_script_action_view;
 // pub mod observable_trigger_behavior_view;
 pub mod interaction_trigger_behavior_view;
+pub mod observable_trigger_behavior_view;
 pub mod flyout_binding_view;
 // Group C (pages 145 to 234)
 pub mod key_trigger_view;
@@ -473,7 +474,7 @@ pub(crate) const PAGE_TABLE: &[PageInfo] = &[
     drawn_cursor_view::PAGE,
     if_else_trigger_view::PAGE,
     PageInfo::placeholder("ExecuteScriptAction", "Views/Pages/ExecuteScriptActionView"),
-    PageInfo::placeholder("Observable Trigger", "Views/ReactiveUI/ObservableTriggerBehaviorView"),
+    observable_trigger_behavior_view::PAGE,
     interaction_trigger_behavior_view::PAGE,
     flyout_binding_view::PAGE,
     // Group C (pages 145 to 234)

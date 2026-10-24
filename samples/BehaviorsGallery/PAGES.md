@@ -191,12 +191,12 @@ until the page is ported.
 | 36 | AutoFocusBehavior | `Views/Pages/AutoFocusBehaviorView` | A | 34 | ported |  |
 | 37 | AutoSelectBehavior | `Views/Pages/AutoSelectBehaviorView` | A | 34 | ported |  |
 | 38 | TextBoxValidationBehavior | `Views/Pages/TextBoxValidationBehaviorView` | A | 43 | ported |  |
-| 39 | NumericUpDownValidationBehavior | `Views/Pages/NumericUpDownValidationBehaviorView` | A | 46 | ported | deviation: the rules without `x:TypeArguments` (the rules of the port are not generic) |
-| 40 | NotNullValidationRule | `Views/Pages/NotNullValidationRuleView` | A | 45 | ported | deviation: the rule without `x:TypeArguments` (the rules of the port are not generic) |
-| 41 | PropertyValidationBehavior | `Views/Pages/PropertyValidationBehaviorView` | A | 56 | ported | deviation: the closed `PropertyValidationBehavior<TextBox, string>` of the document is a class of the page (`TextBoxPropertyValidationBehavior`), the behavior of the port not being generic |
-| 42 | SliderValidationBehavior | `Views/Pages/SliderValidationBehaviorView` | A | 60 | ported | deviation: the rule without `x:TypeArguments` (the rules of the port are not generic) |
-| 43 | DatePickerValidationBehavior | `Views/Pages/DatePickerValidationBehaviorView` | A | 47 | ported | deviation: the rule without `x:TypeArguments` (the rules of the port are not generic) |
-| 44 | ComboBoxValidationBehavior | `Views/Pages/ComboBoxValidationBehaviorView` | A | 46 | ported | deviation: the rule without `x:TypeArguments` (the rules of the port are not generic) |
+| 39 | NumericUpDownValidationBehavior | `Views/Pages/NumericUpDownValidationBehaviorView` | A | 46 | ported | deviation: the rules without `x:TypeArguments` (markup cannot give a class of the object model type arguments; the rules of the port are untyped) |
+| 40 | NotNullValidationRule | `Views/Pages/NotNullValidationRuleView` | A | 45 | ported | deviation: the rule without `x:TypeArguments` (markup cannot give a class of the object model type arguments; the rules of the port are untyped) |
+| 41 | PropertyValidationBehavior | `Views/Pages/PropertyValidationBehaviorView` | A | 56 | ported | deviation: no `x:TypeArguments="TextBox, sys:String"` (markup cannot give a class of the object model type arguments); the behavior markup creates validates the property whatever the type of its value |
+| 42 | SliderValidationBehavior | `Views/Pages/SliderValidationBehaviorView` | A | 60 | ported | deviation: the rule without `x:TypeArguments` (markup cannot give a class of the object model type arguments; the rules of the port are untyped) |
+| 43 | DatePickerValidationBehavior | `Views/Pages/DatePickerValidationBehaviorView` | A | 47 | ported | deviation: the rule without `x:TypeArguments` (markup cannot give a class of the object model type arguments; the rules of the port are untyped) |
+| 44 | ComboBoxValidationBehavior | `Views/Pages/ComboBoxValidationBehaviorView` | A | 46 | ported | deviation: the rule without `x:TypeArguments` (markup cannot give a class of the object model type arguments; the rules of the port are untyped) |
 | 45 | FocusControlBehavior | `Views/Pages/FocusControlBehaviorView` | A | 37 | ported |  |
 | 46 | FocusOnAttachedBehavior | `Views/Pages/FocusOnAttachedBehaviorView` | A | 34 | ported | a behavior of the Custom crate |
 | 47 | FocusOnAttachedToVisualTreeBehavior | `Views/Pages/FocusOnAttachedToVisualTreeBehaviorView` | A | 34 | ported |  |
@@ -294,7 +294,7 @@ until the page is ported.
 | 139 | Drawn Cursor | `Views/Pages/DrawnCursorView` | B | 51 | ported | SetCursorFromProvider behavior and action; own view model (`ViewModels/drawn_cursor_view_model.rs`) |
 | 140 | IfElseTrigger | `Views/Pages/IfElseTriggerView` | B | 49 | ported | IfElseTrigger |
 | 141 | ExecuteScriptAction | `Views/Pages/ExecuteScriptActionView` | B | 53 | placeholder | NOT PORTED: ExecuteScriptAction needs a C# script run time, which the port has not (waived) |
-| 142 | Observable Trigger | `Views/ReactiveUI/ObservableTriggerBehaviorView` | B | 46 | placeholder | NOT PORTED: the binding `Observable="{Binding Values}"` hands the trigger the stream value of the view model (`ObservableValue`), which `ObservableTriggerBehavior` does not read (`src/Behaviors/FerroUI.Xaml.Interactions.Custom/core/observable_trigger_behavior.rs`, `observable_of`); x:TypeArguments must also go (the trigger is not generic) |
+| 142 | Observable Trigger | `Views/ReactiveUI/ObservableTriggerBehaviorView` | B | 46 | ported | ObservableTriggerBehavior with `Observable="{Binding Values}"` (the stream value of the view model) and ChangePropertyAction; deviation: no `x:TypeArguments="x:Int32"` (the trigger is not generic, its value is untyped) |
 | 143 | InteractionTriggerBehavior | `Views/ReactiveUI/InteractionTriggerBehaviorView` | B | 45 | ported | InteractionTriggerBehavior; own view model (`ViewModels/ReactiveUI/interaction_trigger_behavior_view_model.rs`, namespace `BehaviorsGallery.ViewModels.ReactiveUI`); deviation: no x:TypeArguments (the behavior is not generic) |
 | 144 | Flyout Binding | `Views/Pages/FlyoutBindingView` | B | 48 | ported | InvokeCommandAction in a flyout bound to the data context |
 | 145 | KeyTrigger | `Views/Pages/KeyTriggerView` | C | 49 | ported |  |
