@@ -9,6 +9,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:ClassModifier="internal">
   <ControlTheme x:Key="DefaultHyperlinkButtonStyle" TargetType="HyperlinkButton" BasedOn="{StaticResource MaterialTextButton}">
+    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
   </ControlTheme>
   <ControlTheme x:Key="{x:Type HyperlinkButton}" TargetType="HyperlinkButton" BasedOn="{StaticResource DefaultHyperlinkButtonStyle}" />
 </ResourceDictionary>

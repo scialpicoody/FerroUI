@@ -1,17 +1,15 @@
 <!-- Material 3 Expressive adaptation of the FerroUI WinUI control contract.
      Source: AndroidX Material3 1.5.0-beta02, e4d933c98df7baa7ea2b83eea6e086915961e0ff.
      Original structure: Microsoft Corporation, MIT; see NOTICE.md. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:ClassModifier="internal">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:material="using:FerroUI.Themes.Material" x:ClassModifier="internal">
   <Design.PreviewWith>
     <Border Width="400" Height="300">
       <NavigationPage/>
     </Border>
   </Design.PreviewWith>
-  <ControlTheme x:Key="NavigationBackButtonNormalStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
+  <ControlTheme x:Key="NavigationBackButtonNormalStyle" TargetType="Button">
     <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
-    <Setter Property="FontFamily" Value="{DynamicResource SymbolThemeFontFamily}"/>
-    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
     <Setter Property="Height" Value="48"/>
     <Setter Property="Width" Value="48"/>
     <Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -21,67 +19,24 @@
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="Padding" Value="0"/>
     <Setter Property="FocusAdorner">
-      <FocusAdornerTemplate>
-        <Border BorderThickness="2" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}"/>
-        </Border>
-      </FocusAdornerTemplate>
+      <FocusAdornerTemplate><Border BorderThickness="3" BorderBrush="{DynamicResource MaterialSecondaryBrush}" CornerRadius="24" Margin="-3"/></FocusAdornerTemplate>
     </Setter>
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="RootGrid" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}">
           <Panel>
+            <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False"/>
+            <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
             <Path x:Name="Content" Data="M20 11H7.83L13.42 5.41 12 4 4 12 12 20 13.42 18.59 7.83 13H20Z" Fill="{TemplateBinding Foreground}" Stretch="Uniform" Height="24" Width="24" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNull}}"/>
             <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
           </Panel>
         </Border>
       </ControlTemplate>
     </Setter>
-    <Style Selector="^:pointerover">
-      <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPointerOver}"/>
-      <Style Selector="^ /template/ Border#RootGrid">
-        <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPointerOver}"/>
-      </Style>
-      <Style Selector="^ /template/ Path#Content">
-        <Setter Property="Fill" Value="{DynamicResource NavigationViewButtonForegroundPointerOver}"/>
-      </Style>
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPointerOver}"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-      </Style>
-    </Style>
-    <Style Selector="^:pressed">
-      <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPressed}"/>
-      <Style Selector="^ /template/ Border#RootGrid">
-        <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPressed}"/>
-      </Style>
-      <Style Selector="^ /template/ Path#Content">
-        <Setter Property="Fill" Value="{DynamicResource NavigationViewButtonForegroundPressed}"/>
-      </Style>
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPressed}"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-      </Style>
-    </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundDisabled}"/>
-      <Style Selector="^ /template/ Border#RootGrid">
-        <Setter Property="Background" Value="{TemplateBinding Background}"/>
-      </Style>
-      <Style Selector="^ /template/ Path#Content">
-        <Setter Property="Fill" Value="{DynamicResource NavigationViewButtonForegroundDisabled}"/>
-      </Style>
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundDisabled}"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-      </Style>
-    </Style>
-    <Style Selector="^[FlowDirection=RightToLeft] /template/ Path#Content">
-      <Setter Property="RenderTransform" Value="scaleX(-1)"/>
-    </Style>
+    <Style Selector="^:pointerover /template/ Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/></Style>
+    <Style Selector="^:focus-visible /template/ Border#StateLayer"><Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}"/></Style>
+    <Style Selector="^:disabled /template/ Border#StateLayer"><Setter Property="Background" Value="Transparent"/></Style>
+    <Style Selector="^:disabled /template/ Path#Content, ^:disabled /template/ ContentPresenter#PART_ContentPresenter"><Setter Property="Opacity" Value="0.38"/></Style>
   </ControlTheme>
   <ControlTheme x:Key="NavigationBackButtonSmallStyle" TargetType="Button" BasedOn="{StaticResource NavigationBackButtonNormalStyle}">
     <Setter Property="Margin" Value="4,2,0,2"/>
@@ -89,30 +44,8 @@
   <ControlTheme x:Key="{x:Type NavigationPage}" TargetType="NavigationPage">
     <Setter Property="BarHeight" Value="64"/>
     <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="PageTransition">
-      <Setter.Value>
-        <PageSlide Duration="{StaticResource MaterialMotionDefaultSpatialDuration}" Orientation="Horizontal" FillMode="Forward">
-          <PageSlide.SlideInEasing>
-            <SplineEasing X1="0.2" Y1="0" X2="0" Y2="1"/>
-          </PageSlide.SlideInEasing>
-          <PageSlide.SlideOutEasing>
-            <SplineEasing X1="0.2" Y1="0" X2="0" Y2="1"/>
-          </PageSlide.SlideOutEasing>
-        </PageSlide>
-      </Setter.Value>
-    </Setter>
-    <Setter Property="ModalTransition">
-      <Setter.Value>
-        <PageSlide Duration="{StaticResource MaterialMotionDefaultSpatialDuration}" Orientation="Vertical" FillMode="Forward">
-          <PageSlide.SlideInEasing>
-            <SplineEasing X1="0.2" Y1="0" X2="0" Y2="1"/>
-          </PageSlide.SlideInEasing>
-          <PageSlide.SlideOutEasing>
-            <SplineEasing X1="0.2" Y1="0" X2="0" Y2="1"/>
-          </PageSlide.SlideOutEasing>
-        </PageSlide>
-      </Setter.Value>
-    </Setter>
+    <Setter Property="PageTransition" Value="{DynamicResource MaterialPageTransition}"/>
+    <Setter Property="ModalTransition" Value="{DynamicResource MaterialModalTransition}"/>
     <Setter Property="Template">
       <ControlTemplate>
         <Panel ClipToBounds="True">
@@ -158,9 +91,6 @@
     </Style>
     <Style Selector="^:nav-bar-compact /template/ ContentPresenter#PART_TopCommandBar CommandBar">
       <Setter Property="DefaultLabelPosition" Value="Collapsed"/>
-    </Style>
-    <Style Selector="^[FlowDirection=RightToLeft] /template/ Path#PART_BackButtonDefaultIcon">
-      <Setter Property="RenderTransform" Value="scaleX(-1)"/>
     </Style>
   </ControlTheme>
 </ResourceDictionary>

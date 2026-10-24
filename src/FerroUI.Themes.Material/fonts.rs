@@ -8,9 +8,25 @@ use std::rc::Rc;
 
 pub(crate) fn register() {
     static ONCE: std::sync::Once = std::sync::Once::new();
-    ONCE.call_once(|| register_assets(crate::ASSEMBLY.name, &[
-        ("/Assets/Roboto.ttf", include_bytes!("Assets/Roboto.ttf")),
-    ]));
+    ONCE.call_once(|| {
+        register_assets(
+            crate::ASSEMBLY.name,
+            &[
+                (
+                    "/Assets/Roboto-Regular.ttf",
+                    include_bytes!("Assets/Roboto-Regular.ttf"),
+                ),
+                (
+                    "/Assets/Roboto-Medium.ttf",
+                    include_bytes!("Assets/Roboto-Medium.ttf"),
+                ),
+                (
+                    "/Assets/Roboto-Bold.ttf",
+                    include_bytes!("Assets/Roboto-Bold.ttf"),
+                ),
+            ],
+        )
+    });
 }
 
 /// Adds the embedded Android font family to FerroUI's cross-platform font manager.

@@ -51,6 +51,7 @@ const MAX_SIMULTANEOUS_RIPPLES: usize = 16;
 pub struct MaterialRipple {
     base: Control,
     host: RefCell<Option<HostSubscriptions>>,
+    visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     waves: RefCell<Vec<RippleWave>>,
     frame_pending: Cell<bool>,
     frame_generation: Cell<u64>,
@@ -101,7 +102,7 @@ ferro_properties! { impl MaterialRipple {
         pub fn interaction_opacity_property() -> StyledProperty<f64> {
             FerroProperty::register_with::<MaterialRipple, _>(
                 "InteractionOpacity",
-                StyledPropertyOptions::new(0.10)
+                StyledPropertyOptions::new(0.10_f64)
                     .validate(|value| value.is_finite() && (0.0..=1.0).contains(value)),
             )
         }
@@ -165,10 +166,22 @@ impl VisualImpl for MaterialRipple {
 
     fn on_attached_to_visual_tree(this: &Self, event: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, event);
+        let weak = this.to_ref().downgrade();
+        *this.visibility_subscription.borrow_mut() =
+            Some(this.is_effectively_visible_changed(move || {
+                if let Some(this) = weak.upgrade() {
+                    if !this.is_effectively_visible() {
+                        this.cancel();
+                    }
+                }
+            }));
         this.connect_host();
     }
 
     fn on_detached_from_visual_tree(this: &Self, event: &VisualTreeAttachmentEventArgs) {
+        if let Some(subscription) = this.visibility_subscription.borrow_mut().take() {
+            subscription.dispose();
+        }
         this.disconnect_host();
         this.cancel();
         Self::parent_on_detached_from_visual_tree(this, event);
@@ -193,6 +206,7 @@ impl MaterialRipple {
         Self {
             base: Control::construct(),
             host: RefCell::new(None),
+            visibility_subscription: RefCell::new(None),
             waves: RefCell::new(Vec::new()),
             frame_pending: Cell::new(false),
             frame_generation: Cell::new(0),
@@ -284,6 +298,7 @@ impl MaterialRipple {
             .is_none_or(|host| host.is_effectively_enabled());
         if !self.is_effectively_enabled()
             || !host_enabled
+            || !self.is_effectively_visible()
             || !origin.x.is_finite()
             || !origin.y.is_finite()
         {
@@ -373,7 +388,10 @@ impl MaterialRipple {
     }
 
     fn request_frame(&self) {
-        if self.frame_pending.get() || !self.is_attached_to_visual_tree() {
+        if self.frame_pending.get()
+            || !self.is_attached_to_visual_tree()
+            || !self.is_effectively_visible()
+        {
             return;
         }
         if !animations_enabled(self.reduced_motion())
@@ -404,6 +422,9 @@ impl MaterialRipple {
     }
 
     fn connect_host(&self) {
+        if self.host.borrow().is_some() {
+            self.cancel();
+        }
         self.disconnect_host();
         let host = self
             .templated_parent()
@@ -534,6 +555,8 @@ impl MaterialRipple {
             true,
         );
         let enabled = host
+            .clone()
+            .upcast::<FerroObject>()
             .get_observable(InputElement::is_effectively_enabled_property())
             .subscribe_fn(move |enabled| {
                 if !enabled {
@@ -553,6 +576,14 @@ impl MaterialRipple {
             lost_focus,
             enabled,
         });
+    }
+}
+
+impl Drop for MaterialRipple {
+    fn drop(&mut self) {
+        if let Some(subscription) = self.visibility_subscription.get_mut().take() {
+            subscription.dispose();
+        }
     }
 }
 

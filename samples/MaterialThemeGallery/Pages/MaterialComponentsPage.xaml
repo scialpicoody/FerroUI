@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material"
              x:Class="MaterialThemeGallery.Pages.MaterialComponentsPage">
   <StackPanel Margin="24" Spacing="20">
     <StackPanel Spacing="4">
@@ -37,6 +38,7 @@
           <StackPanel Orientation="Horizontal" Spacing="16">
             <ProgressBar Theme="{StaticResource MaterialCircularProgress}" Value="72" Width="40" Height="40" />
             <ProgressBar Theme="{StaticResource MaterialWavyCircularProgress}" Value="68" Width="48" Height="48" />
+            <material:MaterialLoadingIndicator Theme="{StaticResource MaterialContainedLoadingIndicator}" IsIndeterminate="False" Value="65" />
             <ContentControl Theme="{StaticResource MaterialBadgeWithLabel}" Content="3" VerticalAlignment="Center" />
           </StackPanel>
         </StackPanel>

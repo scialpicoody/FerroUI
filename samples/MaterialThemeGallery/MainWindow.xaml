@@ -29,7 +29,7 @@
           <ComboBox x:Name="FlowChoice" Classes="toolbar-choice" />
         </StackPanel>
         <StackPanel Orientation="Horizontal">
-          <TextBlock Classes="toolbar-label" Text="Accent" />
+          <TextBlock Classes="toolbar-label" Text="Seed" />
           <ComboBox x:Name="AccentChoice" Classes="toolbar-choice" />
         </StackPanel>
       </StackPanel>

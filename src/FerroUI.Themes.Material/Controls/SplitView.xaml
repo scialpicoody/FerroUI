@@ -1,35 +1,7 @@
-<!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/SplitView/SplitView_themeresources.xaml (DefaultSplitViewStyle and the implicit
-    style of SplitView; the resources are Resources/SplitView_themeresources.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes (docs/porting/winui-theme.md, section 4):
-  - The Grid PaneRoot (border, corner radius, pane background and its BackgroundTransition) is
-    the Panel PART_PaneRoot that FerroUI's SplitView requires (it clips the pane and its bounds
-    are the area of the light dismiss), holding a Border PaneRoot of the width of the open pane
-    with the background, border and corner radius; the BrushTransition is a transition of the
-    background of the border (150 ms, the default duration of a BrushTransition).
-  - The states of DisplayModeStates (Closed, ClosedCompactLeft, OpenOverlayLeft, OpenInlineLeft,
-    OpenCompactOverlayLeft and the Right ones) are the pseudo-classes FerroUI's SplitView sets:
-    the display mode (:inline, :compactinline, :overlay, :compactoverlay), the state of the pane
-    (:open, :closed) and the placement (:left, :right, :top, :bottom). The width of the pane
-    column and the closed width of the pane are the TemplateSettings of FerroUI's control
-    (PaneColumnGridLength, ClosedPaneWidth).
-  - The VisualTransitions of DisplayModeStates slide the pane in and out with a translation and
-    a moving clip (opening an overlay pane in 350 ms with the key spline 0.1,0.9 0.2,1.0 and
-    closing it in 120 ms; opening an inline pane in SplitViewPaneAnimationOpenDuration, 200 ms,
-    and closing it in SplitViewPaneAnimationCloseDuration, 100 ms, with the key spline
-    0.0,0.35 0.15,1.0): the port animates the width of PART_PaneRoot, which clips the pane, with
-    transitions of those durations and easings; the pane keeps the width of the open pane, so
-    its content is revealed, not laid out again. The fade of the light dismiss layer is not
-    reproduced.
-  - The pane placement Top and Bottom of FerroUI has no counterpart in WinUI: those templates are
-    the left one turned by a quarter, with the height of the pane animated.
-  - The base template is the one of the left placement; the nested styles of the other
-    placements replace it.
--->
+<!-- Material drawer surface and spring timing over FerroUI SplitView contracts.
+     Structural heritage: Microsoft Corporation, MIT; see NOTICE.md.
+     Open/close still reveals the pane through a width/height clip; it is not the
+     Android modal drawer's offset gesture animation. -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:ClassModifier="internal">
@@ -46,13 +18,13 @@
 
   <ControlTheme x:Key="DefaultSplitViewStyle" TargetType="SplitView">
     <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundTransparentBrush}" />
-    <Setter Property="BorderThickness" Value="{DynamicResource SplitViewLeftBorderThemeThickness}" />
+    <Setter Property="BorderThickness" Value="0" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="VerticalContentAlignment" Value="Stretch" />
-    <Setter Property="OpenPaneLength" Value="{DynamicResource SplitViewOpenPaneThemeLength}" />
-    <Setter Property="CompactPaneLength" Value="{DynamicResource SplitViewCompactPaneThemeLength}" />
-    <Setter Property="PaneBackground" Value="{DynamicResource SystemControlPageBackgroundChromeLowBrush}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource SplitViewPaneRootCornerRadius}" />
+    <Setter Property="OpenPaneLength" Value="360" />
+    <Setter Property="CompactPaneLength" Value="96" />
+    <Setter Property="PaneBackground" Value="{DynamicResource MaterialSurfaceContainerLowBrush}" />
+    <Setter Property="CornerRadius" Value="0,16,16,0" />
     <!-- The pane at the left (the only placement of WinUI). -->
     <Setter Property="Template">
       <ControlTemplate>
@@ -77,7 +49,7 @@
                     CornerRadius="{TemplateBinding CornerRadius}">
               <Border.Transitions>
                 <Transitions>
-                  <BrushTransition Property="Background" Duration="0:0:0.15" />
+                  <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
                 </Transitions>
               </Border.Transitions>
               <Panel>
@@ -153,7 +125,7 @@
                       CornerRadius="{TemplateBinding CornerRadius}">
                 <Border.Transitions>
                   <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.15" />
+                    <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
                   </Transitions>
                 </Border.Transitions>
                 <Panel>
@@ -223,7 +195,7 @@
                       CornerRadius="{TemplateBinding CornerRadius}">
                 <Border.Transitions>
                   <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.15" />
+                    <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
                   </Transitions>
                 </Border.Transitions>
                 <Panel>
@@ -294,7 +266,7 @@
                       CornerRadius="{TemplateBinding CornerRadius}">
                 <Border.Transitions>
                   <Transitions>
-                    <BrushTransition Property="Background" Duration="0:0:0.15" />
+                    <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
                   </Transitions>
                 </Border.Transitions>
                 <Panel>
@@ -361,40 +333,40 @@
     <Style Selector="^:inline:open /template/ Panel#PART_PaneRoot, ^:compactinline:open /template/ Panel#PART_PaneRoot">
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Width" Duration="0:0:0.2" Easing="0.0,0.35,0.15,1.0" />
-          <DoubleTransition Property="Height" Duration="0:0:0.2" Easing="0.0,0.35,0.15,1.0" />
+          <DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
         </Transitions>
       </Setter>
     </Style>
     <Style Selector="^:inline:closed /template/ Panel#PART_PaneRoot, ^:compactinline:closed /template/ Panel#PART_PaneRoot">
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Width" Duration="0:0:0.1" Easing="0.0,0.35,0.15,1.0" />
-          <DoubleTransition Property="Height" Duration="0:0:0.1" Easing="0.0,0.35,0.15,1.0" />
+          <DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
         </Transitions>
       </Setter>
     </Style>
-    <!-- Overlay panes: opened in 350 ms and closed in 120 ms, key spline 0.1,0.9 0.2,1.0. -->
+    <!-- Overlay panes use the same spatial spring policy. -->
     <Style Selector="^:overlay:open /template/ Panel#PART_PaneRoot, ^:compactoverlay:open /template/ Panel#PART_PaneRoot">
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Width" Duration="0:0:0.35" Easing="0.1,0.9,0.2,1.0" />
-          <DoubleTransition Property="Height" Duration="0:0:0.35" Easing="0.1,0.9,0.2,1.0" />
+          <DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
         </Transitions>
       </Setter>
     </Style>
     <Style Selector="^:overlay:closed /template/ Panel#PART_PaneRoot, ^:compactoverlay:closed /template/ Panel#PART_PaneRoot">
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Width" Duration="0:0:0.12" Easing="0.1,0.9,0.2,1.0" />
-          <DoubleTransition Property="Height" Duration="0:0:0.12" Easing="0.1,0.9,0.2,1.0" />
+          <DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
         </Transitions>
       </Setter>
     </Style>
 
     <!-- The open states show the high contrast border of the pane. -->
     <Style Selector="^:open /template/ Rectangle#HCPaneBorder">
-      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="IsVisible" Value="False" />
     </Style>
     <!-- OpenOverlay and OpenCompactOverlay show the light dismiss layer; OverlayVisible
          (LightDismissOverlayMode) fills it. -->
@@ -402,7 +374,7 @@
       <Setter Property="IsVisible" Value="True" />
     </Style>
     <Style Selector="^:lightDismiss /template/ Rectangle#LightDismissLayer">
-      <Setter Property="Fill" Value="{DynamicResource SplitViewLightDismissOverlayBackground}" />
+      <Setter Property="Fill" Value="#52000000" />
     </Style>
   </ControlTheme>
 

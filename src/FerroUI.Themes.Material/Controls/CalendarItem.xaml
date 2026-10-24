@@ -13,99 +13,30 @@
   <ControlTheme x:Key="CalendarItemWeekDayNameStyle" TargetType="TextBlock" BasedOn="{StaticResource CaptionTextBlockStyle}">
     <Setter Property="HorizontalAlignment" Value="Center"/>
     <Setter Property="VerticalAlignment" Value="Center"/>
-    <Setter Property="FontWeight" Value="{DynamicResource CalendarViewWeekDayFontWeight}"/>
-    <Setter Property="Margin" Value="1,1,1,3"/>
+    <Setter Property="FontWeight" Value="Medium"/>
+    <Setter Property="Margin" Value="0"/>
     <Setter Property="Padding" Value="0,12"/>
   </ControlTheme>
-  <ControlTheme x:Key="CalendarItemHeaderNavigationButtonStyle" TargetType="Button">
+  <ControlTheme x:Key="CalendarItemHeaderNavigationButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialTextButton}">
     <Setter Property="MinWidth" Value="48"/>
     <Setter Property="MinHeight" Value="48"/>
-    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-    <Setter Property="VerticalContentAlignment" Value="Center"/>
-    <Setter Property="HorizontalAlignment" Value="Stretch"/>
-    <Setter Property="VerticalAlignment" Value="Stretch"/>
-    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="CornerRadius" Value="24"/>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="Margin" Value="0"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="FontWeight" Value="Medium"/>
-    <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackground}"/>
-    <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="Margin" Value="{DynamicResource CalendarViewHeaderNavigationButtonMargin}"/>
-    <Setter Property="Padding" Value="{DynamicResource CalendarViewHeaderNavigationButtonPadding}"/>
-    <Setter Property="BackgroundSizing" Value="InnerBorderEdge"/>
-    <Setter Property="CornerRadius" Value="24"/>
-    <Setter Property="FocusAdorner">
-      <FocusAdornerTemplate>
-        <Border Margin="-2" BorderThickness="2" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}"/>
-        </Border>
-      </FocusAdornerTemplate>
-    </Setter>
-    <Setter Property="Template">
-      <ControlTemplate>
-        <ContentPresenter x:Name="PART_ContentPresenter" Foreground="{TemplateBinding Foreground}" Background="{TemplateBinding Background}" BackgroundSizing="{TemplateBinding BackgroundSizing}" BorderBrush="{DynamicResource CalendarViewNavigationButtonBorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" CornerRadius="{TemplateBinding CornerRadius}"/>
-      </ControlTemplate>
-    </Setter>
-    <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackgroundPointerOver}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewNavigationButtonBorderBrushPointerOver}"/>
-      <Setter Property="Foreground" Value="{DynamicResource CalendarViewHeaderNavigationButtonForegroundPointerOver}"/>
-    </Style>
-    <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackgroundPressed}"/>
-      <Setter Property="Foreground" Value="{DynamicResource CalendarViewHeaderNavigationButtonForegroundPressed}"/>
-    </Style>
-    <Style Selector="^:disabled /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Foreground" Value="{DynamicResource CalendarViewHeaderNavigationButtonForegroundDisabled}"/>
-    </Style>
   </ControlTheme>
-  <ControlTheme x:Key="CalendarItemNavigationButtonStyle" TargetType="Button">
-    <Setter Property="FontWeight" Value="Medium"/>
-    <Setter Property="FontSize" Value="14"/>
+  <ControlTheme x:Key="CalendarItemNavigationButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialTextButton}">
     <Setter Property="MinWidth" Value="48"/>
     <Setter Property="MinHeight" Value="48"/>
-    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-    <Setter Property="VerticalContentAlignment" Value="Center"/>
-    <Setter Property="HorizontalAlignment" Value="Stretch"/>
-    <Setter Property="VerticalAlignment" Value="Stretch"/>
-    <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackground}"/>
-    <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="Padding" Value="{DynamicResource CalendarViewNavigationButtonPadding}"/>
-    <Setter Property="BackgroundSizing" Value="InnerBorderEdge"/>
+    <Setter Property="Width" Value="48"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
     <Setter Property="CornerRadius" Value="24"/>
-    <Setter Property="IsTabStop" Value="True"/>
-    <Setter Property="FocusAdorner">
-      <FocusAdornerTemplate>
-        <Border Margin="-2" BorderThickness="2" BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}" CornerRadius="{DynamicResource ControlCornerRadius}"/>
-        </Border>
-      </FocusAdornerTemplate>
-    </Setter>
-    <Setter Property="Template">
-      <ControlTemplate>
-        <ContentPresenter x:Name="PART_ContentPresenter" Background="{TemplateBinding Background}" BackgroundSizing="{TemplateBinding BackgroundSizing}" BorderBrush="{DynamicResource CalendarViewNavigationButtonBorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" CornerRadius="{TemplateBinding CornerRadius}"/>
-      </ControlTemplate>
-    </Setter>
-    <Style Selector="^:pointerover">
-      <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundPointerOver}"/>
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackgroundPointerOver}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewNavigationButtonBorderBrushPointerOver}"/>
-        <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundPointerOver}"/>
-      </Style>
-    </Style>
-    <Style Selector="^:pressed">
-      <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundPressed}"/>
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource CalendarViewNavigationButtonBackgroundPressed}"/>
-        <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundPressed}"/>
-      </Style>
-    </Style>
-    <Style Selector="^:disabled">
-      <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundDisabled}"/>
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Foreground" Value="{DynamicResource CalendarViewNavigationButtonForegroundDisabled}"/>
-      </Style>
-    </Style>
+    <Setter Property="Padding" Value="12,0"/>
+    <Setter Property="Margin" Value="0"/>
+    <Setter Property="FontSize" Value="14"/>
+    <Setter Property="FontWeight" Value="Medium"/>
   </ControlTheme>
   <ControlTheme x:Key="{x:Type CalendarItem}" TargetType="CalendarItem">
     <Setter Property="CornerRadius" Value="28"/>
@@ -120,14 +51,14 @@
           <Grid RowDefinitions="Auto,Auto,*">
             <Grid ColumnDefinitions="*,Auto,Auto" Background="{TemplateBinding HeaderBackground}">
               <Button x:Name="PART_HeaderButton" Theme="{StaticResource CalendarItemHeaderNavigationButtonStyle}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Left"/>
-              <Button x:Name="PART_PreviousButton" Grid.Column="1" Theme="{StaticResource CalendarItemNavigationButtonStyle}" Foreground="{TemplateBinding Foreground}" Margin="{DynamicResource CalendarViewNavigationPreviousButtonMargin}" HorizontalContentAlignment="Center">
+              <Button x:Name="PART_PreviousButton" Grid.Column="1" Theme="{StaticResource CalendarItemNavigationButtonStyle}" Foreground="{TemplateBinding Foreground}" Margin="0" HorizontalContentAlignment="Center">
                 <Panel Width="24" Height="24">
-                  <Path Data="M15.41 7.41 14 6 8 12 14 18 15.41 16.59 10.83 12Z" Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" Width="8" HorizontalAlignment="Center" VerticalAlignment="Center" Height="12"/>
+                  <Path Data="M15.41 7.41 14 6 8 12 14 18 15.41 16.59 10.83 12Z" Fill="{Binding $parent[Button].Foreground}" Stretch="None" Width="24" HorizontalAlignment="Center" VerticalAlignment="Center" Height="24"/>
                 </Panel>
               </Button>
-              <Button x:Name="PART_NextButton" Grid.Column="2" Theme="{StaticResource CalendarItemNavigationButtonStyle}" Foreground="{TemplateBinding Foreground}" Margin="{DynamicResource CalendarViewNavigationNextButtonMargin}" HorizontalContentAlignment="Center">
+              <Button x:Name="PART_NextButton" Grid.Column="2" Theme="{StaticResource CalendarItemNavigationButtonStyle}" Foreground="{TemplateBinding Foreground}" Margin="0" HorizontalContentAlignment="Center">
                 <Panel Width="24" Height="24">
-                  <Path Data="M8.59 16.59 10 18 16 12 10 6 8.59 7.41 13.17 12Z" Fill="{Binding $parent[Button].Foreground}" Stretch="Uniform" Width="8" HorizontalAlignment="Center" VerticalAlignment="Center" Height="12"/>
+                  <Path Data="M8.59 16.59 10 18 16 12 10 6 8.59 7.41 13.17 12Z" Fill="{Binding $parent[Button].Foreground}" Stretch="None" Width="24" HorizontalAlignment="Center" VerticalAlignment="Center" Height="24"/>
                 </Panel>
               </Button>
             </Grid>

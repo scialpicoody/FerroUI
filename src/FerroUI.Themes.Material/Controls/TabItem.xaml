@@ -27,7 +27,7 @@
             <Border x:Name="StateLayer" Background="Transparent" CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
               <Border.Transitions>
                 <Transitions>
-                  <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}"/>
+                  <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
                 </Transitions>
               </Border.Transitions>
             </Border>
@@ -39,8 +39,8 @@
             <Border x:Name="SelectionIndicator" Height="3" MinWidth="24" CornerRadius="3,3,0,0" Background="{DynamicResource MaterialPrimaryBrush}" Opacity="0" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Bottom" RenderTransformOrigin="50%,50%" RenderTransform="scaleX(0.5)">
               <Border.Transitions>
                 <Transitions>
-                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}"/>
-                  <TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="0.2,0,0,1"/>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
+                  <TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}"/>
                 </Transitions>
               </Border.Transitions>
             </Border>

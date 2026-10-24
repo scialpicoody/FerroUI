@@ -17,7 +17,7 @@
           <Border x:Name="MaterialContainer" Margin="0,4" MinHeight="40"
                   Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                   BorderThickness="{TemplateBinding BorderThickness}"
-                  CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+                  CornerRadius="{TemplateBinding CornerRadius}">
             <Border.Transitions><Transitions>
               <CornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
               <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />

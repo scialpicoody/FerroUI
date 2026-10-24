@@ -32,9 +32,9 @@ use std::time::Duration;
 pub const FLOWS: [(&str, bool); 2] = [("Left to right", false), ("Right to left", true)];
 
 /// The accent colours of the toolbar: the name and the colour (none: the accent colour of the
-/// platform). The colours are the accent colours Windows offers.
+/// platform). Each seed produces a complete HCT palette.
 pub const ACCENTS: [(&str, Option<Color>); 6] = [
-    ("System", None),
+    ("Baseline", None),
     ("Blue", Some(Color::from_rgb(0x00, 0x78, 0xD4))),
     ("Green", Some(Color::from_rgb(0x10, 0x7C, 0x10))),
     ("Purple", Some(Color::from_rgb(0x87, 0x64, 0xB8))),

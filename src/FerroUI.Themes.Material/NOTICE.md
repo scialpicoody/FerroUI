@@ -18,7 +18,9 @@ Its version and algorithm baseline are recorded in the manifest and port guide.
 ## Roboto
 
 `Assets/Roboto.ttf` is distributed under the SIL Open Font License 1.1, included
-as `Assets/OFL-Roboto.txt`. The original variable font is unmodified. Source
+as `Assets/OFL-Roboto.txt`. The original variable font is unmodified. The regular,
+medium and bold files are static instances generated from it with fontTools so
+font backends need not synthesize weights. Source
 revision, URL and SHA-256 are recorded in `scripts/material-theme/font-provenance.json`.
 
 ## WinUI / Avalonia structural heritage

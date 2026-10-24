@@ -110,6 +110,12 @@
     <Style Selector="^:checked /template/ ContentPresenter#PART_OnContentPresenter, ^:unchecked /template/ ContentPresenter#PART_OffContentPresenter">
     <Setter Property="IsVisible" Value="True" />
     </Style>
+    <Style Selector="^:pointerover /template/ Border#MaterialSwitchThumb, ^:focus-visible /template/ Border#MaterialSwitchThumb, ^:pressed /template/ Border#MaterialSwitchThumb">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    </Style>
+    <Style Selector="^:checked:pointerover /template/ Border#MaterialSwitchThumb, ^:checked:focus-visible /template/ Border#MaterialSwitchThumb, ^:checked:pressed /template/ Border#MaterialSwitchThumb">
+      <Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
+    </Style>
     <Style Selector="^:disabled /template/ Border#MaterialSwitchTrack">
     <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerHighestBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource MaterialOnSurfaceBrush}" />

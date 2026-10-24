@@ -1,19 +1,11 @@
-//! The theme under test, in one place: the gallery names the theme crate here only, so that a
-//! rename of the crate or of its class is a change of the `use` line below.
-//!
-//! The theme has the surface of the Fluent theme of the framework: a `Styles` that is created
-//! with `new()`, added to the styles of the application (`as_style()`), with a density style
-//! (normal, compact). The accent colour is set as a WinUI application sets it: the resources
-//! `SystemAccentColor` and its six shades in the resources of the theme, which take precedence
-//! over the colours the theme reads from the platform.
+//! Material theme configuration used by the gallery and capture matrix.
 
 use ferroui_base::media::Color;
 use ferroui_base::styling::{IStyle, ThemeVariant};
 use ferroui_base::Ref;
 use std::rc::Rc;
 
-use ferroui_base::controls::ResourceKey;
-use ferroui_themes_material::accents::SystemAccentColors;
+use ferroui_themes_material::MaterialColorScheme;
 use ferroui_themes_material::{DensityStyle, MaterialTheme as Theme};
 
 /// The theme of the gallery.
@@ -51,7 +43,9 @@ impl Density {
 
     /// The density with the name `name` (without regard to case).
     pub fn parse(name: &str) -> Option<Density> {
-        Density::ALL.into_iter().find(|density| density.name().eq_ignore_ascii_case(name.trim()))
+        Density::ALL
+            .into_iter()
+            .find(|density| density.name().eq_ignore_ascii_case(name.trim()))
     }
 }
 
@@ -63,33 +57,24 @@ pub fn set_density(theme: &GalleryTheme, density: Density) {
     });
 }
 
-/// Sets the accent colour of the theme; `None` leaves the accent to the platform (the accent
-/// colour of the system). The shades are the ones the theme computes from the accent of the
-/// platform (`SystemAccentColors::calculate_accent_shades`).
+/// Rebuilds complete HCT color schemes for a seed; None restores official baseline colors.
 pub fn set_accent(theme: &GalleryTheme, accent: Option<Color>) {
-    let keys = [
-        SystemAccentColors::ACCENT_KEY,
-        SystemAccentColors::ACCENT_DARK1_KEY,
-        SystemAccentColors::ACCENT_DARK2_KEY,
-        SystemAccentColors::ACCENT_DARK3_KEY,
-        SystemAccentColors::ACCENT_LIGHT1_KEY,
-        SystemAccentColors::ACCENT_LIGHT2_KEY,
-        SystemAccentColors::ACCENT_LIGHT3_KEY,
-    ];
-    let resources = theme.resources();
-    match accent {
-        Some(accent) => {
-            let (dark1, dark2, dark3, light1, light2, light3) = SystemAccentColors::calculate_accent_shades(accent);
-            for (key, color) in keys.into_iter().zip([accent, dark1, dark2, dark3, light1, light2, light3]) {
-                resources.set(key, Some(Rc::new(color)));
-            }
-        }
-        None => {
-            for key in keys {
-                resources.remove(&ResourceKey::from(key));
-            }
-        }
-    }
+    let light = accent.map_or_else(MaterialColorScheme::light, |seed| {
+        MaterialColorScheme::from_seed(seed, false)
+    });
+    let dark = accent.map_or_else(MaterialColorScheme::dark, |seed| {
+        MaterialColorScheme::from_seed(seed, true)
+    });
+    theme.set_color_scheme(ThemeVariant::light(), &light);
+    theme.set_color_scheme(ThemeVariant::dark(), &dark);
+    theme.set_color_scheme(ThemeVariant::default(), &dark);
+    let contrast = MaterialColorScheme::from_seed_color(
+        accent.unwrap_or(Color::from_rgb(0x67, 0x50, 0xa4)),
+        true,
+        1.0,
+    )
+    .expect("finite contrast");
+    theme.set_color_scheme(Theme::high_contrast(), &contrast);
 }
 
 /// The theme variants the gallery offers. `HighContrast` is a variant of its own key, which
@@ -118,7 +103,9 @@ impl Variant {
 
     /// The variant with the name `name` (without regard to case).
     pub fn parse(name: &str) -> Option<Variant> {
-        Variant::ALL.into_iter().find(|variant| variant.name().eq_ignore_ascii_case(name.trim()))
+        Variant::ALL
+            .into_iter()
+            .find(|variant| variant.name().eq_ignore_ascii_case(name.trim()))
     }
 
     /// The theme variant of the framework.

@@ -1,36 +1,34 @@
-//! The class of the document `MaterialTheme.xaml`: the WinUI theme
-//! (docs/porting/winui-theme.md, section 3).
+//! The class of the document `MaterialTheme.xaml`: the Android Material theme
+//! (docs/porting/material-theme.md).
 //!
-//! The class has the public surface of `FluentTheme` of `ferroui-themes-fluent` where it applies:
-//! it is a styles collection constructed from its compiled document, with a density style whose
-//! compact resources are looked up first. It has no colour palettes (WinUI has none); it adds the
-//! high contrast theme variant of WinUI, which the theme dictionaries of its documents are keyed
-//! by.
+//! Compiled styles with complete light/dark color schemes, configurable motion,
+//! reduced-motion support, and a generated high-contrast scheme. The inherited
+//! compact-density API preserves Material's minimum interactive touch targets.
 
 use crate::register_types::register_types;
 use crate::{MaterialColorScheme, MaterialMotionRole, MaterialMotionScheme};
 use ferroui_base::controls::{
-    IResourceNode, IResourceProvider, ResourceDictionary, ResourceHostRef, ResourceKey, ResourceValue,
-    ResourcesChangedEventArgs,
+    IResourceNode, IResourceProvider, ResourceDictionary, ResourceHostRef, ResourceKey,
+    ResourceValue, ResourcesChangedEventArgs,
 };
 use ferroui_base::metadata::{from_markup_value, into_markup_value, IServiceProvider};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::{IStyle, Styles, ThemeVariant};
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_markup_enum, ferro_properties, instantiate, BoxedValue, DirectProperty,
-    FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
+    ferro_class, ferro_class_info, ferro_markup_enum, ferro_properties, instantiate, BoxedValue,
+    DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
+    FerroPropertyChangedEventArgs, Ref,
 };
 use ferroui_markup_xaml::XamlLoadException;
-use std::cell::{Cell, OnceCell};
+use std::cell::{Cell, OnceCell, RefCell};
 use std::rc::Rc;
 
 ferroui_base::ferro_thread_local! {
-    /// The high contrast variant: the theme dictionaries `HighContrast` of WinUI.
+    /// Material's high-contrast variant, inheriting the dark color-scheme preference.
     static HIGH_CONTRAST: ThemeVariant = ThemeVariant::new("HighContrast", Some(ThemeVariant::dark()));
 }
 
-/// How much space the controls of the WinUI theme take: the normal density, or the compact one of
-/// WinUI (`compact_themeresources.xaml`).
+/// Layout density. Both modes preserve Material's minimum 48dp touch targets.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 #[repr(i32)]
 pub enum DensityStyle {
@@ -41,7 +39,7 @@ pub enum DensityStyle {
 
 ferro_markup_enum!(DensityStyle { Normal, Compact }, { namespace: "FerroUI.Themes.Material" });
 
-/// Includes the WinUI theme in an application.
+/// Includes the Android Material theme in an application.
 #[repr(C)]
 pub struct MaterialTheme {
     base: Styles,
@@ -49,6 +47,7 @@ pub struct MaterialTheme {
     density_style: Cell<DensityStyle>,
     motion_scheme: Cell<MaterialMotionScheme>,
     reduced_motion: Cell<bool>,
+    pub(crate) android_color_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 
 ferro_class!(MaterialTheme: Styles);
@@ -111,12 +110,10 @@ impl MaterialTheme {
     /// The URI of the document of the class.
     pub const DOCUMENT_URI: &'static str = "ferres://FerroUI.Themes.Material/MaterialTheme.xaml";
 
-    /// The high contrast theme variant of the theme: the `HighContrast` theme dictionaries of
-    /// WinUI. Request it like the light and dark variants
-    /// (`window.set_requested_theme_variant(Some(MaterialTheme::high_contrast()))`, or
-    /// `RequestedThemeVariant="{x:Static winui:MaterialTheme.HighContrast}"` in markup). It inherits
-    /// the dark variant, which the platform is told of (the colours of its dictionaries are the
-    /// ones of the "High Contrast Black" theme of Windows).
+    /// Material's generated high-contrast dark scheme. Request it with
+    /// `window.set_requested_theme_variant(Some(MaterialTheme::high_contrast()))`
+    /// or `RequestedThemeVariant="{x:Static material:MaterialTheme.HighContrast}"`.
+    /// Applications can replace its palette with [`Self::set_color_scheme`].
     pub fn high_contrast() -> ThemeVariant {
         HIGH_CONTRAST.with(Clone::clone)
     }
@@ -124,8 +121,12 @@ impl MaterialTheme {
     /// Field initialisation; see [`Styles::construct`].
     pub fn construct() -> Self {
         Self {
-            base: Styles::construct(), compact_styles: OnceCell::new(), density_style: Cell::new(DensityStyle::Normal),
-            motion_scheme: Cell::new(MaterialMotionScheme::Expressive), reduced_motion: Cell::new(false),
+            base: Styles::construct(),
+            compact_styles: OnceCell::new(),
+            density_style: Cell::new(DensityStyle::Normal),
+            motion_scheme: Cell::new(MaterialMotionScheme::Expressive),
+            reduced_motion: Cell::new(false),
+            android_color_subscription: RefCell::new(None),
         }
     }
 
@@ -149,15 +150,26 @@ impl MaterialTheme {
         }
 
         let compact_styles = this.get_and_remove("CompactStyles");
-        let compact_styles = from_markup_value::<Ref<ResourceDictionary>>(&Some(compact_styles.clone()))
-            .unwrap_or_else(|| {
-                panic!("Unable to cast object of type '{}' to type 'ResourceDictionary'.", (*compact_styles).type_name())
-            });
+        let compact_styles =
+            from_markup_value::<Ref<ResourceDictionary>>(&Some(compact_styles.clone()))
+                .unwrap_or_else(|| {
+                    panic!(
+                        "Unable to cast object of type '{}' to type 'ResourceDictionary'.",
+                        (*compact_styles).type_name()
+                    )
+                });
         let _ = this.compact_styles.set(compact_styles);
 
         this.set_color_scheme(ThemeVariant::light(), &MaterialColorScheme::light());
         this.set_color_scheme(ThemeVariant::dark(), &MaterialColorScheme::dark());
         this.set_color_scheme(ThemeVariant::default(), &MaterialColorScheme::dark());
+        let high_contrast = MaterialColorScheme::from_seed_color(
+            ferroui_base::media::Color::from_rgb(0x67, 0x50, 0xa4),
+            true,
+            1.0,
+        )
+        .expect("a finite contrast value");
+        this.set_color_scheme(Self::high_contrast(), &high_contrast);
         this.refresh_motion_resources();
 
         this
@@ -166,10 +178,12 @@ impl MaterialTheme {
     fn get_and_remove(&self, key: &str) -> BoxedValue {
         let resources = self.resources();
         let key = ResourceKey::from(key);
-        let value = resources
-            .try_get_value(&key)
-            .flatten()
-            .unwrap_or_else(|| panic!("Key {} was not found in the resources", key.as_str().unwrap_or_default()));
+        let value = resources.try_get_value(&key).flatten().unwrap_or_else(|| {
+            panic!(
+                "Key {} was not found in the resources",
+                key.as_str().unwrap_or_default()
+            )
+        });
         resources.remove(&key);
         value
     }
@@ -187,16 +201,21 @@ impl MaterialTheme {
     /// Supply a full Android dynamic-color or Material Theme Builder scheme here.
     /// Existing controls update through DynamicResource without rebuilding their templates.
     pub fn set_color_scheme(&self, variant: ThemeVariant, scheme: &MaterialColorScheme) {
-        self.resources().set_theme_dictionary(variant, scheme.resources());
+        self.resources()
+            .set_theme_dictionary(variant, scheme.resources());
     }
 
-    pub fn motion_scheme(&self) -> MaterialMotionScheme { self.motion_scheme.get() }
+    pub fn motion_scheme(&self) -> MaterialMotionScheme {
+        self.motion_scheme.get()
+    }
 
     pub fn set_motion_scheme(&self, value: MaterialMotionScheme) {
         self.set_and_raise_cell(Self::motion_scheme_property(), &self.motion_scheme, value);
     }
 
-    pub fn reduced_motion(&self) -> bool { self.reduced_motion.get() }
+    pub fn reduced_motion(&self) -> bool {
+        self.reduced_motion.get()
+    }
 
     pub fn set_reduced_motion(&self, value: bool) {
         self.set_and_raise_cell(Self::reduced_motion_property(), &self.reduced_motion, value);
@@ -207,17 +226,46 @@ impl MaterialTheme {
         let scheme = self.motion_scheme();
         let reduced = self.reduced_motion();
         for role in MaterialMotionRole::ALL {
-            resources.set(format!("MaterialMotion{}Duration", role.resource_name()), into_markup_value(scheme.duration(role, reduced)));
-            resources.set(format!("MaterialMotion{}Easing", role.resource_name()), into_markup_value(scheme.easing(role, reduced)));
+            resources.set(
+                format!("MaterialMotion{}Duration", role.resource_name()),
+                into_markup_value(scheme.duration(role, reduced)),
+            );
+            resources.set(
+                format!("MaterialMotion{}Easing", role.resource_name()),
+                into_markup_value(scheme.easing(role, reduced)),
+            );
         }
         resources.set("MaterialReducedMotion", into_markup_value(reduced));
+        // PageSlide has ordinary Rust properties, so build it here rather than
+        // attaching DynamicResource to its Duration in compiled XAML. Replacing
+        // these resources also updates existing NavigationPage instances.
+        use ferroui_base::animation::{IPageTransition, PageSlide, SlideAxis};
+        for (key, axis) in [
+            ("MaterialPageTransition", SlideAxis::Horizontal),
+            ("MaterialModalTransition", SlideAxis::Vertical),
+        ] {
+            let role = MaterialMotionRole::DefaultSpatial;
+            let slide = PageSlide::with_duration(scheme.duration(role, reduced), axis);
+            slide.set_slide_in_easing(scheme.easing(role, reduced));
+            slide.set_slide_out_easing(scheme.easing(role, reduced));
+            let transition: Rc<dyn IPageTransition> = Rc::new(slide);
+            resources.set(key, into_markup_value(transition));
+        }
     }
 
     /// Tries to find a resource within the theme: the compact resources are
     /// checked first when the density style is compact.
-    pub fn try_get_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
+    pub fn try_get_resource(
+        &self,
+        key: &ResourceKey,
+        theme: Option<&ThemeVariant>,
+    ) -> Option<ResourceValue> {
         if self.density_style.get() == DensityStyle::Compact {
-            if let Some(value) = self.compact_styles.get().and_then(|styles| styles.try_get_resource(key, theme)) {
+            if let Some(value) = self
+                .compact_styles
+                .get()
+                .and_then(|styles| styles.try_get_resource(key, theme))
+            {
                 return Some(value);
             }
         }
@@ -248,7 +296,10 @@ impl MaterialTheme {
     /// Populates `this` from the document of the class with the compiled
     /// markup (`compiled_xaml.rs`): the document compiled with every document
     /// it includes as one group, exactly as the run-time loader loads it.
-    fn load(sp: Option<Rc<dyn IServiceProvider>>, this: &Ref<Self>) -> Result<(), XamlLoadException> {
+    fn load(
+        sp: Option<Rc<dyn IServiceProvider>>,
+        this: &Ref<Self>,
+    ) -> Result<(), XamlLoadException> {
         register_types();
         crate::compiled_xaml::populate(sp, this)
     }
@@ -268,7 +319,11 @@ impl IResourceNode for MaterialThemeHandle {
         self.0.has_resources()
     }
 
-    fn try_get_resource(&self, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
+    fn try_get_resource(
+        &self,
+        key: &ResourceKey,
+        theme: Option<&ThemeVariant>,
+    ) -> Option<ResourceValue> {
         self.0.try_get_resource(key, theme)
     }
 }

@@ -1826,6 +1826,7 @@ dependencies = [
 name = "ferroui-themes-material"
 version = "0.4.0"
 dependencies = [
+ "ferroui-android",
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",

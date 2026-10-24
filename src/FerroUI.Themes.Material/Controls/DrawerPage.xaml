@@ -19,7 +19,7 @@
   </Design.PreviewWith>
   <ControlTheme x:Key="NavigationViewItemHeaderTextStyle" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
     <Setter Property="FontSize" Value="14"/>
-    <Setter Property="FontWeight" Value="SemiBold"/>
+    <Setter Property="FontWeight" Value="Medium"/>
     <Setter Property="TextWrapping" Value="NoWrap"/>
   </ControlTheme>
   <ControlTheme x:Key="NavigationViewTitleHeaderContentControlTextStyle" TargetType="ContentControl">
@@ -30,88 +30,17 @@
     <Setter Property="Margin" Value="{DynamicResource NavigationViewHeaderMargin}"/>
     <Setter Property="VerticalAlignment" Value="Stretch"/>
   </ControlTheme>
-  <ControlTheme x:Key="PaneToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
-    <Setter Property="Height" Value="48"/>
-    <Setter Property="Width" Value="48"/>
-    <Setter Property="FontSize" Value="16"/>
-    <Setter Property="FontFamily" Value="{StaticResource SymbolThemeFontFamily}"/>
-    <Setter Property="MinHeight" Value="48"/>
-    <Setter Property="MinWidth" Value="48"/>
-    <Setter Property="HorizontalAlignment" Value="Center"/>
-    <Setter Property="VerticalAlignment" Value="Top"/>
-    <Setter Property="HorizontalContentAlignment" Value="Center"/>
-    <Setter Property="VerticalContentAlignment" Value="Center"/>
-    <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForeground}"/>
-    <Setter Property="BorderThickness" Value="0"/>
-    <Setter Property="Padding" Value="{DynamicResource NavigationViewItemButtonMargin}"/>
-    <Setter Property="CornerRadius" Value="24"/>
-    <Setter Property="Template">
-      <ControlTemplate>
-        <Border x:Name="LayoutRoot" Height="{TemplateBinding MinHeight}" Margin="{TemplateBinding Padding}" Background="{TemplateBinding Background}" HorizontalAlignment="Stretch" CornerRadius="{TemplateBinding CornerRadius}">
-          <Grid ColumnDefinitions="Auto,*">
-            <Border Width="{TemplateBinding MinWidth}">
-              <Path x:Name="Icon" Data="M3 6H21V8H3ZM3 11H21V13H3ZM3 16H21V18H3Z" Width="24" Height="18" Stretch="Uniform" Fill="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-            </Border>
-            <ContentPresenter x:Name="PART_ContentPresenter" Grid.Column="1" VerticalContentAlignment="Center" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" Padding="4,0,0,0" RecognizesAccessKey="True"/>
-          </Grid>
-        </Border>
-      </ControlTemplate>
-    </Setter>
-    <Style Selector="^:pointerover">
-      <Style Selector="^ /template/ Border#LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPointerOver}"/>
-      </Style>
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPointerOver}"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-      </Style>
-      <Style Selector="^ /template/ Path#Icon">
-        <Setter Property="Fill" Value="{DynamicResource NavigationViewButtonForegroundPointerOver}"/>
-      </Style>
-    </Style>
-    <Style Selector="^:pressed">
-      <Style Selector="^ /template/ Border#LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundPressed}"/>
-      </Style>
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundPressed}"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-      </Style>
-      <Style Selector="^ /template/ Path#Icon">
-        <Setter Property="Fill" Value="{DynamicResource NavigationViewButtonForegroundPressed}"/>
-      </Style>
-    </Style>
-    <Style Selector="^:disabled">
-      <Style Selector="^ /template/ Border#LayoutRoot">
-        <Setter Property="Background" Value="{DynamicResource NavigationViewButtonBackgroundDisabled}"/>
-      </Style>
-      <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Foreground" Value="{DynamicResource NavigationViewButtonForegroundDisabled}"/>
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-      </Style>
+  <ControlTheme x:Key="PaneToggleButtonStyle" TargetType="Button" BasedOn="{StaticResource NavigationBackButtonNormalStyle}">
+    <Setter Property="Margin" Value="0"/>
+    <Style Selector="^ /template/ Path#Content">
+      <Setter Property="Data" Value="M3 6H21V8H3ZM3 11H21V13H3ZM3 16H21V18H3Z"/>
+      <Setter Property="Stretch" Value="None"/>
     </Style>
   </ControlTheme>
-  <ControlTheme x:Key="DrawerPagePaneToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource PaneToggleButtonStyle}">
-    <Setter Property="Template">
-      <ControlTemplate>
-        <Border x:Name="LayoutRoot" Height="{TemplateBinding MinHeight}" Margin="{TemplateBinding Padding}" Background="{TemplateBinding Background}" HorizontalAlignment="Stretch" CornerRadius="{TemplateBinding CornerRadius}">
-          <Border Width="{TemplateBinding MinWidth}">
-            <Panel>
-              <Path x:Name="Icon" Data="M3 6H21V8H3ZM3 11H21V13H3ZM3 16H21V18H3Z" Width="24" Height="18" Stretch="Uniform" Fill="{TemplateBinding Foreground}" HorizontalAlignment="Center" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNull}}"/>
-              <ContentPresenter x:Name="PART_ContentPresenter" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}"/>
-            </Panel>
-          </Border>
-        </Border>
-      </ControlTemplate>
-    </Setter>
-  </ControlTheme>
+  <ControlTheme x:Key="DrawerPagePaneToggleButton" TargetType="ToggleButton" BasedOn="{StaticResource PaneToggleButtonStyle}"/>
   <ControlTheme x:Key="DrawerPageNavigationViewItem" TargetType="ListBoxItem" BasedOn="{StaticResource MaterialNavigationDrawerItem}"/>
   <ControlTheme x:Key="DrawerPageNavigationViewMenu" TargetType="ListBox">
-    <Setter Property="Foreground" Value="{DynamicResource NavigationViewItemForeground}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
     <Setter Property="Background" Value="Transparent"/>
     <Setter Property="BorderThickness" Value="0"/>
     <Setter Property="Padding" Value="0"/>
@@ -119,7 +48,7 @@
     <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
     <Setter Property="KeyboardNavigation.TabNavigation" Value="Once"/>
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
-    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}"/>
+    <Setter Property="FontSize" Value="14"/>
     <Setter Property="ItemContainerTheme" Value="{StaticResource DrawerPageNavigationViewItem}"/>
     <Setter Property="ItemsPanel">
       <ItemsPanelTemplate>
@@ -144,7 +73,7 @@
     <Setter Property="CornerRadius" Value="16"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <SplitView Name="PART_SplitView" Background="{TemplateBinding Background}" BorderThickness="{DynamicResource NavigationViewBorderThickness}" CornerRadius="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}" DisplayMode="{TemplateBinding DisplayMode}" OpenPaneLength="{TemplateBinding DrawerLength}" CompactPaneLength="{TemplateBinding CompactDrawerLength}" IsPaneOpen="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+        <SplitView Name="PART_SplitView" Background="{TemplateBinding Background}" BorderThickness="0" CornerRadius="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}" DisplayMode="{TemplateBinding DisplayMode}" OpenPaneLength="{TemplateBinding DrawerLength}" CompactPaneLength="{TemplateBinding CompactDrawerLength}" IsPaneOpen="{Binding IsOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
           <SplitView.Pane>
             <DockPanel x:Name="PaneContentGrid" Margin="0,12">
               <ToggleButton Name="PART_CompactPaneToggle" DockPanel.Dock="Top" Theme="{StaticResource DrawerPagePaneToggleButton}" Margin="{DynamicResource NavigationViewButtonHolderGridMargin}" IsChecked="{Binding #PART_SplitView.IsPaneOpen, Mode=TwoWay}" Content="{TemplateBinding DrawerIcon}" ContentTemplate="{TemplateBinding DrawerIconTemplate}" IsVisible="False" HorizontalAlignment="Left" AutomationProperties.Name="Toggle navigation drawer" ToolTip.Tip="Toggle navigation drawer"/>
@@ -168,7 +97,7 @@
                     <ContentControl x:Name="PART_BottomTitlePresenter" Theme="{StaticResource NavigationViewTitleHeaderContentControlTextStyle}" Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="8,0,0,0" IsVisible="{TemplateBinding Header, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                   </DockPanel>
                 </Border>
-                <ContentPresenter Name="PART_ContentPresenter" Margin="{DynamicResource NavigationViewContentPresenterMargin}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
+                <ContentPresenter Name="PART_ContentPresenter" Margin="0" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BackgroundSizing="InnerBorderEdge" BorderThickness="{TemplateBinding BorderThickness}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"/>
               </DockPanel>
             </Border>
             <Border Name="PART_Backdrop" Background="{TemplateBinding BackdropBrush}" IsVisible="False" IsHitTestVisible="False"/>
@@ -177,28 +106,28 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^ /template/ SplitView#PART_SplitView">
-      <Setter Property="PaneBackground" Value="{DynamicResource MaterialSurfaceContainerBrush}"/>
+      <Setter Property="PaneBackground" Value="{DynamicResource MaterialSurfaceContainerLowBrush}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource NavigationViewItemSeparatorForeground}"/>
     </Style>
-    <Style Selector="^[IsOpen=False] /template/ SplitView#PART_SplitView, ^[DisplayMode=Inline] /template/ SplitView#PART_SplitView, ^[DisplayMode=CompactInline] /template/ SplitView#PART_SplitView">
-      <Setter Property="PaneBackground" Value="{DynamicResource MaterialSurfaceContainerBrush}"/>
+    <Style Selector="^[DisplayMode=Inline] /template/ SplitView#PART_SplitView, ^[DisplayMode=CompactInline] /template/ SplitView#PART_SplitView">
+      <Setter Property="PaneBackground" Value="{DynamicResource MaterialSurfaceBrush}"/>
       <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
     <Style Selector="^[DisplayMode=Overlay] /template/ Border#ContentGrid">
       <Setter Property="BorderThickness" Value="0"/>
       <Setter Property="CornerRadius" Value="0"/>
-      <Setter Property="Margin" Value="{DynamicResource NavigationViewMinimalContentMargin}"/>
+      <Setter Property="Margin" Value="0"/>
     </Style>
     <Style Selector="^:placement-right /template/ Border#ContentGrid">
-      <Setter Property="BorderThickness" Value="0,1,1,0"/>
-      <Setter Property="CornerRadius" Value="0,8,0,0"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="CornerRadius" Value="0"/>
     </Style>
     <Style Selector="^:placement-top /template/ Border#ContentGrid">
       <Setter Property="BorderThickness" Value="0"/>
       <Setter Property="CornerRadius" Value="0"/>
     </Style>
     <Style Selector="^:placement-bottom /template/ Border#ContentGrid">
-      <Setter Property="BorderThickness" Value="0,0,0,1"/>
+      <Setter Property="BorderThickness" Value="0"/>
       <Setter Property="CornerRadius" Value="0"/>
     </Style>
     <Style Selector="^:placement-right /template/ ToggleButton#PART_PaneButton">

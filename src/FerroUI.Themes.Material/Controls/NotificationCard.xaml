@@ -21,7 +21,7 @@
     <Setter Property="Template"><ControlTemplate>
       <Border x:Name="ContentRoot" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
               Padding="{TemplateBinding Padding}" BoxShadow="{DynamicResource MaterialElevation3BoxShadow}">
-        <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" /></Transitions></Border.Transitions>
+        <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
         <Grid ColumnDefinitions="*,Auto">
           <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
                             Foreground="{TemplateBinding Foreground}" VerticalContentAlignment="Center" Margin="0,8,8,8" />

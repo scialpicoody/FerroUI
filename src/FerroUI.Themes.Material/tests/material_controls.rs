@@ -9,7 +9,9 @@ use ferroui_base::{ObjectType, Ref, Visual};
 use ferroui_controls::presenters::TextPresenter;
 use ferroui_controls::primitives::{TemplatedControl, Track};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::{Border, Button, Canvas, CheckBox, Control, Panel, Slider, TextBox, ToggleSwitch, Window};
+use ferroui_controls::{
+    Border, Button, Canvas, CheckBox, Control, Panel, Slider, TextBox, ToggleSwitch, Window,
+};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -23,8 +25,12 @@ impl IObservable<TimeSpan> for TestClock {
     }
 }
 impl IClock for TestClock {
-    fn play_state(&self) -> PlayState { self.state.get() }
-    fn set_play_state(&self, value: PlayState) { self.state.set(value); }
+    fn play_state(&self) -> PlayState {
+        self.state.get()
+    }
+    fn set_play_state(&self, value: PlayState) {
+        self.state.set(value);
+    }
 }
 impl IGlobalClock for TestClock {}
 
@@ -32,8 +38,15 @@ fn application() -> UnitTestApplicationScope {
     register_types();
     UnitTestApplication::start(
         TestServices::styled_window()
-            .with_global_clock(Rc::new(TestClock { subject: LightweightSubject::new(), state: Cell::new(PlayState::Run) }))
-            .with_theme(|| MaterialTheme::new().as_style()),
+            .with_global_clock(Rc::new(TestClock {
+                subject: LightweightSubject::new(),
+                state: Cell::new(PlayState::Run),
+            }))
+            .with_theme(|| {
+                let theme = MaterialTheme::new();
+                theme.set_reduced_motion(true);
+                theme.as_style()
+            }),
     )
 }
 
@@ -41,7 +54,7 @@ fn host(control: &Control) -> Ref<Window> {
     let frame = Border::new();
     frame.set_horizontal_alignment(HorizontalAlignment::Left);
     frame.set_vertical_alignment(VerticalAlignment::Top);
-    frame.set_child(control);
+    frame.set_child(control.to_ref());
     let window = Window::new();
     window.set_width(480.0);
     window.set_height(320.0);
@@ -52,7 +65,8 @@ fn host(control: &Control) -> Ref<Window> {
 }
 
 fn named<T: ObjectType>(visual: &Visual, name: &str) -> Ref<T> {
-    visual.get_visual_descendants()
+    visual
+        .get_visual_descendants()
         .filter(|node| node.name().as_deref() == Some(name))
         .find_map(|node| node.cast::<T>())
         .unwrap_or_else(|| panic!("Material template does not contain {name}"))
@@ -110,7 +124,7 @@ fn slider_keeps_value_binding_when_orientation_changes() {
     let _app = application();
     let slider = Slider::new();
     slider.set_width(240.0);
-    slider.set_value(30.0);
+    slider.set_range_value(30.0);
     let window = host(&slider);
     let track: Ref<Track> = named(&slider, "PART_Track");
     let handle: Ref<Border> = named(&slider, "MaterialHandle");
@@ -126,7 +140,7 @@ fn slider_keeps_value_binding_when_orientation_changes() {
     assert_eq!(30.0, track.value());
     assert_eq!(44.0, handle.bounds().width);
     assert_eq!(4.0, handle.bounds().height);
-    slider.set_value(70.0);
+    slider.set_range_value(70.0);
     assert_eq!(70.0, track.value());
 }
 
@@ -144,4 +158,54 @@ fn material_text_field_keeps_editing_and_selection_template_contracts() {
     assert_eq!(Some("Edited".to_string()), presenter.text());
     let templated: &TemplatedControl = &field;
     assert!(templated.template().is_some());
+}
+
+#[test]
+fn button_variants_keep_disabled_colors_and_flat_hover_surfaces() {
+    let _app = application();
+    for variant in ["text", "outlined", "tonal", "elevated", "accent"] {
+        let button = Button::new();
+        button.classes().add(variant);
+        button.set_content(Some(Rc::new("Action".to_string())));
+        let window = host(&button);
+        button.pseudo_classes().set(":pointerover", true);
+        window.update_layout();
+        let surface: Ref<Border> = named(&button, "MaterialContainer");
+        if variant == "text" || variant == "outlined" {
+            assert_eq!(
+                0,
+                surface.box_shadow().count(),
+                "{variant} must stay flat on hover"
+            );
+        }
+        button.set_is_enabled(false);
+        window.update_layout();
+        assert_eq!(
+            0.38,
+            button.foreground().unwrap().opacity(),
+            "disabled {variant} label opacity"
+        );
+        assert_eq!(
+            0,
+            surface.box_shadow().count(),
+            "disabled {variant} elevation"
+        );
+    }
+}
+
+#[test]
+fn loading_indicator_preserves_range_and_percentage_semantics() {
+    let _app = application();
+    let indicator = crate::MaterialLoadingIndicator::new();
+    indicator.set_is_indeterminate(false);
+    indicator.set_minimum(20.0);
+    indicator.set_maximum(120.0);
+    let _window = host(&indicator);
+    indicator.set_percentage(50.0);
+    assert_eq!(70.0, indicator.value());
+    assert_eq!(50.0, indicator.percentage());
+    assert_eq!(48.0, indicator.bounds().width);
+    assert_eq!(48.0, indicator.bounds().height);
+    indicator.set_range_value(100.0);
+    assert_eq!(80.0, indicator.percentage());
 }

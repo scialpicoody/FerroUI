@@ -76,4 +76,20 @@
     <Style Selector="^ /template/ material|MaterialProgressIndicator#MaterialIndicator"><Setter Property="IsWavy" Value="True" /></Style>
   </ControlTheme>
   <ControlTheme x:Key="{x:Type ProgressBar}" TargetType="ProgressBar" BasedOn="{StaticResource DefaultProgressBarStyle}" />
+  <!-- Loading is a RangeBase with native range automation and percentage alias.
+       The indeterminate mode follows the Android seven-polygon spring sequence. -->
+  <ControlTheme x:Key="DefaultMaterialLoadingIndicatorStyle" TargetType="material:MaterialLoadingIndicator">
+    <Setter Property="ActiveBrush" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="ContainerBrush" Value="Transparent" />
+    <Setter Property="ReducedMotion" Value="{DynamicResource MaterialReducedMotion}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Width" Value="48" /><Setter Property="Height" Value="48" />
+  </ControlTheme>
+  <ControlTheme x:Key="{x:Type material:MaterialLoadingIndicator}" TargetType="material:MaterialLoadingIndicator"
+                BasedOn="{StaticResource DefaultMaterialLoadingIndicatorStyle}" />
+  <ControlTheme x:Key="MaterialContainedLoadingIndicator" TargetType="material:MaterialLoadingIndicator"
+                BasedOn="{StaticResource DefaultMaterialLoadingIndicatorStyle}">
+    <Setter Property="ContainerBrush" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
+    <Setter Property="ActiveBrush" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" />
+  </ControlTheme>
 </ResourceDictionary>

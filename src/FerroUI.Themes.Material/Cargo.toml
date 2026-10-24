@@ -24,6 +24,14 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[features]
+default = []
+# Reads Android 12+ system palettes through the existing platform context.
+android-dynamic-color = ["dep:ferroui-android"]
+
+[target.'cfg(target_os = "android")'.dependencies]
+ferroui-android = { workspace = true, optional = true }
+
 [dependencies]
 # Pinned CAM16/HCT implementation; keeps the workspace Rust 1.89 minimum.
 material-colors = { version = "=0.4.2", default-features = false, features = ["libm"] }

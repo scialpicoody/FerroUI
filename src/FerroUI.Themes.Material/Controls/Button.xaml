@@ -38,10 +38,11 @@
           <Border x:Name="MaterialContainer" Margin="0,4" MinHeight="40"
                   Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
                   BorderThickness="{TemplateBinding BorderThickness}"
-                  CornerRadius="{TemplateBinding CornerRadius}" ClipToBounds="True">
+                  CornerRadius="{TemplateBinding CornerRadius}">
             <Border.Transitions><Transitions>
               <CornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
               <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+              <BoxShadowsTransition Property="BoxShadow" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
             </Transitions></Border.Transitions>
             <Grid>
               <Border x:Name="MaterialStateLayer" Background="{TemplateBinding Foreground}"
@@ -77,11 +78,6 @@
     <Style Selector="^:pressed /template/ Border#MaterialContainer">
     <Setter Property="CornerRadius" Value="8" />
     </Style>
-    <Style Selector="^:disabled">
-    <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
-    <Setter Property="BorderBrush" Value="Transparent" />
-    </Style>
     <Style Selector="^.tonal">
     <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}" />
@@ -96,7 +92,7 @@
     </Style>
     <Style Selector="^.text">
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
@@ -112,11 +108,16 @@
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="BorderBrush" Value="Transparent" />
     </Style>
+    <Style Selector="^:disabled">
+    <Setter Property="Background" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
     <Style Selector="^.text:disabled, ^.outlined:disabled">
     <Setter Property="Background" Value="Transparent" />
     </Style>
     <Style Selector="^.outlined:disabled">
-    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+    <Setter Property="BorderBrush"><SolidColorBrush Color="{DynamicResource MaterialOutlineVariantColor}" Opacity="0.1" /></Setter>
     </Style>
     <Style Selector="^.elevated /template/ Border#MaterialContainer">
     <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel1}" />
@@ -126,6 +127,18 @@
     </Style>
     <Style Selector="^:pressed /template/ Border#MaterialContainer, ^:disabled /template/ Border#MaterialContainer">
     <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="^.text:pointerover /template/ Border#MaterialContainer, ^.outlined:pointerover /template/ Border#MaterialContainer">
+      <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="^.elevated:pointerover /template/ Border#MaterialContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel2}" />
+    </Style>
+    <Style Selector="^.elevated:pressed /template/ Border#MaterialContainer, ^.elevated:focus-visible /template/ Border#MaterialContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel1}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialContainer">
+      <Setter Property="BoxShadow" Value="none" />
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialFilledButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}" />
@@ -142,14 +155,20 @@
     <Setter Property="Background" Value="Transparent" />
     </Style>
     <Style Selector="^:disabled">
-    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDisabledContainerBrush}" />
+    <Setter Property="BorderBrush"><SolidColorBrush Color="{DynamicResource MaterialOutlineVariantColor}" Opacity="0.1" /></Setter>
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#MaterialContainer">
+      <Setter Property="BoxShadow" Value="none" />
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialTextButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
     <Setter Property="Background" Value="Transparent" />
-    <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}" />
     <Style Selector="^:disabled">
     <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="^:pointerover /template/ Border#MaterialContainer">
+      <Setter Property="BoxShadow" Value="none" />
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialElevatedButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
@@ -161,6 +180,10 @@
     <Style Selector="^:pointerover /template/ Border#MaterialContainer">
     <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel2}" />
     </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialContainer, ^:focus-visible /template/ Border#MaterialContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel1}" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialContainer"><Setter Property="BoxShadow" Value="none" /></Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialFab" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
     <Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" />
@@ -171,6 +194,14 @@
       <Setter Property="Margin" Value="0" /><Setter Property="MinHeight" Value="56" />
       <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel3}" />
     </Style>
+    <Style Selector="^:pointerover /template/ Border#MaterialContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel4}" />
+    </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialContainer, ^:focus-visible /template/ Border#MaterialContainer">
+      <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel3}" />
+      <Setter Property="CornerRadius" Value="16" />
+    </Style>
+    <Style Selector="^:disabled /template/ Border#MaterialContainer"><Setter Property="BoxShadow" Value="none" /></Style>
   </ControlTheme>
   <ControlTheme x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialFilledButton}" />
   <ControlTheme x:Key="SubtleButtonStyle" TargetType="Button" BasedOn="{StaticResource MaterialTextButton}" />
@@ -194,6 +225,7 @@
     <Setter Property="MinHeight" Value="56" />
     <Setter Property="Margin" Value="0" />
     </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialContainer"><Setter Property="CornerRadius" Value="12" /></Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialLargeButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
     <Setter Property="FontSize" Value="24" />
@@ -204,6 +236,7 @@
     <Setter Property="MinHeight" Value="96" />
     <Setter Property="Margin" Value="0" />
     </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialContainer"><Setter Property="CornerRadius" Value="16" /></Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialExtraLargeButton" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}">
     <Setter Property="FontSize" Value="32" />
@@ -214,6 +247,7 @@
     <Setter Property="MinHeight" Value="136" />
     <Setter Property="Margin" Value="0" />
     </Style>
+    <Style Selector="^:pressed /template/ Border#MaterialContainer"><Setter Property="CornerRadius" Value="16" /></Style>
   </ControlTheme>
   <ControlTheme x:Key="{x:Type Button}" TargetType="Button" BasedOn="{StaticResource DefaultButtonStyle}" />
 </ResourceDictionary>
