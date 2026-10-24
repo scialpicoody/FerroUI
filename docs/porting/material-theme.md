@@ -297,6 +297,33 @@ math/lifecycle, rounded-path/morph invariants, arranged component geometry,
 selection and editor bindings, and inherited panel layout contracts. Test
 expectations for native dimensions are independent of the generated XAML.
 
+### Recorded desktop verification
+
+The 2026-10-24 implementation validation passed **91 theme tests**, **61 gallery
+markup tests**, the facade feature check, token and Rust-path regeneration checks,
+and workspace release metadata checks. The final gallery build produced **102 of
+102 captures with zero capture failures**: every page in Light, Dark and
+HighContrast, each in LTR and RTL. These are Linux/X11 screenshots rendered with
+Skia under Xvfb at 720×960, scale 1 and normal density. The record and image hashes
+are in [render-validation.json](data/material-theme/render-validation.json).
+The hashes identify this run; continuously animated controls make these images
+unsuitable as unsynchronized pixel goldens.
+
+Visual review verified the outlined label cutout and unclipped label, disabled
+slider and button outlines, invariant RTL check marks, wrapped flyout content,
+centered time-picker text and navigation icons. The Android CI job separately
+compiles the theme with `android-dynamic-color` for `aarch64-linux-android`;
+that target build and a reference-device comparison are not part of this local
+desktop validation record.
+
+| Light | Dark |
+| --- | --- |
+| ![Material overview in light mode](images/material-theme-light.png) | ![Material overview in dark mode](images/material-theme-dark.png) |
+
+| Dark, RTL | High contrast |
+| --- | --- |
+| ![Material overview in dark RTL mode](images/material-theme-dark-rtl.png) | ![Material overview in high contrast](images/material-theme-highcontrast.png) |
+
 ### Native comparison configuration
 
 The following is the configuration checklist for a future Android comparison.

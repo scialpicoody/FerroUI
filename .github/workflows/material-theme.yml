@@ -40,7 +40,7 @@ jobs:
       - name: Render dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev fonts-dejavu-core xvfb
+          sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev libgl1-mesa-dev libx11-dev fonts-dejavu-core xvfb xauth
       - name: Pinned token generation
         run: python3 scripts/material-theme/generate.py --check
       - name: Motion, palette, template and input contracts
@@ -58,6 +58,7 @@ jobs:
           FERROUI_MATERIAL_GALLERY_DENSITIES: normal
           FERROUI_MATERIAL_GALLERY_FLOWS: ltr,rtl
           FERROUI_MATERIAL_GALLERY_TIMEOUT_S: 600
+          LIBGL_ALWAYS_SOFTWARE: 1
         run: xvfb-run -a target/debug/material-theme-gallery
       - name: Render evidence
         if: always()
