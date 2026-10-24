@@ -1,5 +1,6 @@
 use super::*;
-use ferroui_controls::automation::peers::ControlAutomationPeer;
+use ferroui_controls::automation::peers::{AutomationControlType, ControlAutomationPeer};
+use ferroui_controls::Flyout;
 use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, IRangeValueProvider, ISelectionItemProvider, IValueProvider,
 };

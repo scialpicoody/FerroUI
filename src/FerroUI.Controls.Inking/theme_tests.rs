@@ -68,6 +68,8 @@ impl ferroui_base::animation::IClock for MockGlobalClock {
     }
 }
 
+impl ferroui_base::animation::IGlobalClock for MockGlobalClock {}
+
 /// A style (when it is a style and not a collection of styles) and its
 /// nested styles (`StyleExtensions.EnumerateStyles`).
 pub fn enumerate_styles(style: &Rc<dyn IStyle>) -> Vec<Ref<StyleBase>> {
@@ -317,7 +319,8 @@ control_tests! {
 #[test]
 fn ink_toolbar_border_and_padding_offset_themed_children() {
     use crate::{InkToolbar, InkToolbarCustomToolButton, InkToolbarInitialControls,
-        InkToolbarPenConfigurationControl, StackPanel};
+        InkToolbarPenConfigurationControl};
+    use ferroui_controls::StackPanel;
     let _app = start_themed_application();
     let host = StackPanel::new();
     let toolbar = InkToolbar::new();
@@ -413,7 +416,7 @@ fn ink_toolbar_extension_glyph_tracks_selection_and_every_flyout_edge() {
         .find(|path| path.name().as_deref() == Some("ContentFillGlyph"))
         .expect("the selected ink color glyph");
     assert!(outline.fill().is_some(), "presenter content resolves the button foreground");
-    let selected_brush = pen.cast::<ferroui_controls::InkToolbarPenButton>().unwrap()
+    let selected_brush = pen.cast::<crate::InkToolbarPenButton>().unwrap()
         .selected_brush().expect("the selected ink brush");
     assert!(fill.fill().is_some_and(|brush| Rc::ptr_eq(&brush, &selected_brush)),
         "presenter content resolves the selected ink color");
