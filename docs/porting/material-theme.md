@@ -35,3 +35,4 @@ pixel accuracy must be measured against native Android captures; the presence
 of a resource or control template alone is not proof of visual parity.
 Implementation status and known platform differences will be recorded here
 as the work proceeds.
+

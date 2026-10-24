@@ -1822,6 +1822,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-themes-material"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-dialogs",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
 name = "ferroui-themes-simple"
 version = "0.4.0"
 dependencies = [
