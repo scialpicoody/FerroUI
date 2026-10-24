@@ -1,0 +1,3141 @@
+{
+  "schema_version": 1,
+  "provenance": {
+    "repository": "https://github.com/wieslawsoltes/FerroUI",
+    "ferroui_base_commit": "98a56f09459c8ae02f07a2bcd235c0e87b4d44b3",
+    "copied_from": "src/FerroUI.Themes.WinUI",
+    "theme_directory": "src/FerroUI.Themes.MacOS",
+    "upstream_winui_commit": "7e4b0c2096be402f51cc8f7d203ebf67cff183d0",
+    "upstream_license_notice": "src/FerroUI.Themes.MacOS/NOTICE.md",
+    "template_comparison": "Parsed XML, ignoring comments/formatting and the intentional assembly/manifest rename",
+    "unchanged_template_meaning": "The template structure is inherited; shared macOS resources and runtime settings can still change its appearance",
+    "changed_template_meaning": "The template structure differs from the baseline; this is not a native fidelity measurement",
+    "current_xaml_sha256": "e4b91d6ff2d8dd42ff422bd2f155ef0609a509de8f831b9fe31e439c27f9f07c"
+  },
+  "static_contracts": {
+    "status": "pass",
+    "xml_documents_parsed": 151,
+    "documents_reachable_from_theme": 150,
+    "baseline_control_documents": 81,
+    "merged_baseline_control_documents": 81,
+    "changed_control_documents": 48,
+    "unchanged_control_documents": 33,
+    "new_control_documents": [],
+    "baseline_default_theme_keys": 84,
+    "preserved_default_theme_keys": 84,
+    "duration_consumers": 76,
+    "duration_resource_keys": [
+      "MacOSMotionFastDuration",
+      "MacOSMotionStandardDuration",
+      "MacOSProgressPulseDuration"
+    ],
+    "documented_duration_exceptions": 0,
+    "external_includes": [],
+    "errors": []
+  },
+  "inherited_behavior_coverage": {
+    "status": "default-theme inventory preserved",
+    "meaning": "Static template availability from the copied WinUI foundation; this is not an executed behavior result",
+    "runtime_gate": "cargo test --locked -p ferroui-themes-macos --lib",
+    "runtime_gate_status": "not evaluated by this audit",
+    "default_theme_inventory": [
+      {
+        "key": "{x:Type AdornerLayer}",
+        "baseline_documents": [
+          "Controls/AdornerLayer.xaml"
+        ],
+        "macos_documents": [
+          "Controls/AdornerLayer.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type AutoCompleteBox}",
+        "baseline_documents": [
+          "Controls/AutoCompleteBox.xaml"
+        ],
+        "macos_documents": [
+          "Controls/AutoCompleteBox.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ButtonSpinner}",
+        "baseline_documents": [
+          "Controls/ButtonSpinner.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ButtonSpinner.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Button}",
+        "baseline_documents": [
+          "Controls/Button.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Button.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CalendarButton}",
+        "baseline_documents": [
+          "Controls/CalendarButton.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CalendarButton.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CalendarDatePicker}",
+        "baseline_documents": [
+          "Controls/CalendarDatePicker.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CalendarDatePicker.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CalendarDayButton}",
+        "baseline_documents": [
+          "Controls/CalendarDayButton.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CalendarDayButton.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CalendarItem}",
+        "baseline_documents": [
+          "Controls/CalendarItem.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CalendarItem.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Calendar}",
+        "baseline_documents": [
+          "Controls/Calendar.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Calendar.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CarouselPage}",
+        "baseline_documents": [
+          "Controls/CarouselPage.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CarouselPage.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Carousel}",
+        "baseline_documents": [
+          "Controls/Carousel.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Carousel.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CheckBox}",
+        "baseline_documents": [
+          "Controls/CheckBox.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CheckBox.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ComboBoxItem}",
+        "baseline_documents": [
+          "Controls/ComboBoxItem.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ComboBoxItem.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ComboBox}",
+        "baseline_documents": [
+          "Controls/ComboBox.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ComboBox.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CommandBarButton}",
+        "baseline_documents": [
+          "Controls/CommandBar.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CommandBar.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CommandBarSeparator}",
+        "baseline_documents": [
+          "Controls/CommandBar.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CommandBar.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CommandBarToggleButton}",
+        "baseline_documents": [
+          "Controls/CommandBar.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CommandBar.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type CommandBar}",
+        "baseline_documents": [
+          "Controls/CommandBar.xaml"
+        ],
+        "macos_documents": [
+          "Controls/CommandBar.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ContentPage}",
+        "baseline_documents": [
+          "Controls/ContentPage.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ContentPage.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ContextMenu}",
+        "baseline_documents": [
+          "Controls/ContextMenu.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ContextMenu.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type DataValidationErrors}",
+        "baseline_documents": [
+          "Controls/DataValidationErrors.xaml"
+        ],
+        "macos_documents": [
+          "Controls/DataValidationErrors.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type DatePickerPresenter}",
+        "baseline_documents": [
+          "Controls/DatePicker.xaml"
+        ],
+        "macos_documents": [
+          "Controls/DatePicker.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type DatePicker}",
+        "baseline_documents": [
+          "Controls/DatePicker.xaml"
+        ],
+        "macos_documents": [
+          "Controls/DatePicker.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type DrawerPage}",
+        "baseline_documents": [
+          "Controls/DrawerPage.xaml"
+        ],
+        "macos_documents": [
+          "Controls/DrawerPage.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type DropDownButton}",
+        "baseline_documents": [
+          "Controls/DropDownButton.xaml"
+        ],
+        "macos_documents": [
+          "Controls/DropDownButton.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type EmbeddableControlRoot}",
+        "baseline_documents": [
+          "Controls/EmbeddableControlRoot.xaml"
+        ],
+        "macos_documents": [
+          "Controls/EmbeddableControlRoot.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Expander}",
+        "baseline_documents": [
+          "Controls/Expander.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Expander.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type FlyoutPresenter}",
+        "baseline_documents": [
+          "Controls/FlyoutPresenter.xaml"
+        ],
+        "macos_documents": [
+          "Controls/FlyoutPresenter.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type GridSplitter}",
+        "baseline_documents": [
+          "Controls/GridSplitter.xaml"
+        ],
+        "macos_documents": [
+          "Controls/GridSplitter.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type GroupBox}",
+        "baseline_documents": [
+          "Controls/GroupBox.xaml"
+        ],
+        "macos_documents": [
+          "Controls/GroupBox.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type HeaderedContentControl}",
+        "baseline_documents": [
+          "Controls/HeaderedContentControl.xaml"
+        ],
+        "macos_documents": [
+          "Controls/HeaderedContentControl.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type HyperlinkButton}",
+        "baseline_documents": [
+          "Controls/HyperlinkButton.xaml"
+        ],
+        "macos_documents": [
+          "Controls/HyperlinkButton.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ItemsControl}",
+        "baseline_documents": [
+          "Controls/ItemsControl.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ItemsControl.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Label}",
+        "baseline_documents": [
+          "Controls/Label.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Label.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ListBoxItem}",
+        "baseline_documents": [
+          "Controls/ListBoxItem.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ListBoxItem.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ListBox}",
+        "baseline_documents": [
+          "Controls/ListBox.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ListBox.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type MenuFlyoutPresenter}",
+        "baseline_documents": [
+          "Controls/MenuFlyoutPresenter.xaml"
+        ],
+        "macos_documents": [
+          "Controls/MenuFlyoutPresenter.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type MenuItem}",
+        "baseline_documents": [
+          "Controls/MenuItem.xaml"
+        ],
+        "macos_documents": [
+          "Controls/MenuItem.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Menu}",
+        "baseline_documents": [
+          "Controls/Menu.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Menu.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type NavigationPage}",
+        "baseline_documents": [
+          "Controls/NavigationPage.xaml"
+        ],
+        "macos_documents": [
+          "Controls/NavigationPage.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type NotificationCard}",
+        "baseline_documents": [
+          "Controls/NotificationCard.xaml"
+        ],
+        "macos_documents": [
+          "Controls/NotificationCard.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type NumericUpDown}",
+        "baseline_documents": [
+          "Controls/NumericUpDown.xaml"
+        ],
+        "macos_documents": [
+          "Controls/NumericUpDown.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type OverlayPopupHost}",
+        "baseline_documents": [
+          "Controls/OverlayPopupHost.xaml"
+        ],
+        "macos_documents": [
+          "Controls/OverlayPopupHost.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type PathIcon}",
+        "baseline_documents": [
+          "Controls/PathIcon.xaml"
+        ],
+        "macos_documents": [
+          "Controls/PathIcon.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type PipsPager}",
+        "baseline_documents": [
+          "Controls/PipsPager.xaml"
+        ],
+        "macos_documents": [
+          "Controls/PipsPager.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type PopupRoot}",
+        "baseline_documents": [
+          "Controls/PopupRoot.xaml"
+        ],
+        "macos_documents": [
+          "Controls/PopupRoot.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ProgressBar}",
+        "baseline_documents": [
+          "Controls/ProgressBar.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ProgressBar.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type RadioButton}",
+        "baseline_documents": [
+          "Controls/RadioButton.xaml"
+        ],
+        "macos_documents": [
+          "Controls/RadioButton.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type RefreshContainer}",
+        "baseline_documents": [
+          "Controls/RefreshContainer.xaml"
+        ],
+        "macos_documents": [
+          "Controls/RefreshContainer.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type RefreshVisualizer}",
+        "baseline_documents": [
+          "Controls/RefreshVisualizer.xaml"
+        ],
+        "macos_documents": [
+          "Controls/RefreshVisualizer.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type RepeatButton}",
+        "baseline_documents": [
+          "Controls/RepeatButton.xaml"
+        ],
+        "macos_documents": [
+          "Controls/RepeatButton.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ScrollBar}",
+        "baseline_documents": [
+          "Controls/ScrollBar.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ScrollBar.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ScrollViewer}",
+        "baseline_documents": [
+          "Controls/ScrollViewer.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ScrollViewer.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type SelectableTextBlock}",
+        "baseline_documents": [
+          "Controls/SelectableTextBlock.xaml"
+        ],
+        "macos_documents": [
+          "Controls/SelectableTextBlock.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Separator}",
+        "baseline_documents": [
+          "Controls/Separator.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Separator.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Slider}",
+        "baseline_documents": [
+          "Controls/Slider.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Slider.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type SplitButton}",
+        "baseline_documents": [
+          "Controls/SplitButton.xaml"
+        ],
+        "macos_documents": [
+          "Controls/SplitButton.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type SplitView}",
+        "baseline_documents": [
+          "Controls/SplitView.xaml"
+        ],
+        "macos_documents": [
+          "Controls/SplitView.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TabControl}",
+        "baseline_documents": [
+          "Controls/TabControl.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TabControl.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TabItem}",
+        "baseline_documents": [
+          "Controls/TabItem.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TabItem.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TabStripItem}",
+        "baseline_documents": [
+          "Controls/TabStripItem.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TabStripItem.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TabStrip}",
+        "baseline_documents": [
+          "Controls/TabStrip.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TabStrip.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TabbedPage}",
+        "baseline_documents": [
+          "Controls/TabbedPage.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TabbedPage.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TableViewCell}",
+        "baseline_documents": [
+          "Controls/TableViewCell.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TableViewCell.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TableViewColumnHeader}",
+        "baseline_documents": [
+          "Controls/TableViewColumnHeader.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TableViewColumnHeader.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TableViewRow}",
+        "baseline_documents": [
+          "Controls/TableViewRow.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TableViewRow.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TableView}",
+        "baseline_documents": [
+          "Controls/TableView.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TableView.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TextBox}",
+        "baseline_documents": [
+          "Controls/TextBox.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TextBox.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TextSelectionHandle}",
+        "baseline_documents": [
+          "Controls/TextSelectionHandle.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TextSelectionHandle.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ThemeVariantScope}",
+        "baseline_documents": [
+          "Controls/ThemeVariantScope.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ThemeVariantScope.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Thumb}",
+        "baseline_documents": [
+          "Controls/Thumb.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Thumb.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TimePickerPresenter}",
+        "baseline_documents": [
+          "Controls/TimePicker.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TimePicker.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TimePicker}",
+        "baseline_documents": [
+          "Controls/TimePicker.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TimePicker.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ToggleButton}",
+        "baseline_documents": [
+          "Controls/ToggleButton.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ToggleButton.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ToggleSwitch}",
+        "baseline_documents": [
+          "Controls/ToggleSwitch.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ToggleSwitch.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type ToolTip}",
+        "baseline_documents": [
+          "Controls/ToolTip.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ToolTip.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TransitioningContentControl}",
+        "baseline_documents": [
+          "Controls/TransitioningContentControl.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TransitioningContentControl.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TreeViewItem}",
+        "baseline_documents": [
+          "Controls/TreeViewItem.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TreeViewItem.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type TreeView}",
+        "baseline_documents": [
+          "Controls/TreeView.xaml"
+        ],
+        "macos_documents": [
+          "Controls/TreeView.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type WindowDrawnDecorations}",
+        "baseline_documents": [
+          "Controls/WindowDrawnDecorations.xaml"
+        ],
+        "macos_documents": [
+          "Controls/WindowDrawnDecorations.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type WindowNotificationManager}",
+        "baseline_documents": [
+          "Controls/WindowNotificationManager.xaml"
+        ],
+        "macos_documents": [
+          "Controls/WindowNotificationManager.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type Window}",
+        "baseline_documents": [
+          "Controls/Window.xaml"
+        ],
+        "macos_documents": [
+          "Controls/Window.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type dialogs:ManagedFileChooserOverwritePrompt}",
+        "baseline_documents": [
+          "Controls/ManagedFileChooser.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ManagedFileChooser.xaml"
+        ]
+      },
+      {
+        "key": "{x:Type dialogs:ManagedFileChooser}",
+        "baseline_documents": [
+          "Controls/ManagedFileChooser.xaml"
+        ],
+        "macos_documents": [
+          "Controls/ManagedFileChooser.xaml"
+        ]
+      }
+    ]
+  },
+  "resource_validation": {
+    "macos_resource_references": [
+      "MacOSAnimationsEnabled",
+      "MacOSControlCornerRadius",
+      "MacOSControlHeight",
+      "MacOSControlPadding",
+      "MacOSFocusBrush",
+      "MacOSMenuGlassMaterial",
+      "MacOSMenuShadow",
+      "MacOSMinimizeCaptionButton",
+      "MacOSModalTransition",
+      "MacOSMotionFastDuration",
+      "MacOSMotionStandardDuration",
+      "MacOSNavigationTransition",
+      "MacOSProgressPulseDuration",
+      "MacOSReduceMotion",
+      "MacOSRegularGlassMaterial",
+      "MacOSSegmentBackgroundBrush",
+      "MacOSSegmentSelectedBrush",
+      "MacOSSegmentShadow",
+      "MacOSSidebarGlassMaterial",
+      "MacOSToolbarGlassMaterial",
+      "MacOSTrafficCloseGeometry",
+      "MacOSTrafficLightBorderBrush",
+      "MacOSTrafficLightCloseBrush",
+      "MacOSTrafficLightGlyphBrush",
+      "MacOSTrafficLightInactiveBrush",
+      "MacOSTrafficLightMinimizeBrush",
+      "MacOSTrafficLightZoomBrush",
+      "MacOSTrafficMinimizeGeometry",
+      "MacOSTrafficRestoreGeometry",
+      "MacOSTrafficZoomGeometry",
+      "MacOSWindowCornerRadius",
+      "MacOSWindowTitleBarHeight",
+      "MacOSWindowTitleFontSize",
+      "MacOSWindowTitleFontWeight",
+      "MacOSWindowTransparencyLevels",
+      "MacOSZoomCaptionButton"
+    ],
+    "status": "recorded for traceability; availability, types and live invalidation are runtime test gates",
+    "implementation": "src/FerroUI.Themes.MacOS/settings_resources.rs",
+    "tests": [
+      "src/FerroUI.Themes.MacOS/tests/resource_dictionary_tests.rs",
+      "src/FerroUI.Themes.MacOS/tests/accessibility_tests.rs"
+    ]
+  },
+  "native_fidelity": {
+    "status": "unverified",
+    "target": "macOS 26",
+    "reference_capture_tool": "scripts/macos-theme/capture-native.swift",
+    "measured_reference_evidence": [],
+    "visual_comparison_evidence": [],
+    "motion_comparison_evidence": [],
+    "meaning": "Changed templates and passing structural/runtime tests do not establish native pixel, material or animation equivalence",
+    "apple_design_references": [
+      "https://developer.apple.com/videos/play/wwdc2025/310/",
+      "https://developer.apple.com/videos/play/wwdc2025/219/"
+    ]
+  },
+  "control_documents": [
+    {
+      "document": "Controls/AdornerLayer.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type AdornerLayer}",
+          "target_type": "AdornerLayer"
+        }
+      ],
+      "baseline_sha256": "8b8b4633dc2772a08bb5e314deca587a0b7f138e4a69dc22d5d150ceaef31407",
+      "macos_sha256": "0c2b3aa9408941503deb3817c23ddbc09b85b0a8a14d3c9fc2e4aa11a2a4ef2d",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/AutoCompleteBox.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type AutoCompleteBox}",
+          "target_type": "AutoCompleteBox"
+        }
+      ],
+      "baseline_sha256": "4ba775cae9b6f171d6378842c0e9c108d4a74c9730f38a6168b31feebb2a4203",
+      "macos_sha256": "70729d1cd3e49a50b23aa1ebe9313a147f2288b3d67fbf9a6a02d037915cbab9",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Button.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Button}",
+          "target_type": "Button"
+        }
+      ],
+      "baseline_sha256": "abf657c44491a933933396636b70514fa4b2f957de1c5748eec4304890a866d6",
+      "macos_sha256": "96dc14337f3e3eb4715f30f6369812ff60736740c8fd1beea30f0654c9f2c327",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ButtonSpinner.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ButtonSpinner}",
+          "target_type": "ButtonSpinner"
+        }
+      ],
+      "baseline_sha256": "b6f9963a7ebae59d1200724798b4329cc81ba0a5ce53e23b22175b89be1f7d4b",
+      "macos_sha256": "21045882d1358ffa08e859fecc5d06c555bf5d280b3516dd18e07fd3acd558cd",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Calendar.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Calendar}",
+          "target_type": "Calendar"
+        }
+      ],
+      "baseline_sha256": "52a9ca78367f4323836e79780254c7ea2fc1ad2511ed73c7ac82fe190d301f38",
+      "macos_sha256": "52a9ca78367f4323836e79780254c7ea2fc1ad2511ed73c7ac82fe190d301f38",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/CalendarButton.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type CalendarButton}",
+          "target_type": "CalendarButton"
+        }
+      ],
+      "baseline_sha256": "9c535a6f0891ea6af9bb42a91e697285515ee43a2368bce401f92f50ce8003cc",
+      "macos_sha256": "9c535a6f0891ea6af9bb42a91e697285515ee43a2368bce401f92f50ce8003cc",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/CalendarDatePicker.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type CalendarDatePicker}",
+          "target_type": "CalendarDatePicker"
+        }
+      ],
+      "baseline_sha256": "4fea76b1bf88e435be7112f325a2f37a1bf05b62aabb5216fe11b3efa35aab75",
+      "macos_sha256": "c69555ec696187396f2db8c36432b2ec28b4c87cb679ca673fbb49452e3d377c",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/CalendarDayButton.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type CalendarDayButton}",
+          "target_type": "CalendarDayButton"
+        }
+      ],
+      "baseline_sha256": "75c719881b40216314b24a1965db478f792b6b42fe227476b03ce2c2ddeb60d2",
+      "macos_sha256": "75c719881b40216314b24a1965db478f792b6b42fe227476b03ce2c2ddeb60d2",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/CalendarItem.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type CalendarItem}",
+          "target_type": "CalendarItem"
+        }
+      ],
+      "baseline_sha256": "b235f55acf6e105841d74d8ddb9d738b06032efa007b63f33dd98112e531f146",
+      "macos_sha256": "b235f55acf6e105841d74d8ddb9d738b06032efa007b63f33dd98112e531f146",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Carousel.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Carousel}",
+          "target_type": "Carousel"
+        }
+      ],
+      "baseline_sha256": "48eb8010e73d09fc431d35bfd5cacdfe74aeddb3338c6300425e1945668c7d5f",
+      "macos_sha256": "48eb8010e73d09fc431d35bfd5cacdfe74aeddb3338c6300425e1945668c7d5f",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/CarouselPage.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type CarouselPage}",
+          "target_type": "CarouselPage"
+        }
+      ],
+      "baseline_sha256": "926195c70cf085ed1d38bcfef219431090f2d0d42795a7db053b4165c902eb07",
+      "macos_sha256": "926195c70cf085ed1d38bcfef219431090f2d0d42795a7db053b4165c902eb07",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/CheckBox.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type CheckBox}",
+          "target_type": "CheckBox"
+        }
+      ],
+      "baseline_sha256": "4d7f9bc5876ed427d3101231e1503e24e69a2234eb91bb4e0af06003e49d65e1",
+      "macos_sha256": "671f2344d737c0654ce7c52732d1e4dec75cdf3a8e8f4a628bdf81d5f69b3a51",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ComboBox.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ComboBox}",
+          "target_type": "ComboBox"
+        }
+      ],
+      "baseline_sha256": "02883cd163b238bdd1a3428314b6c04e2475a48c11bc1f7bf4b5894cb9e886c6",
+      "macos_sha256": "5631741fd3aebea46b9918bb2741f6c458605396e29a6ec55367cb0631a2c12e",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ComboBoxItem.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ComboBoxItem}",
+          "target_type": "ComboBoxItem"
+        }
+      ],
+      "baseline_sha256": "d129bdb7a8f158885bd8d44d4e54ea28ca4fc1a6bba6ce82a9581335ab6464c8",
+      "macos_sha256": "951cd44ae4ca61dcea010c7793093023a1001b79a2a9d6638823760ac1fcc74d",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/CommandBar.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type CommandBarButton}",
+          "target_type": "CommandBarButton"
+        },
+        {
+          "key": "{x:Type CommandBarSeparator}",
+          "target_type": "CommandBarSeparator"
+        },
+        {
+          "key": "{x:Type CommandBarToggleButton}",
+          "target_type": "CommandBarToggleButton"
+        },
+        {
+          "key": "{x:Type CommandBar}",
+          "target_type": "CommandBar"
+        }
+      ],
+      "baseline_sha256": "5496b2baa7bda64db6e04cb8301b5628456d3c3b2d38ba7a56745c0825c6a803",
+      "macos_sha256": "00e6125e46dd6bc24c2585d98c9dc47d710a220cbc9f4a62cd4d7c774a342cd4",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ContentPage.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ContentPage}",
+          "target_type": "ContentPage"
+        }
+      ],
+      "baseline_sha256": "698468edfa9873f06890ee26f0a9545ca4e26ab535c3917052d30cf5b92b8107",
+      "macos_sha256": "698468edfa9873f06890ee26f0a9545ca4e26ab535c3917052d30cf5b92b8107",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ContextMenu.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ContextMenu}",
+          "target_type": "ContextMenu"
+        }
+      ],
+      "baseline_sha256": "b4c5918b5fde4894ae6e621c844e795d0345a864ba374e0ab528713c8bed825d",
+      "macos_sha256": "3dcbda24d9e34032de9928e43c48db253576ee1c465a506f4e061af086ccab56",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/DataValidationErrors.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type DataValidationErrors}",
+          "target_type": "DataValidationErrors"
+        }
+      ],
+      "baseline_sha256": "185b81fb08bb2349c41a31ca98f96c44def5c37fc7cb591fe4996f1ed6cfd704",
+      "macos_sha256": "185b81fb08bb2349c41a31ca98f96c44def5c37fc7cb591fe4996f1ed6cfd704",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/DatePicker.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type DatePickerPresenter}",
+          "target_type": "DatePickerPresenter"
+        },
+        {
+          "key": "{x:Type DatePicker}",
+          "target_type": "DatePicker"
+        }
+      ],
+      "baseline_sha256": "b978823249b2ed639996683a829427bf3325f4f14264bce33d609a4c86a4c779",
+      "macos_sha256": "b3d2812cc77968e9b3f2c3d9795900847aae9503e5884deb533f6f0a5134071b",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/DateTimePickerShared.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [],
+      "baseline_sha256": "8b905606e1bdaaf797de89e5f0e3115ffcd244bd30cea48ab90d8948ac38f178",
+      "macos_sha256": "f8904c1d79413b519f250917e228025013ef87174ddd076988c623c1c4242f39",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/DrawerPage.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type DrawerPage}",
+          "target_type": "DrawerPage"
+        }
+      ],
+      "baseline_sha256": "43a42dd9e4c682244f962fe1071213548a4ec4938b6744556855b506a26ecd65",
+      "macos_sha256": "43a42dd9e4c682244f962fe1071213548a4ec4938b6744556855b506a26ecd65",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/DropDownButton.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type DropDownButton}",
+          "target_type": "DropDownButton"
+        }
+      ],
+      "baseline_sha256": "59c3255ddac5102054814aaab6647cca71ea0144e755abb464bac78033a649e3",
+      "macos_sha256": "b27b3dc6c0e2ea32819342dae639e6afdc4bdf5d2bec60ce767b9c2652e90378",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/EmbeddableControlRoot.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type EmbeddableControlRoot}",
+          "target_type": "EmbeddableControlRoot"
+        }
+      ],
+      "baseline_sha256": "b9a0eaa6de6d9192bdb75d9205e9949cc066ffc8330198301d63f1dd077576fd",
+      "macos_sha256": "b9a0eaa6de6d9192bdb75d9205e9949cc066ffc8330198301d63f1dd077576fd",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Expander.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Expander}",
+          "target_type": "Expander"
+        }
+      ],
+      "baseline_sha256": "ea1b0c43987b5f0218bf5ec5828862ccefb6070b10fdb6de0326b762ae9a5f84",
+      "macos_sha256": "23bfabf677dda80b640d6d4093d944474b74af4cbca0dcf18b96397f59f0d52c",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/FlyoutPresenter.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type FlyoutPresenter}",
+          "target_type": "FlyoutPresenter"
+        }
+      ],
+      "baseline_sha256": "1f0ad796db5ee4e006e88006dcf1cd830d56ee331bde94af9d92bcca3b1bef9f",
+      "macos_sha256": "4b79a636eb1ae8669da2ba791fa5f9c93f49acf2fc5da6b3339c01963f0b7866",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/GridSplitter.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type GridSplitter}",
+          "target_type": "GridSplitter"
+        }
+      ],
+      "baseline_sha256": "4fbb03396ac759e0f1e892ea3ae75f35e0e99153c47824b50a5523e315c5c08a",
+      "macos_sha256": "4fbb03396ac759e0f1e892ea3ae75f35e0e99153c47824b50a5523e315c5c08a",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/GroupBox.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type GroupBox}",
+          "target_type": "GroupBox"
+        }
+      ],
+      "baseline_sha256": "ed7eaf2dd778816c3e1bdd09ca3caf38c6559be38cd00b47e70080bfa7b404ab",
+      "macos_sha256": "8f12dcd18c257b1a9100d8c3c6e34fdfe4d1a99a7003aab14be323cce7e3c112",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/HeaderedContentControl.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type HeaderedContentControl}",
+          "target_type": "HeaderedContentControl"
+        }
+      ],
+      "baseline_sha256": "4b60de39cd20d4d09bd9a86f1fa525b1a4c4e20bf90ac221fd11416106015f6c",
+      "macos_sha256": "4b60de39cd20d4d09bd9a86f1fa525b1a4c4e20bf90ac221fd11416106015f6c",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/HyperlinkButton.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type HyperlinkButton}",
+          "target_type": "HyperlinkButton"
+        }
+      ],
+      "baseline_sha256": "f0ab99eb4135234fdc11e45ddd5e3323e5e1cfd52f76bbb1e004268f16aa9ee1",
+      "macos_sha256": "ceea7293d33119cee15defa8c6693a9cdf2071263595e202a9e3d2d24e8c3fe2",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ItemsControl.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ItemsControl}",
+          "target_type": "ItemsControl"
+        }
+      ],
+      "baseline_sha256": "93d6d023eff1fc8aeff948b674f71f826367acd1515e305129d79f9a3586a8ee",
+      "macos_sha256": "93d6d023eff1fc8aeff948b674f71f826367acd1515e305129d79f9a3586a8ee",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Label.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Label}",
+          "target_type": "Label"
+        }
+      ],
+      "baseline_sha256": "e5529403fa963958a35c9a2aa0c5b572b88e268f1b5d66111827386dff438e65",
+      "macos_sha256": "e5529403fa963958a35c9a2aa0c5b572b88e268f1b5d66111827386dff438e65",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ListBox.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ListBox}",
+          "target_type": "ListBox"
+        }
+      ],
+      "baseline_sha256": "1411f699599d2cfced25d044c80eaf5326bdd3a7dcef98d13f64c18fdfcb63c2",
+      "macos_sha256": "1411f699599d2cfced25d044c80eaf5326bdd3a7dcef98d13f64c18fdfcb63c2",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ListBoxItem.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ListBoxItem}",
+          "target_type": "ListBoxItem"
+        }
+      ],
+      "baseline_sha256": "894c211c9fb79f23d0ef66b63c26ee635f2218ac0e6f1e7bbeac3ba9a4a77bc7",
+      "macos_sha256": "4afdf474c7982d9f2b84b2cd24ce095d19711f18c23232f5b585ae9dfdf40204",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ManagedFileChooser.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type dialogs:ManagedFileChooserOverwritePrompt}",
+          "target_type": "dialogs:ManagedFileChooserOverwritePrompt"
+        },
+        {
+          "key": "{x:Type dialogs:ManagedFileChooser}",
+          "target_type": "dialogs:ManagedFileChooser"
+        }
+      ],
+      "baseline_sha256": "773c26e8a69ddf737b81685b1a58aafa4b586c3d73368ee401fd86eca78acf75",
+      "macos_sha256": "ae64380c149f0932c9e9a505b6cd735850f8d97b5aafa96d67806e9ea9d74ae7",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Menu.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Menu}",
+          "target_type": "Menu"
+        }
+      ],
+      "baseline_sha256": "f7ff9c0a83a425fe8b87db40f3fe9ee81cf852c29cd9fcd648ad464480c59042",
+      "macos_sha256": "574875f8797da60ff633496e30e322a5079ab5c90c4bf09f21e182b5bf54e82b",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/MenuFlyoutPresenter.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type MenuFlyoutPresenter}",
+          "target_type": "MenuFlyoutPresenter"
+        }
+      ],
+      "baseline_sha256": "6a3f13f43ded4b4e9b4435b60711df0aaf0d35cb30353ad25611eeec679cad16",
+      "macos_sha256": "bf14ed064691bf6abe611e18b4783e6ddd40cc1a8c82d4bf137980c01ee4157a",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/MenuItem.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type MenuItem}",
+          "target_type": "MenuItem"
+        }
+      ],
+      "baseline_sha256": "84411d4a2ffe47a2447016172f96197410c237c4d886e4660eefcb291296d6f7",
+      "macos_sha256": "922266509e0c475381c2ee97e773a714cfc166ff488361b7a67379097bb44ef1",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/MenuScrollViewer.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [],
+      "baseline_sha256": "fb8291151cdefe62ce849337df5e1ac5de4b0015bf3954cca3ddbc1be10b0b0e",
+      "macos_sha256": "fb8291151cdefe62ce849337df5e1ac5de4b0015bf3954cca3ddbc1be10b0b0e",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/NavigationPage.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type NavigationPage}",
+          "target_type": "NavigationPage"
+        }
+      ],
+      "baseline_sha256": "f2311aee0bd204b0650f8606bf3d42cd741e6b9b4fc5d5dc9674e6890580f673",
+      "macos_sha256": "c9326c0d1f7bd590a2f148401b5fed58a7585f0b6d821ba07e52c9bea09a72e3",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/NotificationCard.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type NotificationCard}",
+          "target_type": "NotificationCard"
+        }
+      ],
+      "baseline_sha256": "04240951cb1e0be1f1d16c862a85e42da93b91f4806a10ec0871793b4fd1e32c",
+      "macos_sha256": "b5f55d0acf7bbbe60dc77caad20a1107e78bd99147c6f4bc9eb2204cb8b4f9fe",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/NumericUpDown.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type NumericUpDown}",
+          "target_type": "NumericUpDown"
+        }
+      ],
+      "baseline_sha256": "f66114d1e73e1638a1107af1ab62a02024748973f47852e9ec48cf571935864d",
+      "macos_sha256": "aba0473390a2caa5df299f2be798e9f96d4d53d10bcfad9dd8c6c47abd9b1ec9",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/OverlayPopupHost.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type OverlayPopupHost}",
+          "target_type": "OverlayPopupHost"
+        }
+      ],
+      "baseline_sha256": "1965b38e0a57d5895ac0cbeb45b3dcf9d4024aa3f0d773c096f2a9764dd9b349",
+      "macos_sha256": "1965b38e0a57d5895ac0cbeb45b3dcf9d4024aa3f0d773c096f2a9764dd9b349",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/PathIcon.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type PathIcon}",
+          "target_type": "PathIcon"
+        }
+      ],
+      "baseline_sha256": "70c202b29d73948bbfacd77525eb297ccef7c7f1c08e01d25f3d578296ed11e0",
+      "macos_sha256": "9646370eea34803fd0dd6e9d5eac3b212ed56c88309451e06cd694874cf6e611",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/PipsPager.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type PipsPager}",
+          "target_type": "PipsPager"
+        }
+      ],
+      "baseline_sha256": "a213a323c9614558635768fe0a390d87657007ac2ecb16e2b53ab3aa8b8b8c65",
+      "macos_sha256": "a213a323c9614558635768fe0a390d87657007ac2ecb16e2b53ab3aa8b8b8c65",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/PopupRoot.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type PopupRoot}",
+          "target_type": "PopupRoot"
+        }
+      ],
+      "baseline_sha256": "8c3fa37c4cbed14127e3129919edaf629882db596c78af4ef9a494913ea520c8",
+      "macos_sha256": "8c3fa37c4cbed14127e3129919edaf629882db596c78af4ef9a494913ea520c8",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ProgressBar.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ProgressBar}",
+          "target_type": "ProgressBar"
+        }
+      ],
+      "baseline_sha256": "8aea71894a8a74854cf768799c96f5db67bc087e36aa989ee588f2a6e1298227",
+      "macos_sha256": "549212d6f5fcf39a3fe2c55c8d33aad89d068f749b4af682a830a95575b140aa",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/RadioButton.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type RadioButton}",
+          "target_type": "RadioButton"
+        }
+      ],
+      "baseline_sha256": "990d10cd660fae072a12f1883c6c43e108ab29662b4661dfc321a36c04418bd3",
+      "macos_sha256": "fedba302a9b5322b1ec2b69c262aec63c74065af344b1ff81aeed63eee10e98b",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/RefreshContainer.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type RefreshContainer}",
+          "target_type": "RefreshContainer"
+        }
+      ],
+      "baseline_sha256": "e8700c0dfec9c7bc73168268ad8deb3844db44cac138e3be19013307563fc20d",
+      "macos_sha256": "e8700c0dfec9c7bc73168268ad8deb3844db44cac138e3be19013307563fc20d",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/RefreshVisualizer.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type RefreshVisualizer}",
+          "target_type": "RefreshVisualizer"
+        }
+      ],
+      "baseline_sha256": "a90e6411587d2ae3a86f96f127d586a50783713378d2ec85721ca9bc1a15a9e0",
+      "macos_sha256": "a90e6411587d2ae3a86f96f127d586a50783713378d2ec85721ca9bc1a15a9e0",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/RepeatButton.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type RepeatButton}",
+          "target_type": "RepeatButton"
+        }
+      ],
+      "baseline_sha256": "60582cd68393f0d34beea9e9e3fa704cce012b88f01cc16b7538571e3a9ca6fc",
+      "macos_sha256": "a6bd16a9d764676923385f614d8dfc69967f54f6b1e51883396ecabfb9ead9b4",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ScrollBar}",
+          "target_type": "ScrollBar"
+        }
+      ],
+      "baseline_sha256": "c271ef1b01fe94a04eaa2869a95d20c33052a0841da738b8832be4886257c23d",
+      "macos_sha256": "f1f0f05647e27b5a9c995da4a1f60cbf7c988c66aa43717002338606cd23f91d",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ScrollViewer.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ScrollViewer}",
+          "target_type": "ScrollViewer"
+        }
+      ],
+      "baseline_sha256": "570443e8b283f1db95ea8d9e438731b6df38783ed0f51d0b2ad22bbc40bc2981",
+      "macos_sha256": "41241873bc1ea5d018e532fc218dbb64f77186467e6b158558a545c55a15017f",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/SelectableTextBlock.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type SelectableTextBlock}",
+          "target_type": "SelectableTextBlock"
+        }
+      ],
+      "baseline_sha256": "72bd7555106943c2bf679e8d95a97808c4e08edf3e8fbff9ee9036edd7c55710",
+      "macos_sha256": "72bd7555106943c2bf679e8d95a97808c4e08edf3e8fbff9ee9036edd7c55710",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Separator.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Separator}",
+          "target_type": "Separator"
+        }
+      ],
+      "baseline_sha256": "a656e8470a7594076fbe268f2544918c3e70f75d7303c8d7c7a35a742ba25b91",
+      "macos_sha256": "0e7f4cb8b1caee0e0b4d760bf637b3382c88a02148c5498f0e187680c8d0032d",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Slider.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Slider}",
+          "target_type": "Slider"
+        }
+      ],
+      "baseline_sha256": "6de030b50b00a847e5b07378d46952b61d2b1d160c6b7d9312caaa12faad16d7",
+      "macos_sha256": "766f2b6af76b5576fc1800a89c662dd15e5dd2f5705060271f92185e0605885e",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/SplitButton.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type SplitButton}",
+          "target_type": "SplitButton"
+        }
+      ],
+      "baseline_sha256": "55a0252bb5e64cea38527bd8e93ad2db18d58b14cab78d6a5a9fe8f62c5a6244",
+      "macos_sha256": "d80b32c71102571df097a665adcc964233a9a17d3382ee3371da1f029021cdbe",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type SplitView}",
+          "target_type": "SplitView"
+        }
+      ],
+      "baseline_sha256": "604688f394693fa2880d0a4a338d32857101a4f67b14c405d8a41b0d2f6cb770",
+      "macos_sha256": "332d31c01647b38e4cdea72a5463801bb21b0ab8fd9f6f9f6c8bd9f83858595e",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TabControl.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TabControl}",
+          "target_type": "TabControl"
+        }
+      ],
+      "baseline_sha256": "11e7cf869c92203ad068458be473888dc064c44812f40bc807a6fc473c2cfc88",
+      "macos_sha256": "c3ebaeac94e6db349fdd79020769f0360315e08a897004c21d84e81172d372f6",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TabItem.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TabItem}",
+          "target_type": "TabItem"
+        }
+      ],
+      "baseline_sha256": "d8d241d8cd29c579fd8e666960163e98262b0a6cfcb41b4ad1a831bad5590ab0",
+      "macos_sha256": "439fc467c5ae1c065468d54acd96b22af9bcc1f7836c65bbdccf1bfd5e5785f5",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TabStrip.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TabStrip}",
+          "target_type": "TabStrip"
+        }
+      ],
+      "baseline_sha256": "643e22ad38f3e6aebfb747232968bc963a45d0f9c12c734fa7a187208b2be754",
+      "macos_sha256": "ecc347290cc4d0324c658653e33f8e8b8b5bb8209f0e9c93b5f961783c7f410f",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TabStripItem.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TabStripItem}",
+          "target_type": "TabStripItem"
+        }
+      ],
+      "baseline_sha256": "44a4583b30307b6e6ca759a1e5c40201a8c0c4f483d353bc2ea0a54db11bfc10",
+      "macos_sha256": "7fd31dce5049a0b4170c0cf6be983a1bc625b25d04617d0ccbcc1c76550495ff",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TabbedPage.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TabbedPage}",
+          "target_type": "TabbedPage"
+        }
+      ],
+      "baseline_sha256": "d6164db08f49dd6c83e36fe64f6aaf1e74089a1f58bf37ed0a04b7a383b47fde",
+      "macos_sha256": "d6164db08f49dd6c83e36fe64f6aaf1e74089a1f58bf37ed0a04b7a383b47fde",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TableView.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TableView}",
+          "target_type": "TableView"
+        }
+      ],
+      "baseline_sha256": "be38a2348abaa3670c087e20dcaf175739e7dd60909c4316d0c79feb2485f948",
+      "macos_sha256": "f221b0405c109802cadde026509f4563fa283693cd5df408d2aa8f819f5d9c53",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TableViewCell.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TableViewCell}",
+          "target_type": "TableViewCell"
+        }
+      ],
+      "baseline_sha256": "61dcf60bf94f1a17c2a52d841c134be2421af070939726e689de13fc0dfa2b08",
+      "macos_sha256": "61dcf60bf94f1a17c2a52d841c134be2421af070939726e689de13fc0dfa2b08",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TableViewColumnHeader.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TableViewColumnHeader}",
+          "target_type": "TableViewColumnHeader"
+        }
+      ],
+      "baseline_sha256": "1a0408eb75d88b3f58ed029f021b1e819b5c5bef2f808d4640a97fb43e2fdd04",
+      "macos_sha256": "1a0408eb75d88b3f58ed029f021b1e819b5c5bef2f808d4640a97fb43e2fdd04",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TableViewRow.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TableViewRow}",
+          "target_type": "TableViewRow"
+        }
+      ],
+      "baseline_sha256": "eba29333428f07ca783db519e7e86b816de1fdbd053c51e3444767da0503b893",
+      "macos_sha256": "fc1cc0d55ea22ea851cc5211e7a6c98c29435528b9332c2894db553088365ad4",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TextBlock.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [],
+      "baseline_sha256": "5dc0f6bfd28297bcc62a5f1e68444c485a23cf94a7304237622ff70912d125f0",
+      "macos_sha256": "5dc0f6bfd28297bcc62a5f1e68444c485a23cf94a7304237622ff70912d125f0",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TextBox.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TextBox}",
+          "target_type": "TextBox"
+        }
+      ],
+      "baseline_sha256": "3590b7e9b0f5d9ba4609d095e18919e19c64d73086c84284f5ace9b9e645918d",
+      "macos_sha256": "846245ec2f4b3965b4919a6b90d8a38ff7199f0f042a508008a78b9817ea2dd1",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TextSelectionHandle.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TextSelectionHandle}",
+          "target_type": "TextSelectionHandle"
+        }
+      ],
+      "baseline_sha256": "09f02ba63e0416e224af5573aad1b57ad9b37e7550196b03d35741201d6b952b",
+      "macos_sha256": "09f02ba63e0416e224af5573aad1b57ad9b37e7550196b03d35741201d6b952b",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ThemeVariantScope.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ThemeVariantScope}",
+          "target_type": "ThemeVariantScope"
+        }
+      ],
+      "baseline_sha256": "343bf57fe4062621e78844e81ccca2d2e4b622906be6cc0be742a934dcd2bcec",
+      "macos_sha256": "343bf57fe4062621e78844e81ccca2d2e4b622906be6cc0be742a934dcd2bcec",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Thumb.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Thumb}",
+          "target_type": "Thumb"
+        }
+      ],
+      "baseline_sha256": "d110371e2a7e3f4f847ed1aea84398a004a399bd8873fae70e1442e482ed1b35",
+      "macos_sha256": "d110371e2a7e3f4f847ed1aea84398a004a399bd8873fae70e1442e482ed1b35",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TimePicker.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TimePickerPresenter}",
+          "target_type": "TimePickerPresenter"
+        },
+        {
+          "key": "{x:Type TimePicker}",
+          "target_type": "TimePicker"
+        }
+      ],
+      "baseline_sha256": "e6359f222dfe7e998747d2a186fd9ad63c6d3534486f0a88fe150dc0b155b202",
+      "macos_sha256": "4f55b4c4cd33472d60337f3f5a1f731a1f7c07ae5e0d6f8e4adfd45e6a8d1822",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ToggleButton.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ToggleButton}",
+          "target_type": "ToggleButton"
+        }
+      ],
+      "baseline_sha256": "41991ac01f9ece73566b99d0b1bbd90c484fccc878df092001778e3ec3e1c662",
+      "macos_sha256": "4b9aa97c88aa3e986c2538f2ca369c2ad1a536ee57c729a00aa8e2bf4ca096df",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ToggleSwitch.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ToggleSwitch}",
+          "target_type": "ToggleSwitch"
+        }
+      ],
+      "baseline_sha256": "a070e9b7299ae1d57c3869485ea7af35e0724b13615b8561a65198b1a32ac3a7",
+      "macos_sha256": "9a149ed5221955c0404bede90e8d56e0c5927ed47c42150dc76026eed5053819",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/ToolTip.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type ToolTip}",
+          "target_type": "ToolTip"
+        }
+      ],
+      "baseline_sha256": "552f773424a9e84395f7bb2597826235521bd92b0d99c5e1f826bd232fe8eef7",
+      "macos_sha256": "e702f2fbe88e2f45fe17577a2e77585b8f477b2842e0f340c4a508eceda452a5",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TransitioningContentControl.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TransitioningContentControl}",
+          "target_type": "TransitioningContentControl"
+        }
+      ],
+      "baseline_sha256": "f88a751a3a05bfcf60322ce269de1788f120e618044b8d427b252f8281d4197d",
+      "macos_sha256": "f88a751a3a05bfcf60322ce269de1788f120e618044b8d427b252f8281d4197d",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TreeView.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TreeView}",
+          "target_type": "TreeView"
+        }
+      ],
+      "baseline_sha256": "795bfb74aa88f953721dde90aaabc0c5fa9879172fc1ea6fad5600906b3ae859",
+      "macos_sha256": "795bfb74aa88f953721dde90aaabc0c5fa9879172fc1ea6fad5600906b3ae859",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/TreeViewItem.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type TreeViewItem}",
+          "target_type": "TreeViewItem"
+        }
+      ],
+      "baseline_sha256": "9a33f3d4f05b77e35b143df445f2d1d06982a77365431f040cc17b213fa82388",
+      "macos_sha256": "cdd0e92bbc53f9f30160575c566f50b05dd379a1670e738fc788c148334a26a9",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/Window.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type Window}",
+          "target_type": "Window"
+        }
+      ],
+      "baseline_sha256": "51b455a865069cc3c84dd10e5d01df9b4f5abdb4bc94208271bcb6b8a8e6c5e7",
+      "macos_sha256": "175189b2241ce93fe7feee17a1e7f31be304b278f9750e918edc3a153b97c935",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/WindowDrawnDecorations.xaml",
+      "template_status": "changed",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type WindowDrawnDecorations}",
+          "target_type": "WindowDrawnDecorations"
+        }
+      ],
+      "baseline_sha256": "a8763df6049b9ef721b91fe3a56f0710758efc96b1ee7ff01e9e88a66f6e03ee",
+      "macos_sha256": "5aa51de50e0244a70ca420ee01dc7e7e3e522fb1ff6b88d6008a44426d44bd3f",
+      "native_fidelity": "unverified"
+    },
+    {
+      "document": "Controls/WindowNotificationManager.xaml",
+      "template_status": "unchanged",
+      "baseline_merged": true,
+      "macos_merged": true,
+      "default_themes": [
+        {
+          "key": "{x:Type WindowNotificationManager}",
+          "target_type": "WindowNotificationManager"
+        }
+      ],
+      "baseline_sha256": "495d1aefe084201774d00c01e6f7ade4d0abc83b0a04b8cee34ef75558d4be82",
+      "macos_sha256": "d7f55157a793835d9befdef242a96401bcba5b91e0dd7e02ffb0bb17ca3e6514",
+      "native_fidelity": "unverified"
+    }
+  ],
+  "merged_include_graph": [
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/AdornerLayer.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/AutoCompleteBox.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Button.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ButtonSpinner.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Calendar.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/CalendarButton.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/CalendarDatePicker.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/CalendarDayButton.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/CalendarItem.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Carousel.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/CarouselPage.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/CheckBox.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ComboBox.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ComboBoxItem.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/CommandBar.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ContentPage.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ContextMenu.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/DataValidationErrors.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/DatePicker.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/DateTimePickerShared.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/DrawerPage.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/DropDownButton.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/EmbeddableControlRoot.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Expander.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/FlyoutPresenter.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/GridSplitter.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/GroupBox.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/HeaderedContentControl.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/HyperlinkButton.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ItemsControl.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Label.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ListBox.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ListBoxItem.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ManagedFileChooser.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Menu.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/MenuFlyoutPresenter.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/MenuItem.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/MenuScrollViewer.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/NavigationPage.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/NotificationCard.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/NumericUpDown.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/OverlayPopupHost.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/PathIcon.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/PipsPager.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/PopupRoot.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ProgressBar.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/RadioButton.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/RefreshContainer.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/RefreshVisualizer.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/RepeatButton.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ScrollBar.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ScrollViewer.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/SelectableTextBlock.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Separator.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Slider.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/SplitButton.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/SplitView.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TabControl.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TabItem.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TabStrip.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TabStripItem.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TabbedPage.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TableView.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TableViewCell.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TableViewColumnHeader.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TableViewRow.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TextBlock.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TextBox.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TextSelectionHandle.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ThemeVariantScope.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Thumb.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TimePicker.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ToggleButton.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ToggleSwitch.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/ToolTip.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TransitioningContentControl.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TreeView.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/TreeViewItem.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/Window.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/WindowDrawnDecorations.xaml"
+    },
+    {
+      "from": "Controls/MacOSControls.xaml",
+      "to": "Controls/WindowNotificationManager.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Controls/MacOSControls.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/AcrylicBrush_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/AppBarButton_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/AppBarSeparator_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/AppBarToggleButton_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/AutoSuggestBox_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Button_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/CalendarDatePicker_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/CalendarView_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/CheckBox_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ComboBox_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/CommandBar_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Common_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Common_themeresources_any.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ContentDialog_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/CornerRadius_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/DatePicker_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/DateTimePickerFlyout_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Deprecated_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Deprecated_themeresources_any.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/DropDownButton_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Expander_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/FlipViewItem_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/FlipView_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/FlyoutPresenter_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Generic.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Glyphs.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/HyperlinkButton_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Hyperlink_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/InfoBar_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ListBox_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ListViewItem_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/MacOSMaterials.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/MenuBar_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/MenuFlyout_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/NavigationBackButton_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/NavigationView_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/NumberBox_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/PasswordBox_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/PipsPager_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ProgressBar_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/RadioButton_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/RefreshContainer_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/RefreshVisualizer_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/RepeatButton_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ResizeGripper_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/RevealBrush_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ScrollBar_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ScrollViewer_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/SelectorBar_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/Slider_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/SplitButton_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/SplitView_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/SystemResources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/TabView_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/TableView_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/TabularSurfaces_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/TextBlock_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/TextBlock_themeresources_v2.5.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/TextBox_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ThemeShadows.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/TimePicker_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/TitleBar_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ToggleButton_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ToggleSwitch_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/ToolTip_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Resources/TreeView_themeresources.xaml"
+    },
+    {
+      "from": "MacOSTheme.xaml",
+      "to": "Strings/InvariantResources.xaml"
+    }
+  ],
+  "motion_duration_consumers": [
+    {
+      "document": "Controls/AutoCompleteBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[2]/Setter[14]/ControlTemplate[1]/DataValidationErrors[1]/Grid[1]/Border[2]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/Button.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[17]/ControlTemplate[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/Button.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[17]/ControlTemplate[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/Button.xaml",
+      "element": "/ResourceDictionary/ControlTheme[2]/Setter[6]/ControlTemplate[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/Button.xaml",
+      "element": "/ResourceDictionary/ControlTheme[2]/Setter[6]/ControlTemplate[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/CalendarDatePicker.xaml",
+      "element": "/ResourceDictionary/ControlTheme[3]/Setter[15]/ControlTemplate[1]/DataValidationErrors[1]/Grid[1]/Border[2]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/CheckBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[15]/ControlTemplate[1]/Border[1]/Grid[1]/Grid[1]/Rectangle[1]/Rectangle.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/CheckBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[15]/ControlTemplate[1]/Border[1]/Grid[1]/Grid[1]/Rectangle[1]/Rectangle.Transitions[1]/Transitions[1]/BrushTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/CheckBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[15]/ControlTemplate[1]/Border[1]/Grid[1]/Grid[1]/Path[1]/Path.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ComboBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[1]/ControlTemplate[1]/Panel[1]/Border[2]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ComboBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[2]/Setter[21]/ControlTemplate[1]/DataValidationErrors[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ComboBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[2]/Setter[21]/ControlTemplate[1]/DataValidationErrors[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/CommandBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[12]/ControlTemplate[1]/Panel[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/CommandBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[4]/Setter[13]/ControlTemplate[1]/Panel[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/DateTimePickerShared.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[10]/ControlTemplate[1]/Panel[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/DropDownButton.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[17]/ControlTemplate[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/Expander.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[10]/ControlTemplate[1]/Border[1]/Grid[1]/Border[1]/Grid[1]/Path[1]/Path.Transitions[1]/Transitions[1]/TransformOperationsTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/Expander.xaml",
+      "element": "/ResourceDictionary/ControlTheme[2]/Setter[4]/ControlTemplate[1]/Border[1]/Grid[1]/Border[1]/Grid[1]/Path[1]/Path.Transitions[1]/Transitions[1]/TransformOperationsTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/HyperlinkButton.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[16]/ControlTemplate[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/HyperlinkButton.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[16]/ControlTemplate[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ManagedFileChooser.xaml",
+      "element": "/ResourceDictionary/ControlTheme[4]/Style[1]/Style.Animations[1]/Animation[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ManagedFileChooser.xaml",
+      "element": "/ResourceDictionary/ControlTheme[4]/Style[1]/Style.Animations[1]/Animation[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/NotificationCard.xaml",
+      "element": "/ResourceDictionary/ControlTheme[2]/Setter[8]/ControlTemplate[1]/Border[1]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/NotificationCard.xaml",
+      "element": "/ResourceDictionary/ControlTheme[2]/Style[11]/Style.Animations[1]/Animation[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/NumericUpDown.xaml",
+      "element": "/ResourceDictionary/ControlTheme[4]/Setter[1]/ControlTemplate[1]/Grid[1]/Border[2]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ProgressBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[4]/Style.Animations[1]/Animation[1]/@Duration",
+      "value": "{DynamicResource MacOSProgressPulseDuration}",
+      "resource_key": "MacOSProgressPulseDuration"
+    },
+    {
+      "document": "Controls/RadioButton.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[14]/ControlTemplate[1]/Border[1]/Grid[1]/Grid[1]/Ellipse[3]/Ellipse.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/RadioButton.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[14]/ControlTemplate[1]/Border[1]/Grid[1]/Grid[1]/Ellipse[3]/Ellipse.Transitions[1]/Transitions[1]/DoubleTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/RadioButton.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[14]/ControlTemplate[1]/Border[1]/Grid[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/RadioButton.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[14]/ControlTemplate[1]/Border[1]/Grid[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/DoubleTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/RepeatButton.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[17]/ControlTemplate[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[6]/Setter[1]/ControlTemplate[1]/Rectangle[1]/Rectangle.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[7]/Setter[1]/ControlTemplate[1]/Rectangle[1]/Rectangle.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[1]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[1]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/RepeatButton[1]/RepeatButton.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[1]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/Track[1]/Thumb[1]/Thumb.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[1]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/Track[1]/Thumb[1]/Thumb.Transitions[1]/Transitions[1]/TransformOperationsTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[1]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/RepeatButton[2]/RepeatButton.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[2]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[2]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/RepeatButton[1]/RepeatButton.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[2]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/Track[1]/Thumb[1]/Thumb.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[2]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/Track[1]/Thumb[1]/Thumb.Transitions[1]/Transitions[1]/TransformOperationsTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollBar.xaml",
+      "element": "/ResourceDictionary/ControlTheme[8]/Style[2]/Setter[1]/ControlTemplate[1]/Border[1]/Border[1]/Grid[1]/RepeatButton[2]/RepeatButton.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollViewer.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[8]/ControlTemplate[1]/Border[1]/Grid[1]/ScrollBar[1]/ScrollBar.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollViewer.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[8]/ControlTemplate[1]/Border[1]/Grid[1]/ScrollBar[2]/ScrollBar.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ScrollViewer.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[8]/ControlTemplate[1]/Border[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/Slider.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[3]/ControlTemplate[1]/Border[1]/Ellipse[1]/Ellipse.Transitions[1]/Transitions[1]/TransformOperationsTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[9]/ControlTemplate[1]/Grid[1]/Panel[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[2]/Setter[1]/ControlTemplate[1]/Grid[1]/Panel[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[3]/Setter[1]/ControlTemplate[1]/Grid[1]/Panel[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[4]/Setter[1]/ControlTemplate[1]/Grid[1]/Panel[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[9]/Setter[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[9]/Setter[1]/Transitions[1]/DoubleTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[10]/Setter[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[10]/Setter[1]/Transitions[1]/DoubleTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[11]/Setter[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[11]/Setter[1]/Transitions[1]/DoubleTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[12]/Setter[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/SplitView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Style[12]/Setter[1]/Transitions[1]/DoubleTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/TabItem.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[10]/ControlTemplate[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/TabStripItem.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[18]/ControlTemplate[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/TableView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[1]/ControlTemplate[1]/Border[1]/Grid[1]/ScrollBar[1]/ScrollBar.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/TableView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[1]/ControlTemplate[1]/Border[1]/Grid[1]/ScrollBar[2]/ScrollBar.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/TableView.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[1]/ControlTemplate[1]/Border[1]/Grid[1]/Border[2]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/TableViewRow.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[7]/ControlTemplate[1]/Panel[1]/Border[1]/Panel[1]/Rectangle[1]/Rectangle.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/TextBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[3]/Setter[21]/ControlTemplate[1]/DataValidationErrors[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/TextBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[3]/Setter[21]/ControlTemplate[1]/DataValidationErrors[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/TextBox.xaml",
+      "element": "/ResourceDictionary/ControlTheme[3]/Setter[21]/ControlTemplate[1]/DataValidationErrors[1]/Grid[1]/Border[2]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ToggleButton.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[17]/ControlTemplate[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ToggleSwitch.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[13]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionStandardDuration}",
+      "resource_key": "MacOSMotionStandardDuration"
+    },
+    {
+      "document": "Controls/ToggleSwitch.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[14]/ControlTemplate[1]/Border[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ToggleSwitch.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[14]/ControlTemplate[1]/Border[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[2]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ToggleSwitch.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[14]/ControlTemplate[1]/Border[1]/Grid[1]/Border[1]/Canvas[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ToggleSwitch.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[14]/ControlTemplate[1]/Border[1]/Grid[1]/Border[1]/Canvas[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/ToolTip.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[13]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    },
+    {
+      "document": "Controls/WindowDrawnDecorations.xaml",
+      "element": "/ResourceDictionary/ControlTheme[1]/Setter[15]/ControlTemplate[1]/Border[1]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
+      "value": "{DynamicResource MacOSMotionFastDuration}",
+      "resource_key": "MacOSMotionFastDuration"
+    }
+  ]
+}
