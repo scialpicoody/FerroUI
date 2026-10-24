@@ -1017,9 +1017,11 @@ dependencies = [
  "ferroui-microcom",
  "ferroui-themes-winui",
  "ferroui-win32",
+ "microcom-codegen",
  "windows 0.62.2",
  "windows-collections 0.3.2",
  "windows-numerics 0.3.1",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

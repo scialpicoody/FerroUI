@@ -14,6 +14,11 @@
 //! with the feature `document-assets`, and in the tests of the crate, the documents are
 //! embedded as assets too (`$OUT_DIR/assets.rs`), for a document the run-time loader loads
 //! that includes them.
+//!
+//! The build also runs the MicroCom generator over the interface definition file of the ink
+//! services of Windows (`windows_ink.idl`) and writes the bindings to `$OUT_DIR/windows_ink.rs`,
+//! which `windows_ink_interop.rs` includes. WinUI has no such file: its ink control calls the ink
+//! engine of the system in C++/WinRT.
 
 use std::env;
 use std::fmt::Write as _;
@@ -78,4 +83,23 @@ fn main() {
     if fs::read_to_string(&out).ok().as_deref() != Some(text.as_str()) {
         fs::write(&out, text).unwrap_or_else(|e| panic!("cannot write {}: {e}", out.display()));
     }
+
+    generate_windows_ink_bindings(&root);
+}
+
+/// The bindings of the interfaces of the Windows Runtime the ink services of Windows call,
+/// generated on every host: they are values and vtable calls, whose identifiers the tests of the
+/// crate check everywhere.
+fn generate_windows_ink_bindings(root: &Path) {
+    let idl_path = root.join("windows_ink.idl");
+    println!("cargo::rerun-if-changed={}", idl_path.display());
+    let source = fs::read_to_string(&idl_path).unwrap_or_else(|e| panic!("{}: {e}", idl_path.display()));
+    let parsed = microcom_codegen::parse(&source).unwrap_or_else(|e| panic!("{}:{e}", idl_path.display()));
+    let bindings = microcom_codegen::rust::generate(&parsed, &Default::default())
+        .unwrap_or_else(|e| panic!("{}: {e}", idl_path.display()));
+    let generated = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR")).join("windows_ink.rs");
+    if fs::read_to_string(&generated).is_ok_and(|existing| existing == bindings) {
+        return;
+    }
+    fs::write(&generated, bindings).unwrap_or_else(|e| panic!("{}: {e}", generated.display()));
 }

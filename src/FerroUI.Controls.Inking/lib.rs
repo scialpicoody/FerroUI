@@ -34,6 +34,7 @@ mod ink_events;
 mod markup;
 mod register_types;
 mod rust_paths;
+mod windows_ink_interop;
 #[cfg(windows)]
 mod windows_ink_services;
 mod ink_platform_services;

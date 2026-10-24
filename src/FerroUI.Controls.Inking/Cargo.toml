@@ -37,12 +37,15 @@ ferroui-markup-xaml = { workspace = true }
 # The theme documents key their high-contrast dictionaries by the variant of the WinUI theme.
 ferroui-themes-winui = { workspace = true }
 bitflags = { workspace = true }
+# The COM runtime of the bindings of the ink services of Windows the build script generates
+# (`windows_ink_interop.rs`), which compile, and are tested, on every host.
+ferroui-microcom = { workspace = true }
 
 # The ink services of Windows (`windows_ink_services.rs`): WinRT activation and the apartment of the
-# UI thread through the Windows backend.
+# UI thread through the Windows backend, and the COM allocator.
 [target.'cfg(windows)'.dependencies]
 ferroui-win32 = { workspace = true }
-ferroui-microcom = { workspace = true }
+windows-sys = { workspace = true, features = ["Win32_System_Com"] }
 windows = { version = "=0.62.2", features = [
     "Foundation",
     "Foundation_Collections",
@@ -55,6 +58,8 @@ windows-numerics = "=0.3.1"
 
 [build-dependencies]
 ferroui-build = { workspace = true }
+# The port's MicroCom generator: the standard library alone.
+microcom-codegen = { workspace = true }
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
