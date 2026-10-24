@@ -99,7 +99,7 @@
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}"/>
     <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="FontWeight" Value="Medium"/>
@@ -137,11 +137,17 @@
     <Style Selector="^:focus-visible /template/ Border#StateLayer">
       <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}"/>
     </Style>
-    <Style Selector="^:disabled /template/ Border#ChipContainer">
-      <Setter Property="Opacity" Value="0.38"/>
+    <!-- Chip/SegmentedButton defaults apply separate alpha to content, outline and fill. -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialDisabledOutlineBrush}"/>
+      <Setter Property="Background" Value="Transparent"/>
     </Style>
     <Style Selector="^:disabled /template/ Border#StateLayer">
       <Setter Property="Background" Value="Transparent"/>
+    </Style>
+      <Style Selector="^:disabled /template/ material|MaterialRipple#Ripple">
+      <Setter Property="IsVisible" Value="False"/>
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialSuggestionChip" TargetType="Button">
@@ -185,16 +191,22 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover /template/ Border#StateLayer">
-      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceVariantHoverBrush}"/>
     </Style>
     <Style Selector="^:focus-visible /template/ Border#StateLayer">
-      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceVariantFocusBrush}"/>
     </Style>
-    <Style Selector="^:disabled /template/ Border#ChipContainer">
-      <Setter Property="Opacity" Value="0.38"/>
+    <!-- Chip/SegmentedButton defaults apply separate alpha to content, outline and fill. -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialDisabledOutlineBrush}"/>
+      <Setter Property="Background" Value="Transparent"/>
     </Style>
     <Style Selector="^:disabled /template/ Border#StateLayer">
       <Setter Property="Background" Value="Transparent"/>
+    </Style>
+      <Style Selector="^:disabled /template/ material|MaterialRipple#Ripple">
+      <Setter Property="IsVisible" Value="False"/>
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialFilterChip" TargetType="ToggleButton">
@@ -230,7 +242,9 @@
               </Border>
               <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
               <StackPanel Orientation="Horizontal" Spacing="8" Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Path x:Name="CheckIcon" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Width="18" Height="18" Stretch="Uniform" Fill="{TemplateBinding Foreground}" IsVisible="False"/>
+                <Viewbox x:Name="CheckIcon" Width="18" Height="18" IsVisible="False">
+                  <Path FlowDirection="LeftToRight" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Width="24" Height="24" Stretch="None" Fill="{TemplateBinding Foreground}"/>
+                </Viewbox>
                 <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
               </StackPanel>
             </Panel>
@@ -239,27 +253,41 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover /template/ Border#StateLayer">
-      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceVariantHoverBrush}"/>
     </Style>
     <Style Selector="^:focus-visible /template/ Border#StateLayer">
-      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceVariantFocusBrush}"/>
     </Style>
     <Style Selector="^:checked">
       <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}"/>
       <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
       <Setter Property="BorderBrush" Value="Transparent"/>
-      <Style Selector="^ /template/ Path#CheckIcon">
+      <Setter Property="BorderThickness" Value="0"/>
+      <Style Selector="^ /template/ Viewbox#CheckIcon">
         <Setter Property="IsVisible" Value="True"/>
       </Style>
     </Style>
     <Style Selector="^:checked:pointerover /template/ Border#StateLayer">
       <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerHoverBrush}"/>
     </Style>
-    <Style Selector="^:disabled /template/ Border#ChipContainer">
-      <Setter Property="Opacity" Value="0.38"/>
+    <Style Selector="^:checked:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerFocusBrush}"/>
+    </Style>
+    <!-- Chip/SegmentedButton defaults apply separate alpha to content, outline and fill. -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialDisabledOutlineBrush}"/>
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="^:disabled:checked">
+      <Setter Property="Background" Value="{DynamicResource MaterialChipDisabledContainerBrush}"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
     <Style Selector="^:disabled /template/ Border#StateLayer">
       <Setter Property="Background" Value="Transparent"/>
+    </Style>
+      <Style Selector="^:disabled /template/ material|MaterialRipple#Ripple">
+      <Setter Property="IsVisible" Value="False"/>
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialInputChip" TargetType="ToggleButton">
@@ -269,7 +297,7 @@
     <Setter Property="CornerRadius" Value="8"/>
     <Setter Property="BorderThickness" Value="1"/>
     <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}"/>
-    <Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowBrush}"/>
+    <Setter Property="Background" Value="Transparent"/>
     <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
     <Setter Property="FontSize" Value="14"/>
@@ -295,7 +323,9 @@
               </Border>
               <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
               <StackPanel Orientation="Horizontal" Spacing="8" Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Path x:Name="CheckIcon" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Width="18" Height="18" Stretch="Uniform" Fill="{TemplateBinding Foreground}" IsVisible="False"/>
+                <Viewbox x:Name="CheckIcon" Width="18" Height="18" IsVisible="False">
+                  <Path FlowDirection="LeftToRight" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Width="24" Height="24" Stretch="None" Fill="{TemplateBinding Foreground}"/>
+                </Viewbox>
                 <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
               </StackPanel>
             </Panel>
@@ -304,27 +334,41 @@
       </ControlTemplate>
     </Setter>
     <Style Selector="^:pointerover /template/ Border#StateLayer">
-      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceVariantHoverBrush}"/>
     </Style>
     <Style Selector="^:focus-visible /template/ Border#StateLayer">
-      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceFocusBrush}"/>
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceVariantFocusBrush}"/>
     </Style>
     <Style Selector="^:checked">
       <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}"/>
       <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
       <Setter Property="BorderBrush" Value="Transparent"/>
-      <Style Selector="^ /template/ Path#CheckIcon">
+      <Setter Property="BorderThickness" Value="0"/>
+      <Style Selector="^ /template/ Viewbox#CheckIcon">
         <Setter Property="IsVisible" Value="True"/>
       </Style>
     </Style>
     <Style Selector="^:checked:pointerover /template/ Border#StateLayer">
       <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerHoverBrush}"/>
     </Style>
-    <Style Selector="^:disabled /template/ Border#ChipContainer">
-      <Setter Property="Opacity" Value="0.38"/>
+    <Style Selector="^:checked:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerFocusBrush}"/>
+    </Style>
+    <!-- Chip/SegmentedButton defaults apply separate alpha to content, outline and fill. -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialDisabledOutlineBrush}"/>
+      <Setter Property="Background" Value="Transparent"/>
+    </Style>
+    <Style Selector="^:disabled:checked">
+      <Setter Property="Background" Value="{DynamicResource MaterialChipDisabledContainerBrush}"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
     <Style Selector="^:disabled /template/ Border#StateLayer">
       <Setter Property="Background" Value="Transparent"/>
+    </Style>
+      <Style Selector="^:disabled /template/ material|MaterialRipple#Ripple">
+      <Setter Property="IsVisible" Value="False"/>
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialSegmentedButton" TargetType="ToggleButton">
@@ -333,9 +377,9 @@
     <Setter Property="Padding" Value="12,0"/>
     <Setter Property="CornerRadius" Value="20"/>
     <Setter Property="BorderThickness" Value="1"/>
-    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineVariantBrush}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineBrush}"/>
     <Setter Property="Background" Value="Transparent"/>
-    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+    <Setter Property="Foreground" Value="{DynamicResource MaterialOnSurfaceBrush}"/>
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}"/>
     <Setter Property="FontSize" Value="14"/>
     <Setter Property="FontWeight" Value="Medium"/>
@@ -360,7 +404,9 @@
               </Border>
               <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="{TemplateBinding CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
               <StackPanel Orientation="Horizontal" Spacing="8" Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Path x:Name="CheckIcon" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Width="18" Height="18" Stretch="Uniform" Fill="{TemplateBinding Foreground}" IsVisible="False"/>
+                <Viewbox x:Name="CheckIcon" Width="18" Height="18" IsVisible="False">
+                  <Path FlowDirection="LeftToRight" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Width="24" Height="24" Stretch="None" Fill="{TemplateBinding Foreground}"/>
+                </Viewbox>
                 <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True"/>
               </StackPanel>
             </Panel>
@@ -377,13 +423,16 @@
     <Style Selector="^:checked">
       <Setter Property="Background" Value="{DynamicResource MaterialSecondaryContainerBrush}"/>
       <Setter Property="Foreground" Value="{DynamicResource MaterialOnSecondaryContainerBrush}"/>
-      <Setter Property="BorderBrush" Value="Transparent"/>
-      <Style Selector="^ /template/ Path#CheckIcon">
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineBrush}"/>
+      <Style Selector="^ /template/ Viewbox#CheckIcon">
         <Setter Property="IsVisible" Value="True"/>
       </Style>
     </Style>
     <Style Selector="^:checked:pointerover /template/ Border#StateLayer">
       <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerHoverBrush}"/>
+    </Style>
+    <Style Selector="^:checked:focus-visible /template/ Border#StateLayer">
+      <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerFocusBrush}"/>
     </Style>
     <Style Selector="^.leading">
       <Setter Property="CornerRadius" Value="20,0,0,20"/>
@@ -396,11 +445,16 @@
       <Setter Property="CornerRadius" Value="0,20,20,0"/>
       <Setter Property="Margin" Value="-1,0,0,0"/>
     </Style>
-    <Style Selector="^:disabled /template/ Border#ChipContainer">
-      <Setter Property="Opacity" Value="0.38"/>
+    <!-- Chip/SegmentedButton defaults apply separate alpha to content, outline and fill. -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}"/>
+      <Setter Property="BorderBrush" Value="{DynamicResource MaterialSegmentedButtonDisabledOutlineBrush}"/>
     </Style>
     <Style Selector="^:disabled /template/ Border#StateLayer">
       <Setter Property="Background" Value="Transparent"/>
+    </Style>
+      <Style Selector="^:disabled /template/ material|MaterialRipple#Ripple">
+      <Setter Property="IsVisible" Value="False"/>
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="MaterialSearchBar" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">

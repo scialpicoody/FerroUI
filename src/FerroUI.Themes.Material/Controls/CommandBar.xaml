@@ -57,14 +57,14 @@
                 </Border.Transitions>
               </Border>
               <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{Binding #MaterialContainer.CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
-              <Grid x:Name="ContentRoot" RowDefinitions="Auto,Auto" ColumnDefinitions="*" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Viewbox x:Name="ContentViewbox" Width="24" Height="24" HorizontalAlignment="Center" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}">
+              <Grid x:Name="ContentRoot" RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Viewbox x:Name="ContentViewbox" Width="24" Height="24" HorizontalAlignment="Center" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" Grid.ColumnSpan="2">
                   <Panel Width="24" Height="24">
                     <ContentPresenter x:Name="Content" Content="{TemplateBinding Icon}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <Path x:Name="OverflowCheckGlyph" Width="24" Height="24" Stretch="None" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Fill="{TemplateBinding Foreground}" IsVisible="False" />
+                    <Path x:Name="OverflowCheckGlyph" FlowDirection="LeftToRight" Width="24" Height="24" Stretch="None" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Fill="{TemplateBinding Foreground}" IsVisible="False" />
                   </Panel>
                 </Viewbox>
-                <TextBlock x:Name="TextLabel" Grid.Row="1" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" Margin="0,4,0,0" TextAlignment="Center" VerticalAlignment="Center" />
+                <TextBlock x:Name="TextLabel" Grid.Row="1" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" Margin="0,4,0,0" TextAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2" />
               </Grid>
             </Panel>
           </Border>
@@ -84,12 +84,11 @@
       <Setter Property="Width" Value="NaN" />
     </Style>
     <Style Selector="^[LabelPosition=Right] /template/ Grid#ContentRoot">
-      <Setter Property="ColumnDefinitions" Value="Auto,*" />
-      <Setter Property="RowDefinitions" Value="Auto" />
       <Setter Property="Margin" Value="12,0" />
     </Style>
     <Style Selector="^[LabelPosition=Right] /template/ Viewbox#ContentViewbox">
       <Setter Property="Margin" Value="0,0,8,0" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
     </Style>
     <Style Selector="^[LabelPosition=Right] /template/ TextBlock#TextLabel">
       <Setter Property="Grid.Row" Value="0" />
@@ -97,6 +96,7 @@
       <Setter Property="Margin" Value="0" />
       <Setter Property="FontSize" Value="14" />
       <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
     </Style>
     <Style Selector="^[IsInOverflow=True]">
       <Setter Property="Width" Value="NaN" />
@@ -111,13 +111,12 @@
       <Setter Property="Margin" Value="0" />
     </Style>
     <Style Selector="^[IsInOverflow=True] /template/ Grid#ContentRoot">
-      <Setter Property="ColumnDefinitions" Value="Auto,*" />
-      <Setter Property="RowDefinitions" Value="Auto" />
       <Setter Property="HorizontalAlignment" Value="Stretch" />
       <Setter Property="Margin" Value="12,8" />
     </Style>
     <Style Selector="^[IsInOverflow=True] /template/ Viewbox#ContentViewbox">
       <Setter Property="Margin" Value="0,0,12,0" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
     </Style>
     <Style Selector="^[IsInOverflow=True] /template/ TextBlock#TextLabel">
       <Setter Property="Grid.Row" Value="0" />
@@ -127,6 +126,7 @@
       <Setter Property="FontWeight" Value="Normal" />
       <Setter Property="TextAlignment" Value="Left" />
       <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
     </Style>
     <Style Selector="^:pointerover /template/ Border#StateLayer">
       <Setter Property="Opacity" Value="0.08" />
@@ -185,14 +185,14 @@
                 </Border.Transitions>
               </Border>
               <material:MaterialRipple Fill="{TemplateBinding Foreground}" CornerRadius="{Binding #MaterialContainer.CornerRadius}" ReducedMotion="{DynamicResource MaterialReducedMotion}" />
-              <Grid x:Name="ContentRoot" RowDefinitions="Auto,Auto" ColumnDefinitions="*" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <Viewbox x:Name="ContentViewbox" Width="24" Height="24" HorizontalAlignment="Center" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}">
+              <Grid x:Name="ContentRoot" RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Viewbox x:Name="ContentViewbox" Width="24" Height="24" HorizontalAlignment="Center" IsVisible="{TemplateBinding Icon, Converter={x:Static ObjectConverters.IsNotNull}}" Grid.ColumnSpan="2">
                   <Panel Width="24" Height="24">
                     <ContentPresenter x:Name="Content" Content="{TemplateBinding Icon}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
-                    <Path x:Name="OverflowCheckGlyph" Width="24" Height="24" Stretch="None" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Fill="{TemplateBinding Foreground}" IsVisible="False" />
+                    <Path x:Name="OverflowCheckGlyph" FlowDirection="LeftToRight" Width="24" Height="24" Stretch="None" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z" Fill="{TemplateBinding Foreground}" IsVisible="False" />
                   </Panel>
                 </Viewbox>
-                <TextBlock x:Name="TextLabel" Grid.Row="1" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" Margin="0,4,0,0" TextAlignment="Center" VerticalAlignment="Center" />
+                <TextBlock x:Name="TextLabel" Grid.Row="1" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" FontSize="{TemplateBinding FontSize}" FontWeight="{TemplateBinding FontWeight}" Margin="0,4,0,0" TextAlignment="Center" VerticalAlignment="Center" Grid.ColumnSpan="2" />
               </Grid>
             </Panel>
           </Border>
@@ -212,12 +212,11 @@
       <Setter Property="Width" Value="NaN" />
     </Style>
     <Style Selector="^[LabelPosition=Right] /template/ Grid#ContentRoot">
-      <Setter Property="ColumnDefinitions" Value="Auto,*" />
-      <Setter Property="RowDefinitions" Value="Auto" />
       <Setter Property="Margin" Value="12,0" />
     </Style>
     <Style Selector="^[LabelPosition=Right] /template/ Viewbox#ContentViewbox">
       <Setter Property="Margin" Value="0,0,8,0" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
     </Style>
     <Style Selector="^[LabelPosition=Right] /template/ TextBlock#TextLabel">
       <Setter Property="Grid.Row" Value="0" />
@@ -225,6 +224,7 @@
       <Setter Property="Margin" Value="0" />
       <Setter Property="FontSize" Value="14" />
       <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
     </Style>
     <Style Selector="^[IsInOverflow=True]">
       <Setter Property="Width" Value="NaN" />
@@ -239,13 +239,12 @@
       <Setter Property="Margin" Value="0" />
     </Style>
     <Style Selector="^[IsInOverflow=True] /template/ Grid#ContentRoot">
-      <Setter Property="ColumnDefinitions" Value="Auto,*" />
-      <Setter Property="RowDefinitions" Value="Auto" />
       <Setter Property="HorizontalAlignment" Value="Stretch" />
       <Setter Property="Margin" Value="12,8" />
     </Style>
     <Style Selector="^[IsInOverflow=True] /template/ Viewbox#ContentViewbox">
       <Setter Property="Margin" Value="0,0,12,0" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
     </Style>
     <Style Selector="^[IsInOverflow=True] /template/ TextBlock#TextLabel">
       <Setter Property="Grid.Row" Value="0" />
@@ -255,6 +254,7 @@
       <Setter Property="FontWeight" Value="Normal" />
       <Setter Property="TextAlignment" Value="Left" />
       <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
     </Style>
     <Style Selector="^:pointerover /template/ Border#StateLayer">
       <Setter Property="Opacity" Value="0.08" />
@@ -285,6 +285,7 @@
     </Style>
     <Style Selector="^[IsInOverflow=True] /template/ Viewbox#ContentViewbox">
       <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Grid.ColumnSpan" Value="1" />
     </Style>
     <Style Selector="^[IsInOverflow=True]:checked /template/ Path#OverflowCheckGlyph">
       <Setter Property="IsVisible" Value="True" />

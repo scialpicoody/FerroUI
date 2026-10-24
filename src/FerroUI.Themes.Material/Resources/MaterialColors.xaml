@@ -300,6 +300,9 @@
       <SolidColorBrush x:Key="MaterialDisabledContentBrush" Color="{DynamicResource MaterialOnSurfaceVariantColor}" Opacity="0.38" />
       <SolidColorBrush x:Key="MaterialDisabledOnSurfaceBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.38" />
       <SolidColorBrush x:Key="MaterialDisabledOutlineBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.12" />
+      <SolidColorBrush x:Key="MaterialOutlinedButtonDisabledOutlineBrush" Color="{DynamicResource MaterialOutlineVariantColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialChipDisabledContainerBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.12" />
+      <SolidColorBrush x:Key="MaterialSegmentedButtonDisabledOutlineBrush" Color="{DynamicResource MaterialOutlineColor}" Opacity="0.12" />
       <SolidColorBrush x:Key="MaterialDisabledFieldBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.04" />
       <SolidColorBrush x:Key="MaterialTextFieldDisabledContainerBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.04" />
       <SolidColorBrush x:Key="MaterialModalScrimBrush" Color="{DynamicResource MaterialScrimColor}" Opacity="0.32" />
@@ -597,6 +600,9 @@
       <SolidColorBrush x:Key="MaterialDisabledContentBrush" Color="{DynamicResource MaterialOnSurfaceVariantColor}" Opacity="0.38" />
       <SolidColorBrush x:Key="MaterialDisabledOnSurfaceBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.38" />
       <SolidColorBrush x:Key="MaterialDisabledOutlineBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.12" />
+      <SolidColorBrush x:Key="MaterialOutlinedButtonDisabledOutlineBrush" Color="{DynamicResource MaterialOutlineVariantColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialChipDisabledContainerBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.12" />
+      <SolidColorBrush x:Key="MaterialSegmentedButtonDisabledOutlineBrush" Color="{DynamicResource MaterialOutlineColor}" Opacity="0.12" />
       <SolidColorBrush x:Key="MaterialDisabledFieldBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.04" />
       <SolidColorBrush x:Key="MaterialTextFieldDisabledContainerBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.04" />
       <SolidColorBrush x:Key="MaterialModalScrimBrush" Color="{DynamicResource MaterialScrimColor}" Opacity="0.32" />
@@ -894,6 +900,9 @@
       <SolidColorBrush x:Key="MaterialDisabledContentBrush" Color="{DynamicResource MaterialOnSurfaceVariantColor}" Opacity="0.38" />
       <SolidColorBrush x:Key="MaterialDisabledOnSurfaceBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.38" />
       <SolidColorBrush x:Key="MaterialDisabledOutlineBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.12" />
+      <SolidColorBrush x:Key="MaterialOutlinedButtonDisabledOutlineBrush" Color="{DynamicResource MaterialOutlineVariantColor}" Opacity="0.1" />
+      <SolidColorBrush x:Key="MaterialChipDisabledContainerBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.12" />
+      <SolidColorBrush x:Key="MaterialSegmentedButtonDisabledOutlineBrush" Color="{DynamicResource MaterialOutlineColor}" Opacity="0.12" />
       <SolidColorBrush x:Key="MaterialDisabledFieldBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.04" />
       <SolidColorBrush x:Key="MaterialTextFieldDisabledContainerBrush" Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.04" />
       <SolidColorBrush x:Key="MaterialModalScrimBrush" Color="{DynamicResource MaterialScrimColor}" Opacity="0.32" />

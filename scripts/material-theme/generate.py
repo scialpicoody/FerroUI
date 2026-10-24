@@ -41,7 +41,7 @@ def colors() -> str:
             result += f'      <SolidColorBrush x:Key="Material{role}Brush" Color="{{DynamicResource Material{role}Color}}" />\n'
             for state, opacity in (("Hover", .08), ("Focus", .10), ("Pressed", .10), ("Dragged", .16)):
                 result += f'      <SolidColorBrush x:Key="Material{role}{state}Brush" Color="{{DynamicResource Material{role}Color}}" Opacity="{opacity}" />\n'
-        for key, role, opacity in (("DisabledContainer", "OnSurface", .10), ("DisabledContent", "OnSurfaceVariant", .38), ("DisabledOnSurface", "OnSurface", .38), ("DisabledOutline", "OnSurface", .12), ("DisabledField", "OnSurface", .04), ("TextFieldDisabledContainer", "OnSurface", .04), ("ModalScrim", "Scrim", .32)):
+        for key, role, opacity in (("DisabledContainer", "OnSurface", .10), ("DisabledContent", "OnSurfaceVariant", .38), ("DisabledOnSurface", "OnSurface", .38), ("DisabledOutline", "OnSurface", .12), ("OutlinedButtonDisabledOutline", "OutlineVariant", .10), ("ChipDisabledContainer", "OnSurface", .12), ("SegmentedButtonDisabledOutline", "Outline", .12), ("DisabledField", "OnSurface", .04), ("TextFieldDisabledContainer", "OnSurface", .04), ("ModalScrim", "Scrim", .32)):
             result += f'      <SolidColorBrush x:Key="Material{key}Brush" Color="{{DynamicResource Material{role}Color}}" Opacity="{opacity}" />\n'
         result += "    </ResourceDictionary>\n"
     return result + "  </ResourceDictionary.ThemeDictionaries>\n</ResourceDictionary>\n"
@@ -148,6 +148,9 @@ impl MaterialColorScheme {{
             ("MaterialDisabledContentBrush", MaterialColorRole::OnSurfaceVariant, 0.38),
             ("MaterialDisabledOnSurfaceBrush", MaterialColorRole::OnSurface, 0.38),
             ("MaterialDisabledOutlineBrush", MaterialColorRole::OnSurface, 0.12),
+            ("MaterialOutlinedButtonDisabledOutlineBrush", MaterialColorRole::OutlineVariant, 0.10),
+            ("MaterialChipDisabledContainerBrush", MaterialColorRole::OnSurface, 0.12),
+            ("MaterialSegmentedButtonDisabledOutlineBrush", MaterialColorRole::Outline, 0.12),
             ("MaterialDisabledFieldBrush", MaterialColorRole::OnSurface, 0.04),
             ("MaterialTextFieldDisabledContainerBrush", MaterialColorRole::OnSurface, 0.04),
             ("MaterialModalScrimBrush", MaterialColorRole::Scrim, 0.32),

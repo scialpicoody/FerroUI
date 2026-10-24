@@ -7,6 +7,7 @@
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
                     x:ClassModifier="internal">
   <Design.PreviewWith>
     <Border Padding="20">
@@ -199,6 +200,8 @@
     <Setter Property="BorderThickness" Value="0,0,0,1" />
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="FontSize" Value="16" />
+    <Setter Property="LineHeight" Value="24" />
+    <Setter Property="LetterSpacing" Value="0.5" />
     <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
     <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
     <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
@@ -206,14 +209,19 @@
     <Setter Property="MinWidth" Value="120" />
     <Setter Property="Padding" Value="16,16" />
     <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <!-- The outlined label straddles the top edge. Editing remains clipped by
+         PART_ScrollViewer; the field and validation wrapper must expose it. -->
+    <Setter Property="ClipToBounds" Value="False" />
     <Setter Property="CornerRadius" Value="4,4,0,0" />
     <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
     <Setter Property="ContextFlyout" Value="{StaticResource TextBoxContextFlyout}" />
     <Setter Property="Template">
       <ControlTemplate>
-        <DataValidationErrors>
+        <DataValidationErrors x:Name="MaterialValidationRoot" ClipToBounds="False">
           <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
-            <Border x:Name="BorderElement"
+            <material:MaterialTextFieldBorder x:Name="BorderElement"
+                    NotchStart="{Binding #MaterialFloatingLabel.Bounds.X}"
+                    NotchWidth="{Binding #MaterialFloatingLabel.Bounds.Width}"
                     Grid.Column="0"
                     Grid.ColumnSpan="5"
                     Background="{TemplateBinding Background}"
@@ -223,10 +231,10 @@
                     CornerRadius="{TemplateBinding CornerRadius}"
                     MinWidth="{TemplateBinding MinWidth}"
                     MinHeight="{TemplateBinding MinHeight}">
-              <Border.Transitions><Transitions><BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /><BrushTransition Property="BorderBrush" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
-            </Border>
+              <Border.Transitions><Transitions><BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /><BrushTransition Property="BorderBrush" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /><DoubleTransition Property="material:MaterialTextFieldBorder.NotchOpen" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Border.Transitions>
+            </material:MaterialTextFieldBorder>
             <TextBlock x:Name="MaterialFloatingLabel" Grid.Column="1" Grid.ColumnSpan="2"
-                       Text="{TemplateBinding PlaceholderText}" FontSize="16" Margin="16,0"
+                       Text="{TemplateBinding PlaceholderText}" FontSize="16" LineHeight="24" LetterSpacing="0.5" Margin="16,0"
                        Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}"
                        VerticalAlignment="Center" HorizontalAlignment="Left"
                        IsHitTestVisible="False" IsVisible="False">
@@ -236,7 +244,7 @@
             <ContentPresenter x:Name="InnerLeftContentPresenter"
                               IsVisible="{TemplateBinding InnerLeftContent, Converter={x:Static ObjectConverters.IsNotNull}}"
                               Grid.Column="0"
-                              Margin="{TemplateBinding BorderThickness}"
+                              Margin="0"
                               Content="{TemplateBinding InnerLeftContent}"
                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
             <ScrollViewer x:Name="PART_ScrollViewer"
@@ -244,7 +252,7 @@
                           HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
                           VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
                           IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
-                          Margin="{TemplateBinding BorderThickness}"
+                          Margin="0"
                           Padding="{TemplateBinding Padding}"
                           Foreground="{TemplateBinding Foreground}"
                           Focusable="False">
@@ -276,7 +284,7 @@
                        Grid.ColumnSpan="2"
                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
                        Foreground="{TemplateBinding PlaceholderForeground}"
-                       Margin="{TemplateBinding BorderThickness}"
+                       Margin="0"
                        Padding="{TemplateBinding Padding}"
                        Text="{TemplateBinding PlaceholderText}"
                        TextAlignment="{TemplateBinding TextAlignment}"
@@ -319,7 +327,7 @@
             <ContentPresenter x:Name="InnerRightContentPresenter"
                               IsVisible="{TemplateBinding InnerRightContent, Converter={x:Static ObjectConverters.IsNotNull}}"
                               Grid.Column="4"
-                              Margin="{TemplateBinding BorderThickness}"
+                              Margin="0"
                               Content="{TemplateBinding InnerRightContent}"
                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
           </Grid>
@@ -397,8 +405,9 @@
       <Setter Property="Padding" Value="16,24,16,8" />
     </Style>
     <Style Selector="^.floatingLabel:focus /template/ TextBlock#MaterialFloatingLabel, ^.floatingLabel:not(TextBox:empty) /template/ TextBlock#MaterialFloatingLabel">
-      <Setter Property="FontSize" Value="12" /><Setter Property="VerticalAlignment" Value="Top" />
-      <Setter Property="Margin" Value="16,6,16,0" />
+      <Setter Property="FontSize" Value="12" /><Setter Property="LineHeight" Value="16" />
+      <Setter Property="LetterSpacing" Value="0.4" /><Setter Property="VerticalAlignment" Value="Top" />
+      <Setter Property="Margin" Value="16,8,16,0" />
     </Style>
     <Style Selector="^:focus /template/ TextBlock#MaterialFloatingLabel">
       <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" />
@@ -416,6 +425,15 @@
     </Style>
     <Style Selector="^.outlined /template/ Border#BorderElement"><Setter Property="Background" Value="Transparent" /></Style>
     <Style Selector="^.outlined:focus /template/ Border#BorderElement"><Setter Property="BorderThickness" Value="2" /></Style>
+    <Style Selector="^.outlined.floatingLabel:focus, ^.outlined.floatingLabel:not(TextBox:empty)">
+      <Setter Property="Padding" Value="16" />
+    </Style>
+    <Style Selector="^.outlined.floatingLabel:focus /template/ TextBlock#MaterialFloatingLabel, ^.outlined.floatingLabel:not(TextBox:empty) /template/ TextBlock#MaterialFloatingLabel">
+      <Setter Property="Margin" Value="16,-8,16,0" />
+    </Style>
+    <Style Selector="^.outlined.floatingLabel:focus /template/ Border#BorderElement, ^.outlined.floatingLabel:not(TextBox:empty) /template/ Border#BorderElement">
+      <Setter Property="material:MaterialTextFieldBorder.NotchOpen" Value="1" />
+    </Style>
   </ControlTheme>
 
   <!-- DefaultPasswordBoxStyle (PasswordBox_themeresources.xaml): a text box with the password
@@ -442,5 +460,14 @@
     <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineBrush}" /><Setter Property="CornerRadius" Value="4" />
     <Style Selector="^ /template/ Border#BorderElement"><Setter Property="Background" Value="Transparent" /></Style>
     <Style Selector="^:focus /template/ Border#BorderElement"><Setter Property="BorderThickness" Value="2" /></Style>
+    <Style Selector="^.floatingLabel:focus, ^.floatingLabel:not(TextBox:empty)">
+      <Setter Property="Padding" Value="16" />
+    </Style>
+    <Style Selector="^.floatingLabel:focus /template/ TextBlock#MaterialFloatingLabel, ^.floatingLabel:not(TextBox:empty) /template/ TextBlock#MaterialFloatingLabel">
+      <Setter Property="Margin" Value="16,-8,16,0" />
+    </Style>
+    <Style Selector="^.floatingLabel:focus /template/ Border#BorderElement, ^.floatingLabel:not(TextBox:empty) /template/ Border#BorderElement">
+      <Setter Property="material:MaterialTextFieldBorder.NotchOpen" Value="1" />
+    </Style>
   </ControlTheme>
 </ResourceDictionary>

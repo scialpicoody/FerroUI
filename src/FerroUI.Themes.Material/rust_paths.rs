@@ -10,6 +10,7 @@ ferroui_base::ferro_rust_paths! {
         crate::MaterialProgressIndicator,
         crate::MaterialRipple,
         crate::MaterialSelectionMark,
+        crate::MaterialTextFieldBorder,
         crate::MaterialTheme,
         crate::accents::SystemAccentColors,
         crate::primitives::InfoBarPanel,

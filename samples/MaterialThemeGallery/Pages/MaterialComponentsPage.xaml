@@ -44,10 +44,10 @@
         </StackPanel>
       </ContentControl>
     </Grid>
-    <TextBox Theme="{StaticResource MaterialSearchBar}" Watermark="Search your collection" />
+    <TextBox Theme="{StaticResource MaterialSearchBar}" PlaceholderText="Search your collection" />
     <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-      <TextBox Classes="floatingLabel" Watermark="Project name" Text="A new perspective" />
-      <TextBox Grid.Column="1" Classes="outlined floatingLabel" Watermark="A little more detail" Text="Built with FerroUI" />
+      <TextBox Classes="floatingLabel" PlaceholderText="Project name" Text="A new perspective" />
+      <TextBox Grid.Column="1" Classes="outlined floatingLabel" PlaceholderText="A little more detail" Text="Built with FerroUI" />
     </Grid>
     <TabControl Theme="{StaticResource MaterialNavigationBar}" Height="174" SelectedIndex="0">
       <TabItem Header="Explore">
@@ -59,13 +59,21 @@
           </StackPanel>
         </Border>
       </TabItem>
-      <TabItem Header="Favorites"><TextBlock Text="Your saved items" Margin="24" /></TabItem>
-      <TabItem Header="Library"><TextBlock Text="Your collection" Margin="24" /></TabItem>
+      <TabItem Header="Favorites">
+        <TabItem.Icon><PathIcon Data="M12 17.27 L18.18 21 L16.54 13.97 L22 9.24 L14.81 8.63 L12 2 L9.19 8.63 L2 9.24 L7.46 13.97 L5.82 21 Z" /></TabItem.Icon>
+        <TextBlock Text="Your saved items" Margin="24" />
+      </TabItem>
+      <TabItem Header="Library">
+        <TabItem.Icon><PathIcon Data="M3 4 L9 4 L12 6 L15 4 L21 4 L21 20 L15 20 L12 22 L9 20 L3 20 Z M5 6 L5 18 L9.6 18 L11 18.93 L11 7.07 L8.4 6 Z M13 7.07 L13 18.93 L14.4 18 L19 18 L19 6 L15.6 6 Z" /></TabItem.Icon>
+        <TextBlock Text="Your collection" Margin="24" />
+      </TabItem>
     </TabControl>
     <WrapPanel ItemSpacing="8">
       <Button Theme="{StaticResource MaterialAssistChip}" Content="Add a task" />
-      <ToggleButton Theme="{StaticResource MaterialSegmentedButton}" Content="Day" IsChecked="True" />
-      <ToggleButton Theme="{StaticResource MaterialSegmentedButton}" Content="Week" />
+      <StackPanel Orientation="Horizontal">
+        <RadioButton Theme="{StaticResource MaterialSegmentedButton}" Classes="leading" GroupName="Period" Content="Day" IsChecked="True" />
+        <RadioButton Theme="{StaticResource MaterialSegmentedButton}" Classes="trailing" GroupName="Period" Content="Week" />
+      </StackPanel>
       <Button Content="Disabled" IsEnabled="False" />
     </WrapPanel>
   </StackPanel>

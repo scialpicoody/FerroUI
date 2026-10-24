@@ -199,7 +199,7 @@
     <Setter Property="Opacity" Value="0.38" />
     </Style>
     <Style Selector="^:disabled /template/ RepeatButton#PART_IncreaseButton">
-      <Setter Property="Background"><SolidColorBrush Color="{DynamicResource MaterialOnSurfaceColor}" Opacity="0.12" /></Setter>
+      <Setter Property="Background" Value="{DynamicResource MaterialDisabledOutlineBrush}" />
       <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledOnSurfaceBrush}" />
     </Style>
     <Style Selector="^[IsDirectionReversed=True]:horizontal /template/ RepeatButton#PART_DecreaseButton">

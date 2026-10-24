@@ -47,13 +47,14 @@ jobs:
         run: cargo test --locked -p ferroui-themes-material --lib
       - name: Facade integration
         run: cargo check --locked -p ferroui --no-default-features --features material-theme
+      - name: Gallery compiled and runtime markup contracts
+        run: cargo test --locked -p material-theme-gallery --lib
       - name: Gallery compilation
         run: cargo build --locked -p material-theme-gallery --bin material-theme-gallery
-      - name: Light, dark and RTL render matrix
+      - name: Every gallery page in light, dark, high contrast and RTL
         env:
           FERROUI_MATERIAL_GALLERY_CAPTURE: material-captures
-          FERROUI_MATERIAL_GALLERY_PAGES: material,buttons,toggles,text,range,navigation
-          FERROUI_MATERIAL_GALLERY_VARIANTS: Light,Dark
+          FERROUI_MATERIAL_GALLERY_VARIANTS: Light,Dark,HighContrast
           FERROUI_MATERIAL_GALLERY_DENSITIES: normal
           FERROUI_MATERIAL_GALLERY_FLOWS: ltr,rtl
           FERROUI_MATERIAL_GALLERY_TIMEOUT_S: 600

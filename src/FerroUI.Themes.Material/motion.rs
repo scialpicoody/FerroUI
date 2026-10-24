@@ -1,3 +1,6 @@
+// Copyright 2024 The Android Open Source Project (motion tokens).
+// Copyright 2026 FerroUI contributors (analytical evaluator and runtime integration).
+// SPDX-License-Identifier: Apache-2.0
 //! Material 3 Expressive motion, connected to FerroUI's transition and compositor APIs.
 //!
 //! The spring constants follow AndroidX Material3 1.5.0-beta02, commit
@@ -26,6 +29,8 @@ pub(crate) struct MaterialMotionPolicy {
 }
 
 impl MaterialMotionPolicy {
+    // fetch_update is the name available on the workspace Rust 1.89 baseline.
+    #[allow(deprecated)]
     pub(crate) fn set_reduced_motion(&self, reduced: bool) {
         let _ = self
             .state

@@ -84,6 +84,9 @@
     <Setter Property="ReducedMotion" Value="{DynamicResource MaterialReducedMotion}" />
     <Setter Property="IsTabStop" Value="False" />
     <Setter Property="Width" Value="48" /><Setter Property="Height" Value="48" />
+    <!-- RangeBase retains the themed-control contract while the indicator's
+         native renderer draws its shape, container, and continuous morph. -->
+    <Setter Property="Template"><ControlTemplate><Panel IsHitTestVisible="False" /></ControlTemplate></Setter>
   </ControlTheme>
   <ControlTheme x:Key="{x:Type material:MaterialLoadingIndicator}" TargetType="material:MaterialLoadingIndicator"
                 BasedOn="{StaticResource DefaultMaterialLoadingIndicatorStyle}" />

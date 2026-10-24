@@ -5,12 +5,15 @@ use crate::{register_types, MaterialTheme};
 use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
-use ferroui_base::{ObjectType, Ref, Visual};
+use ferroui_base::{ObjectType, Point, Ref, StaticType, Visual};
+use ferroui_controls::automation::peers::{AutomationControlType, ControlAutomationPeer};
+use ferroui_controls::automation::provider::IRangeValueProvider;
 use ferroui_controls::presenters::TextPresenter;
 use ferroui_controls::primitives::{TemplatedControl, Track};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{
-    Border, Button, Canvas, CheckBox, Control, Panel, Slider, TextBox, ToggleSwitch, Window,
+    Border, Button, Canvas, CheckBox, Control, DataValidationErrors, Panel, RepeatButton, Slider,
+    TextBlock, TextBox, ToggleSwitch, Window,
 };
 use std::cell::Cell;
 use std::rc::Rc;
@@ -145,6 +148,35 @@ fn slider_keeps_value_binding_when_orientation_changes() {
 }
 
 #[test]
+fn disabled_slider_resolves_both_track_colors_and_the_stop_indicator() {
+    let _app = application();
+    let slider = Slider::new();
+    slider.set_width(240.0);
+    slider.set_range_value(30.0);
+    slider.set_is_enabled(false);
+    let _window = host(&slider);
+    let inactive: Ref<RepeatButton> = named(&slider, "PART_IncreaseButton");
+    let track = inactive
+        .background()
+        .expect("disabled inactive track brush");
+    assert_eq!(0.12, track.opacity());
+    assert_eq!(255, track.as_solid_color_brush().unwrap().color().a);
+    assert_eq!(0.38, inactive.foreground().unwrap().opacity());
+    let active: Ref<RepeatButton> = named(&slider, "PART_DecreaseButton");
+    assert_eq!(0.38, active.opacity());
+    assert_eq!(
+        255,
+        active
+            .background()
+            .unwrap()
+            .as_solid_color_brush()
+            .unwrap()
+            .color()
+            .a
+    );
+}
+
+#[test]
 fn material_text_field_keeps_editing_and_selection_template_contracts() {
     let _app = application();
     let field = TextBox::new();
@@ -158,6 +190,37 @@ fn material_text_field_keeps_editing_and_selection_template_contracts() {
     assert_eq!(Some("Edited".to_string()), presenter.text());
     let templated: &TemplatedControl = &field;
     assert!(templated.template().is_some());
+}
+
+#[test]
+fn outlined_floating_label_opens_a_real_notch_and_keeps_border_state_selectors() {
+    let _app = application();
+    let field = TextBox::new();
+    field.classes().add("outlined");
+    field.classes().add("floatingLabel");
+    field.set_placeholder_text(Some("Account"));
+    field.set_text(Some("ready"));
+    let window = host(&field);
+    let surface: Ref<crate::MaterialTextFieldBorder> = named(&field, "BorderElement");
+    let validation: Ref<DataValidationErrors> = named(&field, "MaterialValidationRoot");
+    let label: Ref<TextBlock> = named(&field, "MaterialFloatingLabel");
+    assert_eq!(<Border as StaticType>::TYPE, surface.style_key());
+    assert!(!field.clip_to_bounds());
+    assert!(!validation.clip_to_bounds());
+    assert_eq!(56.0, surface.bounds().height);
+    assert_eq!(1.0, surface.notch_open());
+    assert_eq!(label.bounds().width, surface.notch_width());
+    assert_eq!(16.0, label.line_height());
+    assert_eq!(-8.0, label.bounds().y);
+    field.pseudo_classes().set(":focus", true);
+    window.update_layout();
+    assert_eq!(2.0, surface.border_thickness().top);
+    field.pseudo_classes().set(":focus", false);
+    field.set_text(None);
+    window.update_layout();
+    assert_eq!(0.0, surface.notch_open());
+    assert_eq!(1.0, surface.border_thickness().top);
+    assert!(label.bounds().y >= 0.0);
 }
 
 #[test]
@@ -190,6 +253,11 @@ fn button_variants_keep_disabled_colors_and_flat_hover_surfaces() {
             surface.box_shadow().count(),
             "disabled {variant} elevation"
         );
+        if variant == "outlined" {
+            let outline = button.border_brush().unwrap();
+            assert_eq!(0.1, outline.opacity());
+            assert_eq!(255, outline.as_solid_color_brush().unwrap().color().a);
+        }
     }
 }
 
@@ -208,4 +276,145 @@ fn loading_indicator_preserves_range_and_percentage_semantics() {
     assert_eq!(48.0, indicator.bounds().height);
     indicator.set_range_value(100.0);
     assert_eq!(80.0, indicator.percentage());
+    let peer = ControlAutomationPeer::create_peer_for_element(&indicator);
+    assert_eq!(
+        AutomationControlType::ProgressBar,
+        peer.get_automation_control_type()
+    );
+    let range = peer
+        .get_provider::<dyn IRangeValueProvider>()
+        .expect("loading range automation");
+    assert!(range.is_read_only());
+    assert_eq!(20.0, range.minimum());
+    assert_eq!(120.0, range.maximum());
+    assert_eq!(100.0, range.value());
+    assert!(!indicator.is_hit_test_visible());
+    assert!(!indicator.focusable());
+    let mark = crate::MaterialSelectionMark::new();
+    let peer = ControlAutomationPeer::create_peer_for_element(&mark);
+    assert!(
+        !peer.is_control_element(),
+        "selection decoration must not create an extra accessible control"
+    );
+    assert!(!mark.is_hit_test_visible());
+}
+
+fn animation_application() -> (
+    UnitTestApplicationScope,
+    Rc<TestClock>,
+    Rc<crate::motion::MotionTestSettings>,
+) {
+    register_types();
+    let clock = Rc::new(TestClock {
+        subject: LightweightSubject::new(),
+        state: Cell::new(PlayState::Run),
+    });
+    let settings = crate::motion::MotionTestSettings::new();
+    let app = UnitTestApplication::start(
+        TestServices::styled_window()
+            .with_global_clock(clock.clone())
+            .with_platform_settings(settings.clone()),
+    );
+    (app, clock, settings)
+}
+
+#[test]
+fn progress_animation_releases_clock_on_hide_reduced_motion_and_detach() {
+    let (_app, clock, _) = animation_application();
+    let indicator = crate::MaterialProgressIndicator::new();
+    indicator.set_is_indeterminate(true);
+    let window = host(&indicator);
+    assert!(clock.subject.has_observers());
+    indicator.set_is_visible(false);
+    assert!(
+        !clock.subject.has_observers(),
+        "hidden progress must stop continuous clock work"
+    );
+    indicator.set_is_visible(true);
+    assert!(clock.subject.has_observers());
+    indicator.set_reduced_motion(true);
+    assert!(!clock.subject.has_observers());
+    indicator.set_reduced_motion(false);
+    assert!(clock.subject.has_observers());
+    window.set_content(None);
+    window.update_layout();
+    assert!(
+        !clock.subject.has_observers(),
+        "detached progress must release its clock observer"
+    );
+}
+
+#[test]
+fn loading_animation_honors_live_platform_preference_and_detachment() {
+    let (_app, clock, settings) = animation_application();
+    let indicator = crate::MaterialLoadingIndicator::new();
+    let window = host(&indicator);
+    assert!(clock.subject.has_observers());
+    settings.animations_enabled.set(false);
+    clock.subject.on_next(TimeSpan::from_seconds(0.0));
+    assert!(
+        !clock.subject.has_observers(),
+        "platform motion preference cancels an active loading cycle"
+    );
+    settings.animations_enabled.set(true);
+    indicator.set_is_indeterminate(false);
+    indicator.set_is_indeterminate(true);
+    assert!(clock.subject.has_observers());
+    indicator.set_is_visible(false);
+    assert!(!clock.subject.has_observers());
+    indicator.set_is_visible(true);
+    assert!(clock.subject.has_observers());
+    window.set_content(None);
+    window.update_layout();
+    assert!(!clock.subject.has_observers());
+}
+
+#[test]
+fn selection_mark_releases_clock_when_settled_and_when_detached() {
+    let (_app, clock, _) = animation_application();
+    let mark = crate::MaterialSelectionMark::new();
+    let window = host(&mark);
+    assert!(!clock.subject.has_observers());
+    mark.set_is_checked(Some(true));
+    assert!(clock.subject.has_observers());
+    clock.subject.on_next(TimeSpan::from_seconds(0.0));
+    clock.subject.on_next(TimeSpan::from_seconds(1.0));
+    assert!(
+        !clock.subject.has_observers(),
+        "a settled check should not keep requesting frames"
+    );
+    mark.set_is_checked(None);
+    assert!(clock.subject.has_observers());
+    mark.set_is_visible(false);
+    assert!(!clock.subject.has_observers());
+    mark.set_is_visible(true);
+    assert!(clock.subject.has_observers());
+    window.set_content(None);
+    window.update_layout();
+    assert!(!clock.subject.has_observers());
+}
+
+#[test]
+fn ripple_cancels_indications_when_hidden_and_detached() {
+    let (_app, _, _) = animation_application();
+    let ripple = crate::MaterialRipple::new();
+    ripple.set_width(48.0);
+    ripple.set_height(48.0);
+    let window = host(&ripple);
+    ripple.begin_press(Point::new(12.0, 12.0));
+    assert_eq!(1, ripple.active_ripple_count());
+    ripple.set_is_visible(false);
+    assert_eq!(0, ripple.active_ripple_count());
+    ripple.begin_press(Point::new(12.0, 12.0));
+    assert_eq!(
+        0,
+        ripple.active_ripple_count(),
+        "hidden ripple cannot restart"
+    );
+    ripple.set_is_visible(true);
+    ripple.begin_press(Point::new(12.0, 12.0));
+    assert_eq!(1, ripple.active_ripple_count());
+    window.set_content(None);
+    window.update_layout();
+    assert_eq!(0, ripple.active_ripple_count());
 }

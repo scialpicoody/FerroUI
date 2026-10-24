@@ -21,12 +21,27 @@
              theme keeps FerroUI's opaque page (ApplicationPageBackgroundThemeBrush, CTP-1). -->
         <TabbedPage Width="320" Height="170" HorizontalAlignment="Left">
           <ContentPage Header="Home" Background="Transparent">
+            <ContentPage.Icon>
+              <Path Width="24" Height="24" Stretch="None" FlowDirection="LeftToRight"
+                    Fill="{Binding $parent[ContentPresenter].Foreground}"
+                    Data="M10 20V14H14V20H19V11H22L12 2L2 11H5V20Z" />
+            </ContentPage.Icon>
             <TextBlock Text="The home page." Margin="12" />
           </ContentPage>
           <ContentPage Header="Search" Background="Transparent">
+            <ContentPage.Icon>
+              <Path Width="24" Height="24" Stretch="None" FlowDirection="LeftToRight"
+                    Fill="{Binding $parent[ContentPresenter].Foreground}"
+                    Data="M15.5 14H14.71L14.43 13.73A6.5 6.5 0 1 0 13.73 14.43L14 14.71V15.5L19 20.49L20.49 19ZM9.5 14A4.5 4.5 0 1 1 9.5 5A4.5 4.5 0 0 1 9.5 14Z" />
+            </ContentPage.Icon>
             <TextBlock Text="The search page." Margin="12" />
           </ContentPage>
           <ContentPage Header="Settings" Background="Transparent">
+            <ContentPage.Icon>
+              <Path Width="24" Height="24" Stretch="None" FlowDirection="LeftToRight"
+                    Fill="{Binding $parent[ContentPresenter].Foreground}"
+                    Data="M19.14 12.94A7.8 7.8 0 0 0 19.2 12A7.8 7.8 0 0 0 19.14 11.06L21.17 9.48L19.25 6.16L16.86 7.12A7.1 7.1 0 0 0 15.24 6.18L14.88 3.6H11.04L10.68 6.18A7.1 7.1 0 0 0 9.06 7.12L6.67 6.16L4.75 9.48L6.78 11.06A7.8 7.8 0 0 0 6.72 12A7.8 7.8 0 0 0 6.78 12.94L4.75 14.52L6.67 17.84L9.06 16.88A7.1 7.1 0 0 0 10.68 17.82L11.04 20.4H14.88L15.24 17.82A7.1 7.1 0 0 0 16.86 16.88L19.25 17.84L21.17 14.52ZM12.96 15.36A3.36 3.36 0 1 1 12.96 8.64A3.36 3.36 0 0 1 12.96 15.36Z" />
+            </ContentPage.Icon>
             <TextBlock Text="The settings page." Margin="12" />
           </ContentPage>
         </TabbedPage>

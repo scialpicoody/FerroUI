@@ -82,6 +82,11 @@ fn bottom_navigation_shares_width_and_updates_selected_page() {
     assert_eq!(pages.tab_placement(), TabPlacement::Bottom);
     let tabs: Ref<TabControl> = named(&pages, "PART_TabControl");
     assert_eq!(tabs.tab_strip_placement(), Dock::Bottom);
+    let bar: Ref<Border> = named(&tabs, "TabContainerGrid");
+    assert_eq!(
+        bar.border_thickness(),
+        ferroui_base::Thickness::uniform(0.0)
+    );
     let realized: Vec<Ref<TabItem>> = tabs
         .get_visual_descendants()
         .filter_map(|node| node.cast())
@@ -116,6 +121,21 @@ fn bottom_navigation_shares_width_and_updates_selected_page() {
         1,
         "programmatic page navigation must reach the visual bar"
     );
+    realized[1].set_is_enabled(false);
+    window.update_layout();
+    let root: Ref<Border> = named(&realized[1], "LayoutRoot");
+    let icon: Ref<ferroui_controls::presenters::ContentPresenter> = named(&realized[1], "Icon");
+    let label: Ref<ferroui_controls::presenters::ContentPresenter> =
+        named(&realized[1], "PART_ContentPresenter");
+    let indicator: Ref<Border> = named(&realized[1], "SelectionIndicator");
+    assert_eq!(
+        root.opacity(),
+        1.0,
+        "disabled navigation must not fade its selected pill"
+    );
+    assert_eq!(indicator.background().unwrap().opacity(), 1.0);
+    assert_eq!(icon.foreground().unwrap().opacity(), 0.38);
+    assert_eq!(label.foreground().unwrap().opacity(), 0.38);
     window.close();
 }
 
@@ -253,4 +273,73 @@ fn navigation_back_icon_follows_platform_rtl_mirroring_once() {
     window.update_layout();
     assert!(arrow.transform_to_visual(&window).unwrap().m11 > 0.0);
     window.close();
+}
+
+#[test]
+fn disabled_chip_and_segment_keep_independent_content_fill_and_outline_roles() {
+    let _app = app();
+    for key in [
+        "MaterialFilterChip",
+        "MaterialInputChip",
+        "MaterialSegmentedButton",
+    ] {
+        let chip = ferroui_controls::primitives::ToggleButton::new();
+        let resource = Application::current()
+            .unwrap()
+            .try_get_resource(&ResourceKey::from(key), None)
+            .flatten();
+        chip.set_theme(from_markup_value::<Ref<ControlTheme>>(&resource).unwrap());
+        chip.set_content(Some(Rc::new("Choice".to_owned())));
+        chip.set_is_checked(Some(true));
+        chip.set_is_enabled(false);
+        chip.set_flow_direction(ferroui_base::media::FlowDirection::RightToLeft);
+        let window = window(Control::boxed(&chip));
+        let surface: Ref<Border> = named(&chip, "ChipContainer");
+        let check: Ref<ferroui_controls::Viewbox> = named(&chip, "CheckIcon");
+        let glyph: Ref<ferroui_controls::shapes::Path> = check
+            .get_visual_descendants()
+            .find_map(|node| node.cast())
+            .expect("selected check icon");
+        assert!(
+            glyph.transform_to_visual(&window).unwrap().m11 > 0.0,
+            "non-directional {key} check must not mirror in RTL"
+        );
+        assert_eq!(
+            surface.opacity(),
+            1.0,
+            "{key} container must not fade its contents twice"
+        );
+        assert_eq!(
+            chip.foreground().unwrap().opacity(),
+            0.38,
+            "{key} disabled content"
+        );
+        if key == "MaterialSegmentedButton" {
+            assert_eq!(
+                surface.background().unwrap().opacity(),
+                1.0,
+                "disabled selected segment keeps its fill"
+            );
+            assert_eq!(surface.border_brush().unwrap().opacity(), 0.12);
+        } else {
+            assert_eq!(
+                surface.background().unwrap().opacity(),
+                0.12,
+                "disabled selected chip fill"
+            );
+            assert_eq!(
+                surface.border_thickness(),
+                ferroui_base::Thickness::uniform(0.0)
+            );
+        }
+        chip.set_is_checked(Some(false));
+        window.update_layout();
+        assert_eq!(
+            surface.border_brush().unwrap().opacity(),
+            0.12,
+            "{key} disabled outline"
+        );
+        assert_eq!(chip.foreground().unwrap().opacity(), 0.38);
+        window.close();
+    }
 }

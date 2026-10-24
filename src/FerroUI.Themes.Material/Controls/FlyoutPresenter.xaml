@@ -30,7 +30,7 @@
     <Setter Property="MaxWidth" Value="{DynamicResource FlyoutThemeMaxWidth}"/>
     <Setter Property="MinHeight" Value="{DynamicResource FlyoutThemeMinHeight}"/>
     <Setter Property="MaxHeight" Value="{DynamicResource FlyoutThemeMaxHeight}"/>
-    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
     <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
     <Setter Property="CornerRadius" Value="28"/>
     <Setter Property="Margin" Value="8"/>

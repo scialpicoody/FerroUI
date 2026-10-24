@@ -40,8 +40,8 @@
                   <ColumnDefinition Width="Auto" SharedSizeGroup="MenuFlyoutItemKeyboardAcceleratorText"/>
                   <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Path x:Name="CheckGlyph" Grid.Column="0" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z"
-                      Fill="{TemplateBinding Foreground}" Stretch="Uniform" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" Opacity="0" IsVisible="False"/>
+                <Path x:Name="CheckGlyph" Grid.Column="0" FlowDirection="LeftToRight" Data="M9 16.17 4.83 12 3.41 13.41 9 19 21 7 19.59 5.59Z"
+                      Fill="{TemplateBinding Foreground}" Stretch="None" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" Opacity="0" IsVisible="False"/>
                 <Viewbox x:Name="IconRoot" Grid.Column="1" Width="24" Height="24" Margin="0,0,12,0" HorizontalAlignment="Left" VerticalAlignment="Center" IsVisible="False">
                   <ContentPresenter x:Name="IconContent" Content="{TemplateBinding Icon}" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
                 </Viewbox>
@@ -51,7 +51,7 @@
                            Margin="24,0,0,0" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" FontSize="14" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center"
                            IsVisible="{TemplateBinding InputGesture, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                 <Path x:Name="SubItemChevron" Grid.Column="4" Data="M9.29 6.71 10.71 5.29 17.41 12 10.71 18.71 9.29 17.29 14.59 12Z"
-                      Fill="{DynamicResource MaterialOnSurfaceVariantBrush}" Stretch="Uniform" Width="24" Height="24" Margin="12,0,0,0" VerticalAlignment="Center" IsVisible="False"/>
+                      Fill="{DynamicResource MaterialOnSurfaceVariantBrush}" Stretch="None" Width="24" Height="24" Margin="12,0,0,0" VerticalAlignment="Center" IsVisible="False"/>
               </Grid>
             </Panel>
           </Border>

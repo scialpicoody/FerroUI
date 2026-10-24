@@ -110,6 +110,9 @@ and drag 0.16. Disabled colors distinguish container, outline, content and text
 field treatment; the entire control is not simply faded. Interactions combine
 hover/focus layers with an expanding ripple instead of doubling a pressed fill.
 
+Compatibility brushes are installed inside the selected variant dictionary,
+so light and dark windows do not share one mutable brush.
+
 `set_color_scheme` replaces a whole variant dictionary, including role colors,
 state brushes and compatibility resources. Existing `DynamicResource` bindings
 are notified without reconstructing controls. The old resource names remain
@@ -173,7 +176,7 @@ Example composition:
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:material="using:FerroUI.Themes.Material" Spacing="16">
   <Button Theme="{StaticResource MaterialTonalButton}" Content="Save changes" />
-  <TextBox Classes="outlined floatingLabel" Watermark="Project name" Text="My project" />
+  <TextBox Classes="outlined floatingLabel" PlaceholderText="Project name" Text="My project" />
   <ProgressBar Theme="{StaticResource MaterialWavyLinearProgress}" Value="64" />
   <material:MaterialLoadingIndicator
       Theme="{StaticResource MaterialContainedLoadingIndicator}" />
@@ -263,17 +266,18 @@ cargo run -p material-theme-gallery --bin material-theme-gallery
 
 The gallery includes a Material overview and the inherited control-family pages.
 Its toolbar changes light/dark/high-contrast mode, density, text direction,
-seed color and Expressive/Standard/reduced motion. The same controls are rendered for capture; capture failures include
+seed color and Expressive/Standard/reduced motion. The same controls are rendered
+for capture; capture failures include
 missing templates, failed page loads and binding diagnostics.
 
 ```sh
 python3 scripts/material-theme/generate.py --check
 cargo test --locked -p ferroui-themes-material --lib
+cargo test --locked -p material-theme-gallery --lib
 cargo check --locked -p ferroui --no-default-features --features material-theme
 cargo build --locked -p material-theme-gallery --bin material-theme-gallery
 FERROUI_MATERIAL_GALLERY_CAPTURE=target/material-captures \
-FERROUI_MATERIAL_GALLERY_PAGES=material,buttons,toggles,text,range,navigation \
-FERROUI_MATERIAL_GALLERY_VARIANTS=Light,Dark \
+FERROUI_MATERIAL_GALLERY_VARIANTS=Light,Dark,HighContrast \
 FERROUI_MATERIAL_GALLERY_DENSITIES=normal \
 FERROUI_MATERIAL_GALLERY_FLOWS=ltr,rtl \
 xvfb-run -a target/debug/material-theme-gallery
@@ -281,8 +285,11 @@ xvfb-run -a target/debug/material-theme-gallery
 
 On Windows/macOS or a desktop Linux session, omit `xvfb-run`. Optional variables
 include `FERROUI_MATERIAL_GALLERY_SIZE=720x960`, `SCALE=2` with the same prefix,
-and `SETTLE_MS=300`. The CI workflow runs token regeneration, library tests,
-facade compilation and a light/dark/RTL render matrix, and uploads the images.
+and `SETTLE_MS=300`. Set `PAGES=material,buttons` with the same prefix to capture
+a subset. By default all 17 gallery pages are included. The CI workflow runs
+token regeneration, theme and gallery tests, facade compilation and all 102
+combinations of the 17 pages, three color variants and two text directions,
+and uploads the images.
 
 Tests cover literal baseline roles, independent HCT seed goldens, contrast,
 complete Android palette imports, live scheme replacement, motion and ripple

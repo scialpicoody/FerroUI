@@ -119,7 +119,7 @@
     <Setter Property="Background" Value="Transparent" />
     </Style>
     <Style Selector="^.outlined:disabled">
-    <Setter Property="BorderBrush"><SolidColorBrush Color="{DynamicResource MaterialOutlineVariantColor}" Opacity="0.1" /></Setter>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlinedButtonDisabledOutlineBrush}" />
     </Style>
     <Style Selector="^.elevated /template/ Border#MaterialContainer">
     <Setter Property="BoxShadow" Value="{DynamicResource MaterialElevationLevel1}" />
@@ -157,7 +157,7 @@
     <Setter Property="Background" Value="Transparent" />
     </Style>
     <Style Selector="^:disabled">
-    <Setter Property="BorderBrush"><SolidColorBrush Color="{DynamicResource MaterialOutlineVariantColor}" Opacity="0.1" /></Setter>
+    <Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlinedButtonDisabledOutlineBrush}" />
     </Style>
     <Style Selector="^:pointerover /template/ Border#MaterialContainer">
       <Setter Property="BoxShadow" Value="none" />

@@ -22,6 +22,8 @@ mod progress_indicator;
 mod loading_indicator;
 mod selection_mark;
 pub use selection_mark::MaterialSelectionMark;
+mod text_field_border;
+pub use text_field_border::MaterialTextFieldBorder;
 pub use loading_indicator::{MaterialLoadingIndicator, loading_indeterminate_frame};
 pub use ripple::MaterialRipple;
 pub use progress_indicator::{MaterialProgressIndicator, linear_indeterminate_segments, circular_indeterminate_frame};

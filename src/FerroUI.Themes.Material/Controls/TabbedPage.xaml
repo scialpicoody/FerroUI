@@ -12,6 +12,9 @@
     <Style Selector="^ /template/ Border#TabContainerGrid">
       <Setter Property="BorderThickness" Value="0" />
     </Style>
+    <Style Selector="^[TabStripPlacement=Bottom] /template/ Border#TabContainerGrid">
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
   </ControlTheme>
   <ControlTheme x:Key="TabbedPageTabItemTheme" TargetType="TabItem">
     <Setter Property="MinWidth" Value="64" />
@@ -80,8 +83,15 @@
     <Style Selector="^:selected:focus-visible /template/ Border#StateLayer">
       <Setter Property="Background" Value="{DynamicResource MaterialOnSecondaryContainerFocusBrush}" />
     </Style>
-    <Style Selector="^:disabled /template/ Border#LayoutRoot">
-      <Setter Property="Opacity" Value="0.38" />
+    <!-- Native navigation keeps the selected pill opaque when the destination is disabled. -->
+    <Style Selector="^:disabled">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ ContentPresenter#Icon">
+      <Setter Property="Foreground" Value="{DynamicResource MaterialDisabledContentBrush}" />
+    </Style>
+    <Style Selector="^:disabled /template/ material|MaterialRipple#Ripple">
+      <Setter Property="IsVisible" Value="False" />
     </Style>
     <Style Selector="^:disabled /template/ Border#StateLayer">
       <Setter Property="Background" Value="Transparent" />

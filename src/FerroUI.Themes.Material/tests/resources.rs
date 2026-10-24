@@ -58,7 +58,8 @@ fn replacing_palette_updates_role_and_compatibility_brushes_together() {
 fn existing_button_updates_when_its_complete_scheme_is_replaced() {
     use ferroui_controls::{Application, Control, Window};
     crate::register_types();
-    let mut services = TestServices::styled_window();
+    let mut services = TestServices::styled_window()
+        .with_global_clock(Rc::new(super::support::MockGlobalClock::new()));
     services.theme = None;
     let _app = UnitTestApplication::start(services);
     let theme = MaterialTheme::new();

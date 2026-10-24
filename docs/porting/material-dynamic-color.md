@@ -68,11 +68,11 @@ To match actual device colors, use the platform imports below.
 
 ## Native Android system-color bridge
 
-Enable the optional feature in the Android application's dependencies:
+For an Android application in this workspace, enable the optional feature:
 
 ```toml
 [dependencies]
-ferroui-themes-material = { version = "0.4", features = ["android-dynamic-color"] }
+ferroui-themes-material = { workspace = true, features = ["android-dynamic-color"] }
 ```
 
 Create the theme after the FerroUI Android application is initialized, then import

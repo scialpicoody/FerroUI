@@ -1,3 +1,6 @@
+// Copyright 2019 The Android Open Source Project (ripple animation reference).
+// Copyright 2026 FerroUI contributors (FerroUI drawing, input and lifecycle integration).
+// SPDX-License-Identifier: Apache-2.0
 //! The pointer and keyboard press indication used by Material control templates.
 //!
 //! Timing and radius formulas follow AndroidX Material3 1.5.0-beta02 and
@@ -23,7 +26,7 @@ use ferroui_base::{
     RoundedRect, Size, StyledElementImpl, StyledProperty, StyledPropertyOptions, Visual,
     VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
 };
-use ferroui_controls::{Control, ControlImpl};
+use ferroui_controls::{Button, Control, ControlImpl};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -449,8 +452,27 @@ impl MaterialRipple {
             InputElement::pointer_pressed_event(),
             {
                 let weak = weak.clone();
-                move |_, event: &PointerPressedEventArgs| {
+                move |sender, event: &PointerPressedEventArgs| {
                     let Some(this) = weak.upgrade() else { return };
+                    // A nested action owns its own indication. Observe handled events from
+                    // this host's template, without lighting an outer row when its trailing
+                    // button or an embedded editor is the actual interaction target.
+                    if let Some(source) = event.source().and_then(|source| source.cast::<Visual>())
+                    {
+                        let host = sender.to_ref().upcast::<Visual>();
+                        let nested_action = source
+                            .get_self_and_visual_ancestors()
+                            .take_while(|node| *node != host)
+                            .any(|node| {
+                                node.cast::<InputElement>().is_some_and(|input| {
+                                    input.is_effectively_enabled()
+                                        && (input.focusable() || node.cast::<Button>().is_some())
+                                })
+                            });
+                        if nested_action {
+                            return;
+                        }
+                    }
                     if event.pointer().type_() != PointerType::Mouse
                         || event.properties().is_left_button_pressed
                     {
@@ -832,6 +854,38 @@ mod tests {
         ripple.cancel();
         press();
         assert_eq!(0, ripple.active_ripple_count());
+    }
+
+    #[test]
+    fn a_nested_button_owns_its_press_indication_without_lighting_the_outer_row() {
+        use ferroui_controls::Panel;
+        let host = Panel::new();
+        let child = Button::new();
+        // Some toolbar actions intentionally avoid keyboard focus; they are still actions.
+        child.set_focusable(false);
+        host.children().add(child.clone());
+        let outer = MaterialRipple::new();
+        let inner = MaterialRipple::new();
+        outer.attach_host(&host.clone().upcast());
+        inner.attach_host(&child.clone().upcast());
+        let pointer = Pointer::new(Pointer::get_next_free_id(), PointerType::Mouse, true);
+        let event = PointerPressedEventArgs::new(
+            child.clone(),
+            pointer,
+            &host,
+            Point::default(),
+            0,
+            PointerPointProperties::new(
+                RawInputModifiers::LEFT_MOUSE_BUTTON,
+                PointerUpdateKind::LeftButtonPressed,
+            ),
+            KeyModifiers::NONE,
+            1,
+        );
+        child.raise_event(&event);
+        assert!(child.is_pressed());
+        assert_eq!(1, inner.active_ripple_count());
+        assert_eq!(0, outer.active_ripple_count());
     }
 
     #[test]
