@@ -540,10 +540,26 @@ fn to_native_attributes(attributes: InkDrawingAttributes) -> Result<NativeAttrib
         native
             .cast::<winrt::IInkDrawingAttributes3>()
             .and_then(|native| object(native.pencil_properties()))
-            .and_then(|pencil| pencil.set_opacity(attributes.pencil_opacity))
+            .and_then(|pencil| pencil.set_opacity(to_native_pencil_opacity(attributes.pencil_opacity)))
             .map_err(platform)?;
     }
     Ok(native)
+}
+
+/// The range of `InkDrawingAttributesPencilProperties.Opacity` (Windows's default is 1.0).
+const NATIVE_PENCIL_OPACITY: (f64, f64) = (0.01, 5.0);
+
+/// The opacity of a pencil for Windows: the portable range is 0 to 1, which Windows reads on the
+/// same scale; 0 is below its minimum and is sent as the minimum.
+fn to_native_pencil_opacity(opacity: f64) -> f64 {
+    opacity.clamp(NATIVE_PENCIL_OPACITY.0, NATIVE_PENCIL_OPACITY.1)
+}
+
+/// The portable opacity of a pencil of Windows: the values above 1 (a pencil darker than its
+/// colour, which the portable renderer cannot draw) are read as 1, so a document of Windows loads
+/// instead of failing validation.
+fn from_native_pencil_opacity(opacity: f64) -> f64 {
+    opacity.clamp(0.0, 1.0)
 }
 
 fn from_native_attributes(native: &NativeAttributes) -> Result<InkDrawingAttributes, InkError> {
@@ -574,6 +590,7 @@ fn from_native_attributes(native: &NativeAttributes) -> Result<InkDrawingAttribu
         pencil_opacity: if kind == InkDrawingAttributesKind::Pencil {
             object(native3.pencil_properties())
                 .and_then(|pencil| pencil.opacity())
+                .map(from_native_pencil_opacity)
                 .map_err(platform)?
         } else {
             1.0
@@ -790,6 +807,48 @@ mod tests {
             to_native_matrix(perspective),
             Err(InkError::InvalidTransform)
         );
+    }
+
+    #[test]
+    fn pencil_opacity_maps_between_the_portable_and_the_windows_ranges() {
+        assert_eq!(to_native_pencil_opacity(0.0), 0.01);
+        assert_eq!(to_native_pencil_opacity(0.4), 0.4);
+        assert_eq!(to_native_pencil_opacity(1.0), 1.0);
+        assert_eq!(from_native_pencil_opacity(0.01), 0.01);
+        assert_eq!(from_native_pencil_opacity(1.0), 1.0);
+        assert_eq!(from_native_pencil_opacity(5.0), 1.0);
+    }
+
+    #[test]
+    fn native_pencil_opacity_outside_the_portable_range_loads() {
+        native_thread(|| {
+            let services = WindowsInkServices::new().expect("Windows ink activation");
+            let mut transparent = InkDrawingAttributes::create_for_pencil();
+            transparent.pencil_opacity = 0.0;
+            let point = InkPoint::new(Point::new(4.0, 5.0), 0.5).unwrap();
+            let stroke = InkStroke::new(vec![point], transparent).unwrap();
+            let native = services.native_container(&[stroke]).unwrap();
+            let native_stroke = native_strokes(&native).remove(0);
+            let pencil = |stroke: &NativeStroke| {
+                object(stroke.drawing_attributes())
+                    .and_then(|attributes| attributes.cast::<winrt::IInkDrawingAttributes3>())
+                    .and_then(|attributes| object(attributes.pencil_properties()))
+                    .unwrap()
+            };
+            // The portable 0 is sent as the minimum of Windows.
+            near(pencil(&native_stroke).opacity().unwrap(), 0.01, 1e-6);
+            for (native_opacity, portable_opacity) in [(1.0, 1.0), (5.0, 1.0)] {
+                let attributes = object(native_stroke.drawing_attributes()).unwrap();
+                object(attributes.cast::<winrt::IInkDrawingAttributes3>().unwrap().pencil_properties())
+                    .unwrap()
+                    .set_opacity(native_opacity)
+                    .unwrap();
+                native_stroke.set_drawing_attributes(Some(&attributes)).unwrap();
+                near(pencil(&native_stroke).opacity().unwrap(), native_opacity, 1e-6);
+                let imported = from_native_container(&native, InkPersistenceLimits::DEFAULT).unwrap();
+                assert_eq!(imported[0].drawing_attributes().pencil_opacity, portable_opacity);
+            }
+        });
     }
 
     #[test]

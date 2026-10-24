@@ -353,7 +353,10 @@ member, so native export rejects nonzero twist unless the application opts into
 metadata, custom native extended properties, recognized state and stroke-start
 wall-clock values do not have a complete two-way mapping. Pencil supports a
 restricted set of native attributes; unsupported requested changes return the
-OS error rather than silently becoming another tool. Use FERROINK when exact
+OS error rather than silently becoming another tool. The pencil opacity of
+Windows ranges from 0.01 to 5.0 and the portable one from 0 to 1, on one scale:
+export sends 0 as 0.01, and import reads a value above 1 as 1, so a document
+of Windows with a darker pencil loads. Use FERROINK when exact
 portable round trips are required. Format operations are recorded as verified
 adaptations. The native clipboard adapter preserves OS-returned stroke state;
 the public portable container deliberately normalizes selection to the
