@@ -40,6 +40,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 - Composition, with the WinUI composition API (see `docs/porting/DEVIATIONS.md`, "WinUI composition"): a `CompositionPropertySet` made with `new` is live on the compositor; an animation that reads nothing (a constant expression) now applies; the operators of expressions combine the single- and double-precision forms of a vector; the expression functions `Matrix3x2.CreateTranslation` and `Matrix4x4.CreateTranslation` build translations, the 6- and 16-argument matrix constructors read every argument, and function names are matched ignoring case; in a window rendered by a compositor, `ConnectedAnimation` runs on the compositor with the engine of WinUI.
 - Markup, the run-time type system: a static type whose metadata declares a namespace (`ferro_markup_type!(static X { type_info: X, namespace: "..", .. })`) has that namespace at run time too, as it has in the build-time scanner; it was given the namespace of its Rust module, so the run-time loader and the compiler named the type differently. The namespace of the Rust module is no longer a second name of such a type.
 
+### Fixed
+
+- Automation: the peer of a control that is gone no longer panics ("The control of the automation peer no longer exists.") when a platform still asks it something, as UI Automation did during page navigation on Windows: `AutomationPeer::is_element_available` tells such a peer, its public members answer empty values, the nodes of UI Automation answer `UIA_E_ELEMENTNOTAVAILABLE` and the handlers of AT-SPI an unknown object.
+
 ## [0.4.0] - 2026-10-22
 
 The fourth release. It completes the declarative Rust API of `0.4.0-preview.1` and adds the developer tools:
