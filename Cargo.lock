@@ -2382,6 +2382,64 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
+name = "hello-world"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
+]
+
+[[package]]
+name = "hello-world-builders"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-themes-winui",
+ "ferroui-view",
+]
+
+[[package]]
+name = "hello-world-component-host"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-markup",
+ "ferroui-markup-xaml",
+ "ferroui-themes-winui",
+ "ferroui-view",
+ "sample-build",
+ "sample-support",
+ "sample-testing",
+]
+
+[[package]]
+name = "hello-world-hooks"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-themes-winui",
+ "ferroui-view",
+]
+
+[[package]]
+name = "hello-world-macros"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-themes-winui",
+ "ferroui-view",
+]
+
+[[package]]
 name = "hermit-abi"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
