@@ -1,7 +1,7 @@
-//! The strip of the themed TabControl sizes its tabs as TabView does in its default
-//! `TabWidthMode="Equal"` (`Controls/TabControl.xaml`, `Primitives/tab_view_equal_width_panel.rs`):
+//! The macOS TabControl retains the inherited equal-width strip layout
+//! contract (`Controls/TabControl.xaml`, `Primitives/tab_view_equal_width_panel.rs`):
 //! every tab of the strip at the top or the bottom as wide as the others, sharing the width of the
-//! strip between `TabViewItemMinWidth` (100) and `TabViewItemMaxWidth` (240), with the scroll
+//! strip between `TabViewItemMinWidth` (48) and `TabViewItemMaxWidth` (240), with the scroll
 //! buttons of the strip while they do not fit at the minimum width. The strips at the left and at
 //! the right stack their tabs, and TabbedPage's top pane keeps items as wide as their content.
 
@@ -64,11 +64,14 @@ fn tabs(tab_control: &TabControl) -> Vec<Ref<TabItem>> {
     descendants::<TabItem>(tab_control)
 }
 
-/// The width the strip of a TabControl `width` wide has for its tabs: less the 2 px of the left
-/// content column, the 2 px of the column of the decrease button and the 1 px padding of the
-/// presenter of the scroll viewer, and the 4 px header and footer of the items presenter.
+/// The strip reserves its two 8-point outer margins, two 2-point content insets,
+/// the two structural 2-point columns, the 1-point presenter inset, and the two
+/// 4-point header/footer slots. These are the macOS template's explicit layout contract.
+const TAB_STRIP_INSETS: f64 = 16.0 + 4.0 + 2.0 + 2.0 + 1.0 + 4.0 + 4.0;
+const MIN_TAB_WIDTH: f64 = 48.0;
+
 fn width_for_tabs(width: f64) -> f64 {
-    width - 2.0 - 2.0 - 1.0 - 4.0 - 4.0
+    width - TAB_STRIP_INSETS
 }
 
 /// Every tab `width` wide, side by side from the left, up to the rounding of their bounds to
@@ -113,16 +116,16 @@ fn the_tabs_at_the_top_share_the_width_of_the_strip() {
     assert!(!scroll_buttons_shown(&tab_control));
 
     // Narrow: the minimum width, scrolled with the scroll buttons.
-    frame.set_width(300.0);
+    frame.set_width(150.0);
     window.update_layout();
-    assert_eq!(100.0, panel.item_width());
+    assert_eq!(MIN_TAB_WIDTH, panel.item_width());
     assert!(scroll_viewer.extent().width > scroll_viewer.viewport().width);
     assert!(scroll_buttons_shown(&tab_control));
 
     // Wide enough again: the tabs fill the strip, the scroll buttons gone, as soon as the tabs fit
     // at the minimum width beside the header and the footer (TabView leaves the scroll buttons
     // out of the width).
-    let fits = 4.0 * 100.0 + 2.0 + 2.0 + 1.0 + 8.0;
+    let fits = 4.0 * MIN_TAB_WIDTH + TAB_STRIP_INSETS;
     frame.set_width(fits + 1.0);
     window.update_layout();
     assert_eq!(width_for_tabs(fits + 1.0) / 4.0, panel.item_width());
@@ -130,11 +133,11 @@ fn the_tabs_at_the_top_share_the_width_of_the_strip() {
     assert_eq!(scroll_viewer.viewport().width, scroll_viewer.extent().width);
     frame.set_width(fits - 4.0);
     window.update_layout();
-    assert_eq!(100.0, panel.item_width());
+    assert_eq!(MIN_TAB_WIDTH, panel.item_width());
     assert!(scroll_buttons_shown(&tab_control));
     frame.set_width(fits);
     window.update_layout();
-    assert_eq!(100.0, panel.item_width());
+    assert_eq!(MIN_TAB_WIDTH, panel.item_width());
     assert!(!scroll_buttons_shown(&tab_control));
 
     // More tabs share the same width.

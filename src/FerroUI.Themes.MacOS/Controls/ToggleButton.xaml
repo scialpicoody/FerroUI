@@ -1,14 +1,10 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/CommonStyles/ToggleButton_themeresources.xaml (the styles; its resources are
-    Resources/ToggleButton_themeresources.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes as Button.xaml. The visual states of the one group CommonStates combine the
-  pointer state and the check state (CheckedPointerOver); each is a nested style on the
-  pseudo-classes of both (^:checked:pointerover), in the order of the source, so that the
-  combined state is the last to match.
+  macOS 26 control theme, adapted from the FerroUI WinUI template foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  macOS geometry and states are theme calibrations against Apple's WWDC25
+  AppKit design guidance; exact native rendering remains a comparison gate.
+  FerroUI template parts, bindings and routed interaction are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -25,6 +21,7 @@
   </Design.PreviewWith>
 
   <ControlTheme x:Key="DefaultToggleButtonStyle" TargetType="ToggleButton">
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
     <!-- The defaults of a WinUI 3 control, which its style leaves unset and its template binds
          (FerroUI's defaults are Stretch). Deviation (winui-theme/DEVIATIONS.md, G-27). -->
     <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -34,23 +31,18 @@
     <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForeground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonBorderBrush}" />
     <Setter Property="BorderThickness" Value="{DynamicResource ToggleButtonBorderThemeThickness}" />
-    <Setter Property="Padding" Value="{StaticResource ButtonPadding}" />
+    <Setter Property="Padding" Value="{DynamicResource MacOSControlPadding}" />
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="FontWeight" Value="Normal" />
     <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border Margin="-3"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
       </FocusAdornerTemplate>
     </Setter>
     <Setter Property="Template">
@@ -70,7 +62,7 @@
                           RecognizesAccessKey="True">
           <ContentPresenter.Transitions>
             <Transitions>
-              <BrushTransition Property="Background" Duration="0:0:0.083" />
+              <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
             </Transitions>
           </ContentPresenter.Transitions>
         </ContentPresenter>
@@ -169,6 +161,56 @@
         <Setter Property="Foreground" Value="{DynamicResource ToggleButtonForegroundIndeterminateDisabled}" />
         <Setter Property="BorderBrush" Value="{DynamicResource ToggleButtonBorderBrushIndeterminateDisabled}" />
       </Style>
+    </Style>
+
+    <!-- macOS 26 mini/small/regular rectangles; large sizes use capsules. -->
+    <Style Selector="^.mini">
+      <Setter Property="MinHeight" Value="18" />
+      <Setter Property="Padding" Value="7,1" />
+      <Setter Property="FontSize" Value="9" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="4" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^.small">
+      <Setter Property="MinHeight" Value="22" />
+      <Setter Property="Padding" Value="8,2" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="CornerRadius" Value="5" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="5" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^.large">
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="Padding" Value="15,5" />
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="999" />
+        </FocusAdornerTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="^.extra-large">
+      <Setter Property="MinHeight" Value="42" />
+      <Setter Property="Padding" Value="19,7" />
+      <Setter Property="FontSize" Value="17" />
+      <Setter Property="CornerRadius" Value="999" />
+      <Setter Property="FocusAdorner">
+        <FocusAdornerTemplate>
+          <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}" CornerRadius="999" />
+        </FocusAdornerTemplate>
+      </Setter>
     </Style>
   </ControlTheme>
 

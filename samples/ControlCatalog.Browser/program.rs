@@ -82,12 +82,16 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen(js_name = runMain)]
 pub fn run_main(href: &str) {
     let options = parse_args(&[href]).unwrap_or_default();
+    let initial_theme = catalog_theme_of_uri(href);
 
     build_ferro_app()
         .log_to_text_writer(std::io::stdout(), LogEventLevel::Warning, &[])
-        .after_setup(|_| {
+        .after_setup(move |_| {
             EmbedSample::set_implementation(Some(Rc::new(EmbedSampleWeb)));
             PageAssets::set_implementation(Some(Rc::new(BrowserPageAssets)));
+            if let Some(theme) = initial_theme {
+                App::select_initial_catalog_theme(theme);
+            }
         })
         .start_browser_app("out", Some(options));
 
@@ -404,6 +408,30 @@ fn query_value(query: &str, name: &str) -> Option<String> {
         .map(|(_, value)| decode_query_component(value))
 }
 
+/// Select the initial catalog theme with `?Theme=macos`; unavailable optional themes leave
+/// the default active and report the missing build feature in the browser console.
+fn catalog_theme_of_uri(uri: &str) -> Option<control_catalog::models::CatalogTheme> {
+    use control_catalog::models::CatalogTheme;
+    let value = query_value(query_of(uri)?, "Theme")?;
+    let theme = match value.to_ascii_lowercase().as_str() {
+        "winui" => CatalogTheme::WinUI,
+        "macos" | "macos26" => CatalogTheme::MacOS,
+        "fluent" => CatalogTheme::Fluent,
+        "simple" => CatalogTheme::Simple,
+        other => {
+            println!("ControlCatalog.Theme: unknown theme {other:?}");
+            return None;
+        }
+    };
+    if App::themes().contains(&theme) {
+        Some(theme)
+    } else {
+        let feature = if theme == CatalogTheme::MacOS { "macos-theme" } else { "classic-themes" };
+        println!("ControlCatalog.Theme: {theme:?} needs the `{feature}` build feature");
+        None
+    }
+}
+
 /// Decodes `+` and `%XX` escapes of a query component; an invalid escape is
 /// kept as it is.
 fn decode_query_component(value: &str) -> String {
@@ -514,6 +542,16 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn optional_theme_query_respects_the_built_theme_inventory() {
+        use control_catalog::models::CatalogTheme;
+        assert_eq!(Some(CatalogTheme::WinUI), catalog_theme_of_uri("https://localhost/?Theme=winui"));
+        let expected = if cfg!(feature = "macos-theme") { Some(CatalogTheme::MacOS) } else { None };
+        assert_eq!(expected, catalog_theme_of_uri("https://localhost/?theme=MaCoS26#controls"));
+        assert_eq!(None, catalog_theme_of_uri("https://localhost/?Theme=unknown"));
+        assert_eq!(None, catalog_theme_of_uri("https://localhost/"));
+    }
 
     // Not from upstream: the probe of the behaviour tests is an addition of the port.
     #[test]

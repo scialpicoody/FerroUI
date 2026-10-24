@@ -1,51 +1,9 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/CommonStyles/DateTimePickerFlyout_themeresources.xaml (DateTimePickerFlyoutButtonStyle,
-    DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle, DefaultLoopingSelectorStyle and the
-    implicit styles of LoopingSelector and LoopingSelectorItem; its resources are
-    Resources/DateTimePickerFlyout_themeresources.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  The themes the flyout presenters of the date and time pickers share (Controls/DatePicker.xaml,
-  Controls/TimePicker.xaml).
-
-  Translation notes (docs/porting/winui-theme.md, section 4):
-  - DateTimePickerFlyoutButtonStyle and DateTimePickerFlyoutLoopingSelectorNavigationButtonStyle
-    have the target type ButtonBase: they are keyed control themes of Button, which apply to
-    Button and RepeatButton. They are not based on DefaultButtonStyle (section 4.2): the source
-    applies them to both kinds of buttons, and the state styles of DefaultButtonStyle (which set the
-    background, the border and the foreground of PART_ContentPresenter when the button is pressed or
-    disabled) would set what these templates leave alone; the setters of the default style that
-    take effect in the source (the foreground and the font) are written here.
-  - LoopingSelector: WinUI's looping list of a column of the flyouts (a ScrollViewer and the up and
-    down RepeatButtons, shown while the pointer is over the list, in a Grid). FerroUI's
-    DateTimePickerPanel is a panel that the presenters put in a ScrollViewer of a host panel
-    (PART_DayHost, PART_HourHost, ...) with the up and down buttons; the ScrollViewer has the
-    template of the source, ScrollViewerScrollBarlessTemplate (Controls/ScrollViewer.xaml), and
-    hidden bars, so the template of DefaultLoopingSelectorStyle is written into the hosts of the
-    presenter templates; the up and down buttons are the keyed themes
-    DateTimePickerLoopingSelectorUpButtonStyle and DateTimePickerLoopingSelectorDownButtonStyle
-    (the RepeatButtons UpButton and DownButton of the template, with their glyphs EDDB and EDDC at
-    8 px as GlyphGeometryEDDB and GlyphGeometryEDDC).
-    WinUI: DefaultLoopingSelectorStyle, {LoopingSelector}
-  - LoopingSelectorItem: the items of FerroUI's DateTimePickerPanel are ListBoxItems with a class
-    of their column (MonthItem, DayItem, YearItem, HourItem, MinuteItem, SecondItem,
-    TimePeriodItem): the implicit style of LoopingSelectorItem is the keyed theme
-    DateTimePickerLoopingSelectorItemStyle of ListBoxItem, which the presenters give their items.
-    WinUI: {LoopingSelectorItem}
-    The padding and the alignment of the items, which the code of the WinUI presenters sets on
-    each LoopingSelector (DatePickerFlyoutPresenterItemPadding, DatePickerFlyoutPresenterMonthPadding
-    with the month left aligned, TimePickerFlyoutPresenterItemPadding), are setters of the classes.
-  - The selected item: WinUI draws the highlight (HighlightRect) over the items and a
-    MonochromaticOverlayPresenter over it, which draws the selected item again in
-    DatePickerFlyoutPresenterHighlightForegroundColor (TextOnAccentAAFillColorPrimary). The port
-    draws the highlight under the items and the selected item in TextOnAccentAAFillColorPrimaryBrush,
-    without a background of its own (the Selected state of the item, LoopingSelectorItemBackgroundSelected,
-    is under the highlight in the source).
-  - The ScaleTransform of the glyph of the navigation buttons, animated to
-    LoopingSelectorUpDownButtonScalePressed (0.875) 16 ms into the Pressed state, is the
-    RenderTransform scale(0.875) of the pressed state (the value is written).
+  macOS 26 control theme adapted from FerroUI's compiled WinUI foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  Geometry and timing are calibrated theme values, pending native capture.
+  FerroUI template parts, keyboard handling, editing and popup contracts are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -73,17 +31,13 @@
     <Setter Property="BackgroundSizing" Value="InnerBorderEdge" />
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <!-- UseSystemFocusVisuals with FocusVisualMargin="0". -->
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
       </FocusAdornerTemplate>
     </Setter>
     <Setter Property="Template">
@@ -99,7 +53,13 @@
                             Padding="{TemplateBinding Padding}"
                             HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                            CornerRadius="{TemplateBinding CornerRadius}" />
+                            CornerRadius="{TemplateBinding CornerRadius}">
+            <ContentPresenter.Transitions>
+              <Transitions>
+                <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+              </Transitions>
+            </ContentPresenter.Transitions>
+          </ContentPresenter>
         </Panel>
       </ControlTemplate>
     </Setter>
@@ -168,7 +128,7 @@
       <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Foreground" Value="{DynamicResource LoopingSelectorUpDownButtonForegroundPressed}" />
         <!-- LoopingSelectorUpDownButtonScalePressed (0.875). -->
-        <Setter Property="RenderTransform" Value="scale(0.875)" />
+        <Setter Property="RenderTransform" Value="scale(0.96)" />
       </Style>
     </Style>
   </ControlTheme>
@@ -240,7 +200,7 @@
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Padding" Value="{StaticResource DatePickerFlyoutPresenterItemPadding}" />
     <Setter Property="IsTabStop" Value="False" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="Root"

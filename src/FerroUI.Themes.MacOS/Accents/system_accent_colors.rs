@@ -98,7 +98,7 @@ impl SystemAccentColors {
     pub const ACCENT_LIGHT2_KEY: &'static str = "SystemAccentColorLight2";
     pub const ACCENT_LIGHT3_KEY: &'static str = "SystemAccentColorLight3";
 
-    const DEFAULT_SYSTEM_ACCENT_COLOR: Color = Color::from_rgb(0, 120, 215);
+    const DEFAULT_SYSTEM_ACCENT_COLOR: Color = Color::from_rgb(0, 122, 255);
 
     /// Field initialisation; see [`ResourceProvider::construct`].
     pub fn construct() -> Self {
@@ -153,7 +153,7 @@ impl SystemAccentColors {
 
     /// The platform settings of the owner: those of the application when
     /// the owner is the application, those of the visual when it is one.
-    fn get_from_owner(owner: Option<&ResourceHostRef>) -> Option<Rc<dyn IPlatformSettings>> {
+    pub(crate) fn get_from_owner(owner: Option<&ResourceHostRef>) -> Option<Rc<dyn IPlatformSettings>> {
         match owner? {
             ResourceHostRef::Element(element) => element.cast::<Visual>().and_then(|visual| visual.get_platform_settings()),
             other => {

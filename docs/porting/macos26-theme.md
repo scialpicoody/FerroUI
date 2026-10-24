@@ -26,4 +26,12 @@ The target is macOS 26, not the newest macOS design revision. Reference Apple's 
 
 ## Status
 
-Implementation started. This document will be updated with the implemented surface and actual validation results as commits land in the draft PR.
+The independent theme package, macOS control templates, semantic light/dark palettes,
+live appearance settings, automatic native accessibility bridge and optional catalogue
+integration are implemented. Runtime validation and native reference collection are in
+progress on draft PR #340. The next validation commit regenerates the checked-in compiled
+XAML references after the integrated source and runtime tests agree.
+
+The native fixture and CI workflow collect public AppKit measurements on macOS 26.
+FerroUI glass currently uses its acrylic composition contract with an opaque fallback;
+that is not measured equivalence to AppKit’s adaptive refraction and glass grouping.

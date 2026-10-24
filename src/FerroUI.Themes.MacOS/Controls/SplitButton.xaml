@@ -1,48 +1,10 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/SplitButton/SplitButton.xaml (SplitButtonStyle and the implicit styles of
-    SplitButton and ToggleSplitButton)
-    controls/dev/SplitButton/SplitButton_themeresources.xaml (SplitButtonCommandBarStyle; its
-    resources are Resources/SplitButton_themeresources.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes (docs/porting/winui-theme.md, section 4):
-  - FerroUI's ToggleSplitButton takes the style of SplitButton (its style key is SplitButton), as
-    WinUI's implicit ToggleSplitButton style is SplitButtonStyle: one default control theme
-    serves both; the :checked pseudo-class is the InternalIsChecked of the source.
-  - Template parts: PrimaryButton is PART_PrimaryButton, SecondaryButton PART_SecondaryButton.
-  - The Grid RootGrid has a corner radius, which clips the backgrounds of the halves in WinUI:
-    it is a Border of the same name with ClipToBounds around the Grid of the columns. The grids
-    PrimaryButtonBorder and SecondaryButtonBorder, which draw borders, are Borders.
-  - The implicit Button style of Grid.Resources (the style of the two inner buttons) is the keyed
-    theme SplitButtonInnerButtonStyle (SplitButtonCommandBarInnerButtonStyle for the command bar
-    style). These themes are not based on DefaultButtonStyle, whose visual state styles would
-    select the content presenter of their templates; the setters of the source are written out.
-  - The visual states of CommonStates are chosen by the code of WinUI's SplitButton from the
-    pointer and press state of each inner button. FerroUI's inner buttons have their own
-    :pointerover and :pressed, so the states of one half (PrimaryPointerOver, SecondaryPressed,
-    ...) are styles of the inner button (Button#PART_PrimaryButton:pointerover). A state sets
-    the background grid and the border of its half: the grids PrimaryBackgroundGrid and
-    SecondaryBackgroundGrid take the Background of their button and the borders its BorderBrush
-    (bindings), and the styles set those properties of the button. The values a state of one
-    half gives the other half are the :pointerover style of the split button, which comes first.
-  - FlyoutOpen is :flyout-open; TouchPressed (the pointer of the last press was touch, or a key
-    is down) is :pressed, which FerroUI's split button sets while a key is down; the placement
-    state SecondaryButtonSpan (a key is down) moves the secondary button over both columns in
-    :pressed. Checked and the Checked* states are :checked and its combinations.
-  - The chevron of the secondary button is an AnimatedIcon (AnimatedChevronDownSmallVisualSource)
-    of 12 x 12 with the fallback glyph E96E (ChevronDownSmall) at 8 px; the command bar style
-    shows E972 (ChevronDownMed) at 8 px in a TextBlock. Both are Paths of the glyph geometries
-    whose Fill is the Foreground of the inner button (an icon inherits the foreground of the content
-    presenter in WinUI, which is the one of the button except in Disabled, where the disabled styles
-    of the split button set the foreground of the buttons as the inner states set the one of the
-    presenter).
-  - UseSystemFocusVisuals with FocusVisualMargin="-1" (SplitButtonStyle) and "-3" (the command bar
-    style and the inner buttons) is the FocusAdorner. IsTabStop="True" of the split button is
-    also Focusable="True"; IsTabStop="False" of the inner buttons is also Focusable="False".
-  - Column widths of resources (SplitButtonSecondaryButtonSize, 35) are written as values: a
-    double resource does not convert to a GridLength.
+  macOS 26 control theme, adapted from the FerroUI WinUI template foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  macOS geometry and states are theme calibrations against Apple's WWDC25
+  AppKit design guidance; exact native rendering remains a comparison gate.
+  FerroUI template parts, bindings and routed interaction are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -75,14 +37,9 @@
     <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border Margin="-3"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
       </FocusAdornerTemplate>
     </Setter>
     <Setter Property="Template">
@@ -131,20 +88,16 @@
     <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border Margin="-1"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
       </FocusAdornerTemplate>
     </Setter>
     <Setter Property="IsTabStop" Value="True" />
     <Setter Property="Focusable" Value="True" />
-    <Setter Property="Padding" Value="{DynamicResource SplitButtonPadding}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Padding" Value="{DynamicResource MacOSControlPadding}" />
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="RootGrid"
@@ -157,7 +110,7 @@
                    SecondaryButtonColumn (Width SplitButtonSecondaryButtonSize). -->
               <ColumnDefinition Width="*" MinWidth="35" />
               <ColumnDefinition Width="1" />
-              <ColumnDefinition Width="35" />
+              <ColumnDefinition Width="24" />
             </Grid.ColumnDefinitions>
             <Grid x:Name="PrimaryBackgroundGrid"
                   Grid.ColumnSpan="2"
@@ -201,7 +154,7 @@
                     VerticalContentAlignment="Stretch"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Stretch"
-                    Padding="0,0,12,0"
+                    Padding="0,0,6,0"
                     IsTabStop="False"
                     Focusable="False">
               <!-- The AnimatedIcon (12 x 12) with its fallback glyph E96E at 8 px. -->
@@ -221,12 +174,12 @@
                     Grid.Column="0"
                     BorderBrush="{Binding #PART_PrimaryButton.BorderBrush}"
                     BorderThickness="1,1,0,1"
-                    CornerRadius="4,0,0,4" />
+                    CornerRadius="{TemplateBinding CornerRadius, Converter={StaticResource LeftCornerRadiusFilterConverter}}" />
             <Border x:Name="SecondaryButtonBorder"
                     Grid.Column="2"
                     BorderBrush="{Binding #PART_SecondaryButton.BorderBrush}"
                     BorderThickness="0,1,1,1"
-                    CornerRadius="0,4,4,0" />
+                    CornerRadius="{TemplateBinding CornerRadius, Converter={StaticResource RightCornerRadiusFilterConverter}}" />
           </Grid>
         </Border>
       </ControlTemplate>
@@ -391,14 +344,9 @@
     <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border Margin="-3"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
       </FocusAdornerTemplate>
     </Setter>
     <Setter Property="Template">
@@ -449,21 +397,16 @@
     <Setter Property="FontSize" Value="12" />
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border Margin="-3"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
       </FocusAdornerTemplate>
     </Setter>
     <Setter Property="IsTabStop" Value="True" />
     <Setter Property="Focusable" Value="True" />
     <Setter Property="Padding" Value="12,8,4,8" />
     <Setter Property="MinHeight" Value="{DynamicResource AppBarThemeCompactHeight}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="RootGrid"

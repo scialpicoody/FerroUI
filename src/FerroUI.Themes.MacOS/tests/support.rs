@@ -1,7 +1,7 @@
 //! Shared helpers of the tests: the application scope, loading a document
 //! of the theme on its own and realising everything a loaded document
 //! holds. As the helpers of the tests of the Fluent theme
-//! (`src/FerroUI.Themes.Fluent/tests/support.rs`), for the WinUI theme.
+//! (`src/FerroUI.Themes.Fluent/tests/support.rs`), for the macOS theme.
 
 use crate::{assets, register_types, MacOSTheme, ASSEMBLY};
 use ferroui_base::controls::{IResourceProvider, ResourceDictionary, ResourceKey};
@@ -27,7 +27,7 @@ pub fn start_application() -> UnitTestApplicationScope {
 }
 
 /// Starts a unit test application with the services of a styled window and
-/// the WinUI theme as the theme of the application.
+/// the macOS theme as the theme of the application.
 pub fn start_themed_application() -> UnitTestApplicationScope {
     register_types();
     let services = TestServices::styled_window()
@@ -51,6 +51,15 @@ impl MockGlobalClock {
             subject: ferroui_base::reactive::LightweightSubject::new(),
             play_state: std::cell::Cell::new(ferroui_base::animation::PlayState::Run),
         }
+    }
+
+    /// A deterministic frame for behavioral motion tests, without wall-clock waits.
+    pub fn pulse(&self, seconds: f64) {
+        ferroui_base::reactive::IObserver::on_next(&self.subject, ferroui_base::animation::TimeSpan::from_seconds(seconds));
+    }
+
+    pub fn has_observers(&self) -> bool {
+        self.subject.has_observers()
     }
 }
 

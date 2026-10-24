@@ -1,20 +1,10 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/CommonStyles/CheckBox_themeresources.xaml (the styles; its resources are
-    Resources/CheckBox_themeresources.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes (docs/porting/winui-theme.md, section 4):
-  - The Grid RootGrid has a background, a border and a corner radius, which a FerroUI panel does
-    not have: it is a Border of the same name around the Grid.
-  - The check glyph is an AnimatedIcon (AnimatedAcceptVisualSource, a Lottie animation) with a
-    FontIconSource fallback of the symbol font; FerroUI has neither, so it is a Path of the glyph
-    geometries GlyphGeometryE73E (CheckBoxCheckedGlyph) and GlyphGeometryE9AE
-    (CheckBoxIndeterminateGlyph) of Resources/Glyphs.xaml. The states of the animated icon
-    (NormalOff, PointerOverOn, ...) become its opacity: hidden when unchecked, shown otherwise.
-  - The visual states of CombinedStates are nested styles on the pseudo-classes of the check
-    state and the pointer state, in the order of the source.
+  macOS 26 control theme, adapted from the FerroUI WinUI template foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  macOS geometry and states are theme calibrations against Apple's WWDC25
+  AppKit design guidance; exact native rendering remains a comparison gate.
+  FerroUI template parts, bindings and routed interaction are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -34,27 +24,22 @@
     <Setter Property="Background" Value="{DynamicResource CheckBoxBackgroundUnchecked}" />
     <Setter Property="Foreground" Value="{DynamicResource CheckBoxForegroundUnchecked}" />
     <Setter Property="BorderBrush" Value="{DynamicResource CheckBoxBorderBrushUnchecked}" />
-    <Setter Property="Padding" Value="{StaticResource CheckBoxPadding}" />
+    <Setter Property="Padding" Value="{DynamicResource CheckBoxPadding}" />
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="HorizontalContentAlignment" Value="Left" />
-    <Setter Property="VerticalContentAlignment" Value="Top" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
-    <Setter Property="MinWidth" Value="{StaticResource CheckBoxMinWidth}" />
-    <Setter Property="MinHeight" Value="{StaticResource CheckBoxHeight}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="MinWidth" Value="{DynamicResource CheckBoxMinWidth}" />
+    <Setter Property="MinHeight" Value="{DynamicResource CheckBoxHeight}" />
+    <Setter Property="CornerRadius" Value="3" />
     <!-- UseSystemFocusVisuals with FocusVisualMargin="{StaticResource CheckBoxFocusVisualMargin}" (-7,-3,-7,-3). -->
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border Margin="-7,-3,-7,-3"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="5" />
       </FocusAdornerTemplate>
     </Setter>
     <Setter Property="Template">
@@ -68,17 +53,25 @@
           <Grid ColumnDefinitions="Auto,*">
             <Grid Grid.Column="0"
                   VerticalAlignment="Center"
-                  Height="{StaticResource CheckBoxSize}"
-                  Width="{StaticResource CheckBoxSize}">
+                  TemplatedControl.IsTemplateFocusTarget="True"
+                  Height="{DynamicResource CheckBoxSize}"
+                  Width="{DynamicResource CheckBoxSize}">
               <Rectangle x:Name="NormalRectangle"
                          Fill="{DynamicResource CheckBoxCheckBackgroundFillUnchecked}"
                          Stroke="{DynamicResource CheckBoxCheckBackgroundStrokeUnchecked}"
                          StrokeThickness="{StaticResource CheckBoxBorderThickness}"
                          UseLayoutRounding="False"
-                         Height="{StaticResource CheckBoxSize}"
-                         Width="{StaticResource CheckBoxSize}"
+                         Height="{DynamicResource CheckBoxSize}"
+                         Width="{DynamicResource CheckBoxSize}"
                          RadiusX="{TemplateBinding CornerRadius, Converter={StaticResource TopLeftCornerRadiusDoubleValueConverter}}"
-                         RadiusY="{TemplateBinding CornerRadius, Converter={StaticResource BottomRightCornerRadiusDoubleValueConverter}}" />
+                         RadiusY="{TemplateBinding CornerRadius, Converter={StaticResource BottomRightCornerRadiusDoubleValueConverter}}">
+                <Rectangle.Transitions>
+                  <Transitions>
+                    <BrushTransition Property="Fill" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                    <BrushTransition Property="Stroke" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                  </Transitions>
+                </Rectangle.Transitions>
+              </Rectangle>
               <!-- The glyph is drawn at the size of its ink in the symbol font at CheckBoxGlyphSize. -->
               <Path x:Name="CheckGlyph"
                     Fill="{DynamicResource CheckBoxCheckGlyphForegroundUnchecked}"
@@ -88,8 +81,14 @@
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     FlowDirection="LeftToRight"
-                    Margin="0,1,0,-1"
-                    Opacity="0" />
+                    Margin="0"
+                    Opacity="0">
+                <Path.Transitions>
+                  <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                  </Transitions>
+                </Path.Transitions>
+              </Path>
             </Grid>
             <ContentPresenter x:Name="PART_ContentPresenter"
                               Grid.Column="1"

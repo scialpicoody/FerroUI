@@ -44,8 +44,8 @@ fn only_the_entry_point_is_built_by_the_document_table() {
     }
 }
 
-/// Every ported document names its source in microsoft-ui-xaml, and the documents that are not
-/// ported say so, in the comment the document starts with (docs/porting/winui-theme.md, section 5).
+/// Inherited documents preserve their upstream provenance. Newly authored macOS documents
+/// name the macOS theme design record instead of claiming to be original WinUI resources.
 #[test]
 fn every_document_names_its_source() {
     for (path, content) in assets::documents() {
@@ -53,7 +53,10 @@ fn every_document_names_its_source() {
         let start = text.trim_start_matches('\u{feff}').trim_start();
         assert!(start.starts_with("<!--"), "{path} does not start with a comment");
         let comment = &start[..start.find("-->").unwrap_or_else(|| panic!("{path}: an unterminated comment"))];
-        assert!(comment.contains("microsoft-ui-xaml"), "{path}: the first comment does not name microsoft-ui-xaml");
-        assert!(comment.contains("7e4b0c2096be402f51cc8f7d203ebf67cff183d0"), "{path}: the first comment does not name the commit");
+        if comment.contains("microsoft-ui-xaml") {
+            assert!(comment.contains("7e4b0c2096be402f51cc8f7d203ebf67cff183d0"), "{path}: the inherited source pin is missing");
+        } else {
+            assert!(comment.contains("docs/porting/macos26-theme.md"), "{path}: the macOS design record is missing");
+        }
     }
 }

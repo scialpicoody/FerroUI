@@ -1,61 +1,9 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/CommonStyles/DatePicker_themeresources.xaml (DefaultDatePickerStyle with its
-    template-local DatePickerFlyoutButtonStyle, DefaultDatePickerFlyoutPresenterStyle and the
-    implicit styles of DatePicker and DatePickerFlyoutPresenter; its resources are
-    Resources/DatePicker_themeresources.xaml)
-    controls/dev/CommonStyles/DateTimePickerFlyout_themeresources.xaml (the template of
-    DefaultLoopingSelectorStyle, written into the hosts of the presenter; the themes of the buttons
-    and the items are in Controls/DateTimePickerShared.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes (docs/porting/winui-theme.md, section 4):
-  - Template parts of DatePicker: FlyoutButton, FlyoutButtonContentGrid, DayTextBlock,
-    MonthTextBlock, YearTextBlock, FirstPickerSpacing and SecondPickerSpacing are PART_FlyoutButton,
-    PART_ButtonContentGrid, PART_DayTextBlock, PART_MonthTextBlock, PART_YearTextBlock,
-    PART_FirstSpacer and PART_SecondSpacer. FerroUI's control sets the columns of the grid and
-    their order from the date pattern of the culture, as WinUI's does (78*, 132* for the month).
-  - WinUI's DatePickerFlyout is a flyout the control creates in code; FerroUI's DatePicker has the
-    Popup PART_Popup with the DatePickerPresenter PART_PickerPresenter in its template. The control
-    places the popup so that the selected values are over the button, as WinUI places its flyout.
-  - The texts of the placeholders are the localized strings of WinUI ("day", "month", "year",
-    TEXT_DATEPICKER_*_PLACEHOLDER of dxaml/xcp/dxaml/dllsrv/winrt/Microsoft.UI.Xaml.Common.rc) in
-    English; the control clears the text it sets when it has no date, which restores them.
-  - The template-local DatePickerFlyoutButtonStyle is the keyed theme of the same name; its
-    ContentPresenter is PART_ContentPresenter.
-  - HasDateStates: HasNoDate is FerroUI's :hasnodate.
-  - The MinWidth and MaxWidth of the flyout button (DatePickerThemeMinWidth, DatePickerThemeMaxWidth) are
-    setters of the control bound to the button, so that the sizes of FerroUI's control apply.
-  - The focus visual: IsTabStop False on the control and UseSystemFocusVisuals with
-    FocusVisualMargin -3 on the flyout button. FerroUI's DatePicker takes the focus itself: the
-    FocusAdorner of the control (margin -3) is drawn around the flyout button
-    (TemplatedControl.IsTemplateFocusTarget), and IsTabStop is left out.
-  - HeaderContentPresenter and its row are left out: FerroUI's DatePicker has no Header.
-    Orientation (Horizontal) and ElementSoundMode have no counterpart.
-  - The FerroUI contract: the template is wrapped in DataValidationErrors, which shows the errors
-    of FerroUI's data validation under the control, and :error gives the border the critical brush
-    (SystemFillColorCriticalBrush), as the Fluent theme does and as Controls/TextBox.xaml does.
-  - Template parts of DatePickerPresenter: PickerHostGrid is PART_PickerContainer; the
-    LoopingSelectors the WinUI presenter creates in code are the hosts PART_DayHost, PART_MonthHost
-    and PART_YearHost, each with the template of DefaultLoopingSelectorStyle (a ScrollViewer with
-    ScrollViewerScrollBarlessTemplate around the DateTimePickerPanel PART_DaySelector, ... and the
-    up and down RepeatButtons PART_DayUpButton, PART_DayDownButton, ..., shown while the pointer is
-    over the host); AcceptButton and DismissButton are PART_AcceptButton and PART_DismissButton;
-    FirstPickerSpacing and SecondPickerSpacing are PART_FirstSpacer and PART_SecondSpacer. The
-    presenter sets the columns in code (78*, 138* for the month), the month column is 138* in
-    FerroUI where WinUI's is 132*.
-  - HighlightRect (a Grid with a background and a corner radius) is a Border, under the items; the
-    three MonochromaticOverlayPresenters that draw the selected items again in
-    DatePickerFlyoutPresenterHighlightForegroundColor are the selected state of the items
-    (Controls/DateTimePickerShared.xaml).
-  - The glyphs of the buttons (E8FB Accept, E711 Cancel at 16 px) are GlyphGeometryE8FB (14 px
-    wide) and GlyphGeometryE711 (12 px wide).
-  - The ThemeShadow of the flyout (ApplyElevationEffect of DatePickerFlyoutPresenter at a
-    Translation.Z of 32) is the BoxShadow ThemeShadowFlyoutBoxShadow of the border Background of
-    the presenter, and the margin ThemeShadowFlyoutMargin of PART_PickerPresenter is the room for
-    it in the popup (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24); WindowManagerAddShadowHint
-    is off, as in the Fluent theme.
+  macOS 26 control theme adapted from FerroUI's compiled WinUI foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  Geometry and timing are calibrated theme values, pending native capture.
+  FerroUI template parts, keyboard handling, editing and popup contracts are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -71,6 +19,13 @@
 
   <!-- DatePickerFlyoutButtonStyle of the template of DefaultDatePickerStyle. -->
   <ControlTheme x:Key="DatePickerFlyoutButtonStyle" TargetType="Button">
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="3" IsHitTestVisible="False"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
     <Setter Property="Template">
       <ControlTemplate>
         <Panel>
@@ -121,22 +76,18 @@
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <!-- MinWidth and MaxWidth of the flyout button in the source, bound to it from the control. -->
-    <Setter Property="MinWidth" Value="{StaticResource DatePickerThemeMinWidth}" />
+    <Setter Property="MinWidth" Value="{DynamicResource DatePickerThemeMinWidth}" />
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
     <Setter Property="MaxWidth" Value="{StaticResource DatePickerThemeMaxWidth}" />
     <!-- UseSystemFocusVisuals with FocusVisualMargin="-3", around the flyout button. -->
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border Margin="-3"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
       </FocusAdornerTemplate>
     </Setter>
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <Setter Property="Template">
       <ControlTemplate>
         <!-- The errors of FerroUI's data validation under the control (DataValidationErrors.xaml). -->
@@ -150,6 +101,7 @@
                     BorderThickness="{TemplateBinding BorderThickness}"
                     IsEnabled="{TemplateBinding IsEnabled}"
                     MinWidth="{TemplateBinding MinWidth}"
+                    MinHeight="{TemplateBinding MinHeight}"
                     MaxWidth="{TemplateBinding MaxWidth}"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
@@ -242,7 +194,7 @@
     <Setter Property="Background" Value="{DynamicResource DatePickerFlyoutPresenterBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource DatePickerFlyoutPresenterBorderBrush}" />
     <Setter Property="BorderThickness" Value="{DynamicResource DateTimeFlyoutBorderThickness}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="Background"
@@ -252,7 +204,7 @@
                 BorderThickness="{TemplateBinding BorderThickness}"
                 CornerRadius="{TemplateBinding CornerRadius}"
                 Padding="{DynamicResource DateTimeFlyoutBorderPadding}"
-                MaxHeight="398">
+                MaxHeight="292">
           <Grid x:Name="ContentPanel" RowDefinitions="*,Auto">
             <Grid x:Name="PART_PickerContainer">
               <Grid.Styles>

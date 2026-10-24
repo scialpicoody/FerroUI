@@ -11,6 +11,8 @@ pub enum CatalogTheme {
     Simple = 1,
     /// The WinUI theme (`ferroui-themes-winui`), an addition of the port.
     WinUI = 2,
+    /// The macOS 26 theme, available with the `macos-theme` feature.
+    MacOS = 3,
 }
 
-ferro_markup_enum!(CatalogTheme { Fluent, Simple, WinUI });
+ferro_markup_enum!(CatalogTheme { Fluent, Simple, WinUI, MacOS });

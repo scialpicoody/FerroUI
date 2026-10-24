@@ -1,5 +1,11 @@
 # NOTICE
 
+This macOS 26 theme is derived from FerroUI’s WinUI theme and retains its
+Microsoft and Avalonia attribution. The macOS templates and semantic resources
+are independently authored adaptations based on public Apple design guidance.
+No Apple framework implementation, system fonts or SF Symbols assets are bundled.
+See `docs/porting/macos26-theme.md` for provenance and measured fidelity scope.
+
 The markup documents of this crate are ported from the WinUI 3 theme of
 microsoft-ui-xaml (<https://github.com/microsoft/microsoft-ui-xaml>, branch
 `winui3/main`, commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`):
@@ -7,9 +13,9 @@ microsoft-ui-xaml (<https://github.com/microsoft/microsoft-ui-xaml>, branch
 the default style documents of `controls/dev`, and the density documents of
 `controls/dev/dll/DensityStyles`. Each ported document names its source documents
 in its header comment; `docs/porting/winui-theme.md` at the root of the repository
-describes the port. The resource documents under `Resources/` are converted by
-`scripts/winui-theme/convert.py`; the control documents under `Controls/` are
-ported by hand. `Converters/corner_radius_to_thickness_converter.rs` is a Rust port
+describes the port. The original resource documents were converted by
+`scripts/winui-theme/convert.py`; this copied package maintains its macOS resources
+and control templates independently. `Converters/corner_radius_to_thickness_converter.rs` is a Rust port
 of the class `CornerRadiusToThicknessConverter` of the same repository
 (`controls/dev/Common/CornerRadiusToThicknessConverter.idl`, `.h` and `.cpp`), and
 `Primitives/info_bar_panel.rs` a Rust port of the class `InfoBarPanel`

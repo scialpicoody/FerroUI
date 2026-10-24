@@ -1,46 +1,9 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/CommonStyles/CalendarDatePicker_themeresources.xaml (DefaultCalendarDatePicker
-    and the implicit style of CalendarDatePicker; its resources are
-    Resources/CalendarDatePicker_themeresources.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes (docs/porting/winui-theme.md, section 4):
-  - WinUI's picker shows the date in a TextBlock (DateText) and opens its calendar when it is
-    clicked anywhere. FerroUI's CalendarDatePicker edits the date in a text box (PART_TextBox) and
-    opens the calendar with a button (PART_Button): DateText is the text box, with the keyed theme
-    CalendarDatePickerTextBoxStyle (a transparent text box without a border, the placeholder in its
-    foreground as the TextBlock of the source shows it, and the floating placeholder of FerroUI's
-    UseFloatingPlaceholder above the text), and the glyph is the content of the button,
-    with the keyed theme CalendarDatePickerButtonStyle (a transparent button of the 32 px column
-    of the glyph).
-  - The padding 12,0,0,2 of DateText is the Padding of the control (a setter), bound to the text
-    box, so that the Padding of FerroUI's control applies.
-  - The glyph E787 (Calendar) of FontIcon CalendarGlyph at 12 px is the geometry
-    GlyphGeometryE787, 10.5 px wide (the ink of the glyph at 12 px).
-  - DateText lies in the column of the border, not inside it: the text box has no margin of the
-    border thickness, so its text starts 12 px from the edge of the control, as WinUI's.
-  - The Flyout of FlyoutBase.AttachedFlyout is the Popup PART_Popup (light dismiss, below the
-    control) with the Calendar PART_Calendar, whose corner radius is OverlayCornerRadius as in the
-    source; the FlyoutPresenterStyle of the source (no padding, no border) leaves the calendar as
-    it is, so the popup has no presenter. CalendarViewStyle is the default theme of Calendar.
-    The shadow of that style (IsDefaultShadowEnabled: a ThemeShadow at a Translation.Z of 32) is
-    the BoxShadow ThemeShadowFlyoutBoxShadow of the Border CalendarShadow around the calendar,
-    with the margin ThemeShadowFlyoutMargin as the room for it in the popup
-    (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
-  - The Border Background is the focus target (Control.IsTemplateFocusTarget) of the focus visual,
-    FocusVisualMargin -3: the FocusAdorner of the control, drawn around the border.
-  - HeaderContentPresenter, DescriptionPresenter, their rows and HeaderStates are left out:
-    FerroUI's CalendarDatePicker has no Header and no Description.
-  - SelectionStates (Selected: the date text and the glyph in CalendarDatePickerTextForegroundSelected
-    while a date is selected) is not ported: FerroUI's control has no state for a selected date;
-    the brush is TextFillColorPrimaryBrush, the one of the normal state.
-  - CalendarDatePickerLightDismissOverlayBackground is not used: FerroUI's popups have no light
-    dismiss overlay.
-  - The FerroUI contract: the template is wrapped in DataValidationErrors, which shows the errors
-    of FerroUI's data validation under the control, and :error gives the border the critical brush
-    (SystemFillColorCriticalBrush), as the Fluent theme does and as Controls/TextBox.xaml does.
+  macOS 26 control theme adapted from FerroUI's compiled WinUI foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  Geometry and timing are calibrated theme values, pending native capture.
+  FerroUI template parts, keyboard handling, editing and popup contracts are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -167,26 +130,18 @@
     <Setter Property="HorizontalContentAlignment" Value="Left" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <!-- The Padding of DateText. -->
-    <Setter Property="Padding" Value="12,0,0,2" />
+    <Setter Property="Padding" Value="8,2,0,2" />
     <!-- UseSystemFocusVisuals with FocusVisualMargin="-3". -->
-    <Setter Property="FocusAdorner">
-      <FocusAdornerTemplate>
-        <Border Margin="-3"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
-      </FocusAdornerTemplate>
-    </Setter>
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <!-- The focus ring surrounds the whole field when its editor receives focus. -->
+    <Setter Property="FocusAdorner" Value="{x:Null}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
     <Setter Property="Template">
       <ControlTemplate>
         <!-- The errors of FerroUI's data validation under the control (DataValidationErrors.xaml). -->
         <DataValidationErrors>
-          <Grid x:Name="Root" ColumnDefinitions="*,32">
+          <Grid x:Name="Root" ColumnDefinitions="*,26">
             <Border x:Name="Background"
                     Grid.ColumnSpan="2"
                     BorderThickness="{TemplateBinding BorderThickness}"
@@ -195,7 +150,17 @@
                     Background="{TemplateBinding Background}"
                     CornerRadius="{TemplateBinding CornerRadius}"
                     TemplatedControl.IsTemplateFocusTarget="True"
-                    MinHeight="32" />
+                    MinHeight="{DynamicResource MacOSControlHeight}" />
+            <Border x:Name="MacOSInputFocusRing"
+                    Grid.ColumnSpan="2" Margin="-3" BorderThickness="3" Opacity="0"
+                    BorderBrush="{DynamicResource MacOSFocusBrush}"
+                    CornerRadius="{TemplateBinding CornerRadius}" IsHitTestVisible="False">
+              <Border.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </Border.Transitions>
+            </Border>
             <TextBox x:Name="PART_TextBox"
                      Grid.Column="0"
                      Theme="{StaticResource CalendarDatePickerTextBoxStyle}"
@@ -245,6 +210,10 @@
         </DataValidationErrors>
       </ControlTemplate>
     </Setter>
+
+    <Style Selector="^:focus-within:not(CalendarDatePicker:disabled) /template/ Border#MacOSInputFocusRing">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
 
     <!-- PointerOver -->
     <Style Selector="^:pointerover">

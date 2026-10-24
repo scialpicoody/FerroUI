@@ -110,7 +110,7 @@
                        Opacity="0">
               <ScrollBar.Transitions>
                 <Transitions>
-                  <DoubleTransition Property="Opacity" Duration="0:0:0.083" />
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
                 </Transitions>
               </ScrollBar.Transitions>
             </ScrollBar>
@@ -122,7 +122,7 @@
                        Opacity="0">
               <ScrollBar.Transitions>
                 <Transitions>
-                  <DoubleTransition Property="Opacity" Duration="0:0:0.083" />
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
                 </Transitions>
               </ScrollBar.Transitions>
             </ScrollBar>
@@ -133,7 +133,7 @@
                     Background="{DynamicResource ScrollViewerScrollBarSeparatorBackground}">
               <Border.Transitions>
                 <Transitions>
-                  <DoubleTransition Property="Opacity" Duration="0:0:0.1" />
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
                 </Transitions>
               </Border.Transitions>
             </Border>

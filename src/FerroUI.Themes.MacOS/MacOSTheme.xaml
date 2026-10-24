@@ -1,5 +1,5 @@
 <!--
-  The WinUI theme: the theme of a WinUI 3 application of microsoft-ui-xaml
+  The macOS 26 theme, copied from the FerroUI WinUI 3 theme foundation of microsoft-ui-xaml
   (https://github.com/microsoft/microsoft-ui-xaml, commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0),
   generic.xaml with the theme resources of XamlControlsResources merged over it, ported to FerroUI
   (docs/porting/winui-theme.md). Copyright (c) Microsoft Corporation for the ported documents;
@@ -85,6 +85,7 @@
         <MergeResourceInclude Source="/Resources/ThemeShadows.xaml" />
         <MergeResourceInclude Source="/Resources/Glyphs.xaml" />
         <!-- resources:end -->
+        <MergeResourceInclude Source="/Resources/MacOSMaterials.xaml" />
 
         <!-- The labels of the commands of the context flyout of the text controls (not part of the
              WinUI theme: WinUI takes them from the resources of the framework). -->

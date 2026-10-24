@@ -1,6 +1,6 @@
 //! The rules of the theme tests of the upstream project
 //! (`tests/Themes.UnitTests/ControlThemeTests.cs`, ported for the Fluent theme in
-//! `src/FerroUI.Themes.Fluent/tests/control_theme_tests.rs`), for the WinUI theme.
+//! `src/FerroUI.Themes.Fluent/tests/control_theme_tests.rs`), for the macOS theme.
 //!
 //! Differences from the tests of the Fluent theme:
 //! - Every templated control has a default control theme or is in
@@ -264,10 +264,6 @@ fn should_define_setters_with_valid_dynamic_resources() {
     // Validate that <Setter Value="{DynamicResource}"> points to an actually defined resource.
     let _app = start_application();
     let theme = create_attached_theme();
-    let all_resources = enumerate_resources(&theme.as_style());
-    let default_keys: Vec<&ResourceKey> =
-        all_resources.iter().filter(|r| r.theme_variant == ThemeVariant::default()).map(|r| &r.key).collect();
-
     let control_themes = control_themes(&theme);
     assert!(!control_themes.is_empty());
     let mut dynamic_resources = 0;
@@ -285,7 +281,13 @@ fn should_define_setters_with_valid_dynamic_resources() {
                     Some(text) => ResourceKey::from(text),
                     None => ResourceKey::Type(from_markup_value::<&'static TypeInfo>(&key).expect("a string or type key")),
                 };
-                assert!(default_keys.contains(&&key), "the dynamic resource {key:?} is not defined");
+                // The macOS theme also supplies live size, accent and accessibility resources
+                // through its resource provider. Resolve them as a real consumer does, for
+                // every variant, instead of assuming all keys are static dictionary entries.
+                for variant in variants() {
+                    assert!(theme.try_get_resource(&key, Some(&variant)).is_some(),
+                        "the dynamic resource {key:?} is not defined for {variant:?}");
+                }
                 dynamic_resources += 1;
             }
         }
@@ -315,7 +317,10 @@ fn should_not_define_setters_with_hardcoded_brushes_or_colors() {
                 } else if let Some(brush) = from_markup_value::<Rc<dyn IBrush>>(&value) {
                     brush.as_solid_color_brush().is_none_or(|solid| !is_transparent_or_empty(solid.color()))
                 } else {
-                    from_markup_value::<BoxShadows>(&value).is_some()
+                    // Clearing a shadow for an edge placement or a disabled control is
+                    // semantic, like clearing a brush to Transparent. Actual shadows
+                    // still have to come from shared theme resources.
+                    from_markup_value::<BoxShadows>(&value).is_some_and(|shadows| shadows.count() != 0)
                 };
                 assert!(
                     !hardcoded,

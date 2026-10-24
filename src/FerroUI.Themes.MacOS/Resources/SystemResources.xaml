@@ -15,34 +15,34 @@
                     x:ClassModifier="internal">
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Default">
-      <Color x:Key="SystemColorWindowColor">#FFFFFFFF</Color>
-      <Color x:Key="SystemColorWindowTextColor">#FF000000</Color>
-      <Color x:Key="SystemColorButtonFaceColor">#FFF0F0F0</Color>
-      <Color x:Key="SystemColorButtonTextColor">#FF000000</Color>
-      <Color x:Key="SystemColorHighlightColor">#FF0078D7</Color>
+      <Color x:Key="SystemColorWindowColor">#FF242426</Color>
+      <Color x:Key="SystemColorWindowTextColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemColorButtonFaceColor">#FF2C2C2E</Color>
+      <Color x:Key="SystemColorButtonTextColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemColorHighlightColor">#FF0A84FF</Color>
       <Color x:Key="SystemColorHighlightTextColor">#FFFFFFFF</Color>
-      <Color x:Key="SystemColorHotlightColor">#FF0066CC</Color>
-      <Color x:Key="SystemColorGrayTextColor">#FF6D6D6D</Color>
+      <Color x:Key="SystemColorHotlightColor">#FF0A84FF</Color>
+      <Color x:Key="SystemColorGrayTextColor">#FF98989D</Color>
     </ResourceDictionary>
     <ResourceDictionary x:Key="Light">
       <Color x:Key="SystemColorWindowColor">#FFFFFFFF</Color>
       <Color x:Key="SystemColorWindowTextColor">#FF000000</Color>
-      <Color x:Key="SystemColorButtonFaceColor">#FFF0F0F0</Color>
+      <Color x:Key="SystemColorButtonFaceColor">#FFF5F5F7</Color>
       <Color x:Key="SystemColorButtonTextColor">#FF000000</Color>
-      <Color x:Key="SystemColorHighlightColor">#FF0078D7</Color>
+      <Color x:Key="SystemColorHighlightColor">#FF007AFF</Color>
       <Color x:Key="SystemColorHighlightTextColor">#FFFFFFFF</Color>
-      <Color x:Key="SystemColorHotlightColor">#FF0066CC</Color>
-      <Color x:Key="SystemColorGrayTextColor">#FF6D6D6D</Color>
+      <Color x:Key="SystemColorHotlightColor">#FF007AFF</Color>
+      <Color x:Key="SystemColorGrayTextColor">#FF808080</Color>
     </ResourceDictionary>
     <ResourceDictionary x:Key="{x:Static winui:MacOSTheme.HighContrast}">
-      <Color x:Key="SystemColorWindowColor">#FF000000</Color>
+      <Color x:Key="SystemColorWindowColor">#FF1C1C1E</Color>
       <Color x:Key="SystemColorWindowTextColor">#FFFFFFFF</Color>
-      <Color x:Key="SystemColorButtonFaceColor">#FF000000</Color>
+      <Color x:Key="SystemColorButtonFaceColor">#FF2C2C2E</Color>
       <Color x:Key="SystemColorButtonTextColor">#FFFFFFFF</Color>
-      <Color x:Key="SystemColorHighlightColor">#FF1AEBFF</Color>
-      <Color x:Key="SystemColorHighlightTextColor">#FF000000</Color>
-      <Color x:Key="SystemColorHotlightColor">#FFFFFF00</Color>
-      <Color x:Key="SystemColorGrayTextColor">#FF3FF23F</Color>
+      <Color x:Key="SystemColorHighlightColor">#FF0A84FF</Color>
+      <Color x:Key="SystemColorHighlightTextColor">#FFFFFFFF</Color>
+      <Color x:Key="SystemColorHotlightColor">#FF0A84FF</Color>
+      <Color x:Key="SystemColorGrayTextColor">#FF98989D</Color>
     </ResourceDictionary>
   </ResourceDictionary.ThemeDictionaries>
 </ResourceDictionary>

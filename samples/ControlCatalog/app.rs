@@ -22,6 +22,8 @@ use ferroui_themes_fluent::FluentTheme;
 #[cfg(feature = "classic-themes")]
 use ferroui_themes_simple::SimpleTheme;
 use ferroui_themes_winui::WinUITheme;
+#[cfg(feature = "macos-theme")]
+use ferroui_themes_macos::MacOSTheme;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -37,6 +39,8 @@ pub struct App {
     simple_theme: RefCell<Option<Ref<SimpleTheme>>>,
     /// The WinUI theme of the port (`CatalogTheme::WinUI`), not in the original.
     winui_theme: RefCell<Option<Ref<WinUITheme>>>,
+    #[cfg(feature = "macos-theme")]
+    macos_theme: RefCell<Option<Ref<MacOSTheme>>>,
     color_picker_fluent: RefCell<Option<Rc<dyn IStyle>>>,
     #[cfg(feature = "classic-themes")]
     color_picker_simple: RefCell<Option<Rc<dyn IStyle>>>,
@@ -97,6 +101,11 @@ impl ApplicationImpl for App {
             this.resources().merged_dictionaries().add(classic_themes.into());
         }
         *this.winui_theme.borrow_mut() = from_markup_value::<Ref<WinUITheme>>(&this.resource("WinUITheme"));
+        #[cfg(feature = "macos-theme")]
+        {
+            // The independently compiled theme supplies all templates from its own XAML assembly.
+            *this.macos_theme.borrow_mut() = Some(MacOSTheme::new());
+        }
         *this.color_picker_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerFluent"));
         *this.tree_data_grid_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("TreeDataGridFluent"));
 
@@ -142,6 +151,8 @@ impl App {
             #[cfg(feature = "classic-themes")]
             simple_theme: RefCell::new(None),
             winui_theme: RefCell::new(None),
+            #[cfg(feature = "macos-theme")]
+            macos_theme: RefCell::new(None),
             color_picker_fluent: RefCell::new(None),
             #[cfg(feature = "classic-themes")]
             color_picker_simple: RefCell::new(None),
@@ -258,18 +269,34 @@ impl App {
     }
 
     /// Not in the original: the themes the catalog is built with, the items of the theme list
-    /// of the settings page. The WinUI theme alone; with the feature `classic-themes` the Fluent
-    /// and Simple themes of the original before it, in the order of the original.
+    /// of the settings page. WinUI is always included; `classic-themes` adds Fluent and Simple
+    /// before it in the original order, and `macos-theme` adds macOS 26 after it.
     pub fn available_themes() -> ItemsSource {
         ItemsSource::from_values(Self::themes().iter().copied())
     }
 
     /// The themes of [`available_themes`](Self::available_themes).
     pub fn themes() -> &'static [CatalogTheme] {
-        #[cfg(feature = "classic-themes")]
-        return &[CatalogTheme::Fluent, CatalogTheme::Simple, CatalogTheme::WinUI];
-        #[cfg(not(feature = "classic-themes"))]
-        return &[CatalogTheme::WinUI];
+        &[
+            #[cfg(feature = "classic-themes")]
+            CatalogTheme::Fluent,
+            #[cfg(feature = "classic-themes")]
+            CatalogTheme::Simple,
+            CatalogTheme::WinUI,
+            #[cfg(feature = "macos-theme")]
+            CatalogTheme::MacOS,
+        ]
+    }
+
+    /// The retained macOS theme instance, so gallery settings update existing controls live.
+    #[cfg(feature = "macos-theme")]
+    pub fn macos_theme() -> Option<Ref<MacOSTheme>> {
+        Application::current()
+            .and_then(|application| application.cast::<App>())
+            .and_then(|application| {
+                let theme = application.macos_theme.borrow().clone();
+                theme
+            })
     }
 
     /// Not in the original: selects the theme of the catalog before its main window exists (the
@@ -337,6 +364,20 @@ impl App {
                 app.theme_styles_container.set(2, Style::new());
                 app.theme_styles_container.set(3, tree_data_grid_fluent());
             }
+            #[cfg(feature = "macos-theme")]
+            CatalogTheme::MacOS => {
+                let theme = app.macos_theme.borrow().clone().expect("the macOS theme of the catalog");
+                app.theme_styles_container.set(0, theme.as_style());
+                let color_picker_fluent =
+                    app.color_picker_fluent.borrow().clone().expect("the colour picker Fluent styles of App.xaml");
+                app.theme_styles_container.set(1, color_picker_fluent);
+                app.theme_styles_container.set(2, Style::new());
+                app.theme_styles_container.set(3, tree_data_grid_fluent());
+            }
+            #[cfg(not(feature = "macos-theme"))]
+            CatalogTheme::MacOS => panic!(
+                "the macOS theme needs the feature `macos-theme` of control-catalog"
+            ),
             // Not in the original: the catalog is built without the themes of the original.
             #[cfg(not(feature = "classic-themes"))]
             CatalogTheme::Fluent | CatalogTheme::Simple => panic!(

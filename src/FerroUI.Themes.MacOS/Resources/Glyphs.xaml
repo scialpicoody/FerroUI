@@ -2,7 +2,7 @@
   Not ported from a document: the outlines the port draws where the templates of microsoft-ui-xaml
   (https://github.com/microsoft/microsoft-ui-xaml, commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0)
   show a glyph of the symbol font (FontIcon, FontIconSource or a TextBlock in
-  SymbolThemeFontFamily, "Segoe Fluent Icons,Segoe MDL2 Assets"). The font is part of Windows,
+  SymbolThemeFontFamily, "SF Pro, .AppleSystemUIFont, Arial, $Default"). The font is part of Windows,
   is not redistributable and does not exist on the other platforms, so a template of the port
   draws the glyph as a path of the geometry GlyphGeometry<code point> (docs/porting/winui-theme.md,
   section 4.7), sized to the ink of the glyph at the font size of the source.

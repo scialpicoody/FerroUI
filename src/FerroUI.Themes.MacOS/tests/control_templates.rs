@@ -1,7 +1,7 @@
 //! Every themed control gets its template from the theme: one test per
 //! control, as the tests of the Fluent theme
 //! (`src/FerroUI.Themes.Fluent/tests/control_templates.rs`). The control is
-//! created in a `Window` of an application whose theme is the WinUI theme;
+//! created in a `Window` of an application whose theme is the macOS theme;
 //! after the window is shown
 //!
 //! * the template of the control theme (or of the theme it is based on) has

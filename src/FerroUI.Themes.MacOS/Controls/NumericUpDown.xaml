@@ -1,54 +1,10 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/NumberBox/NumberBox.xaml (the implicit style of NumberBox,
-    NumberBoxSpinButtonStyle, NumberBoxPopupSpinButtonStyle, NumberBoxTextBoxStyle; the resources
-    of controls/dev/NumberBox/NumberBox_themeresources.xaml are
-    Resources/NumberBox_themeresources.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes (docs/porting/winui-theme.md, section 4):
-  - FerroUI's NumericUpDown is WinUI's NumberBox with the spin buttons inline
-    (SpinButtonPlacementMode="Inline"). Its parts are a ButtonSpinner PART_Spinner, which raises
-    the spins, holding the TextBox PART_TextBox. The layout of the NumberBox template (the text box
-    InputBox over the whole width, the buttons UpSpinButton and DownSpinButton over its right end)
-    is the keyed ButtonSpinner theme NumericUpDownButtonSpinnerStyle: its content spans the
-    control and the buttons, PART_IncreaseButton (UpSpinButton) and PART_DecreaseButton
-    (DownSpinButton), are laid over it with the margins of the source.
-  - The Grid.Resources of the template set the RepeatButton brushes to the TextControlButton
-    brushes for the spin buttons: the keyed theme NumericUpDownSpinButtonStyle, based on
-    NumberBoxSpinButtonStyle, sets those brushes in its states.
-  - The spin buttons show the glyphs E70E and E70D of the symbol font (their content, at the font
-    size of the control, 14 px): Paths of GlyphGeometryE70E and GlyphGeometryE70D, 12 px wide,
-    filled with the Foreground of the button, which the states of NumericUpDownSpinButtonStyle set
-    as they set the foreground of its content presenter.
-  - SpinButtonStates: SpinButtonsVisible (ShowButtonSpinner) shows the buttons, sets MinWidth of
-    the text box to NumberBoxMinWidth and reserves the column of the buttons in the text box
-    (SpinButtonsColumn, 72 px), which NumberBox sets as a visual state of the text box; here the
-    NumericUpDown theme sets the Tag of the text box to SpinButtonsVisible and
-    NumberBoxTextBoxStyle selects it (SpinButtonsPopup likewise shows the popup indicator).
-    SpinButtonsPopup (the buttons in a popup) has no counterpart in FerroUI's NumericUpDown;
-    NumberBoxPopupSpinButtonStyle is ported for applications. ButtonSpinnerLocation="Left", which
-    WinUI does not have, puts the buttons at the left and reserves their column there (the Tag
-    SpinButtonsVisibleLeft).
-  - UpSpinButtonEnabledStates and DownSpinButtonEnabledStates are the IsEnabled the ButtonSpinner
-    sets on its buttons.
-  - Header, HeaderContentPresenter, Description and DescriptionPresenter: FerroUI's NumericUpDown
-    has none; they are left out with their rows. SelectionFlyout and SelectionHighlightColor have
-    no counterpart on NumericUpDown.
-  - NumberBoxTextBoxStyle: its template is the one of DefaultTextBoxStyle (ported in TextBox.xaml)
-    with the column of the spin buttons and the popup indicator (glyph EC8F at 12 px, the Path of
-    GlyphGeometryEC8F). Its visual states are those of DefaultTextBoxStyle, which this theme is
-    based on and whose styles select the same element names; the Focused state of the source also
-    sets RequestedTheme="Light" on the scroll viewer, which is left out. Its DeleteButtonStyle is
-    the one of DefaultTextBoxStyle: TextBoxDeleteButtonStyle.
-  - The FerroUI contract: InnerLeftContent and InnerRightContent of NumericUpDown (shown by the
-    Fluent theme) are passed to the text box, whose NumberBoxTextBoxStyle shows them beside the
-    text; :error (data validation) gives the border the critical brush, and the template is
-    wrapped in DataValidationErrors, which shows the errors under the box (as the Fluent theme
-    wraps it, and as Controls/TextBox.xaml does).
-  - IsTabStop="False" of the spin buttons is also Focusable="False"; the FontFamily setters of the
-    symbol font are left out (the glyphs are paths).
+  macOS 26 control theme, adapted from the FerroUI WinUI template foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  macOS geometry and states are theme calibrations against Apple's WWDC25
+  AppKit design guidance; exact native rendering remains a comparison gate.
+  FerroUI template parts, bindings and routed interaction are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -67,7 +23,10 @@
   <ControlTheme x:Key="NumberBoxSpinButtonStyle" TargetType="RepeatButton" BasedOn="{StaticResource DefaultRepeatButtonStyle}">
     <Setter Property="IsTabStop" Value="False" />
     <Setter Property="Focusable" Value="False" />
-    <Setter Property="MinWidth" Value="32" />
+    <Setter Property="MinWidth" Value="18" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Width" Value="18" />
+    <Setter Property="Height" Value="12" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="VerticalAlignment" Value="Stretch" />
     <Setter Property="BorderThickness" Value="{DynamicResource NumberBoxSpinButtonBorderThickness}" />
@@ -84,7 +43,7 @@
     <Setter Property="Padding" Value="0" />
     <Setter Property="BorderThickness" Value="{DynamicResource NumberBoxPopupSpinButtonBorderThickness}" />
     <Setter Property="FontSize" Value="16" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
   </ControlTheme>
 
   <!-- The spin buttons of the template, with the RepeatButton brushes the Grid.Resources of the
@@ -136,10 +95,22 @@
                   BorderThickness="{TemplateBinding BorderThickness}"
                   CornerRadius="{TemplateBinding CornerRadius}"
                   MinWidth="{TemplateBinding MinWidth}"
-                  MinHeight="{TemplateBinding MinHeight}" />
+                  MinHeight="{TemplateBinding MinHeight}"
+                    TemplatedControl.IsTemplateFocusTarget="True" />
+          <Border x:Name="MacOSPointerFocusRing" Grid.ColumnSpan="6"
+                  Margin="-3" BorderThickness="3" Opacity="0"
+                  BorderBrush="{DynamicResource MacOSFocusBrush}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False">
+            <Border.Transitions>
+              <Transitions>
+                <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+              </Transitions>
+            </Border.Transitions>
+          </Border>
           <Border x:Name="SpinButtonsSpaceLeft"
                   Grid.Column="0"
-                  Width="72"
+                  Width="26"
                   IsVisible="False" />
           <ContentPresenter x:Name="InnerLeftContentPresenter"
                             IsVisible="{TemplateBinding InnerLeftContent, Converter={x:Static ObjectConverters.IsNotNull}}"
@@ -213,12 +184,12 @@
                   IsVisible="False"
                   FontSize="{TemplateBinding FontSize}"
                   HorizontalAlignment="Right"
-                  MinWidth="40"
+                  MinWidth="24"
                   VerticalAlignment="Stretch" />
-          <!-- SpinButtonsColumn (Width 72 in SpinButtonsVisible) -->
+          <!-- Reserve the compact stepper width while spin buttons are visible. -->
           <Border x:Name="SpinButtonsSpace"
                   Grid.Column="5"
-                  Width="72"
+                  Width="26"
                   IsVisible="False" />
           <!-- The glyph EC8F at 12 px. -->
           <Path x:Name="PopupIndicator"
@@ -246,6 +217,10 @@
     <Style Selector="^[Tag=SpinButtonsPopup] /template/ Path#PopupIndicator">
       <Setter Property="IsVisible" Value="True" />
     </Style>
+    <!-- Text editing retains a focus ring for pointer focus as well as keyboard focus. -->
+    <Style Selector="^:focus:not(TextBox:focus-visible):not(TextBox:disabled) /template/ Border#MacOSPointerFocusRing">
+      <Setter Property="Opacity" Value="1" />
+    </Style>
   </ControlTheme>
 
   <!-- The layout of the NumberBox template: the text box over the whole control, the spin buttons
@@ -262,28 +237,30 @@
                             HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
           <StackPanel x:Name="SpinButtons"
-                      Orientation="Horizontal"
+                      Orientation="Vertical"
+                      VerticalAlignment="Center"
+                      Margin="4,2"
                       HorizontalAlignment="Right"
                       IsVisible="{TemplateBinding ShowButtonSpinner}">
             <RepeatButton x:Name="PART_IncreaseButton"
                           Theme="{StaticResource NumericUpDownSpinButtonStyle}"
-                          Margin="4"
-                          CornerRadius="{TemplateBinding CornerRadius}">
+                          Margin="0"
+                          CornerRadius="4,4,0,0">
               <Path Data="{StaticResource GlyphGeometryE70E}"
                     Fill="{Binding $parent[RepeatButton].Foreground}"
                     Stretch="Uniform"
-                    Width="12"
+                    Width="6"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center" />
             </RepeatButton>
             <RepeatButton x:Name="PART_DecreaseButton"
                           Theme="{StaticResource NumericUpDownSpinButtonStyle}"
-                          Margin="0,4,4,4"
-                          CornerRadius="{TemplateBinding CornerRadius}">
+                          Margin="0"
+                          CornerRadius="0,0,4,4">
               <Path Data="{StaticResource GlyphGeometryE70D}"
                     Fill="{Binding $parent[RepeatButton].Foreground}"
                     Stretch="Uniform"
-                    Width="12"
+                    Width="6"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center" />
             </RepeatButton>
@@ -299,8 +276,11 @@
 
   <!-- The implicit style of NumberBox (it has no key in WinUI). -->
   <ControlTheme x:Key="{x:Type NumericUpDown}" TargetType="NumericUpDown">
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
     <Setter Property="IsTabStop" Value="False" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
     <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
     <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
@@ -323,6 +303,7 @@
                          VerticalContentAlignment="Stretch">
             <TextBox x:Name="PART_TextBox"
                      Theme="{StaticResource NumberBoxTextBoxStyle}"
+                     MinHeight="{TemplateBinding MinHeight}"
                      FontSize="{TemplateBinding FontSize}"
                      FontWeight="{TemplateBinding FontWeight}"
                      FontFamily="{TemplateBinding FontFamily}"

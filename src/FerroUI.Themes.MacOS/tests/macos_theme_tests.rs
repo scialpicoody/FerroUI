@@ -1,5 +1,5 @@
 //! The class of the theme and its resources as a whole (not from upstream): the accent colours,
-//! the three theme variants, the density style, and the theme in markup.
+//! light/dark/high-contrast appearance, compact density and loading the theme through markup.
 
 use super::support::*;
 use crate::accents::SystemAccentColors;
@@ -11,7 +11,7 @@ use ferroui_base::platform::{AccentColorShades, PlatformColorValues};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Ref, Thickness};
 use ferroui_base::styling::{ControlTheme, Setter, SetterValue};
-use ferroui_base::{StaticType, TypeInfo};
+use ferroui_base::TypeInfo;
 use ferroui_controls::embedding::EmbeddableControlRoot;
 use ferroui_controls::primitives::{OverlayPopupHost, PopupRoot};
 use ferroui_controls::{
@@ -31,7 +31,7 @@ fn system_accent_colors_provide_the_default_accent_without_an_owner() {
     let _app = start_application();
     let colors = SystemAccentColors::new();
     assert!(colors.has_resources());
-    assert_eq!(Some(Color::from_rgb(0, 120, 215)), color_of(colors.try_get_resource(&key("SystemAccentColor"), None)));
+    assert_eq!(Some(Color::from_rgb(0, 122, 255)), color_of(colors.try_get_resource(&key("SystemAccentColor"), None)));
     for shade in ["Dark1", "Dark2", "Dark3", "Light1", "Light2", "Light3"] {
         assert!(color_of(colors.try_get_resource(&key(&format!("SystemAccentColor{shade}")), None)).is_some());
     }
@@ -66,7 +66,7 @@ fn system_accent_colors_compute_the_shades_the_platform_does_not_report() {
     assert_eq!((accent, computed(accent)), SystemAccentColors::accent_colors(Some(&values)));
 
     // Without platform settings: the default accent and its computed shades.
-    let default_accent = Color::from_rgb(0, 120, 215);
+    let default_accent = Color::from_rgb(0, 122, 255);
     assert_eq!((default_accent, computed(default_accent)), SystemAccentColors::accent_colors(None));
 
     // The computed shades are ordered by lightness around the accent.
@@ -105,7 +105,7 @@ fn theme_loads_and_is_added_to_the_styles_of_an_application() {
     let button_theme = application.try_get_resource(&ResourceKey::Type(Button::TYPE), None);
     assert!(button_theme.flatten().is_some());
     assert_eq!(
-        Some(Color::from_rgb(0, 120, 215)),
+        Some(Color::from_rgb(0, 122, 255)),
         color_of(application.try_get_resource(&key("SystemAccentColor"), None))
     );
 }
@@ -119,13 +119,13 @@ fn the_three_variants_resolve_their_resources() {
         color_of(application.try_get_resource(&key(name), Some(&variant)))
             .unwrap_or_else(|| panic!("{name} is not a colour of {variant:?}"))
     };
-    // Common_themeresources_any.xaml: Default is the dark theme of WinUI.
-    assert_eq!(Color::parse("#E4000000").unwrap(), resource("TextFillColorPrimary", ThemeVariant::light()));
-    assert_eq!(Color::parse("#FFFFFFFF").unwrap(), resource("TextFillColorPrimary", ThemeVariant::dark()));
-    assert_eq!(Color::parse("#F3F3F3").unwrap(), resource("SolidBackgroundFillColorBase", ThemeVariant::light()));
-    assert_eq!(Color::parse("#202020").unwrap(), resource("SolidBackgroundFillColorBase", ThemeVariant::dark()));
-    // Resources/SystemResources.xaml: the "High Contrast Black" colours.
-    assert_eq!(Color::parse("#FF000000").unwrap(), resource("SystemColorWindowColor", MacOSTheme::high_contrast()));
+    // The macOS semantic palette resolves independently for light and dark content.
+    assert_eq!(Color::parse("#D9000000").unwrap(), resource("TextFillColorPrimary", ThemeVariant::light()));
+    assert_eq!(Color::parse("#F2FFFFFF").unwrap(), resource("TextFillColorPrimary", ThemeVariant::dark()));
+    assert_eq!(Color::parse("#FFF5F5F7").unwrap(), resource("SolidBackgroundFillColorBase", ThemeVariant::light()));
+    assert_eq!(Color::parse("#FF242426").unwrap(), resource("SolidBackgroundFillColorBase", ThemeVariant::dark()));
+    // The named high-contrast variant uses the dark macOS palette.
+    assert_eq!(Color::parse("#FF1C1C1E").unwrap(), resource("SystemColorWindowColor", MacOSTheme::high_contrast()));
     assert_eq!(Color::parse("#FFFFFFFF").unwrap(), resource("SystemColorWindowColor", ThemeVariant::light()));
 
     // A brush of the high contrast dictionary takes the system colour of that variant: the
@@ -135,7 +135,7 @@ fn the_three_variants_resolve_their_resources() {
     window.show();
     window.set_requested_theme_variant(Some(MacOSTheme::high_contrast()));
     let background = window.background().and_then(|brush| brush.as_solid_color_brush().map(|solid| solid.color()));
-    assert_eq!(Some(Color::parse("#FF000000").unwrap()), background);
+    assert_eq!(Some(Color::parse("#FF1C1C1E").unwrap()), background);
 }
 
 #[test]
@@ -149,14 +149,14 @@ fn compact_density_style_is_checked_first() {
         let value = application.try_get_resource(&key("TextControlThemePadding"), Some(&ThemeVariant::light()));
         from_markup_value::<Thickness>(&value.expect("TextControlThemePadding is defined")).expect("a thickness")
     };
-    assert_eq!(Thickness::new(10.0, 5.0, 6.0, 6.0), padding());
+    assert_eq!(Thickness::new(6.0, 3.0, 6.0, 3.0), padding());
 
     theme.set_density_style(DensityStyle::Compact);
     assert_eq!(DensityStyle::Compact, theme.get_direct_value(MacOSTheme::density_style_property()));
     assert_eq!(Thickness::new(2.0, 2.0, 6.0, 1.0), padding());
 
     theme.set_density_style(DensityStyle::Normal);
-    assert_eq!(Thickness::new(10.0, 5.0, 6.0, 6.0), padding());
+    assert_eq!(Thickness::new(6.0, 3.0, 6.0, 3.0), padding());
 }
 
 #[test]
@@ -166,10 +166,10 @@ fn theme_and_high_contrast_are_written_in_markup() {
         "
 <ContentControl xmlns='https://github.com/ferroui'
                 xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'
-                xmlns:winui='using:FerroUI.Themes.MacOS'
-                RequestedThemeVariant='{x:Static winui:MacOSTheme.HighContrast}'>
+                xmlns:macos='using:FerroUI.Themes.MacOS'
+                RequestedThemeVariant='{x:Static macos:MacOSTheme.HighContrast}'>
     <ContentControl.Styles>
-        <winui:MacOSTheme DensityStyle='Compact' />
+        <macos:MacOSTheme DensityStyle='Compact' />
     </ContentControl.Styles>
 </ContentControl>",
     );
@@ -180,13 +180,13 @@ fn theme_and_high_contrast_are_written_in_markup() {
     assert_eq!(DensityStyle::Compact, theme.density_style());
     assert_eq!(Some(MacOSTheme::high_contrast()), control.get_value(ThemeVariant::requested_theme_variant_property()));
     assert_eq!(
-        Some(Color::parse("#FF1AEBFF").unwrap()),
+        Some(Color::parse("#FF0A84FF").unwrap()),
         color_of(style.try_get_resource(&key("SystemColorHighlightColor"), Some(&MacOSTheme::high_contrast())))
     );
 }
 
 #[test]
-fn text_blocks_put_the_layout_rounding_above_their_text_as_winui() {
+fn text_blocks_inherit_the_theme_layout_rounding_placement() {
     let _app = start_themed_application();
     let application = Application::current().expect("an application");
 

@@ -112,7 +112,7 @@
                 CornerRadius="{TemplateBinding CornerRadius}">
           <Border.Transitions>
             <Transitions>
-              <DoubleTransition Property="Opacity" Duration="0:0:0.083" />
+              <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
             </Transitions>
           </Border.Transitions>
           <!-- The background of the card over the background of the severity. -->
@@ -208,7 +208,7 @@
     </Style>
     <Style Selector="^[IsClosing=true]">
       <Style.Animations>
-        <Animation Duration="0:0:0.083" FillMode="Forward">
+        <Animation Duration="{DynamicResource MacOSMotionFastDuration}" FillMode="Forward">
           <KeyFrame Cue="100%">
             <Setter Property="IsClosed" Value="True" />
           </KeyFrame>

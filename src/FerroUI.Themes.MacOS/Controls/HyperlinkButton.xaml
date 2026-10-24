@@ -1,12 +1,9 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/CommonStyles/HyperlinkButton_themeresources.xaml (the styles; its resources are
-    Resources/HyperlinkButton_themeresources.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes as Button.xaml. WinUI draws a visited hyperlink button as any other, so the
-  :visited pseudo-class of FerroUI's HyperlinkButton has no style here.
+  macOS 26 control theme adapted from FerroUI's compiled WinUI foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  Geometry and timing are calibrated theme values, pending native capture.
+  FerroUI template parts, keyboard handling, editing and popup contracts are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -32,22 +29,17 @@
     <Setter Property="Foreground" Value="{DynamicResource HyperlinkButtonForeground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource HyperlinkButtonBorderBrush}" />
     <Setter Property="BorderThickness" Value="{DynamicResource HyperlinkButtonBorderThemeThickness}" />
-    <Setter Property="Padding" Value="{DynamicResource ButtonPadding}" />
+    <Setter Property="Padding" Value="2,1" />
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border Margin="-3"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
       </FocusAdornerTemplate>
     </Setter>
     <Setter Property="Template">
@@ -66,7 +58,8 @@
                           RecognizesAccessKey="True">
           <ContentPresenter.Transitions>
             <Transitions>
-              <BrushTransition Property="Background" Duration="0:0:0.083" />
+              <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
+              <BrushTransition Property="Foreground" Duration="{DynamicResource MacOSMotionFastDuration}" />
             </Transitions>
           </ContentPresenter.Transitions>
         </ContentPresenter>

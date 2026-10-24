@@ -1,35 +1,23 @@
-//! ferroui-themes-macos
+//! A separately selectable macOS 26 theme for FerroUI.
 //!
-//! The WinUI theme: the control styles, templates and theme resources of
-//! WinUI 3 (microsoft-ui-xaml), ported to the controls of FerroUI, in a
-//! light, a dark and a high contrast variant and in a normal and a compact
-//! density (docs/porting/winui-theme.md).
-//!
-//! The theme is markup: `MacOSTheme.xaml` (the document of the
-//! [`MacOSTheme`] class), `Resources/*.xaml` (one document per source
-//! document of the theme of WinUI: the colours, brushes, sizes and the other
-//! theme resources, written by `scripts/winui-theme/convert.py`, with the
-//! system colours and the outlines of the symbol glyphs),
-//! `DensityStyles/Compact.xaml`, `Controls/MacOSControls.xaml` (the list of
-//! the control themes) and one document per control under `Controls/`. The
-//! documents belong to the assembly `FerroUI.Themes.MacOS`, with the URIs
-//! `ferres://FerroUI.Themes.MacOS/<path>`. They are compiled into the crate
-//! and are not embedded as assets: a load by URI goes to the loader table of
-//! the compiled markup, which answers the public document `MacOSTheme.xaml`
-//! (see `build.rs`).
+//! The compiled-XAML control foundation is copied from `ferroui-themes-winui`;
+//! the macOS package owns its resources, control templates, namespace and loader.
+//! It has no dependency on the WinUI theme crate. The original input, binding,
+//! template-part and accessibility contracts remain in FerroUI controls.
 //!
 //! ```ignore
-//! application.styles().add(MacOSTheme::new().as_style());
+//! use ferroui_themes_macos::{ControlSize, MacOSTheme};
+//! let theme = MacOSTheme::new();
+//! theme.set_control_size(ControlSize::Regular);
+//! application.styles().add(theme.as_style());
 //! ```
 //!
-//! The theme variants are the light and dark variants of FerroUI and
-//! [`MacOSTheme::high_contrast`], the high contrast variant of WinUI.
-//!
-//! [`converters`] has the value converters of WinUI that the theme resources
-//! are instances of and FerroUI's control set has no counterpart of
-//! ([`converters::CornerRadiusToThicknessConverter`]); [`primitives`] has the primitives of WinUI
-//! that its templates use and FerroUI's control set has no counterpart of
-//! ([`primitives::InfoBarPanel`], [`primitives::TabViewEqualWidthPanel`]).
+//! `ReduceMotion`, `ReduceTransparency`, `IncreaseContrast`, `WindowActive`,
+//! `AccentColor` and `ControlSize` are live properties usable in Rust and XAML.
+//! Glass surfaces use the existing composition material contract, with an opaque
+//! fallback on unsupported backends. Exact AppKit optical and animation fidelity
+//! requires the native comparison procedure in `docs/porting/macos26-theme.md`.
+//! SF Pro is resolved from the host; Apple fonts and symbols are not bundled.
 
 #[path = "Accents/mod.rs"]
 pub mod accents;
@@ -48,10 +36,11 @@ ferroui_markup_xaml::include_compiled_xaml!();
 mod register_types;
 mod rust_paths;
 mod macos_theme;
+mod settings_resources;
 
 pub use assets::{excluded_documents, ExcludedDocument};
 pub use register_types::{register_types, ASSEMBLY};
-pub use macos_theme::{DensityStyle, MacOSTheme};
+pub use macos_theme::{ControlSize, DensityStyle, MacOSTheme};
 
 #[cfg(test)]
 mod tests;

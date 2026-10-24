@@ -1,55 +1,9 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/CommonStyles/TimePicker_themeresources.xaml (the implicit styles of TimePicker,
-    with its template-local TimePickerFlyoutButtonStyle, and of TimePickerFlyoutPresenter; its
-    resources are Resources/TimePicker_themeresources.xaml)
-    controls/dev/CommonStyles/DateTimePickerFlyout_themeresources.xaml (the template of
-    DefaultLoopingSelectorStyle, written into the hosts of the presenter; the themes of the buttons
-    and the items are in Controls/DateTimePickerShared.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes (docs/porting/winui-theme.md, section 4):
-  - Template parts of TimePicker: FlyoutButton, FlyoutButtonContentGrid, FirstPickerHost,
-    SecondPickerHost, ThirdPickerHost, HourTextBlock, MinuteTextBlock, PeriodTextBlock,
-    FirstColumnDivider and SecondColumnDivider are PART_FlyoutButton,
-    PART_FlyoutButtonContentGrid, PART_FirstPickerHost, PART_SecondPickerHost, PART_ThirdPickerHost,
-    PART_HourTextBlock, PART_MinuteTextBlock, PART_PeriodTextBlock, PART_FirstColumnDivider and
-    PART_SecondColumnDivider. FerroUI's TimePicker can show seconds (UseSeconds): it has a fourth
-    host and a third divider (PART_FourthPickerHost, PART_ThirdColumnDivider) and the text block
-    PART_SecondTextBlock; the seconds are the third host, the period the fourth. The control sets the
-    columns (* for a host, Auto for a divider) and the visibility of the hosts in code.
-  - WinUI's TimePickerFlyout is a flyout the control creates in code; FerroUI's TimePicker has the
-    Popup PART_Popup with the TimePickerPresenter PART_PickerPresenter in its template.
-  - The texts of the placeholders are the localized strings of WinUI ("hour", "minute",
-    TEXT_TIMEPICKER_*_PLACEHOLDER of dxaml/xcp/dxaml/dllsrv/winrt/Microsoft.UI.Xaml.Common.rc) in
-    English, and "second" for the seconds of FerroUI; the period without a time is set by the control
-    (the designator of the current time, where WinUI shows "AM").
-  - The template-local TimePickerFlyoutButtonStyle is the keyed theme of the same name; its
-    ContentPresenter is PART_ContentPresenter.
-  - HasTimeStates: HasNoTime is FerroUI's :hasnotime.
-  - The MinWidth and MaxWidth of the flyout button (TimePickerThemeMinWidth, TimePickerThemeMaxWidth) are
-    setters of the control bound to the button, so that the sizes of FerroUI's control apply.
-  - The focus visual, the header and the properties without a counterpart are as for DatePicker
-    (Controls/DatePicker.xaml).
-  - The FerroUI contract: the template is wrapped in DataValidationErrors, which shows the errors
-    of FerroUI's data validation under the control, and :error gives the border the critical brush
-    (SystemFillColorCriticalBrush), as the Fluent theme does and as Controls/TextBox.xaml does.
-  - Template parts of TimePickerPresenter: the LoopingSelectors the WinUI presenter creates in code
-    and puts into FirstPickerHost, SecondPickerHost and ThirdPickerHost are the host panels
-    PART_HourHost, PART_MinuteHost, PART_SecondHost and PART_PeriodHost, each with the template of
-    DefaultLoopingSelectorStyle (as DatePickerPresenter); PickerHostGrid is PART_PickerContainer;
-    FirstPickerSpacing and SecondPickerSpacing are PART_FirstSpacer and PART_SecondSpacer, and
-    PART_ThirdSpacer is the divider of the seconds.
-  - HighlightRect (a Grid with a background and a corner radius) is a Border, under the items; the
-    three MonochromaticOverlayPresenters (with the background of the highlight, 3 px inside each
-    column) that draw the selected items again in TimePickerFlyoutPresenterHighlightForegroundColor
-    are the selected state of the items (Controls/DateTimePickerShared.xaml).
-  - The accept button has the margin DatePickerFlyoutPresenterDismissMargin, as in the source.
-  - The ThemeShadow of the flyout (a Translation.Z of 32, as DatePickerFlyoutPresenter) is the
-    BoxShadow ThemeShadowFlyoutBoxShadow of the border Background of the presenter, and the margin
-    ThemeShadowFlyoutMargin of PART_PickerPresenter is the room for it in the popup
-    (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
+  macOS 26 control theme adapted from FerroUI's compiled WinUI foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  Geometry and timing are calibrated theme values, pending native capture.
+  FerroUI template parts, keyboard handling, editing and popup contracts are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -65,6 +19,13 @@
 
   <!-- TimePickerFlyoutButtonStyle of the template of the implicit style of TimePicker. -->
   <ControlTheme x:Key="TimePickerFlyoutButtonStyle" TargetType="Button">
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3" BorderThickness="3" IsHitTestVisible="False"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
+      </FocusAdornerTemplate>
+    </Setter>
     <Setter Property="Template">
       <ControlTemplate>
         <Panel>
@@ -112,22 +73,18 @@
     <Setter Property="HorizontalAlignment" Value="Left" />
     <Setter Property="VerticalAlignment" Value="Center" />
     <!-- MinWidth and MaxWidth of the flyout button in the source, bound to it from the control. -->
-    <Setter Property="MinWidth" Value="{StaticResource TimePickerThemeMinWidth}" />
+    <Setter Property="MinWidth" Value="{DynamicResource TimePickerThemeMinWidth}" />
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
     <Setter Property="MaxWidth" Value="{StaticResource TimePickerThemeMaxWidth}" />
     <!-- UseSystemFocusVisuals with FocusVisualMargin="-3", around the flyout button. -->
     <Setter Property="FocusAdorner">
       <FocusAdornerTemplate>
-        <Border Margin="-3"
-                BorderThickness="2"
-                BorderBrush="{DynamicResource SystemControlFocusVisualPrimaryBrush}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
-          <Border BorderThickness="1"
-                  BorderBrush="{DynamicResource SystemControlFocusVisualSecondaryBrush}"
-                  CornerRadius="{DynamicResource ControlCornerRadius}" />
-        </Border>
+        <Border IsHitTestVisible="False" Margin="-3" BorderThickness="3"
+                BorderBrush="{DynamicResource MacOSFocusBrush}"
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}" />
       </FocusAdornerTemplate>
     </Setter>
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <Setter Property="Template">
       <ControlTemplate>
         <!-- The errors of FerroUI's data validation under the control (DataValidationErrors.xaml). -->
@@ -141,6 +98,7 @@
                     BorderThickness="{TemplateBinding BorderThickness}"
                     IsEnabled="{TemplateBinding IsEnabled}"
                     MinWidth="{TemplateBinding MinWidth}"
+                    MinHeight="{TemplateBinding MinHeight}"
                     MaxWidth="{TemplateBinding MaxWidth}"
                     HorizontalAlignment="Stretch"
                     HorizontalContentAlignment="Stretch"
@@ -252,7 +210,7 @@
     <Setter Property="Background" Value="{DynamicResource TimePickerFlyoutPresenterBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource TimePickerFlyoutPresenterBorderBrush}" />
     <Setter Property="BorderThickness" Value="{DynamicResource DateTimeFlyoutBorderThickness}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="Background"
@@ -262,7 +220,7 @@
                 BorderThickness="{TemplateBinding BorderThickness}"
                 CornerRadius="{TemplateBinding CornerRadius}"
                 Padding="{DynamicResource DateTimeFlyoutBorderPadding}"
-                MaxHeight="398">
+                MaxHeight="292">
           <Grid x:Name="ContentPanel" RowDefinitions="*,Auto">
             <!-- The columns are set by the presenter. -->
             <Grid x:Name="PART_PickerContainer">

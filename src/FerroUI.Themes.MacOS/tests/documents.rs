@@ -95,6 +95,7 @@ macro_rules! document_tests {
 }
 
 document_tests! {
+    resources_macos_materials => "/Resources/MacOSMaterials.xaml";
     controls_adorner_layer => "/Controls/AdornerLayer.xaml";
     controls_auto_complete_box => "/Controls/AutoCompleteBox.xaml";
     controls_button => "/Controls/Button.xaml";

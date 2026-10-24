@@ -1,41 +1,9 @@
 <!--
-  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
-  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
-    controls/dev/AutoSuggestBox/AutoSuggestBox_themeresources.xaml (the styles
-    DefaultAutoSuggestBoxStyle and AutoSuggestBoxTextBoxStyle; the resources of the document are
-    Resources/AutoSuggestBox_themeresources.xaml)
-  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
-
-  Translation notes (docs/porting/winui-theme.md, section 4):
-  - FerroUI's AutoCompleteBox is WinUI's AutoSuggestBox. Template parts: the TextBox of the source
-    is PART_TextBox, with the keyed theme AutoSuggestBoxTextBoxStyle (the TextBoxStyle of the
-    source); SuggestionsPopup is PART_Popup; the ListView SuggestionsList is the list box
-    PART_SelectingItemsControl, whose items have the keyed theme DefaultListViewItemStyle (the
-    style of the items of a ListView, Controls/ListBoxItem.xaml) and which draws no background
-    and no border of its own, as a ListView. PART_SelectionAdapter, an optional part of FerroUI's
-    control, is not in the template (as in FerroUI's other themes).
-  - The text box takes the properties FerroUI's auto-complete box passes to it in its other
-    themes: the placeholder text and foreground, the padding (TextControlThemePadding, the padding
-    of the text box of the source), the caret index, the maximum length, the validation errors and
-    the inner contents. The maximum height of the suggestion list, AutoSuggestListMaxHeight, is the
-    MaxDropDownHeight of the control, the maximum height of SuggestionsContainer (whose MinWidth
-    is the width of the control).
-  - The shadow of the suggestion list (ApplyElevationEffect on the popup, AutoSuggestBox_Partial.cpp:
-    a ThemeShadow at a Translation.Z of 32) is the BoxShadow ThemeShadowFlyoutBoxShadow of
-    SuggestionsContainer, with the margin ThemeShadowFlyoutMargin as the room for it in the popup
-    (Resources/ThemeShadows.xaml; DEVIATIONS.md, G-24).
-  - AutoSuggestBoxTextBoxStyle: the template of the source with FerroUI's parts (as
-    Controls/TextBox.xaml, with its wrapper DataValidationErrors, its inner contents and its
-    placeholder foreground); the template-local DeleteButtonStyle is the keyed theme
-    AutoSuggestBoxDeleteButtonStyle; the delete button is shown by the selector of
-    DefaultTextBoxStyle, the theme this one is based on. The QueryButton (the QueryIcon of
-    AutoSuggestBox, with the template-local QueryButtonStyle) has no counterpart: FerroUI's
-    auto-complete box has no query icon. The column of AutoSuggestBoxRightButtonMargin (4 px) at
-    the right of the buttons is kept.
-  - Orientation (Landscape, Portrait), UseSystemFocusVisuals of IsApplicationFocusVisualKindReveal
-    (no focus adorner), AutoSuggestBoxHelper.KeepInteriorCornersSquare, the header, description
-    and DesiredCandidateWindowAlignment of the text box and the item container transitions of the
-    list have no counterpart.
+  macOS 26 control theme adapted from FerroUI's compiled WinUI foundation.
+  Foundation: microsoft-ui-xaml 7e4b0c2096be402f51cc8f7d203ebf67cff183d0.
+  Copyright (c) Microsoft Corporation. MIT License; see NOTICE.md.
+  Geometry and timing are calibrated theme values, pending native capture.
+  FerroUI template parts, keyboard handling, editing and popup contracts are preserved.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -59,15 +27,15 @@
                 BorderThickness="{TemplateBinding BorderThickness}"
                 Background="{DynamicResource TextControlButtonBackground}"
                 Margin="{StaticResource AutoSuggestBoxDeleteButtonMargin}"
-                CornerRadius="{DynamicResource ControlCornerRadius}">
+                CornerRadius="{DynamicResource MacOSControlCornerRadius}">
           <!-- E894 at AutoSuggestBoxIconFontSize (12 px): the glyph is drawn at the size of its
                ink, as the delete button of TextBox. -->
           <Path x:Name="GlyphElement"
                 Fill="{DynamicResource TextControlButtonForeground}"
-                Data="{StaticResource GlyphGeometryE894}"
+                Data="F0 M 7,0 A 7,7 0 1 1 7,14 A 7,7 0 1 1 7,0 Z M 4.25,3.25 L 7,6 L 9.75,3.25 L 10.75,4.25 L 8,7 L 10.75,9.75 L 9.75,10.75 L 7,8 L 4.25,10.75 L 3.25,9.75 L 6,7 L 3.25,4.25 Z"
                 Stretch="Uniform"
-                Width="10"
-                Height="10"
+                Width="13"
+                Height="13"
                 VerticalAlignment="Center"
                 HorizontalAlignment="Center" />
         </Border>
@@ -75,7 +43,7 @@
     </Setter>
 
     <!-- PointerOver -->
-    <Style Selector="^:pointerover">
+    <Style Selector="^:not(Button:disabled):pointerover">
       <Style Selector="^ /template/ Border#ButtonLayoutGrid">
         <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPointerOver}" />
         <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPointerOver}" />
@@ -85,7 +53,7 @@
       </Style>
     </Style>
     <!-- Pressed -->
-    <Style Selector="^:pressed">
+    <Style Selector="^:not(Button:disabled):pressed">
       <Style Selector="^ /template/ Border#ButtonLayoutGrid">
         <Setter Property="Background" Value="{DynamicResource TextControlButtonBackgroundPressed}" />
         <Setter Property="BorderBrush" Value="{DynamicResource TextControlButtonBorderBrushPressed}" />
@@ -103,7 +71,7 @@
   <!-- AutoSuggestBoxTextBoxStyle: the TextBoxStyle of an auto-complete box. -->
   <ControlTheme x:Key="AutoSuggestBoxTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource DefaultTextBoxStyle}">
     <Setter Property="MinWidth" Value="{DynamicResource TextControlThemeMinWidth}" />
-    <Setter Property="MinHeight" Value="{DynamicResource TextControlThemeMinHeight}" />
+    <Setter Property="MinHeight" Value="{DynamicResource MacOSControlHeight}" />
     <Setter Property="Foreground" Value="{DynamicResource TextControlForeground}" />
     <Setter Property="Background" Value="{DynamicResource TextControlBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}" />
@@ -126,7 +94,19 @@
                     BorderBrush="{TemplateBinding BorderBrush}"
                     BackgroundSizing="InnerBorderEdge"
                     BorderThickness="{TemplateBinding BorderThickness}"
-                    CornerRadius="{TemplateBinding CornerRadius}" />
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    TemplatedControl.IsTemplateFocusTarget="True" />
+            <Border x:Name="MacOSPointerFocusRing" Grid.ColumnSpan="5"
+                    Margin="-3" BorderThickness="3" Opacity="0"
+                    BorderBrush="{DynamicResource MacOSFocusBrush}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    IsHitTestVisible="False">
+              <Border.Transitions>
+                <Transitions>
+                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}" />
+                </Transitions>
+              </Border.Transitions>
+            </Border>
             <!-- InnerLeftContent of FerroUI's text box. -->
             <ContentPresenter x:Name="InnerLeftContentPresenter"
                               IsVisible="{TemplateBinding InnerLeftContent, Converter={x:Static ObjectConverters.IsNotNull}}"
@@ -193,7 +173,7 @@
                     Focusable="False"
                     IsVisible="False"
                     FontSize="{TemplateBinding FontSize}"
-                    Width="32"
+                    Width="24"
                     VerticalAlignment="Stretch" />
             <!-- InnerRightContent of FerroUI's text box. -->
             <ContentPresenter x:Name="InnerRightContentPresenter"
@@ -219,7 +199,7 @@
       </Style>
     </Style>
     <!-- PointerOver -->
-    <Style Selector="^:pointerover">
+    <Style Selector="^:not(TextBox:disabled):pointerover">
       <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundPointerOver}" />
       <Style Selector="^ /template/ Border#BorderElement">
         <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushPointerOver}" />
@@ -230,16 +210,20 @@
       </Style>
     </Style>
     <!-- Focused -->
-    <Style Selector="^:focus">
+    <Style Selector="^:not(TextBox:disabled):focus">
       <Setter Property="PlaceholderForeground" Value="{DynamicResource TextControlPlaceholderForegroundFocused}" />
       <Style Selector="^ /template/ Border#BorderElement">
         <Setter Property="Background" Value="{DynamicResource TextControlBackgroundFocused}" />
         <Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrushFocused}" />
-        <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThicknessFocused}" />
+        <Setter Property="BorderThickness" Value="{DynamicResource TextControlBorderThemeThickness}" />
       </Style>
       <Style Selector="^ /template/ ScrollViewer#PART_ScrollViewer">
         <Setter Property="Foreground" Value="{DynamicResource TextControlForegroundFocused}" />
       </Style>
+    </Style>
+    <!-- Text editing retains a focus ring for pointer focus as well as keyboard focus. -->
+    <Style Selector="^:focus:not(TextBox:focus-visible):not(TextBox:disabled) /template/ Border#MacOSPointerFocusRing">
+      <Setter Property="Opacity" Value="1" />
     </Style>
   </ControlTheme>
 
@@ -256,7 +240,7 @@
     <Setter Property="Padding" Value="{DynamicResource TextControlThemePadding}" />
     <Setter Property="MaxDropDownHeight" Value="{DynamicResource AutoSuggestListMaxHeight}" />
     <Setter Property="FocusAdorner" Value="{x:Null}" />
-    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource MacOSControlCornerRadius}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Grid x:Name="LayoutRoot">
@@ -273,7 +257,7 @@
                    FontFamily="{TemplateBinding FontFamily}"
                    FontWeight="{TemplateBinding FontWeight}"
                    FontStretch="{TemplateBinding FontStretch}"
-                   VerticalContentAlignment="Stretch"
+                   VerticalContentAlignment="Center"
                    HorizontalContentAlignment="Stretch"
                    ScrollViewer.BringIntoViewOnFocusChange="False"
                    Margin="0"

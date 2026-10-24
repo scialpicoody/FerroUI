@@ -12,6 +12,7 @@ ferroui_base::ferro_rust_paths! {
         crate::primitives::TabViewEqualWidthPanel,
     ],
     types: [
+        crate::ControlSize,
         crate::DensityStyle,
         crate::converters::CornerRadiusToThicknessConverter,
         crate::converters::CornerRadiusToThicknessConverterKind,
