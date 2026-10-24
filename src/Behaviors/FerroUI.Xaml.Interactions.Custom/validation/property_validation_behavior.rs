@@ -77,14 +77,14 @@ const NEW_LINE: &str = if cfg!(windows) { "\r\n" } else { "\n" };
 /// Deviation (DEVIATIONS.md, Behaviors): the reference class is generic over the type of the
 /// associated control (`TControl`) and of the validated property (`TValue`); classes of the class
 /// model are not generic, so both are runtime types given at creation
-/// ([`new`](Self::new)`::<TControl, TValue>()`, [`construct`](Self::construct)): the associated
+/// ([`new_of`](Self::new_of)`::<TControl, TValue>()`, [`construct`](Self::construct)): the associated
 /// object is checked against the first as the reference does, and the property is validated only
 /// when its value type is the second (`Property is FerroProperty<TValue>` of the reference).
 /// The rules receive the value untyped (see [`IValidationRule`]).
 ///
 /// Deviation (DEVIATIONS.md, Behaviors): markup cannot give a class of the object model type
 /// arguments (`x:TypeArguments="TextBox, sys:String"`), so the behavior markup creates
-/// ([`new_untyped`](Self::new_untyped)) is attached to any object and validates the property
+/// ([`new`](Self::new)) is attached to any object and validates the property
 /// whatever the type of its value: the `PropertyValidationBehavior<FerroObject, object>` of the
 /// reference, where every property is a property of `object`.
 #[repr(C)]
@@ -97,7 +97,7 @@ pub struct PropertyValidationBehavior {
 
 ferro_class!(PropertyValidationBehavior: DisposingBehavior);
 ferro_class_info!(PropertyValidationBehavior {
-    new: PropertyValidationBehavior::new_untyped,
+    new: PropertyValidationBehavior::new,
     markup: {
         content: Rules,
     },
@@ -163,21 +163,21 @@ impl PropertyValidationBehavior {
     }
 
     /// Creates the class data of a behavior attached to any object that validates a property
-    /// whatever the type of its value (the behavior of markup, [`new_untyped`](Self::new_untyped)).
+    /// whatever the type of its value (the behavior of markup, [`new`](Self::new)).
     pub fn construct_untyped() -> Self {
         Self { base: DisposingBehavior::construct(FerroObject::TYPE), value_type: None, rules: OnceCell::new() }
     }
 
     /// Creates a behavior attached to objects of class `TControl` that validates a property whose
     /// value is of type `TValue` (`new PropertyValidationBehavior<TControl, TValue>()`).
-    pub fn new<TControl: StaticType, TValue: 'static>() -> Ref<Self> {
+    pub fn new_of<TControl: StaticType, TValue: 'static>() -> Ref<Self> {
         instantiate(Self::construct(TControl::TYPE, TypeId::of::<TValue>()))
     }
 
     /// Creates a behavior attached to any object that validates a property whatever the type of
     /// its value (`new PropertyValidationBehavior<FerroObject, object>()` of the reference, the
     /// form markup creates: `<PropertyValidationBehavior Property="{x:Static TextBox.TextProperty}">`).
-    pub fn new_untyped() -> Ref<Self> {
+    pub fn new() -> Ref<Self> {
         instantiate(Self::construct_untyped())
     }
 
