@@ -1,4 +1,32 @@
-# NOTICE
+# Android Material 3 Expressive theme notices
+
+## AndroidX / Material Design
+
+Material numeric tokens, component geometry, state definitions, motion constants,
+ripple timing and progress algorithms are adapted from AndroidX Compose Material3
+1.5.0-beta02, commit `e4d933c98df7baa7ea2b83eea6e086915961e0ff`:
+<https://android.googlesource.com/platform/frameworks/support/+/e4d933c98df7baa7ea2b83eea6e086915961e0ff/compose/material3/material3/src/commonMain/kotlin/androidx/compose/material3/>.
+
+Copyright The Android Open Source Project. Licensed under Apache License 2.0;
+see `LICENSE-ANDROID`. These definitions have been translated and adapted for
+FerroUI's Rust controls and XAML resource system. This is an independent port,
+not a Google product or an Android platform implementation.
+
+`material-colors` is used for CAM16/HCT dynamic palettes under MIT OR Apache-2.0.
+Its version and algorithm baseline are recorded in the manifest and port guide.
+
+## Roboto
+
+`Assets/Roboto.ttf` is distributed under the SIL Open Font License 1.1, included
+as `Assets/OFL-Roboto.txt`. The original variable font is unmodified. Source
+revision, URL and SHA-256 are recorded in `scripts/material-theme/font-provenance.json`.
+
+## WinUI / Avalonia structural heritage
+
+The initial control-template contracts, resource aliases, build registration,
+layout primitives and converters were copied from FerroUI's WinUI theme. The
+following original notices remain applicable to that inherited material.
+
 
 The markup documents of this crate are ported from the WinUI 3 theme of
 microsoft-ui-xaml (<https://github.com/microsoft/microsoft-ui-xaml>, branch

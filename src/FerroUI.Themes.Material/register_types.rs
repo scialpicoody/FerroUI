@@ -6,6 +6,7 @@ use crate::accents::SystemAccentColors;
 use crate::converters::{CornerRadiusToThicknessConverter, CornerRadiusToThicknessConverterKind};
 use crate::primitives::{InfoBarPanel, TabViewEqualWidthPanel};
 use crate::material_theme::{DensityStyle, MaterialTheme};
+use crate::{MaterialMotionScheme, MaterialRipple, MaterialProgressIndicator};
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition, FERRO_XML_NAMESPACE};
@@ -16,6 +17,9 @@ use std::rc::Rc;
 /// The dotted namespaces of the modules of this crate.
 const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_themes_material", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::ripple", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::progress_indicator", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::motion", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::accents", "FerroUI.Themes.Material.Accents"),
     ("ferroui_themes_material::converters", "FerroUI.Themes.Material.Converters"),
     ("ferroui_themes_material::primitives", "FerroUI.Themes.Material.Primitives"),
@@ -32,10 +36,11 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 };
 
 const TYPES: &[&TypeInfo] =
-    &[MaterialTheme::TYPE, SystemAccentColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
+    &[MaterialTheme::TYPE, MaterialRipple::TYPE, MaterialProgressIndicator::TYPE, SystemAccentColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
 
 const MARKUP_TYPES: &[&MarkupType] = &[
     <DensityStyle as MarkupTyped>::MARKUP,
+    <MaterialMotionScheme as MarkupTyped>::MARKUP,
     <CornerRadiusToThicknessConverter as MarkupTyped>::MARKUP,
     <CornerRadiusToThicknessConverterKind as MarkupTyped>::MARKUP,
 ];
@@ -55,6 +60,7 @@ pub fn register_types() {
         ValueTypes::register_global(register_value_types);
         MarkupAssembly::register(&ASSEMBLY);
         crate::assets::register();
+        crate::fonts::register();
         FerroXamlLoader::register_compiled_xaml(ASSEMBLY.name, crate::compiled_xaml::try_load);
     });
 }
@@ -63,6 +69,7 @@ pub fn register_types() {
 /// forms of the enumerations and of the converter, and the converter as its contract.
 fn register_value_types() {
     ValueTypes::register_nullable::<DensityStyle>();
+    ValueTypes::register_nullable::<MaterialMotionScheme>();
     ValueTypes::register_nullable::<CornerRadiusToThicknessConverterKind>();
     ValueTypes::register_nullable::<Rc<CornerRadiusToThicknessConverter>>();
     ValueTypes::register_cast::<Rc<CornerRadiusToThicknessConverter>, Rc<dyn IValueConverter>>(|c| c.clone());

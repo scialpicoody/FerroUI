@@ -1,0 +1,16 @@
+{
+  "repository": "https://github.com/google/fonts",
+  "revision": "1c627bfa375fc51cf86fabeca4f6e08a95f0aa5c",
+  "files": {
+    "Roboto.ttf": {
+      "url": "https://raw.githubusercontent.com/google/fonts/1c627bfa375fc51cf86fabeca4f6e08a95f0aa5c/ofl/roboto/Roboto%5Bwdth%2Cwght%5D.ttf",
+      "sha256": "d7598e12c5dbef095ff8272cfc55da0250bd07fbdecbac8a530b9b277872a134",
+      "bytes": 488584
+    },
+    "OFL-Roboto.txt": {
+      "url": "https://raw.githubusercontent.com/google/fonts/1c627bfa375fc51cf86fabeca4f6e08a95f0aa5c/ofl/roboto/OFL.txt",
+      "sha256": "061402327a96aadb0bfb694a960ed289ecd38d383e396243831ab81feb109c41",
+      "bytes": 4394
+    }
+  }
+}

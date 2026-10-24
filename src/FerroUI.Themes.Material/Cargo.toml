@@ -4,7 +4,7 @@ description = "Android Material 3 Expressive theme for FerroUI with compiled XAM
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-license.workspace = true
+license = "MIT AND Apache-2.0 AND OFL-1.1"
 repository.workspace = true
 homepage.workspace = true
 readme.workspace = true
@@ -25,6 +25,8 @@ autoexamples = false
 path = "lib.rs"
 
 [dependencies]
+# Pinned CAM16/HCT implementation; keeps the workspace Rust 1.89 minimum.
+material-colors = { version = "=0.4.2", default-features = false, features = ["libm"] }
 # The compiled markup of the theme (`compiled_xaml.rs`) calls the typed functions of the declared
 # members, which exist with this feature (docs/porting/xaml-compiler/HANDOVER.md, section 7, "Cost").
 ferroui-base = { workspace = true, features = ["markup-functions"] }

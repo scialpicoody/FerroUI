@@ -1,0 +1,70 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="MaterialThemeGallery.Pages.MaterialComponentsPage">
+  <StackPanel Margin="24" Spacing="20">
+    <StackPanel Spacing="4">
+      <TextBlock Theme="{StaticResource MaterialLabelLarge}" Foreground="{DynamicResource MaterialPrimaryBrush}" Text="FERROUI · ANDROID MATERIAL" />
+      <TextBlock Theme="{StaticResource MaterialHeadlineLarge}" Text="Made to feel alive" />
+      <TextBlock Theme="{StaticResource MaterialBodyMedium}" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}"
+                 Text="Material 3 Expressive · Color, shape, type and motion" />
+    </StackPanel>
+    <WrapPanel ItemSpacing="8" LineSpacing="8">
+      <Button Theme="{StaticResource MaterialFilledButton}" Content="Filled" />
+      <Button Theme="{StaticResource MaterialTonalButton}" Content="Tonal" />
+      <Button Theme="{StaticResource MaterialOutlinedButton}" Content="Outlined" />
+      <Button Theme="{StaticResource MaterialElevatedButton}" Content="Elevated" />
+      <Button Theme="{StaticResource MaterialTextButton}" Content="Text" />
+    </WrapPanel>
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+      <ContentControl Theme="{StaticResource MaterialFilledCard}">
+        <StackPanel Spacing="12">
+          <TextBlock Theme="{StaticResource MaterialTitleLarge}" Text="Your everyday" />
+          <TextBlock Theme="{StaticResource MaterialBodyMedium}" Text="Thoughtful surfaces. Comfortable touch targets. Familiar controls." />
+          <ToggleSwitch Content="Notifications" IsChecked="True" />
+          <CheckBox Content="Keep me updated" IsChecked="True" />
+          <WrapPanel ItemSpacing="8">
+            <ToggleButton Theme="{StaticResource MaterialFilterChip}" Content="Design" IsChecked="True" />
+            <ToggleButton Theme="{StaticResource MaterialFilterChip}" Content="Build" />
+          </WrapPanel>
+        </StackPanel>
+      </ContentControl>
+      <ContentControl Grid.Column="1" Theme="{StaticResource MaterialElevatedCard}">
+        <StackPanel Spacing="12">
+          <TextBlock Theme="{StaticResource MaterialTitleLarge}" Text="Find your rhythm" />
+          <TextBlock Theme="{StaticResource MaterialBodyMedium}" Text="Responsive motion with expressive springs and a bounded ripple." />
+          <Slider Value="65" Minimum="0" Maximum="100" />
+          <ProgressBar Theme="{StaticResource MaterialWavyLinearProgress}" Value="64" />
+          <StackPanel Orientation="Horizontal" Spacing="16">
+            <ProgressBar Theme="{StaticResource MaterialCircularProgress}" Value="72" Width="40" Height="40" />
+            <ProgressBar Theme="{StaticResource MaterialWavyCircularProgress}" Value="68" Width="48" Height="48" />
+            <ContentControl Theme="{StaticResource MaterialBadgeWithLabel}" Content="3" VerticalAlignment="Center" />
+          </StackPanel>
+        </StackPanel>
+      </ContentControl>
+    </Grid>
+    <TextBox Theme="{StaticResource MaterialSearchBar}" Watermark="Search your collection" />
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
+      <TextBox Classes="floatingLabel" Watermark="Project name" Text="A new perspective" />
+      <TextBox Grid.Column="1" Classes="outlined floatingLabel" Watermark="A little more detail" Text="Built with FerroUI" />
+    </Grid>
+    <TabControl Theme="{StaticResource MaterialNavigationBar}" Height="174" SelectedIndex="0">
+      <TabItem Header="Explore">
+        <TabItem.Icon><PathIcon Data="M12 2 L21 10 L18 21 L6 21 L3 10 Z M12 7 L8 14 L16 14 Z" /></TabItem.Icon>
+        <Border Padding="20" Background="{DynamicResource MaterialSurfaceContainerLowBrush}" CornerRadius="16">
+          <StackPanel Spacing="6">
+            <TextBlock Theme="{StaticResource MaterialTitleMedium}" Text="Room for what matters" />
+            <TextBlock Theme="{StaticResource MaterialBodyMedium}" Text="Navigation, forms and content share one color system." />
+          </StackPanel>
+        </Border>
+      </TabItem>
+      <TabItem Header="Favorites"><TextBlock Text="Your saved items" Margin="24" /></TabItem>
+      <TabItem Header="Library"><TextBlock Text="Your collection" Margin="24" /></TabItem>
+    </TabControl>
+    <WrapPanel ItemSpacing="8">
+      <Button Theme="{StaticResource MaterialAssistChip}" Content="Add a task" />
+      <ToggleButton Theme="{StaticResource MaterialSegmentedButton}" Content="Day" IsChecked="True" />
+      <ToggleButton Theme="{StaticResource MaterialSegmentedButton}" Content="Week" />
+      <Button Content="Disabled" IsEnabled="False" />
+    </WrapPanel>
+  </StackPanel>
+</UserControl>

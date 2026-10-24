@@ -8,11 +8,12 @@
 //! by.
 
 use crate::register_types::register_types;
+use crate::{MaterialColorScheme, MaterialMotionRole, MaterialMotionScheme};
 use ferroui_base::controls::{
     IResourceNode, IResourceProvider, ResourceDictionary, ResourceHostRef, ResourceKey, ResourceValue,
     ResourcesChangedEventArgs,
 };
-use ferroui_base::metadata::{from_markup_value, IServiceProvider};
+use ferroui_base::metadata::{from_markup_value, into_markup_value, IServiceProvider};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::{IStyle, Styles, ThemeVariant};
 use ferroui_base::{
@@ -46,6 +47,8 @@ pub struct MaterialTheme {
     base: Styles,
     compact_styles: OnceCell<Ref<ResourceDictionary>>,
     density_style: Cell<DensityStyle>,
+    motion_scheme: Cell<MaterialMotionScheme>,
+    reduced_motion: Cell<bool>,
 }
 
 ferro_class!(MaterialTheme: Styles);
@@ -70,11 +73,28 @@ impl FerroObjectImpl for MaterialTheme {
                 owner.notify_hosted_resources_changed(ResourcesChangedEventArgs::create());
             }
         }
+        if change.property() == Self::motion_scheme_property().as_property()
+            || change.property() == Self::reduced_motion_property().as_property()
+        {
+            this.refresh_motion_resources();
+        }
     }
 }
 
 ferro_properties! {
     impl MaterialTheme {
+        /// The Material spring scheme used by control transitions.
+        pub fn motion_scheme_property() -> DirectProperty<MaterialTheme, MaterialMotionScheme> {
+            FerroProperty::register_direct::<MaterialTheme, _>(
+                "MotionScheme", |o| o.motion_scheme(), Some(|o, v| o.set_motion_scheme(v)), MaterialMotionScheme::Expressive,
+            )
+        }
+        /// Disables nonessential motion. Platform accessibility settings are also honored.
+        pub fn reduced_motion_property() -> DirectProperty<MaterialTheme, bool> {
+            FerroProperty::register_direct::<MaterialTheme, _>(
+                "ReducedMotion", |o| o.reduced_motion(), Some(|o, v| o.set_reduced_motion(v)), false,
+            )
+        }
         /// Defines the `DensityStyle` property.
         pub fn density_style_property() -> DirectProperty<MaterialTheme, DensityStyle> {
             FerroProperty::register_direct::<MaterialTheme, _>(
@@ -103,7 +123,10 @@ impl MaterialTheme {
 
     /// Field initialisation; see [`Styles::construct`].
     pub fn construct() -> Self {
-        Self { base: Styles::construct(), compact_styles: OnceCell::new(), density_style: Cell::new(DensityStyle::Normal) }
+        Self {
+            base: Styles::construct(), compact_styles: OnceCell::new(), density_style: Cell::new(DensityStyle::Normal),
+            motion_scheme: Cell::new(MaterialMotionScheme::Expressive), reduced_motion: Cell::new(false),
+        }
     }
 
     /// Creates the theme.
@@ -132,6 +155,11 @@ impl MaterialTheme {
             });
         let _ = this.compact_styles.set(compact_styles);
 
+        this.set_color_scheme(ThemeVariant::light(), &MaterialColorScheme::light());
+        this.set_color_scheme(ThemeVariant::dark(), &MaterialColorScheme::dark());
+        this.set_color_scheme(ThemeVariant::default(), &MaterialColorScheme::dark());
+        this.refresh_motion_resources();
+
         this
     }
 
@@ -153,6 +181,36 @@ impl MaterialTheme {
 
     pub fn set_density_style(&self, value: DensityStyle) {
         self.set_and_raise_cell(Self::density_style_property(), &self.density_style, value);
+    }
+
+    /// Replaces every color role and its state brushes atomically for a variant.
+    /// Supply a full Android dynamic-color or Material Theme Builder scheme here.
+    /// Existing controls update through DynamicResource without rebuilding their templates.
+    pub fn set_color_scheme(&self, variant: ThemeVariant, scheme: &MaterialColorScheme) {
+        self.resources().set_theme_dictionary(variant, scheme.resources());
+    }
+
+    pub fn motion_scheme(&self) -> MaterialMotionScheme { self.motion_scheme.get() }
+
+    pub fn set_motion_scheme(&self, value: MaterialMotionScheme) {
+        self.set_and_raise_cell(Self::motion_scheme_property(), &self.motion_scheme, value);
+    }
+
+    pub fn reduced_motion(&self) -> bool { self.reduced_motion.get() }
+
+    pub fn set_reduced_motion(&self, value: bool) {
+        self.set_and_raise_cell(Self::reduced_motion_property(), &self.reduced_motion, value);
+    }
+
+    fn refresh_motion_resources(&self) {
+        let resources = self.resources();
+        let scheme = self.motion_scheme();
+        let reduced = self.reduced_motion();
+        for role in MaterialMotionRole::ALL {
+            resources.set(format!("MaterialMotion{}Duration", role.resource_name()), into_markup_value(scheme.duration(role, reduced)));
+            resources.set(format!("MaterialMotion{}Easing", role.resource_name()), into_markup_value(scheme.easing(role, reduced)));
+        }
+        resources.set("MaterialReducedMotion", into_markup_value(reduced));
     }
 
     /// Tries to find a resource within the theme: the compact resources are

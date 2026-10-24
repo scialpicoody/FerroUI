@@ -7,6 +7,7 @@
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
                     x:ClassModifier="internal">
   <ControlTheme x:Key="DefaultButtonStyle" TargetType="Button">
     <Setter Property="HorizontalAlignment" Value="Left" />
@@ -48,6 +49,9 @@
                       IsHitTestVisible="False">
                 <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
               </Border>
+              <material:MaterialRipple x:Name="MaterialRipple" Fill="{TemplateBinding Foreground}"
+                                       CornerRadius="{Binding #MaterialContainer.CornerRadius}"
+                                       ReducedMotion="{DynamicResource MaterialReducedMotion}" />
             <ContentPresenter x:Name="PART_ContentPresenter"
                               Content="{TemplateBinding Content}"
                               ContentTemplate="{TemplateBinding ContentTemplate}"
@@ -65,9 +69,6 @@
     <Setter Property="Opacity" Value="0.08" />
     </Style>
     <Style Selector="^:focus-visible /template/ Border#MaterialStateLayer">
-    <Setter Property="Opacity" Value="0.10" />
-    </Style>
-    <Style Selector="^:pressed /template/ Border#MaterialStateLayer">
     <Setter Property="Opacity" Value="0.10" />
     </Style>
     <Style Selector="^:disabled /template/ Border#MaterialStateLayer">

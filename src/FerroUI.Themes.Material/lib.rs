@@ -1,35 +1,25 @@
-//! ferroui-themes-material
+//! Android Material 3 Expressive for FerroUI.
 //!
-//! The WinUI theme: the control styles, templates and theme resources of
-//! WinUI 3 (microsoft-ui-xaml), ported to the controls of FerroUI, in a
-//! light, a dark and a high contrast variant and in a normal and a compact
-//! density (docs/porting/winui-theme.md).
-//!
-//! The theme is markup: `MaterialTheme.xaml` (the document of the
-//! [`MaterialTheme`] class), `Resources/*.xaml` (one document per source
-//! document of the theme of WinUI: the colours, brushes, sizes and the other
-//! theme resources, written by `scripts/winui-theme/convert.py`, with the
-//! system colours and the outlines of the symbol glyphs),
-//! `DensityStyles/Compact.xaml`, `Controls/MaterialControls.xaml` (the list of
-//! the control themes) and one document per control under `Controls/`. The
-//! documents belong to the assembly `FerroUI.Themes.Material`, with the URIs
-//! `ferres://FerroUI.Themes.Material/<path>`. They are compiled into the crate
-//! and are not embedded as assets: a load by URI goes to the loader table of
-//! the compiled markup, which answers the public document `MaterialTheme.xaml`
-//! (see `build.rs`).
+//! Independent compiled XAML theme derived from FerroUI's WinUI template contracts.
+//! Visual reference: AndroidX Material3 1.5.0-beta02 (2026-10-21).
+//! See docs/porting/material-theme.md for component coverage and fidelity limits.
 //!
 //! ```ignore
+//! use ferroui_themes_material::{MaterialTheme, MaterialAppBuilderExtension};
+//! // Add .with_material_fonts() to your AppBuilder.
 //! application.styles().add(MaterialTheme::new().as_style());
 //! ```
-//!
-//! The theme variants are the light and dark variants of FerroUI and
-//! [`MaterialTheme::high_contrast`], the high contrast variant of WinUI.
-//!
-//! [`converters`] has the value converters of WinUI that the theme resources
-//! are instances of and FerroUI's control set has no counterpart of
-//! ([`converters::CornerRadiusToThicknessConverter`]); [`primitives`] has the primitives of WinUI
-//! that its templates use and FerroUI's control set has no counterpart of
-//! ([`primitives::InfoBarPanel`], [`primitives::TabViewEqualWidthPanel`]).
+
+mod color_scheme;
+mod fonts;
+pub mod motion;
+pub mod ripple;
+mod progress_indicator;
+pub use ripple::MaterialRipple;
+pub use progress_indicator::{MaterialProgressIndicator, linear_indeterminate_segments, circular_indeterminate_frame};
+pub use color_scheme::{MaterialColorRole, MaterialColorScheme};
+pub use fonts::MaterialAppBuilderExtension;
+pub use motion::{MaterialMotionScheme, MaterialMotionRole, MaterialSpringSpec, MaterialSpringSample, MaterialSpringState, MaterialSpringEasing};
 
 #[path = "Accents/mod.rs"]
 pub mod accents;
@@ -54,3 +44,6 @@ pub use register_types::{register_types, ASSEMBLY};
 pub use material_theme::{DensityStyle, MaterialTheme};
 
 
+
+#[cfg(test)]
+mod tests;

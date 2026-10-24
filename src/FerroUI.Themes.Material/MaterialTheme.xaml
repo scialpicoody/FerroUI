@@ -16,7 +16,9 @@
   <Styles.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
-        <accents:SystemAccentColors />
+        <MergeResourceInclude Source="/Resources/MaterialColors.xaml" />
+        <MergeResourceInclude Source="/Resources/MaterialTypography.xaml" />
+        <MergeResourceInclude Source="/Resources/MaterialMetrics.xaml" />
 
         <!-- resources:begin (written by scripts/winui-theme/convert.py; do not edit) -->
         <MergeResourceInclude Source="/Resources/SystemResources.xaml" />
@@ -84,6 +86,7 @@
         <MergeResourceInclude Source="/Resources/ResizeGripper_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ThemeShadows.xaml" />
         <MergeResourceInclude Source="/Resources/Glyphs.xaml" />
+        <MergeResourceInclude Source="/Resources/MaterialCompatibility.xaml" />
         <!-- resources:end -->
 
         <!-- The labels of the commands of the context flyout of the text controls (not part of the

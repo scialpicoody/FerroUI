@@ -147,6 +147,8 @@ pub use ferroui_themes_fluent as themes_fluent;
 pub use ferroui_themes_simple as themes_simple;
 #[cfg(feature = "winui-theme")]
 pub use ferroui_themes_winui as themes_winui;
+#[cfg(feature = "material-theme")]
+pub use ferroui_themes_material as themes_material;
 
 #[cfg(feature = "xaml")]
 pub use ferroui_markup_xaml as markup_xaml;
@@ -231,6 +233,8 @@ pub mod prelude {
     pub use ferroui_themes_simple::SimpleTheme;
     #[cfg(feature = "winui-theme")]
     pub use ferroui_themes_winui::WinUITheme;
+    #[cfg(feature = "material-theme")]
+    pub use ferroui_themes_material::{MaterialTheme, MaterialAppBuilderExtension};
 }
 
 /// Chrome DevTools Protocol inspection and automation.

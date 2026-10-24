@@ -7,12 +7,15 @@
 ferroui_base::ferro_rust_paths! {
     classes: [
         crate::MaterialTheme,
+        crate::MaterialRipple,
+        crate::MaterialProgressIndicator,
         crate::accents::SystemAccentColors,
         crate::primitives::InfoBarPanel,
         crate::primitives::TabViewEqualWidthPanel,
     ],
     types: [
         crate::DensityStyle,
+        crate::MaterialMotionScheme,
         crate::converters::CornerRadiusToThicknessConverter,
         crate::converters::CornerRadiusToThicknessConverterKind,
     ],

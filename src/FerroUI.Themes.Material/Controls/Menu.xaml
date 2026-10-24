@@ -115,7 +115,7 @@
                  OverlayInputPassThroughElement="{Binding $parent[Menu]}">
             <!-- The shadow on a border of its own (G-24). -->
             <Border x:Name="ThemeShadowWrapper"
-                    BoxShadow="{DynamicResource ThemeShadowFlyoutBoxShadow}"
+                    BoxShadow="{DynamicResource MaterialElevation2BoxShadow}"
                     Margin="{StaticResource ThemeShadowFlyoutMargin}"
                     CornerRadius="{DynamicResource OverlayCornerRadius}">
               <Border Background="{DynamicResource MenuFlyoutPresenterBackground}"

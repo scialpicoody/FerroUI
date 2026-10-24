@@ -7,6 +7,7 @@
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:material="using:FerroUI.Themes.Material"
                     x:ClassModifier="internal">
   <ControlTheme x:Key="DefaultDropDownButtonStyle" TargetType="DropDownButton" BasedOn="{StaticResource DefaultButtonStyle}">
     <Setter Property="Template">
@@ -27,6 +28,9 @@
                       IsHitTestVisible="False">
                 <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
               </Border>
+              <material:MaterialRipple x:Name="MaterialRipple" Fill="{TemplateBinding Foreground}"
+                                       CornerRadius="{Binding #MaterialContainer.CornerRadius}"
+                                       ReducedMotion="{DynamicResource MaterialReducedMotion}" />
             <Grid ColumnDefinitions="*,24" Margin="{TemplateBinding Padding}">
               <ContentPresenter x:Name="PART_ContentPresenter"
                                 Content="{TemplateBinding Content}"
