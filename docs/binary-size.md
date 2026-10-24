@@ -30,6 +30,9 @@ Everything here is measured unless a sentence says otherwise. Sizes are in MB of
   instantiated per value type (`ferroui_base`, 31 % of the code and data of the catalog and 42 % of
   the gallery), the embedded pictures of the catalog (24 MB, the same pictures the upstream catalog embeds), the unwind tables
   that unwinding needs, and Skia (section 5).
+- **A hello world in the WinUI theme** (`samples/HelloWorld`, `dist`) is 71.5 MB on Windows and
+  51.1 MB on macOS, against 150.4 and 118.1 MB for the catalog; the style of the API (XAML,
+  builders, `rsx!`, hooks) changes it by less than 0.6 MB (section 3.6).
 - **Direct3D 12 is not used.** On Windows Skia draws with OpenGL ES through ANGLE, which runs on
   Direct3D 11 (as upstream does), with software rendering as the fallback; ANGLE is linked into the
   executable instead of being shipped as a DLL beside it, and is about 4 % of it (section 7).
@@ -183,18 +186,45 @@ Windows x86-64 (run 40002097460 of the workflow `Performance`):
 | `winui-theme-gallery` | 80.14 | 74.04 |
 | `control-catalog-desktop` | 163.08 | 150.40 |
 
-MACOS_HELLO
+macOS (GitHub's `macos-15` runner, Apple M1; runs 40034843569 and 40040788406; as written and
+stripped; `dist` strips the symbols itself):
+
+| Application | Release | stripped | `dist` |
+|---|---:|---:|---:|
+| `hello_window` (no theme, no markup) | 88.03 | 52.15 | 41.26 |
+| `hello-world` (XAML, WinUI theme) | 105.71 | 64.87 | 51.09 |
+| `hello-world-builders` | 106.11 | 65.22 | 51.29 |
+| `hello-world-macros` | 106.11 | 65.22 | 51.29 |
+| `hello-world-hooks` | 106.11 | 65.22 | 51.29 |
+| `hello-world-component-host` (XAML with a component) | 106.40 | 65.37 | 51.42 |
+| `winui-theme-gallery` | 110.29 | 67.87 | 53.28 |
+| `control-catalog-desktop` | 215.50 | 143.67 | 118.06 |
+
+By crate (macOS, release, `scripts/symsize.py`; code and named data, MB):
+
+| Crate | `hello_window` | `hello-world` | `hello-world-builders` | Catalog |
+|---|---:|---:|---:|---:|
+| `ferroui_base` | 23.39 | 26.94 | 27.02 | 45.56 |
+| C, C++ and Objective-C (Skia, HarfBuzz, the native backend) | 7.26 | 8.13 | 8.15 | 11.66 |
+| `ferroui_themes_winui` | | 5.93 | 5.93 | 5.93 |
+| `ferroui_controls` | 4.02 | 4.15 | 4.16 | 4.91 |
+| `core`, `alloc`, `std`, `hashbrown` | 7.71 | 8.52 | 8.62 | 14.81 |
+| Embedded files and other private constants | 2.81 | 3.16 | 3.15 | 29.83 |
+| `ferroui_markup_xaml` | 0.32 | 0.43 | 0.42 | 1.45 |
+| `ferroui_view` | | | 0.08 | |
+| `control_catalog`, the TreeDataGrid with its demo, the colour picker | | | | 15.78 |
 
 What the numbers say:
 
 - **The style of the API costs almost nothing.** The four declarative versions are within 0.6 MB
-  of the XAML one: `ferroui-view` (builders, the macros' output, the reactive runtime, the
-  reconciler) is about 0.4 MB, and a component in XAML another 0.15 MB.
-- **The theme is most of an application.** The WinUI theme takes a window from 32.6 to 71.5 MB
-  (`dist`). The theme has a control theme for every control, so every control and its code is
-  linked with it, and its compiled markup itself (about 6.4 MB of code on macOS, 15.6 MB of the
-  Windows catalog). The upstream framework does the same: a theme is a resource dictionary of
-  every control.
+  of the XAML one on both systems; `ferroui-view` itself is 0.08 MB of code on macOS.
+- **The theme is most of an application on Windows, less on macOS.** On Windows the WinUI theme
+  takes a window from 32.6 to 71.5 MB (`dist`): the theme has a control theme for every control,
+  so every control is linked with it, and its compiled markup (15.6 MB of the Windows catalog).
+  On macOS the theme-less window is larger already: it links the controls through the native
+  backend (4.0 MB of `ferroui_controls` in `hello_window`, as much as in `hello-world`), so the
+  theme adds 9.8 MB (`dist`, 41.3 to 51.1 MB), most of it its compiled markup (5.9 MB of code). The upstream framework
+  is built the same way: a theme is a resource dictionary of every control.
 - **What the catalog adds over a hello world** (`dist`, Windows: 150.4 against 71.5 MB, 78.9 MB):
   its 219 compiled pages and their code, its 24 MB of embedded pictures, the TreeDataGrid with its
   demo, the colour picker, the dialogs, and the VNC and headless hosts of its desktop entry point.
