@@ -1,5 +1,6 @@
 //! Port of `Core/ObservableTriggerBehavior.cs` (`ObservableTriggerBehavior<T>`).
 
+use ferroui_base::data::core::plugins::ObservableValue;
 use ferroui_base::reactive::{AnonymousObserver, IDisposable, IObservable, IObserver, Observable, ObservableError};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{
@@ -18,7 +19,8 @@ use std::rc::Rc;
 ///
 /// Deviation (DEVIATIONS.md, Behaviors): classes of the class model are not generic. The
 /// [`observable`](Self::observable) is an observable of untyped values
-/// (`Rc<dyn IObservable<Option<BoxedValue>>>` or `Rc<dyn IObservable<BoxedValue>>`, held in an
+/// (`Rc<dyn IObservable<Option<BoxedValue>>>`, `Rc<dyn IObservable<BoxedValue>>` or the stream
+/// value a binding reads from a property of type `IObservable<T>`, `ObservableValue`, held in an
 /// untyped value), and [`value`](Self::value) is untyped, for the `IObservable<T>` and `T` of the
 /// reference; the class can therefore be created from markup without type arguments.
 #[repr(C)]
@@ -75,9 +77,21 @@ ferroui_base::ferro_overrides! {
 }
 
 /// The observable an untyped value holds, as an observable of optional untyped values.
+///
+/// The value of a property of type `IObservable<T>` that a binding reads (`{Binding Values}`)
+/// is the stream value of the binding system (`ObservableValue`, or its nullable form): its
+/// observable of untyped values.
 fn observable_of(value: &BoxedValue) -> Option<Rc<dyn IObservable<Option<BoxedValue>>>> {
     if let Some(observable) = value.downcast_ref::<Rc<dyn IObservable<Option<BoxedValue>>>>() {
         return Some(observable.clone());
+    }
+
+    if let Some(observable) = value.downcast_ref::<ObservableValue>() {
+        return Some(observable.0.clone());
+    }
+
+    if let Some(observable) = value.downcast_ref::<Option<ObservableValue>>() {
+        return observable.as_ref().map(|observable| observable.0.clone());
     }
 
     if let Some(observable) = value.downcast_ref::<Rc<dyn IObservable<BoxedValue>>>() {

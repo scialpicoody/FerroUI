@@ -9,6 +9,8 @@ use crate::{
 };
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::MarkupType;
+use ferroui_base::platform::storage::IStorageProvider;
+use std::rc::Rc;
 
 mod converters;
 mod enums;
@@ -40,4 +42,12 @@ fn register_value_types() {
     ValueTypes::register_nullable::<StorageFolderRef>();
     ValueTypes::register_nullable::<StorageItemRef>();
     ValueTypes::register_nullable::<StorageProviderRef>();
+    // The storage provider of a top level (`{Binding $parent[TopLevel].StorageProvider}`, the
+    // contract the framework declares to markup) as the handle the pickers hold.
+    ValueTypes::register_cast::<Rc<dyn IStorageProvider>, StorageProviderRef>(|provider| {
+        StorageProviderRef::new(provider.clone())
+    });
+    ValueTypes::register_conversion::<Rc<dyn IStorageProvider>, Option<StorageProviderRef>>(|provider| {
+        Some(Some(StorageProviderRef::new(provider.clone())))
+    });
 }

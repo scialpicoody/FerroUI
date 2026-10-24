@@ -11,15 +11,15 @@
 use super::support::{find, load, run_jobs, start_app};
 use crate::{
     MaxValueValidationRule, MinLengthValidationRule, MinValueValidationRule, NotNullValidationRule,
-    RangeValidationRule, RegexValidationRule, RequiredDateValidationRule, RequiredDecimalValidationRule,
-    RequiredTextValidationRule, SliderValidationBehavior,
+    PropertyValidationBehavior, RangeValidationRule, RegexValidationRule, RequiredDateValidationRule,
+    RequiredDecimalValidationRule, RequiredTextValidationRule, SliderValidationBehavior,
 };
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, FerroObject, FerroObjectImpl,
     FerroProperty, Ref, StaticType, StyledProperty, TypeInfo,
 };
-use ferroui_controls::{Slider, Window};
+use ferroui_controls::{Slider, TextBox, Window};
 use ferroui_xaml_interactivity::Interaction;
 use std::rc::Rc;
 
@@ -216,4 +216,46 @@ fn validation_rules_expose_configuration_as_properties() {
     assert_eq!(text("Value is required."), required_text_rule.error_message());
     required_text_rule.set_value(RequiredTextValidationRule::error_message_property(), text("text"));
     assert_eq!(text("text"), required_text_rule.error_message());
+}
+
+/// A text box whose text a validation behavior created by markup validates: the behavior without
+/// type arguments, which markup cannot give a class of the object model.
+const PROPERTY_VALIDATION_XAML: &str = r#"<Window xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <TextBox x:Name="Box" Text="ab">
+    <Interaction.Behaviors>
+      <PropertyValidationBehavior Property="{x:Static TextBox.TextProperty}">
+        <RequiredTextValidationRule ErrorMessage="Value is required." />
+        <MinLengthValidationRule Length="3" ErrorMessage="Minimum length is 3." />
+      </PropertyValidationBehavior>
+    </Interaction.Behaviors>
+  </TextBox>
+</Window>"#;
+
+// Not from the reference: `<PropertyValidationBehavior>` of a document (the reference closes the
+// generic behavior with `x:TypeArguments="TextBox, sys:String"`) validates the property of the
+// associated object whatever the type of its value.
+#[test]
+fn property_validation_behavior_is_created_by_markup() {
+    let _app = start_app();
+    let window = load::<Window>("PropertyValidationBehavior", PROPERTY_VALIDATION_XAML);
+    let text_box = find::<TextBox>(&window, "Box");
+    let behaviors = Interaction::get_behaviors(&text_box).snapshot();
+    assert_eq!(1, behaviors.len());
+    let behavior = behaviors[0].cast::<PropertyValidationBehavior>().expect("a PropertyValidationBehavior");
+    assert_eq!(2, behavior.rules().count());
+
+    window.show();
+    run_jobs();
+
+    assert!(!behavior.is_valid());
+    assert_eq!(behavior.error().as_deref(), Some("Minimum length is 3."));
+
+    text_box.set_text(Some("abc"));
+    assert!(behavior.is_valid());
+    assert!(behavior.error().is_none());
+
+    text_box.set_text(Some(""));
+    assert!(!behavior.is_valid());
+    window.close();
 }
