@@ -2,9 +2,9 @@
 //! actual selectors and layout rather than searching their XAML source text.
 
 use crate::MacOSTheme;
-use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
+use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan, TransitionBase};
 use ferroui_base::controls::ResourceKey;
-use ferroui_base::input::{KeyModifiers, NavigationMethod};
+use ferroui_base::input::{IKeyboardDevice, IKeyboardNavigationHandler, InputManager, KeyboardDevice, KeyboardNavigationHandler, KeyModifiers, NavigationMethod};
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
@@ -65,7 +65,13 @@ impl Scene {
     fn new() -> Self {
         crate::register_types();
         let clock = Rc::new(PulseClock::new());
+        // styled_window supplies rendering/layout, but deliberately no keyboard.
+        // Keep its test font services and add the real input/focus services instead
+        // of simulating :focus pseudo-classes or weakening the focus assertions.
         let services = TestServices::styled_window()
+            .with_keyboard_device(|| Some(KeyboardDevice::new() as Rc<dyn IKeyboardDevice>))
+            .with_keyboard_navigation(|| Some(KeyboardNavigationHandler::new() as Rc<dyn IKeyboardNavigationHandler>))
+            .with_input_manager(Rc::new(InputManager::new()))
             .with_global_clock(clock.clone())
             .with_theme(|| MacOSTheme::new().as_style());
         let application = UnitTestApplication::start(services);
@@ -82,19 +88,31 @@ impl Scene {
         window.set_content(Some(Control::boxed(control.to_ref())));
         window.show();
         self.settle(&window);
+        window.focus_manager().focus(None, NavigationMethod::Unspecified, KeyModifiers::NONE);
+        self.settle(&window);
         window
     }
 
     fn settle(&self, window: &Window) {
-        Dispatcher::ui_thread().run_jobs(None);
         window.update_layout();
+        Dispatcher::ui_thread().run_jobs(None);
         self.clock.finish_transitions();
         window.update_layout();
+        // Template creation and layout may queue Loaded/resource work. Drain it
+        // before callers start measuring an interaction's animation clock.
+        Dispatcher::ui_thread().run_jobs(None);
     }
 
     fn resource_color(&self, key: &str) -> Color {
-        let value = self.theme.try_get_resource(&ResourceKey::from(key), Some(&ThemeVariant::light())).expect("a defined brush");
-        let brush = from_markup_value::<Rc<dyn IBrush>>(&value).expect("a brush resource");
+        let value = self.theme.try_get_resource(&ResourceKey::from(key), Some(&ThemeVariant::light()))
+            .unwrap_or_else(|| panic!("missing semantic resource {key}"));
+        // Some inherited aliases intentionally resolve to a Color. Brush-valued
+        // styled properties convert those; a raw resource lookup does not.
+        if let Some(color) = from_markup_value::<Color>(&value) {
+            return color;
+        }
+        let brush = from_markup_value::<Rc<dyn IBrush>>(&value)
+            .unwrap_or_else(|| panic!("{key} is neither a color nor a brush"));
         solid(Some(brush))
     }
 }
@@ -151,11 +169,16 @@ fn switch_reverses_an_in_flight_transition_from_its_visible_position() {
     let window = scene.show(&switch);
     let moving = part(&switch, "PART_MovingKnobs").cast::<Grid>().unwrap();
     let travel = part(&switch, "PART_SwitchKnob").cast::<Canvas>().unwrap();
+    let transitions = moving.transitions().expect("Loaded must attach the switch knob transitions");
+    let transition = transitions.get(0).as_object().and_then(|o| o.cast::<TransitionBase>())
+        .expect("the knob's DoubleTransition");
+    assert_eq!(TimeSpan::from_milliseconds(180.0), transition.duration(), "the knob transition must resolve its live motion token");
     switch.set_is_checked(Some(true));
     scene.clock.advance(0.01);
     scene.clock.advance(0.09);
     let middle = Canvas::get_left(&moving);
-    assert!(middle > 0.0 && middle < travel.bounds().width, "the knob must move through intermediate positions");
+    assert!(middle > 0.0 && middle < travel.bounds().width,
+        "the knob must move through intermediate positions: position {middle}, travel {}", travel.bounds().width);
     switch.set_is_checked(Some(false));
     assert_eq!(middle, Canvas::get_left(&moving), "reversing direction must preserve the visible position");
     scene.settle(&window);
@@ -309,5 +332,28 @@ fn combobox_selection_and_editable_text_use_the_actual_foreground() {
     let background = part(&combo, "Background").cast::<Border>().unwrap();
     assert_eq!(scene.resource_color("ComboBoxBackgroundDisabled"), solid(background.background()));
     assert_eq!(scene.resource_color("ComboBoxForegroundDisabled"), solid(selected.foreground()));
+    window.close();
+}
+
+#[test]
+fn increase_contrast_updates_and_restores_existing_window_backgrounds() {
+    let scene = Scene::new();
+    let window = scene.show(&Border::new());
+    for (variant, expected) in [
+        (ThemeVariant::light(), Color::from_rgb(255, 255, 255)),
+        (ThemeVariant::dark(), Color::from_rgb(28, 28, 30)),
+    ] {
+        window.set_requested_theme_variant(Some(variant));
+        scene.settle(&window);
+        let normal = solid(window.background());
+        scene.theme.set_increase_contrast(true);
+        scene.settle(&window);
+        assert_eq!(expected, solid(window.background()));
+        assert_eq!(expected, solid(window.transparency_background_fallback()));
+        scene.theme.set_increase_contrast(false);
+        scene.settle(&window);
+        assert_eq!(normal, solid(window.background()));
+        assert_eq!(normal, solid(window.transparency_background_fallback()));
+    }
     window.close();
 }

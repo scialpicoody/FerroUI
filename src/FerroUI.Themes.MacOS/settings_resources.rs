@@ -140,6 +140,16 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
     }
 
     if contrast {
+        // The inherited high-contrast dictionary defines its system window color,
+        // but the normal solid-background brush can already have been realized in
+        // the dark dictionary. Resolve both public forms here so existing windows,
+        // their opaque fallback and their system-bar color change together.
+        let background = if dark { 0xFF1C1C1E } else { 0xFFFFFFFF };
+        match name {
+            "SolidBackgroundFillColorBase" => return Some(color(background)),
+            "SolidBackgroundFillColorBaseBrush" => return Some(solid(Color::from_uint32(background))),
+            _ => {}
+        }
         let value = match name {
             "TextFillColorPrimary" => Some(if dark { 0xFFFFFFFF } else { 0xFF000000 }),
             "TextFillColorSecondary" => Some(if dark { 0xFFE5E5E5 } else { 0xFF262626 }),
