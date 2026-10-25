@@ -10,7 +10,7 @@
     "template_comparison": "Parsed XML, ignoring comments/formatting and the intentional assembly/manifest rename",
     "unchanged_template_meaning": "The template structure is inherited; shared macOS resources and runtime settings can still change its appearance",
     "changed_template_meaning": "The template structure differs from the baseline; this is not a native fidelity measurement",
-    "current_xaml_sha256": "e4b91d6ff2d8dd42ff422bd2f155ef0609a509de8f831b9fe31e439c27f9f07c"
+    "current_xaml_sha256": "829d8150c739fd86fcf73c41c55371ffbdb8368f92bc53f08c17e886dcd4478d"
   },
   "static_contracts": {
     "status": "pass",
@@ -1554,7 +1554,7 @@
         }
       ],
       "baseline_sha256": "8aea71894a8a74854cf768799c96f5db67bc087e36aa989ee588f2a6e1298227",
-      "macos_sha256": "549212d6f5fcf39a3fe2c55c8d33aad89d068f749b4af682a830a95575b140aa",
+      "macos_sha256": "292eda98003748dbd77be90ed9f4d6f5be7f6ef8c60bd70b9c50f5fd1c933d9c",
       "native_fidelity": "unverified"
     },
     {
