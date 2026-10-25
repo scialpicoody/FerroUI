@@ -49,7 +49,7 @@ fn text(canvas: &Canvas, value: &str, x: f64, y: f64) {
     label.set_font_size(11.0);
     Canvas::set_left(&label, x);
     Canvas::set_top(&label, y);
-    canvas.children().add(label.upcast());
+    canvas.children().add(label.upcast::<Control>());
 }
 
 fn control(xaml: &str) -> Ref<Control> {
@@ -112,7 +112,7 @@ fn rendered_state_matrix_and_disabled_precedence() {
                     cell.set_child(&item);
                     Canvas::set_left(&cell, (LABEL_WIDTH + column as i32 * CELL_WIDTH) as f64);
                     Canvas::set_top(&cell, (HEADER_HEIGHT + row as i32 * ROW_HEIGHT) as f64);
-                    canvas.children().add(cell.upcast());
+                    canvas.children().add(cell.upcast::<Control>());
                 }
             }
             let window = Window::new();
