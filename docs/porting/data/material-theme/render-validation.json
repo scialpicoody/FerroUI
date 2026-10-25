@@ -1,27 +1,43 @@
 {
-  "recorded_utc": "2026-10-24T20:36:12+00:00",
-  "implementation_commit": "6f269de9502587e4f1a8fa356bbf41b2d158d472",
-  "implementation_tree": "6f385913d24b5f317335b0450e9a18dd7a8feeaf",
+  "recorded_utc": "2026-10-25T12:27:23.365467+00:00",
+  "implementation_commit": "f76e55f57fb976421a6f9b8d7d686ce1e0144bb2",
+  "implementation_tree": "2df2e54e5cd2a184aeaf9b4c8f5712f993294fd9",
   "androidx_material3": "1.5.0-beta02",
   "androidx_source": "e4d933c98df7baa7ea2b83eea6e086915961e0ff",
+  "material_color_utilities_source": "bd811e4ca2ab94c4ce3cadc89c19b1820b9704b3",
   "checks": {
     "theme_unit_tests": {
-      "passed": 91,
+      "passed": 267,
       "failed": 0
     },
     "gallery_markup_tests": {
-      "passed": 61,
+      "passed": 76,
       "failed": 0
     },
+    "base_animation_tests": {
+      "passed": 37,
+      "failed": 0
+    },
+    "base_hold_gesture_tests": {
+      "passed": 8,
+      "failed": 0
+    },
+    "text_box_ime_regression": {
+      "passed": 1,
+      "failed": 0
+    },
+    "independent_color_fixture_argbs": 165888,
+    "independent_color_fixture_schemes": 3456,
     "generated_tokens": "5 files current",
     "generated_rust_paths": "current",
     "release_metadata": "72 packages valid",
+    "source_naming_conventions": "passed",
+    "facade_material_theme": "passed",
     "strict_capture": {
-      "expected": 102,
-      "written": 102,
+      "expected": 138,
+      "written": 138,
       "failures": 0
-    },
-    "facade_material_theme": "passed"
+    }
   },
   "render_environment": {
     "os": "Linux x86_64",
@@ -42,44 +58,94 @@
       "ltr",
       "rtl"
     ],
-    "pages": 17,
+    "pages": 23,
+    "page_ids": [
+      "material",
+      "interactions",
+      "floating",
+      "appbars",
+      "datepickers",
+      "daterange",
+      "timepickers",
+      "buttons",
+      "toggles",
+      "text",
+      "numbers",
+      "combobox",
+      "lists",
+      "range",
+      "datetime",
+      "menus",
+      "flyouts",
+      "tabs",
+      "containers",
+      "navigation",
+      "table",
+      "dialogs",
+      "textcal"
+    ],
     "settle_ms": 300,
     "font": "bundled Roboto static 400/500/700"
   },
-  "review": "Manual component/layout review, including fixes verified for floating-label clipping, disabled tracks/outlines, RTL check orientation, finite flyout wrapping and picker text centering.",
+  "review": "Visual review of source-sized glyphs, chip dismissal/selection, text-field anatomy, native calendar and complete-range headers, range bands, clock label clipping and all clock/input/landscape variants, plus dark/high-contrast and RTL behavior.",
   "limitations": [
-    "Hashes identify this capture set, not animation-synchronized golden expectations.",
-    "No Android reference-device pixel or animation-trace comparison was performed.",
-    "Native Android system-color module was source-reviewed; its target compilation is covered by the new Android CI step, not this local record."
+    "Hashes identify these capture sets, not animation-synchronized golden expectations.",
+    "No paired Android reference-device pixel or animation-trace comparison was performed.",
+    "Desktop captures do not validate Android system bars, IME presentation, TalkBack integration, predictive-back animation or native haptics.",
+    "The native Android system-color target build is covered by CI, not this local desktop validation record."
   ],
   "captures": [
     {
+      "file": "appbars-dark-rtl.png",
+      "sha256": "af2c0d616ed6d23fd8007e521865693b2e6d11760abc8a1548b5e5f7ec157f86"
+    },
+    {
+      "file": "appbars-dark.png",
+      "sha256": "a3df20ee71c8149c6e7a76ac50ad858941d862a07410506b2c5c22ae4e1374e4"
+    },
+    {
+      "file": "appbars-highcontrast-rtl.png",
+      "sha256": "1e9aa8bd8044208439f24408136fbcf841abd5b0e72e6bd450a55c3030381c50"
+    },
+    {
+      "file": "appbars-highcontrast.png",
+      "sha256": "d3b8db40aa3c4b2633c94bec053c1c151405d0ed58e27f79d10ad32627fd2343"
+    },
+    {
+      "file": "appbars-light-rtl.png",
+      "sha256": "977a63162cf2d55df16d54d557bd25a1e1664eb83e899be6fcdddb60b47aa919"
+    },
+    {
+      "file": "appbars-light.png",
+      "sha256": "4768c8508d6dcb803979e7698b8c04b244e80fe645bb74a1b3cdf39f9fdd10d5"
+    },
+    {
       "file": "buttons-dark-rtl.png",
-      "sha256": "e8ce404aaca8f4b53a7f738df35c0f203c261a6f2e366a8035627fac5fd62951"
+      "sha256": "dec46d5387a77cb3dd397c268b3f09a80826ed13530e19b575f8490e35fac7cc"
     },
     {
       "file": "buttons-dark.png",
-      "sha256": "be9fb855119997b7ed286a092e4e0e61e1bda387dd33cb250ea068de97578926"
+      "sha256": "b239207423331220a5c49aaadd744ab113a0e36130d0aacc5280cf99b3c4e6c1"
     },
     {
       "file": "buttons-highcontrast-rtl.png",
-      "sha256": "00cd303ed1c36fdced00fdecf748ab8be42764939e3bbe701e4aba171b1598d8"
+      "sha256": "77843a766dccfee8b30c64be2404324a2b89bd1bbddb87c5b986fa95a75f02a0"
     },
     {
       "file": "buttons-highcontrast.png",
-      "sha256": "60c751d354e1a7e1a34c6e7ef96dd9b8fdad615f4b1249fc6d3241381d4eb97a"
+      "sha256": "7df6aa4ce0822b61d033fcffe7fd06ca12f7b98a992aaa753bcf0cd12e8aff6a"
     },
     {
       "file": "buttons-light-rtl.png",
-      "sha256": "01d8fffc702d3ac5b0fc10f3394de77896b64e7e12637b219a0ae521c6ad35cd"
+      "sha256": "e26967b1feebeb34dc2e36672805f333360171a9ce254affe2538269b7ca227c"
     },
     {
       "file": "buttons-light.png",
-      "sha256": "d9365ba0525b38dd2d05a9ac48060e1d5ce5aa6ee655a8da3f4bd983a5acd852"
+      "sha256": "7f57094f58bb55d5729024e4a1896ecde26e47e2ae2842d908cd6f5b060c1ba0"
     },
     {
       "file": "combobox-dark-rtl.png",
-      "sha256": "9bbb9ee9a9af0cbcaafafcfe7d685c686f9f18ea17690b8ae1c3b2998ea5d122"
+      "sha256": "d7bb42799fa85c38d0fd557975dc128b56ed7e795ac047e0ca709ad605d7d6a7"
     },
     {
       "file": "combobox-dark.png",
@@ -87,15 +153,15 @@
     },
     {
       "file": "combobox-highcontrast-rtl.png",
-      "sha256": "f01902ac3ccd9d095fa7aaa9a8762f7630775c1c91d021570d9f5bfbe6f39d34"
+      "sha256": "5c63d824e7f8d6533365dbaae744c9f8a959f4720a0d2a7a34055d8fa9e85986"
     },
     {
       "file": "combobox-highcontrast.png",
-      "sha256": "6914d0dca08caa8b3802631d1edbc978b04ed1be0d0835fcb30c8d0b3de08174"
+      "sha256": "1fe91b32b2b57cf0219766ea40b607965ad16457444311cddab704906c19db5a"
     },
     {
       "file": "combobox-light-rtl.png",
-      "sha256": "3e6ffab6128bce8a81675b09c6042fb76c30c75fa62190e24cf43298dcd03ba7"
+      "sha256": "72414eb7235aa7512c8a022458a2f0a8eee1fc242974b9200c0daec1b5e48166"
     },
     {
       "file": "combobox-light.png",
@@ -107,7 +173,7 @@
     },
     {
       "file": "containers-dark.png",
-      "sha256": "7824801b369227703eb86b2bb0cee1e1dc9a53890dc11e300a0ac96e3b8a5b3d"
+      "sha256": "1f413c27b00f895c46bfaea277f263a0337e76cf44b15f7ee0515f8515ce64ce"
     },
     {
       "file": "containers-highcontrast-rtl.png",
@@ -115,7 +181,7 @@
     },
     {
       "file": "containers-highcontrast.png",
-      "sha256": "94bfc0a4cd542345d2f19ea2ecb208822ef8df43ea56696188b3e62b0e706476"
+      "sha256": "a269f4498e9439de44221731bc3eb2594cf2bf511bb726320cbb52d9ecc158e8"
     },
     {
       "file": "containers-light-rtl.png",
@@ -123,7 +189,55 @@
     },
     {
       "file": "containers-light.png",
-      "sha256": "370cf8d71de43bdd9d03c2fcec72588067bd9de9bda002f510c7d1f58b1ebd26"
+      "sha256": "591bdcfa25f43c5096c61482ea379cbfe251934fa9580e7c1fcec1ae731b545e"
+    },
+    {
+      "file": "datepickers-dark-rtl.png",
+      "sha256": "4950fac55a3c75794dcb77a70cb555336917523fb85c5e4e515c791d5fd37a76"
+    },
+    {
+      "file": "datepickers-dark.png",
+      "sha256": "1b29975a0d730da01d5624877425c5754488a27e36ce7f8db5f5878ecf667a53"
+    },
+    {
+      "file": "datepickers-highcontrast-rtl.png",
+      "sha256": "fe1358aacae3a37a82189acfb3c2c1d1e0ad1b0cdd12bd2f35a95db4817dd58d"
+    },
+    {
+      "file": "datepickers-highcontrast.png",
+      "sha256": "cffeae357213300bcca4f75b331e50afc2e59e407a98b9d67f03e34cb815aa5a"
+    },
+    {
+      "file": "datepickers-light-rtl.png",
+      "sha256": "1d48c718fe124d66fe22f80b5a1b78af19448ee81a8b4a6de25c7ff1f6d30fdc"
+    },
+    {
+      "file": "datepickers-light.png",
+      "sha256": "73a0fdb276d0d5a6ff7022f1989c30aeb255195b63e75e2e53e8551ea527f904"
+    },
+    {
+      "file": "daterange-dark-rtl.png",
+      "sha256": "8f134cfd509e24fcb86e8e3402473ce4bfa6d30de86c67d0fe56c0df3b53e419"
+    },
+    {
+      "file": "daterange-dark.png",
+      "sha256": "ca9333c90cb8151a387bd3763fbd71a57193739fbdd6b5d115cafbda79e120bf"
+    },
+    {
+      "file": "daterange-highcontrast-rtl.png",
+      "sha256": "8eb7e7a45f6e79277081b2f4af29c967c5a02d3a0eb68ca03bb3e5c949644df2"
+    },
+    {
+      "file": "daterange-highcontrast.png",
+      "sha256": "c902651da4ffd10a055c4effe5678cf6dc88f783a71086f82d0232caae6113f6"
+    },
+    {
+      "file": "daterange-light-rtl.png",
+      "sha256": "671370f687e83cda7923392841bc60ef6986df34c8ea4ee7998af77c3f9fea4c"
+    },
+    {
+      "file": "daterange-light.png",
+      "sha256": "e87f61192ffeb3fa152afca9f200e4400433014cd4532ea5c4c1d8fc7f4a7661"
     },
     {
       "file": "datetime-dark-rtl.png",
@@ -174,6 +288,30 @@
       "sha256": "0de17b61f8f0764bcbc36dd8c6c8a9218eeba68dfc322ba768a7b72c5c4fd37f"
     },
     {
+      "file": "floating-dark-rtl.png",
+      "sha256": "95f942feeb9593c71a5723b3897dd5042011efff6cb8cdd1b681492311787335"
+    },
+    {
+      "file": "floating-dark.png",
+      "sha256": "012914f704bbe60aeefcbbf3067a11917ae109bf448c2bff4db58ee0e02e1dd9"
+    },
+    {
+      "file": "floating-highcontrast-rtl.png",
+      "sha256": "4c2c1325929745a96c4b81a7205dfbb2114c7647baa51c0eb0dac62ec6cfca77"
+    },
+    {
+      "file": "floating-highcontrast.png",
+      "sha256": "aac483951646c624ed38c5a5f5514e15c7e50367ee34ed5e222779b1db337cf5"
+    },
+    {
+      "file": "floating-light-rtl.png",
+      "sha256": "f01861354befcc8b97785874c39a34d0180a734556e3356b6b2c5f0115bf40f0"
+    },
+    {
+      "file": "floating-light.png",
+      "sha256": "5e44a563678c5e07257fbc29a4d27cf4c88718b1fe52b9afd76bba0d8482296e"
+    },
+    {
       "file": "flyouts-dark-rtl.png",
       "sha256": "c68b8b6372e887a969f1528fecabf10d66c72e79ec34f95a4e23b10af345688a"
     },
@@ -198,6 +336,30 @@
       "sha256": "c179a21026a6bd9f7e9687775dbcaad0b99f49e77e96ed616c549102da1e691a"
     },
     {
+      "file": "interactions-dark-rtl.png",
+      "sha256": "5cbf7622c930f8b774181138faa0f7aa024441de2ea53629172968870a2ddc3e"
+    },
+    {
+      "file": "interactions-dark.png",
+      "sha256": "ef44785d52585f85245a0dcbea40756b808a134e35c154a465d5ec48f4040783"
+    },
+    {
+      "file": "interactions-highcontrast-rtl.png",
+      "sha256": "5bf8fa4b7e9f2f357ad7055acae4eb6b70d176e0b48d23688d6e0777c1f01637"
+    },
+    {
+      "file": "interactions-highcontrast.png",
+      "sha256": "0c031fa65bb2a7c954bedb710141ad47a982ed88d722e3d99b83797ffbab4794"
+    },
+    {
+      "file": "interactions-light-rtl.png",
+      "sha256": "bc0e4e5047941ce35c47efc0fc131f83a18de3895d396b5bec07fc50f7085106"
+    },
+    {
+      "file": "interactions-light.png",
+      "sha256": "0be76a44e262480aadb08fe16b13e8a2ba1f9f682f23dda0c4eef491113753be"
+    },
+    {
       "file": "lists-dark-rtl.png",
       "sha256": "73d0e1c23296c9f3ddc2609349f9918e7d01addfe9ed718b229058616de0af4f"
     },
@@ -207,11 +369,11 @@
     },
     {
       "file": "lists-highcontrast-rtl.png",
-      "sha256": "12575043f075d76898391f82a4984979d96ca78393bf22998a5e55e548ee95bd"
+      "sha256": "1983096ffa935f5ca94fd59299fcfdf1737c8c50027933415492badddc36dc80"
     },
     {
       "file": "lists-highcontrast.png",
-      "sha256": "17675b83cfb8c9f2e03e3dd5750343e0162e83f5c577cacdc176bb5fb2754d2e"
+      "sha256": "a922fae2c8224e18d98958f458f97db89b34b6eca92baa1d9dc6b13a71499508"
     },
     {
       "file": "lists-light-rtl.png",
@@ -223,27 +385,27 @@
     },
     {
       "file": "material-dark-rtl.png",
-      "sha256": "d7ba04c2ac2ab140bd11bc12763e0709d4912b285fdf3027a201a9e7707845cc"
+      "sha256": "c85944593042c46567a2212d62a451f15acfc18e9f1cc6f413c558378cfbcdac"
     },
     {
       "file": "material-dark.png",
-      "sha256": "14075a128c1e74cd383669dba80bb7b2d1e0fd28bcbbdea3b2c3011d5c9f9dfe"
+      "sha256": "87a412fad5710227ae9155d103c6bc8d16d9a85fc573b1fb1c7b36156fe5065b"
     },
     {
       "file": "material-highcontrast-rtl.png",
-      "sha256": "a1593ad2d62753fba09c2d6dcd53b77b317bf8bb941873dbbe490e8e8ad715ce"
+      "sha256": "cd05a711a2ccb92c3fa3abdaf9c981308c7b82ddaa393771638f693f88ba6d62"
     },
     {
       "file": "material-highcontrast.png",
-      "sha256": "6794fb5b9cca2647c67f22033c6c066d413bd19e882e38cc60c46e11e9cb0c70"
+      "sha256": "55f376c975c1beb4d5628cac1c68130e8f9e63dbf150550405e042a4108f08f7"
     },
     {
       "file": "material-light-rtl.png",
-      "sha256": "b374f119b14f0b541734b0c8aad478e76ac65190bdf946f9328d31c04c034797"
+      "sha256": "f5837e34c04c7b5cf23677abf389480e0b08797bd88bb311d7f03281bb47d2c3"
     },
     {
       "file": "material-light.png",
-      "sha256": "41bba3e519434b39b27a19fc5c2468c0e54ca6ee80324897e2dcd5ba663b673f"
+      "sha256": "dbacc9e68c296efdbec07aa84acbb021860710bdcf32bf04ce3d25948d9d152f"
     },
     {
       "file": "menus-dark-rtl.png",
@@ -255,11 +417,11 @@
     },
     {
       "file": "menus-highcontrast-rtl.png",
-      "sha256": "e73681466bea031394d9da97e93f571ecf84d4bcdb5fba6c1f0e6d4418dbd2b4"
+      "sha256": "2a2da283558c162894026737e683fd59b49e2b0da55eccd12c814be0bd556392"
     },
     {
       "file": "menus-highcontrast.png",
-      "sha256": "a20fdb1cb3af3c7eeb03022980429d6f9e2d5c5d869d2c72a05f5668975b12b0"
+      "sha256": "eb918cc99ee1e8678a666f673b1c027f77c40d02247b00f08d3bdcfce7fdefa5"
     },
     {
       "file": "menus-light-rtl.png",
@@ -279,11 +441,11 @@
     },
     {
       "file": "navigation-highcontrast-rtl.png",
-      "sha256": "380dc11a170a224f3f8e1a7abfe01146364b331b9ca3cd466cf4dd10352ca7ef"
+      "sha256": "60c32316b21a57b2529b712dc0b7f458343aed60cf6faf863b8cdb39e14c79fc"
     },
     {
       "file": "navigation-highcontrast.png",
-      "sha256": "919b74ef9d880c72cebb49007c67342c7e7f897faaeaa627f6c6d5ee51ea578b"
+      "sha256": "f0295c86e3159de3a8d9be5c93c223596d0dfff46cc729a83396ae75418ad1b5"
     },
     {
       "file": "navigation-light-rtl.png",
@@ -295,51 +457,51 @@
     },
     {
       "file": "numbers-dark-rtl.png",
-      "sha256": "41d5ffdc6ef0135991960b1edc1943cbd2c5ea2d2cb28809a321ccf690e95c8e"
+      "sha256": "d42e5b93cbf6b76fac5d6cab6f91c27e573e2cedf736178cf108071d1f54215c"
     },
     {
       "file": "numbers-dark.png",
-      "sha256": "501ced4e10a8a80bac91788608ee6b854963a3774abef29584486fe52e8d489f"
+      "sha256": "4164dd68a3ba89c606d5cb29ccb03d81a262d7530c64cbd9b5118de60cd779f4"
     },
     {
       "file": "numbers-highcontrast-rtl.png",
-      "sha256": "27236d173038abecfcb7cd21f98e1e81c24aab5eef9859433f8b42c1687d6c6b"
+      "sha256": "11340c6e23f5b9cc5371a1461c89ad522f5f3ac1d2397143cbfc2697a86801f2"
     },
     {
       "file": "numbers-highcontrast.png",
-      "sha256": "ed6892c61496a3750cd984fc563b968c3564f9ddc6fd7055411fc05c733ebcdd"
+      "sha256": "b5fae7b64e6c90f19438b700830cd9b985cd3537daebbeeb9a9f48964652a812"
     },
     {
       "file": "numbers-light-rtl.png",
-      "sha256": "bf3b973aed12533e51628a75ecf077b6867d9e58f81b61a71dc39b32eb13c41c"
+      "sha256": "128edc3ba185e5da11f1a155070cf377f709c53e422e89c8c45cb43b2df41f96"
     },
     {
       "file": "numbers-light.png",
-      "sha256": "6452c99cfc4d20871729016d26941e21e24a7cf3ddadc9c590c99acb969baa0e"
+      "sha256": "4daf6a76aee41ed36453caf0ba32bd9a281adf349c65614c0b5a8037be4ed022"
     },
     {
       "file": "range-dark-rtl.png",
-      "sha256": "687741c1bc334404ee99acb821d85aa899dc5e81b9022796d73b741a67d6ebea"
+      "sha256": "92a44644883b3c16192dcfc99765218e53b8e93ee5f86407ae56d3700699d739"
     },
     {
       "file": "range-dark.png",
-      "sha256": "83acd6d5d11035fee511d2c0a02208a48d670bcc1540cb6aac4acd94e6e5c353"
+      "sha256": "42be61c2a276fe92be2b011153f7ea3a40a775ca040455d1a31ce7fd52f8c4ef"
     },
     {
       "file": "range-highcontrast-rtl.png",
-      "sha256": "b38f3ce931c24aecd061fc8b89b4f504c0e6da69e354d69a5edbba3605bd07a3"
+      "sha256": "d0a12edbecb722473771afbfd03d4086a009dd46e7da04225181a01a4409076e"
     },
     {
       "file": "range-highcontrast.png",
-      "sha256": "c1f60f4dec8aea75e788a76b38be2beb6dc7a7b702a94c6ad6bd51d90e725a49"
+      "sha256": "523203e42cf0db471da5a7a8410d389691b64fe6ae824462377ad97748e496d8"
     },
     {
       "file": "range-light-rtl.png",
-      "sha256": "e01bdc513f127b8fafab55e7b1e93a7821e8cb3e2f662efa7298ad58937d983e"
+      "sha256": "507717b7f393a66359b98f10f5933428a2d55d4e940f8d56cdb5cff36ae06f1b"
     },
     {
       "file": "range-light.png",
-      "sha256": "df3609790a4eca9ea5cec3c2cd7b901f28e72e49ed2b1df5a258dfc5d05e49bc"
+      "sha256": "a3cda46103d404f20bd1d4333916480eb19de570aec5f5fa0c524b2f31af2383"
     },
     {
       "file": "table-dark-rtl.png",
@@ -351,11 +513,11 @@
     },
     {
       "file": "table-highcontrast-rtl.png",
-      "sha256": "dd37e8e835252fd10a5f0d468e0ba3c9fdd321ccd80a618981982e0a3f30c005"
+      "sha256": "93d3d29cba9658824cac5e9f55f8891a92aecd2211e8324485c35a36b593ebbe"
     },
     {
       "file": "table-highcontrast.png",
-      "sha256": "5b57db42dc24de1325448c2530f036e6558237a6b012ae6aed12daac9dd8799c"
+      "sha256": "885a5a65dc5db2a37157b4a9dd3667cc01f906a2149524159a720d1be6e7a46c"
     },
     {
       "file": "table-light-rtl.png",
@@ -367,7 +529,7 @@
     },
     {
       "file": "tabs-dark-rtl.png",
-      "sha256": "9167a204346b720fcf5a7ae54573980c70c18c1d97b4a586f63d3ab961359493"
+      "sha256": "f630a935b04debe88c260e36b8eca9122e0f75de167b9b8ea94d81ed77c8e82c"
     },
     {
       "file": "tabs-dark.png",
@@ -375,15 +537,15 @@
     },
     {
       "file": "tabs-highcontrast-rtl.png",
-      "sha256": "ddd737ec2d7767d40c9bc42af1afb4fe723b994d40775e5342dd03a0967a74db"
+      "sha256": "def4dbc4a134308fe220cc19ea09491a2b16f64f6d577f00ed8cbba49420e157"
     },
     {
       "file": "tabs-highcontrast.png",
-      "sha256": "4833c93376c112be53eb3df3443d5e5941fbec7244988483e4e3a58b74c2e980"
+      "sha256": "583424f79fc5ff77e991d8f77459feb81a3423ea452f1686e5b7f51b6aa4e1b4"
     },
     {
       "file": "tabs-light-rtl.png",
-      "sha256": "828b9a79de03c6c42352fbdb9c4ca5a44a68312f6af66a5f541e541d4f00f61f"
+      "sha256": "3d34f7ed5a073a9e4679ba3e851c889266cd5eafd3a4662d432659b3262896d0"
     },
     {
       "file": "tabs-light.png",
@@ -391,27 +553,27 @@
     },
     {
       "file": "text-dark-rtl.png",
-      "sha256": "2cfa92413a641de56a7b0ef63c0d432e9efc47b0f29d9e0105041d74c23fb128"
+      "sha256": "3e2dd5a5f9a67bbb6a2c4fdd1d93bcb6a10153065510187b96985d5206786526"
     },
     {
       "file": "text-dark.png",
-      "sha256": "8b37cba53b0347074cb836e158f8fc995d7f3d16689a2c984566feed21fdd79c"
+      "sha256": "84d8a760c41f7fe7195bd4580da382d613bb62b4582547439e8d5d37f7f997a5"
     },
     {
       "file": "text-highcontrast-rtl.png",
-      "sha256": "5ca0fddba755ea0d303edf798dbd37553f65ccb50d6a561bbc27a7788877c547"
+      "sha256": "c2d0d8c4712e2ccbdd12d198d041754652cda6b67c8af225c1cebf0e71e3d0d8"
     },
     {
       "file": "text-highcontrast.png",
-      "sha256": "f3140fa8b06df392de5eab17f81655792b14ff8303e6d81d444fe93b8e834173"
+      "sha256": "b1b260b0a2922429ec1b1dfbe1abd621ed58b6f146604ddcda1c6b7017b0bd15"
     },
     {
       "file": "text-light-rtl.png",
-      "sha256": "fa6087df6e57ac87928826ec546a3740941c4a3d47d5f6cbd08fef492a3a048f"
+      "sha256": "e28026c9d88cd3e3c3527804165d720b826ebb722e3ba6428f79a0d859dc3255"
     },
     {
       "file": "text-light.png",
-      "sha256": "17e2f02ccd9b2cd98b0eb2e0664b23c6c9457f5051a1d6f3052eca3b74f3bf06"
+      "sha256": "059bcf7afba986d0d4b3ea83aa2f27db1305c6bdc83f382926c38063d9e58f60"
     },
     {
       "file": "textcal-dark-rtl.png",
@@ -438,6 +600,30 @@
       "sha256": "0325036a1a67d13eff191d1e86025df5504822530fa905044c98dd265c3aa15c"
     },
     {
+      "file": "timepickers-dark-rtl.png",
+      "sha256": "35435c403915f7a7026959319984efa67a8fab672d0ea3fa7c4142bf44ce8b66"
+    },
+    {
+      "file": "timepickers-dark.png",
+      "sha256": "b28b199aeec8a43a6791f8d874438739a61ed7319a74c7c20c8cb305d1d75bf1"
+    },
+    {
+      "file": "timepickers-highcontrast-rtl.png",
+      "sha256": "326701a43d5636e17cc7db06b0de83cf5267cb9e0ce285d112e635758baa69ef"
+    },
+    {
+      "file": "timepickers-highcontrast.png",
+      "sha256": "21abf3eb561111e49095501b4ed3b672e3e42165f6850b2e9fefe88f38c9220f"
+    },
+    {
+      "file": "timepickers-light-rtl.png",
+      "sha256": "3dff488671f3a3809cf57923167b34d3200994b72b7e57ed14815898a6aaaf8f"
+    },
+    {
+      "file": "timepickers-light.png",
+      "sha256": "cf3ed1eda511127d49af98217b15ce695589a4d1bf11937a68ef5c27b357d56c"
+    },
+    {
       "file": "toggles-dark-rtl.png",
       "sha256": "87f9985630169449302fd50b0cebc1ae10b5492f5f724387bb7e16342ef36209"
     },
@@ -462,5 +648,41 @@
       "sha256": "98d59207e47a1c464dca4eff74fdba61d1e7b10a3b700a35c0506b92f63def4c"
     }
   ],
+  "supplementary_time_picker_capture": {
+    "purpose": "Full classic, vibrant, numeric-input and landscape examples beyond the standard viewport.",
+    "logical_size": [
+      1024,
+      1440
+    ],
+    "expected": 6,
+    "written": 6,
+    "failures": 0,
+    "captures": [
+      {
+        "file": "timepickers-dark-rtl.png",
+        "sha256": "bb366eea6f95f9bc7f20927ea8dc9fe4f5955d0bbf8883629b1707bd70958053"
+      },
+      {
+        "file": "timepickers-dark.png",
+        "sha256": "9e8d3d72e706d044fb7f328ced1fb8e354e565965765f84784a719829044be77"
+      },
+      {
+        "file": "timepickers-highcontrast-rtl.png",
+        "sha256": "b399ecb0e88a262aee9ca4544193b70e57a3bed67ecc2e006608b91397b03ee5"
+      },
+      {
+        "file": "timepickers-highcontrast.png",
+        "sha256": "9bd8db47b8ba38b5ab414af7485759f648547c4b0af522d95df31db5d0e3a0fa"
+      },
+      {
+        "file": "timepickers-light-rtl.png",
+        "sha256": "adaae87b22f15c4db912d40ca0bf2d4987e8bcb4722c7de2e5935f5c3759f02c"
+      },
+      {
+        "file": "timepickers-light.png",
+        "sha256": "83146c65b64e19815e95e821398461a6c9ba5f3ae735d2e574005f672c6763de"
+      }
+    ]
+  },
   "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)"
 }

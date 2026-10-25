@@ -219,14 +219,18 @@ custom date validator control the calendar. `Culture` reads FerroUI’s culture-
 provider; applications supply that provider or explicit `DateTimeFormatInfo`
 when localized data is needed. The standalone gallery supplies US/UK examples.
 `ShowActions` adds confirmation and
-cancel controls when the picker is hosted in a dialog or sheet. Invalid input
-retains a usable date selection and displays field-specific errors.
+cancel controls when the picker is hosted in a dialog or sheet. Input drafts
+remain editable and display field-specific errors; only complete valid dates
+populate the selection, while an incomplete or invalid edited endpoint is cleared.
+Numeric date input currently accepts ASCII decimal digits with the culture's
+date ordering and separator.
 
 `MaterialTimePicker` keeps `Hour` in 0–23 and `Minute` in 0–59 independently of
-`Is24Hour`. `DisplayMode=Input` exposes numeric editors; `DisplayMode=Picker`
+`Is24Hour`. `DisplayMode=Input` exposes numeric editors; `DisplayMode=Dial`
 exposes the clock dial and active hour/minute selection. `IsVibrant=True` enables
 the expressive variant, and `Orientation=Horizontal` selects the landscape
-layout. Incomplete numeric drafts remain separate from committed values. The
+layout. Numeric time input currently accepts ASCII decimal digits. Incomplete
+numeric drafts remain separate from committed values. The
 dial uses actual radio-button automation nodes and the picker exposes an
 `IValueProvider` value in `HH:mm` form. Each picker supplies selection events,
 keyboard navigation and reduced-motion behavior. See [Material time picker](material-time-picker.md)
@@ -409,22 +413,35 @@ expectations for native dimensions are independent of the generated XAML.
 
 ### Recorded desktop verification
 
-The 2026-10-24 implementation validation passed **91 theme tests**, **61 gallery
-markup tests**, the facade feature check, token and Rust-path regeneration checks,
-and workspace release metadata checks. The final gallery build produced **102 of
-102 captures with zero capture failures**: every page in Light, Dark and
-HighContrast, each in LTR and RTL. These are Linux/X11 screenshots rendered with
-Skia under Xvfb at 720×960, scale 1 and normal density. The record and image hashes
-are in [render-validation.json](data/material-theme/render-validation.json).
-The hashes identify this run; continuously animated controls make these images
+The 2026-10-25 implementation validation passed **267 theme tests**, **76 gallery
+markup tests**, **37 focused base-animation tests**, **8 hold-gesture tests**, and
+the core TextBox IME cancellation regression. The facade feature check, token and
+Rust-path regeneration checks, source naming conventions, and release metadata
+for all 72 publishable crates also passed.
+
+The final gallery build produced **138 of 138 standard captures with zero
+capture failures**: all 23 gallery views in Light, Dark and HighContrast, each
+in LTR and RTL. These are Linux/X11 screenshots rendered with Skia under Xvfb at
+720×960, scale 1 and normal density. A second run produced **6 of 6 full-page
+time-picker captures** at 1024×1440, showing complete classic, vibrant,
+numeric-input and landscape examples in every color/direction combination.
+The record, implementation revision and all 144 image hashes are in
+[render-validation.json](data/material-theme/render-validation.json).
+The hashes identify these runs; continuously animated controls make them
 unsuitable as unsynchronized pixel goldens.
 
-Visual review verified the outlined label cutout and unclipped label, disabled
-slider and button outlines, invariant RTL check marks, wrapped flyout content,
-centered time-picker text and navigation icons. The Android CI job separately
-compiles the theme with `android-dynamic-color` for `aarch64-linux-android`;
-that target build and a reference-device comparison are not part of this local
-desktop validation record.
+Visual review verified source-sized icon viewports, real chip dismissal and
+selection, field labels/notches/affixes/supporting rows, complete date-range
+headings and range bands, clock labels and selector clipping, all clock/input
+layouts, and RTL/high-contrast behavior. Deterministic tests additionally cover
+interrupted springs, animation cleanup, semantic versus keyboard activation,
+queued snackbar lifetimes, nested sheet fling arbitration and accessibility.
+
+The Android CI job separately compiles the theme with `android-dynamic-color`
+for `aarch64-linux-android`. A native target build, paired reference-device pixels
+and synchronized animation traces are not part of this local desktop record.
+Desktop captures do not establish equivalence for system bars, native IME
+presentation, TalkBack, predictive-back animation or haptics.
 
 | Light | Dark |
 | --- | --- |
@@ -433,6 +450,16 @@ desktop validation record.
 | Dark, RTL | High contrast |
 | --- | --- |
 | ![Material overview in dark RTL mode](images/material-theme-dark-rtl.png) | ![Material overview in high contrast](images/material-theme-highcontrast.png) |
+
+| Native date picker | Complete range, dark RTL |
+| --- | --- |
+| ![Material date picker](images/material-date-picker-light.png) | ![Material date range in dark RTL](images/material-date-range-dark-rtl.png) |
+
+| Full clock/input gallery | Full clock/input gallery, dark RTL |
+| --- | --- |
+| ![All Material time picker layouts](images/material-time-pickers-light.png) | ![All Material time picker layouts in dark RTL](images/material-time-pickers-dark-rtl.png) |
+
+![Material text-field anatomy and states](images/material-text-fields-light.png)
 
 ### Native comparison configuration
 
