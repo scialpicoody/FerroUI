@@ -1,0 +1,55 @@
+name: macOS theme review evidence
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Themes.MacOS/**'
+      - 'scripts/macos-theme/**'
+      - '.github/workflows/macos-theme-review.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-theme-review-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-evidence:
+    name: Reproducible theme review sources and inventory
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Record the exact review input
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/macos-theme-review"
+          git rev-parse HEAD > "$RUNNER_TEMP/macos-theme-review/source-commit.txt"
+          # Public, tracked repository sources only: no credentials, caches,
+          # environment dumps or untracked runner files enter the evidence.
+          git archive --format=tar.gz HEAD > "$RUNNER_TEMP/macos-theme-review/source.tar.gz"
+          git archive --format=tar.gz 98a56f09459c8ae02f07a2bcd235c0e87b4d44b3 \
+            src/FerroUI.Themes.WinUI > "$RUNNER_TEMP/macos-theme-review/winui-baseline.tar.gz"
+          sha256sum "$RUNNER_TEMP/macos-theme-review/"*.tar.gz \
+            > "$RUNNER_TEMP/macos-theme-review/source-sha256.txt"
+      - name: Audit all copied theme documents
+        shell: bash
+        run: |
+          set -o pipefail
+          python3 scripts/macos-theme/audit.py --check \
+            2>&1 | tee "$RUNNER_TEMP/macos-theme-review/inventory.log"
+      - name: Publish reproducible review evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: macos-theme-review-sources
+          path: ${{ runner.temp }}/macos-theme-review
+          if-no-files-found: error
+          retention-days: 3
