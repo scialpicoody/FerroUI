@@ -179,3 +179,8 @@ fn gallery_culture(british: bool) -> CultureInfo {
     CultureInfo::get_culture_info(if british { "en-GB" } else { "en-US" })
         .with_date_time_format(format)
 }
+
+/// Creates the page for interactive navigation and strict render capture.
+pub fn create() -> Ref<ferroui_controls::Control> {
+    DatePickersPage::new().upcast()
+}

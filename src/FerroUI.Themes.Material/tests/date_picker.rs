@@ -8,18 +8,20 @@ use ferroui_base::animation::{IClock, IGlobalClock, PlayState, TimeSpan};
 use ferroui_base::input::{
     InputElement, Key, KeyEventArgs, KeyModifiers, KeyboardDevice, NavigationMethod,
 };
-use ferroui_base::media::FlowDirection;
+use ferroui_base::media::{FlowDirection, Stretch};
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::{CultureInfo, DateTime, DayOfWeek, TestCultureDataProvider};
-use ferroui_base::{ObjectType, Point, Ref, Vector, Visual};
+use ferroui_base::{ObjectType, Point, Rect, Ref, Size, Vector, Visual};
 use ferroui_controls::automation::provider::{
     IInvokeProvider, ISelectionItemProvider, ISelectionProvider,
 };
 use ferroui_controls::automation::{AutomationProperties, peers::ControlAutomationPeer};
+use ferroui_controls::shapes::Path;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{
-    Border, Button, CalendarDateRange, Control, Grid, Panel, ScrollViewer, TextBox, Window,
+    Border, Button, CalendarDateRange, Control, Grid, Panel, PathIcon, ScrollViewer, TextBox,
+    Window,
 };
 use std::cell::Cell;
 use std::rc::Rc;
@@ -195,6 +197,75 @@ fn single_picker_has_native_header_toolbar_grid_and_day_surface_geometry() {
             .unwrap()
             .contains("Today")
     );
+}
+
+#[test]
+fn source_icons_preserve_their_twenty_four_dp_viewport_and_small_ink_bounds() {
+    let (_app, _) = application();
+    let p = picker();
+    let w = window(&p);
+    // material3/internal/Icons.kt at e4d933c98df7baa7ea2b83eea6e086915961e0ff:
+    // paths occupy only part of the 24dp viewport; fitting their tight bounds enlarges them.
+    for (name, expected) in [
+        ("PART_YearArrow", Rect::new(7.0, 10.0, 10.0, 5.0)),
+        ("PART_PreviousIcon", Rect::new(8.0, 6.0, 7.41, 12.0)),
+        ("PART_NextIcon", Rect::new(8.59, 6.0, 7.41, 12.0)),
+    ] {
+        let icon: Ref<PathIcon> = named(&p, name);
+        let path: Ref<Path> = named(&icon, "SymbolPath");
+        assert_eq!(Size::new(24.0, 24.0), icon.bounds().size());
+        assert_eq!(Rect::new(0.0, 0.0, 24.0, 24.0), path.bounds());
+        assert_eq!(Stretch::None, path.stretch());
+        let ink = path.rendered_geometry().unwrap().bounds();
+        for (actual, expected) in [
+            (ink.x, expected.x),
+            (ink.y, expected.y),
+            (ink.width, expected.width),
+            (ink.height, expected.height),
+        ] {
+            assert!((actual - expected).abs() < 1e-9, "{name}: {ink:?}");
+        }
+        let left = path.translate_point(Point::new(ink.x, ink.y), &w).unwrap();
+        let right = path
+            .translate_point(Point::new(ink.right(), ink.y), &w)
+            .unwrap();
+        assert!((right.x - left.x - ink.width).abs() < 1e-9);
+    }
+    p.set_display_mode(MaterialDatePickerMode::Input);
+    w.update_layout();
+    let calendar: Ref<PathIcon> = named(&p, "PART_CalendarIcon");
+    let calendar_path: Ref<Path> = named(&calendar, "SymbolPath");
+    assert_eq!(Size::new(24.0, 24.0), calendar.bounds().size());
+    assert_eq!(
+        Rect::new(3.0, 2.0, 18.0, 20.0),
+        calendar_path.rendered_geometry().unwrap().bounds()
+    );
+}
+
+#[test]
+fn symbol_viewport_scales_with_requested_size_and_only_navigation_arrows_mirror() {
+    let (_app, _) = application();
+    let p = picker();
+    let w = window(&p);
+    let arrow: Ref<PathIcon> = named(&p, "PART_YearArrow");
+    arrow.set_width(48.0);
+    arrow.set_height(48.0);
+    w.update_layout();
+    let path: Ref<Path> = named(&arrow, "SymbolPath");
+    let a = path.translate_point(Point::new(7.0, 10.0), &w).unwrap();
+    let b = path.translate_point(Point::new(17.0, 10.0), &w).unwrap();
+    assert!((b.x - a.x - 20.0).abs() < 1e-9);
+    assert_eq!(Size::new(24.0, 24.0), path.bounds().size());
+
+    p.set_flow_direction(FlowDirection::RightToLeft);
+    w.update_layout();
+    for (name, expected_direction) in [("PART_PreviousIcon", -1.0), ("PART_EditIcon", 1.0)] {
+        let icon: Ref<PathIcon> = named(&p, name);
+        let path: Ref<Path> = named(&icon, "SymbolPath");
+        let a = path.translate_point(Point::new(0.0, 12.0), &w).unwrap();
+        let b = path.translate_point(Point::new(24.0, 12.0), &w).unwrap();
+        assert!((b.x - a.x - expected_direction * 24.0).abs() < 1e-9);
+    }
 }
 
 #[test]
