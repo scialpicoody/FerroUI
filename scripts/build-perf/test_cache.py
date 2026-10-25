@@ -130,6 +130,29 @@ class CacheEvidenceTests(unittest.TestCase):
         self.assertNotIn("--no-run", tests)
         self.assertEqual(command[2:], tests[2:])
 
+    def test_explicit_configs_apply_identically_to_build_test_and_fetch(self):
+        options = SimpleNamespace(cargo="cargo", cargo_config=[Path("/workspace/build-tools.toml"), Path("/workspace/extra.toml")],
+                                  package=["ferroui-controls"], features=[], profile="dev", jobs=4)
+        prefix = ["cargo", "--config", "/workspace/build-tools.toml", "--config", "/workspace/extra.toml"]
+        self.assertEqual(cache.cargo_prefix(options), prefix)
+        build = cache.cargo_command(options)
+        tests = cache.cargo_command(options, "test")
+        self.assertEqual(build[:len(prefix)], prefix)
+        self.assertEqual(tests[:len(prefix)], prefix)
+        self.assertEqual(build[len(prefix)], "build")
+        self.assertEqual(tests[len(prefix)], "test")
+        self.assertEqual(build[len(prefix) + 1:], tests[len(prefix) + 1:])
+        self.assertEqual((cache.cargo_prefix(options) + ["fetch", "--locked"])[:len(prefix)], prefix)
+
+    def test_config_digest_detects_changes_even_outside_source_tree(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            config = Path(temporary) / "build-tools.toml"
+            config.write_text('[profile.dev.package.ferroui-build-scan]\nopt-level=3\n')
+            before = cache.config_identity([config])
+            self.assertEqual(before, cache.config_identity([config]))
+            config.write_text('[profile.dev.package.ferroui-build-scan]\nopt-level=0\n')
+            self.assertNotEqual(before, cache.config_identity([config]))
+
 
 class IsolationTests(unittest.TestCase):
     def test_existing_cache_backend_and_wrappers_are_not_inherited(self):
@@ -243,9 +266,11 @@ class FailureDetectionTests(unittest.TestCase):
             root = Path(temporary)
             reports = root / "reports"
             reports.mkdir()
-            options = SimpleNamespace(cargo="cargo", sccache="sccache", output=reports)
+            options = SimpleNamespace(cargo="cargo", sccache="sccache", output=reports,
+                                      cargo_config=[root / "workspace-only-config.toml"])
 
             def fake_run(command, source, target, env, directory, expect_failure=False):
+                self.assertNotIn("--config", command)  # Independent fixture has its own dev profile.
                 directory.mkdir(parents=True)
                 executable = target / "probe"
                 executable.write_text("fake compiler output")

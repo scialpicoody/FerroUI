@@ -181,9 +181,20 @@ def cache_storage(directory: Path) -> dict:
             "measurement_seconds": time.perf_counter() - start}
 
 
+def config_identity(paths: list[Path]) -> list[dict]:
+    return [{"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()} for path in paths]
+
+
+def cargo_prefix(args) -> list[str]:
+    command = [args.cargo]
+    for path in getattr(args, "cargo_config", []):
+        command.extend(["--config", str(path)])
+    return command
+
+
 def cargo_command(args, operation: str = "build") -> list[str]:
-    command = [args.cargo, operation, "--locked", "--offline", "--lib", "--timings",
-               "--message-format=json-render-diagnostics", "--profile", args.profile]
+    command = cargo_prefix(args) + [operation, "--locked", "--offline", "--lib", "--timings",
+                                   "--message-format=json-render-diagnostics", "--profile", args.profile]
     for package in args.package:
         command.extend(["-p", package])
     for feature in args.features:
@@ -393,6 +404,8 @@ def markdown_summary(report: dict) -> str:
         "## Local compiler-cache experiment\n\n"
         f"Profile: `{report['profile']}`. Packages: `{', '.join(report['packages'])}`. "
         "Every timed build starts with an empty target directory.\n\n"
+        f"Explicit Cargo configuration files (identical on all legs): **{len(report['cargo_configs'])}**; "
+        "paths and content hashes are recorded in report.json.\n\n"
         "| No wrapper median | Empty-cache population | Populated-cache median | Local replay speedup |\n"
         "|---:|---:|---:|---:|\n"
         f"| {summary['uncached_median_seconds']:.3f}s | {summary['population_seconds'][0]:.3f}s | "
@@ -420,6 +433,8 @@ def main() -> int:
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument("--jobs", type=int)
     parser.add_argument("--cargo", default="cargo")
+    parser.add_argument("--cargo-config", action="append", type=Path, default=[], metavar="FILE",
+                        help="Extra Cargo config file for every real-graph leg; repeatable, paths relative to --source")
     parser.add_argument("--sccache", default="sccache")
     parser.add_argument("--scratch-root", type=Path, help="Parent of owned temporary targets/cache, never a directory to clean")
     parser.add_argument("--skip-tests", action="store_true", help="Run package tests in a separate correctness job; fixture checks still run")
@@ -433,6 +448,10 @@ def main() -> int:
     args.package = args.package or ["ferroui-controls"]
     args.source = args.source.resolve()
     args.output = args.output.resolve()
+    args.cargo_config = [(path if path.is_absolute() else args.source / path).resolve() for path in args.cargo_config]
+    for path in args.cargo_config:
+        if not path.is_file():
+            parser.error(f"Cargo configuration file is missing or not a regular file: {path}")
     for name in ("cargo", "sccache"):
         executable = shutil.which(getattr(args, name))
         if executable is None:
@@ -441,6 +460,7 @@ def main() -> int:
     args.output.mkdir(parents=True, exist_ok=False)
     report = {"schema_version": 1, "scenario": "empty-target-local-populated-compiler-cache",
               "profile": args.profile, "packages": args.package, "features": args.features,
+              "cargo_configs": config_identity(args.cargo_config),
               "repetitions": args.repetitions, "platform": platform.platform(), "cpu_count": os.cpu_count(),
               "toolchain": output([os.environ.get("RUSTC", "rustc"), "-Vv"], args.source),
               "cargo": output([args.cargo, "-Vv"], args.source),
@@ -463,7 +483,7 @@ def main() -> int:
             control = Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="fcpc-"))).resolve()
             env = isolated_cache_environment(dict(os.environ), root, control)
             fetch_started = time.perf_counter()
-            output([args.cargo, "fetch", "--locked"], args.source, build_environment(env, root / "target", ""))
+            output(cargo_prefix(args) + ["fetch", "--locked"], args.source, build_environment(env, root / "target", ""))
             report["overhead"]["fetch_seconds"] = time.perf_counter() - fetch_started
             report["records"].append(measure(args, root, env, "uncached", 1))
             save()
@@ -503,6 +523,9 @@ def main() -> int:
                 report["source_unchanged"] = source_fingerprint(args.source, args.output) == report["source_sha256"]
                 if not report["source_unchanged"]:
                     raise RuntimeError("Source tree changed during the comparison; results are not comparable")
+                report["cargo_configs_unchanged"] = config_identity(args.cargo_config) == report["cargo_configs"]
+                if not report["cargo_configs_unchanged"]:
+                    raise RuntimeError("Cargo configuration changed during the comparison; results are not comparable")
             finally:
                 stop_started = time.perf_counter()
                 try:

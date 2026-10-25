@@ -179,6 +179,7 @@ FerroUI needs separate native and Emscripten validation.
 | [Bazel rules_rust / crate_universe][bazel-rust] | Generate Bazel Rust targets using Cargo dependency information | Preserves Rust compilation, but ordinary Cargo is no longer the sole execution model. |
 | [BuildXL][buildxl] | Build engine with caching, sandboxing, and distributed execution; documented integrations include JavaScript, MSBuild, Ninja, and DScript | Valuable architecture reference. No verified ready-made Cargo integration was found in the reviewed official documentation; do not claim drop-in support. |
 | [sccache distributed compilation][sccache-dist] | Keep Cargo, distribute supported compiler invocations | Requires infrastructure and artifact/input validation; network overhead and the critical path limit gains. |
+| [Kache source audit](build-performance-kache-review.md) | Keep Cargo; cache eligible libraries, linked executables and optionally build-script executions | Additional binary-cache opportunity. The pinned audit documents proc-macro, native-link and build-script replay boundaries. No FerroUI result or production enablement is claimed. |
 | [cargo-nextest][nextest] | Cargo-compatible test execution | Speeds some test workloads, not rustc itself; stable doctests still need `cargo test --doc`. |
 
 Remote execution can reduce elapsed time by adding machines; it does not imply

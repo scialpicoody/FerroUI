@@ -171,13 +171,19 @@ jobs:
           if-no-files-found: error
 
   compiler-cache:
-    name: Same-profile compiler cache (${{ matrix.profile }})
+    name: Same-profile compiler cache (${{ matrix.profile }}, ${{ matrix.mode }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        profile: [dev, release]
+        include:
+          - profile: dev
+            mode: default
+          - profile: release
+            mode: default
+          - profile: dev
+            mode: optimized-build-tools
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -191,14 +197,19 @@ jobs:
       - name: Cold compilation, cache population, replay and stale-output negative controls
         env:
           PROFILE: ${{ matrix.profile }}
-        run: >-
-          python3 scripts/build-perf/cache.py --source . --output results/cache
-          --package ferroui-controls --profile "$PROFILE" --repetitions 3 --jobs 4
+          MODE: ${{ matrix.mode }}
+        run: |
+          OPTIONS=()
+          if [ "$MODE" = optimized-build-tools ]; then
+            OPTIONS+=(--cargo-config .cargo/build-tools.toml --minimum-speedup 10)
+          fi
+          python3 scripts/build-perf/cache.py --source . --output results/cache \
+            --package ferroui-controls --profile "$PROFILE" --repetitions 3 --jobs 4 "${OPTIONS[@]}"
       - name: Publish cache statistics, exact workload and invalidation evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: compiler-cache-evidence-${{ matrix.profile }}
+          name: compiler-cache-evidence-${{ matrix.profile }}-${{ matrix.mode }}
           path: results/cache
           if-no-files-found: error
 

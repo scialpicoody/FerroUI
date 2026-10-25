@@ -18,6 +18,8 @@ compression measurements.
 The [research review](build-performance-research.md) covers Cargo, rustc, compiler
 caches, alternative backends/linkers/build systems, feature unification, parallelism,
 relink-without-rebuild and build-system research, with primary-source references.
+The [Kache source audit](build-performance-kache-review.md) examines linked-executable
+caching and the input-tracking limits that need validation before enabling it.
 A Cargo-only fork is not justified by these measurements: compiler frontend/codegen,
 native dependencies, build scripts, tests and reporting account for the expensive work.
 Sound relink-without-rebuild also requires compiler metadata support. A signature-only
@@ -82,6 +84,22 @@ cargo --config .cargo/compiler-cache.toml build --locked -p ferroui-controls
 cargo --config .cargo/compiler-cache.toml build --locked --release -p ferroui-controls
 sccache --show-stats
 ```
+
+The two optional configurations compose for repeated development/CI builds:
+
+```sh
+cargo --config .cargo/build-tools.toml --config .cargo/compiler-cache.toml \
+  build --locked -p ferroui-controls
+```
+
+This also accelerates scanner execution that still happens when a newly empty
+target directory requires build scripts to run. The combined CI experiment uses
+the build-tool configuration for its uncached, cache-population and cache-replay
+legs alike, so its ratio compares identical selected profiles.
+That CI lane explicitly requires at least 10× for this populated-local-cache
+workload, alongside the generated-output, invalidation and test gates. The
+threshold is an acceptance check; a passing measurement must still be reported
+separately from first compilation and complete CI wall time.
 
 The native core graph is the initial audited/benchmarked scope. Stock Cargo still resolves
 features, tracks inputs, runs build scripts and invokes rustc. The wrapper can reuse
@@ -160,6 +178,11 @@ python3 scripts/build-perf/scanner.py \
 # Identical Cargo commands and profiles; target is empty before every sample.
 python3 scripts/build-perf/cache.py --source . --output target/build-perf/cache \
   --package ferroui-controls --profile release --repetitions 3
+
+# Same optimized build tools in every leg, including the uncached baseline.
+python3 scripts/build-perf/cache.py --source . --output target/build-perf/cache-tools \
+  --package ferroui-controls --profile dev --repetitions 3 \
+  --cargo-config .cargo/build-tools.toml
 
 # Actual bundles and the real catalog assets, with exact output checks.
 node scripts/build-perf/browser.mjs \
