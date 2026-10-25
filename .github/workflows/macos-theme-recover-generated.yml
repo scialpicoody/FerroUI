@@ -44,7 +44,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
-          test "$(git rev-parse HEAD^)" = abd995a30ff222d92d060924018a6f6e88ba29e4
+          test "$(git rev-parse HEAD^)" = a1f5858543af1eb5271f5979353d25e645b8ce83
           test "$(git diff --name-only HEAD^ HEAD)" = .github/workflows/macos-theme-recover-generated.yml
           test -z "$(git status --porcelain)"
           test "$(git ls-remote origin refs/heads/feat/macos26-theme | cut -f1)" = "$SOURCE_COMMIT"
