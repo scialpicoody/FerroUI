@@ -10,7 +10,7 @@
     "template_comparison": "Parsed XML, ignoring comments/formatting and the intentional assembly/manifest rename",
     "unchanged_template_meaning": "The template structure is inherited; shared macOS resources and runtime settings can still change its appearance",
     "changed_template_meaning": "The template structure differs from the baseline; this is not a native fidelity measurement",
-    "current_xaml_sha256": "829d8150c739fd86fcf73c41c55371ffbdb8368f92bc53f08c17e886dcd4478d"
+    "current_xaml_sha256": "0009a712d398f37786829a2c558cb582da43060a11458e7ce24f0e9d6612fa92"
   },
   "static_contracts": {
     "status": "pass",
@@ -23,7 +23,7 @@
     "new_control_documents": [],
     "baseline_default_theme_keys": 84,
     "preserved_default_theme_keys": 84,
-    "duration_consumers": 76,
+    "duration_consumers": 75,
     "duration_resource_keys": [
       "MacOSMotionFastDuration",
       "MacOSMotionStandardDuration",
@@ -818,6 +818,7 @@
       "MacOSSegmentSelectedBrush",
       "MacOSSegmentShadow",
       "MacOSSidebarGlassMaterial",
+      "MacOSSwitchKnobTransitions",
       "MacOSToolbarGlassMaterial",
       "MacOSTrafficCloseGeometry",
       "MacOSTrafficLightBorderBrush",
@@ -1554,7 +1555,7 @@
         }
       ],
       "baseline_sha256": "8aea71894a8a74854cf768799c96f5db67bc087e36aa989ee588f2a6e1298227",
-      "macos_sha256": "292eda98003748dbd77be90ed9f4d6f5be7f6ef8c60bd70b9c50f5fd1c933d9c",
+      "macos_sha256": "945d7b2f372fed445c01146a8907a5bc2184aa23855c13fe2e3bddcfda9b351f",
       "native_fidelity": "unverified"
     },
     {
@@ -1973,7 +1974,7 @@
         }
       ],
       "baseline_sha256": "a070e9b7299ae1d57c3869485ea7af35e0724b13615b8561a65198b1a32ac3a7",
-      "macos_sha256": "9a149ed5221955c0404bede90e8d56e0c5927ed47c42150dc76026eed5053819",
+      "macos_sha256": "86eb1c084b9b63ab784964a555e89fa6af293e12f23a79a5f1f5748b4b47d059",
       "native_fidelity": "unverified"
     },
     {
@@ -2834,7 +2835,7 @@
     {
       "document": "Controls/ProgressBar.xaml",
       "element": "/ResourceDictionary/ControlTheme[1]/Style[4]/Style.Animations[1]/Animation[1]/@Duration",
-      "value": "{DynamicResource MacOSProgressPulseDuration}",
+      "value": "{StaticResource MacOSProgressPulseDuration}",
       "resource_key": "MacOSProgressPulseDuration"
     },
     {
@@ -3094,12 +3095,6 @@
       "element": "/ResourceDictionary/ControlTheme[1]/Setter[17]/ControlTemplate[1]/ContentPresenter[1]/ContentPresenter.Transitions[1]/Transitions[1]/BrushTransition[1]/@Duration",
       "value": "{DynamicResource MacOSMotionFastDuration}",
       "resource_key": "MacOSMotionFastDuration"
-    },
-    {
-      "document": "Controls/ToggleSwitch.xaml",
-      "element": "/ResourceDictionary/ControlTheme[1]/Setter[13]/Transitions[1]/DoubleTransition[1]/@Duration",
-      "value": "{DynamicResource MacOSMotionStandardDuration}",
-      "resource_key": "MacOSMotionStandardDuration"
     },
     {
       "document": "Controls/ToggleSwitch.xaml",

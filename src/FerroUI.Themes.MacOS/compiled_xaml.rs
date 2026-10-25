@@ -54,7 +54,7 @@ pub fn populate_macostheme_xaml(
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_0.clone());
     if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
         let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 17, 6)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 17, 6)?, count_0.wrapping_add(507_i32));
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 17, 6)?, count_0.wrapping_add(508_i32));
     }
     // MacOSTheme.xaml(96,8) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "CompactStyles", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_0, 96, 8)?;
@@ -129,8 +129,8 @@ pub fn populate_macostheme_xaml(
     populate_macostheme_xaml_part_31(resource_dictionary_0.clone(), context.clone(), root.clone())?;
     // MacOSTheme.xaml(100,4) Content
     let service_provider_0 = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::__markup_CreateRootServiceProviderV3_7(::core::option::Option::Some(rt::service_provider(&context)));
-    let value_626 = build_controls_macoscontrols_xaml(rt::cast(service_provider_0.clone(), 100, 17)?)?;
-    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_626.clone(), 100, 4)?), 100, 4)?;
+    let value_627 = build_controls_macoscontrols_xaml(rt::cast(service_provider_0.clone(), 100, 17)?)?;
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(root.upcast_ref::<::ferroui_base::styling::Styles>(), rt::cast(value_627.clone(), 100, 4)?), 100, 4)?;
     context.pop_parent();
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 12, 2)?;
     ::core::result::Result::Ok(())
@@ -4839,25 +4839,25 @@ fn populate_macostheme_xaml_part_9(
     // MacOSTheme.xaml(45,55) Content (resource)
     let value_204 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 4 8 0 #42000000")), 45, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 45, 55)?, rt::string_object("ThemeShadowToolTipBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_204))), 45, 55)?;
-    // MacOSTheme.xaml(9,6) Key
+    // MacOSTheme.xaml(14,6) Key
     let value_205 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 9, 6)?, rt::cast(::core::clone::Clone::clone(&value_205), 9, 6)?);
-    // MacOSTheme.xaml(10,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "MacOSTrafficLightInactiveBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1782, 10, 8)?;
-    // MacOSTheme.xaml(11,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSegmentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1783, 11, 8)?;
-    // MacOSTheme.xaml(12,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSegmentSelectedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1784, 12, 8)?;
-    // MacOSTheme.xaml(13,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSelectionBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1785, 13, 8)?;
-    // MacOSTheme.xaml(14,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSelectionForegroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1786, 14, 8)?;
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 14, 6)?, rt::cast(::core::clone::Clone::clone(&value_205), 14, 6)?);
     // MacOSTheme.xaml(15,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "MacOSContentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1787, 15, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_1, "MacOSTrafficLightInactiveBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1782, 15, 8)?;
     // MacOSTheme.xaml(16,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSidebarBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1788, 16, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSegmentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1783, 16, 8)?;
     // MacOSTheme.xaml(17,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSeparatorBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1789, 17, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSegmentSelectedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1784, 17, 8)?;
+    // MacOSTheme.xaml(18,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSelectionBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1785, 18, 8)?;
+    // MacOSTheme.xaml(19,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSelectionForegroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1786, 19, 8)?;
+    // MacOSTheme.xaml(20,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_1, "MacOSContentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1787, 20, 8)?;
+    // MacOSTheme.xaml(21,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSidebarBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1788, 21, 8)?;
+    // MacOSTheme.xaml(22,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_1, "MacOSSeparatorBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_1789, 22, 8)?;
     context.pop_parent();
     ::core::result::Result::Ok(())
 }
@@ -9565,25 +9565,25 @@ fn populate_macostheme_xaml_part_19(
     // MacOSTheme.xaml(50,55) Content (resource)
     let value_410 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 4 8 0 #23000000")), 50, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 50, 55)?, rt::string_object("ThemeShadowToolTipBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_410))), 50, 55)?;
-    // MacOSTheme.xaml(19,6) Key
+    // MacOSTheme.xaml(24,6) Key
     let value_411 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Light();
-    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 19, 6)?, rt::cast(::core::clone::Clone::clone(&value_411), 19, 6)?);
-    // MacOSTheme.xaml(20,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "MacOSTrafficLightInactiveBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3571, 20, 8)?;
-    // MacOSTheme.xaml(21,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSegmentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3572, 21, 8)?;
-    // MacOSTheme.xaml(22,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSegmentSelectedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3573, 22, 8)?;
-    // MacOSTheme.xaml(23,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSelectionBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3574, 23, 8)?;
-    // MacOSTheme.xaml(24,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSelectionForegroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3575, 24, 8)?;
+    <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 24, 6)?, rt::cast(::core::clone::Clone::clone(&value_411), 24, 6)?);
     // MacOSTheme.xaml(25,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "MacOSContentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3576, 25, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "MacOSTrafficLightInactiveBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3571, 25, 8)?;
     // MacOSTheme.xaml(26,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSidebarBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3577, 26, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSegmentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3572, 26, 8)?;
     // MacOSTheme.xaml(27,8) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSeparatorBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3578, 27, 8)?;
+    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSegmentSelectedBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3573, 27, 8)?;
+    // MacOSTheme.xaml(28,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSelectionBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3574, 28, 8)?;
+    // MacOSTheme.xaml(29,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSelectionForegroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3575, 29, 8)?;
+    // MacOSTheme.xaml(30,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "MacOSContentBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3576, 30, 8)?;
+    // MacOSTheme.xaml(31,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSidebarBackgroundBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3577, 31, 8)?;
+    // MacOSTheme.xaml(32,8) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_2, "MacOSSeparatorBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_3578, 32, 8)?;
     context.pop_parent();
     ::core::result::Result::Ok(())
 }
@@ -15265,45 +15265,48 @@ fn populate_macostheme_xaml_part_31(
     rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryE7A6", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5415, 139, 45)?;
     // MacOSTheme.xaml(143,45) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "GlyphGeometryF78D", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5416, 143, 45)?;
-    // MacOSTheme.xaml(31,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "MacOSTrafficLightGlyphBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5417, 31, 4)?;
-    // MacOSTheme.xaml(32,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "MacOSTrafficLightBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5418, 32, 4)?;
-    // MacOSTheme.xaml(33,49) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 33, 49)?, rt::string_object("MacOSWindowCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(20.0_f64, 20.0_f64, 20.0_f64, 20.0_f64))), 33, 49)?;
-    // MacOSTheme.xaml(34,47) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 34, 47)?, rt::string_object("MacOSWindowTitleBarHeight"), rt::to_object(44.0_f64)), 34, 47)?;
-    // MacOSTheme.xaml(35,46) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 35, 46)?, rt::string_object("MacOSWindowTitleFontSize"), rt::to_object(13.0_f64)), 35, 46)?;
-    // MacOSTheme.xaml(36,50) Content (resource)
-    let value_621 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 36, 50)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 36, 50)?, rt::string_object("MacOSWindowTitleFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_621))), 36, 50)?;
-    // MacOSTheme.xaml(37,41) Content (resource)
-    let value_622 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 12 36 0 #40000000, 0 1 4 0 #33000000")), 37, 41)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 37, 41)?, rt::string_object("MacOSWindowShadow"), rt::to_object(::core::clone::Clone::clone(&value_622))), 37, 41)?;
-    // MacOSTheme.xaml(38,42) Content (resource)
-    let value_623 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 3 0 #26000000")), 38, 42)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 42)?, rt::string_object("MacOSSegmentShadow"), rt::to_object(::core::clone::Clone::clone(&value_623))), 38, 42)?;
-    // MacOSTheme.xaml(39,39) Content (resource)
-    let value_624 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 24 0 #33000000, 0 1 3 0 #26000000")), 39, 39)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 39)?, rt::string_object("MacOSMenuShadow"), rt::to_object(::core::clone::Clone::clone(&value_624))), 39, 39)?;
-    // MacOSTheme.xaml(40,42) Content (resource)
-    let value_625 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 2 0 #26000000")), 40, 42)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 42)?, rt::string_object("MacOSControlShadow"), rt::to_object(::core::clone::Clone::clone(&value_625))), 40, 42)?;
-    // MacOSTheme.xaml(43,45) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "MacOSSystemFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5419, 43, 45)?;
-    // MacOSTheme.xaml(44,46) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "MacOSDisplayFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5420, 44, 46)?;
-    // MacOSTheme.xaml(45,48) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "MacOSMonospaceFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5421, 45, 48)?;
-    // MacOSTheme.xaml(46,42) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 46, 42)?, rt::string_object("MacOSCaptionFontSize"), rt::to_object(11.0_f64)), 46, 42)?;
-    // MacOSTheme.xaml(47,39) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 47, 39)?, rt::string_object("MacOSBodyFontSize"), rt::to_object(13.0_f64)), 47, 39)?;
-    // MacOSTheme.xaml(48,43) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 48, 43)?, rt::string_object("MacOSHeadlineFontSize"), rt::to_object(17.0_f64)), 48, 43)?;
-    // MacOSTheme.xaml(49,40) Content (resource)
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 49, 40)?, rt::string_object("MacOSTitleFontSize"), rt::to_object(22.0_f64)), 49, 40)?;
+    // MacOSTheme.xaml(11,52) Content (resource)
+    let value_621 = ::ferroui_base::animation::TimeSpan::__markup_FromTicks_0(12000000_i64);
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 11, 52)?, rt::string_object("MacOSProgressPulseDuration"), rt::to_object(::core::clone::Clone::clone(&value_621))), 11, 52)?;
+    // MacOSTheme.xaml(36,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "MacOSTrafficLightGlyphBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5417, 36, 4)?;
+    // MacOSTheme.xaml(37,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "MacOSTrafficLightBorderBrush", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5418, 37, 4)?;
+    // MacOSTheme.xaml(38,49) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 38, 49)?, rt::string_object("MacOSWindowCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(20.0_f64, 20.0_f64, 20.0_f64, 20.0_f64))), 38, 49)?;
+    // MacOSTheme.xaml(39,47) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 39, 47)?, rt::string_object("MacOSWindowTitleBarHeight"), rt::to_object(44.0_f64)), 39, 47)?;
+    // MacOSTheme.xaml(40,46) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 46)?, rt::string_object("MacOSWindowTitleFontSize"), rt::to_object(13.0_f64)), 40, 46)?;
+    // MacOSTheme.xaml(41,50) Content (resource)
+    let value_622 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 41, 50)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 41, 50)?, rt::string_object("MacOSWindowTitleFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_622))), 41, 50)?;
+    // MacOSTheme.xaml(42,41) Content (resource)
+    let value_623 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 12 36 0 #40000000, 0 1 4 0 #33000000")), 42, 41)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 41)?, rt::string_object("MacOSWindowShadow"), rt::to_object(::core::clone::Clone::clone(&value_623))), 42, 41)?;
+    // MacOSTheme.xaml(43,42) Content (resource)
+    let value_624 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 3 0 #26000000")), 43, 42)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 43, 42)?, rt::string_object("MacOSSegmentShadow"), rt::to_object(::core::clone::Clone::clone(&value_624))), 43, 42)?;
+    // MacOSTheme.xaml(44,39) Content (resource)
+    let value_625 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 8 24 0 #33000000, 0 1 3 0 #26000000")), 44, 39)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 44, 39)?, rt::string_object("MacOSMenuShadow"), rt::to_object(::core::clone::Clone::clone(&value_625))), 44, 39)?;
+    // MacOSTheme.xaml(45,42) Content (resource)
+    let value_626 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 2 0 #26000000")), 45, 42)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 45, 42)?, rt::string_object("MacOSControlShadow"), rt::to_object(::core::clone::Clone::clone(&value_626))), 45, 42)?;
+    // MacOSTheme.xaml(48,45) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "MacOSSystemFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5419, 48, 45)?;
+    // MacOSTheme.xaml(49,46) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "MacOSDisplayFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5420, 49, 46)?;
+    // MacOSTheme.xaml(50,48) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "MacOSMonospaceFontFamily", ::ferroui_base::data::core::ValueType::object(), &context, populate_macostheme_xaml_deferred_5421, 50, 48)?;
+    // MacOSTheme.xaml(51,42) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 51, 42)?, rt::string_object("MacOSCaptionFontSize"), rt::to_object(11.0_f64)), 51, 42)?;
+    // MacOSTheme.xaml(52,39) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 52, 39)?, rt::string_object("MacOSBodyFontSize"), rt::to_object(13.0_f64)), 52, 39)?;
+    // MacOSTheme.xaml(53,43) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 43)?, rt::string_object("MacOSHeadlineFontSize"), rt::to_object(17.0_f64)), 53, 43)?;
+    // MacOSTheme.xaml(54,40) Content (resource)
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 54, 40)?, rt::string_object("MacOSTitleFontSize"), rt::to_object(22.0_f64)), 54, 40)?;
     // MacOSTheme.xaml(16,45) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 45)?, rt::string_object("StringTextFlyoutCutText"), rt::string_object("Cut")), 16, 45)?;
     // MacOSTheme.xaml(17,46) Content (resource)
@@ -33158,108 +33161,108 @@ fn populate_macostheme_xaml_deferred_1781(
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
-/// Builds the deferred content at `MacOSTheme.xaml(10,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_1782(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(10,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(10,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4284111450_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `MacOSTheme.xaml(11,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_1783(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(11,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(11,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(587202559_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `MacOSTheme.xaml(12,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_1784(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(12,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(12,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4284637794_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `MacOSTheme.xaml(13,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_1785(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(13,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // MacOSTheme.xaml(13,52) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "SystemAccentColor", 13, 52)?;
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `MacOSTheme.xaml(14,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_1786(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(14,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(14,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
 /// Builds the deferred content at `MacOSTheme.xaml(15,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_1787(
+fn populate_macostheme_xaml_deferred_1782(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
     // MacOSTheme.xaml(15,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // MacOSTheme.xaml(15,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4280163872_u32);
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4284111450_u32);
     solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 /// Builds the deferred content at `MacOSTheme.xaml(16,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_1788(
+fn populate_macostheme_xaml_deferred_1783(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
     // MacOSTheme.xaml(16,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // MacOSTheme.xaml(16,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(2787912750_u32);
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(587202559_u32);
     solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 /// Builds the deferred content at `MacOSTheme.xaml(17,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_1784(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(17,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // MacOSTheme.xaml(17,8) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4284637794_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(18,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_1785(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(18,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
+    // MacOSTheme.xaml(18,52) Color
+    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "SystemAccentColor", 18, 52)?;
+    context.pop_parent();
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(19,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_1786(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(19,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // MacOSTheme.xaml(19,8) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(20,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_1787(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(20,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // MacOSTheme.xaml(20,8) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4280163872_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(21,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_1788(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(21,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // MacOSTheme.xaml(21,8) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(2787912750_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(22,8)` (a template or a deferred resource).
 fn populate_macostheme_xaml_deferred_1789(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(17,8) SolidColorBrush
+    // MacOSTheme.xaml(22,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // MacOSTheme.xaml(17,52) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "DividerStrokeColorDefault", 17, 52)?;
+    // MacOSTheme.xaml(22,52) Color
+    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "DividerStrokeColorDefault", 22, 52)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
@@ -51102,108 +51105,108 @@ fn populate_macostheme_xaml_deferred_3570(
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
-/// Builds the deferred content at `MacOSTheme.xaml(20,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_3571(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(20,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(20,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291875024_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `MacOSTheme.xaml(21,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_3572(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(21,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(21,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(335544320_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `MacOSTheme.xaml(22,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_3573(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(22,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(22,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `MacOSTheme.xaml(23,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_3574(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(23,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // MacOSTheme.xaml(23,52) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "SystemAccentColor", 23, 52)?;
-    context.pop_parent();
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
-/// Builds the deferred content at `MacOSTheme.xaml(24,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_3575(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
-    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(24,8) SolidColorBrush
-    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(24,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
-    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
-    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
-}
-
 /// Builds the deferred content at `MacOSTheme.xaml(25,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_3576(
+fn populate_macostheme_xaml_deferred_3571(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
     // MacOSTheme.xaml(25,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // MacOSTheme.xaml(25,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291875024_u32);
     solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 /// Builds the deferred content at `MacOSTheme.xaml(26,8)` (a template or a deferred resource).
-fn populate_macostheme_xaml_deferred_3577(
+fn populate_macostheme_xaml_deferred_3572(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
     // MacOSTheme.xaml(26,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     // MacOSTheme.xaml(26,8) Color
-    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(2801137143_u32);
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(335544320_u32);
     solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
 /// Builds the deferred content at `MacOSTheme.xaml(27,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_3573(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(27,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // MacOSTheme.xaml(27,8) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(28,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_3574(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(28,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    context.push_parent(rt::to_value(solid_color_brush_0.clone()));
+    // MacOSTheme.xaml(28,52) Color
+    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "SystemAccentColor", 28, 52)?;
+    context.pop_parent();
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(29,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_3575(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(29,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // MacOSTheme.xaml(29,8) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(30,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_3576(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(30,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // MacOSTheme.xaml(30,8) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294967295_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(31,8)` (a template or a deferred resource).
+fn populate_macostheme_xaml_deferred_3577(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
+    let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
+    // MacOSTheme.xaml(31,8) SolidColorBrush
+    let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
+    // MacOSTheme.xaml(31,8) Color
+    let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(2801137143_u32);
+    solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
+    ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
+}
+
+/// Builds the deferred content at `MacOSTheme.xaml(32,8)` (a template or a deferred resource).
 fn populate_macostheme_xaml_deferred_3578(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(27,8) SolidColorBrush
+    // MacOSTheme.xaml(32,8) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
     context.push_parent(rt::to_value(solid_color_brush_0.clone()));
-    // MacOSTheme.xaml(27,52) Color
-    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "DividerStrokeColorDefault", 27, 52)?;
+    // MacOSTheme.xaml(32,52) Color
+    rt::bind_dynamic_resource(&context, solid_color_brush_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::SolidColorBrush::color_property(), "DividerStrokeColorDefault", 32, 52)?;
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
@@ -69576,33 +69579,33 @@ fn populate_macostheme_xaml_deferred_5416(
     ::core::result::Result::Ok(rt::to_value(value_0.clone()))
 }
 
-/// Builds the deferred content at `MacOSTheme.xaml(31,4)` (a template or a deferred resource).
+/// Builds the deferred content at `MacOSTheme.xaml(36,4)` (a template or a deferred resource).
 fn populate_macostheme_xaml_deferred_5417(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(31,4) SolidColorBrush
+    // MacOSTheme.xaml(36,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(31,4) Color
+    // MacOSTheme.xaml(36,4) Color
     let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(2147483648_u32);
     solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
-/// Builds the deferred content at `MacOSTheme.xaml(32,4)` (a template or a deferred resource).
+/// Builds the deferred content at `MacOSTheme.xaml(37,4)` (a template or a deferred resource).
 fn populate_macostheme_xaml_deferred_5418(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let _context = rt::deferred_context(service_provider, &POPULATE_MACOSTHEME_XAML_DOCUMENT);
-    // MacOSTheme.xaml(32,4) SolidColorBrush
+    // MacOSTheme.xaml(37,4) SolidColorBrush
     let solid_color_brush_0 = ::ferroui_base::media::SolidColorBrush::new();
-    // MacOSTheme.xaml(32,4) Color
+    // MacOSTheme.xaml(37,4) Color
     let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(637534208_u32);
     solid_color_brush_0.set_value(::ferroui_base::media::SolidColorBrush::color_property(), ::core::clone::Clone::clone(&value_0));
     ::core::result::Result::Ok(rt::to_value(solid_color_brush_0.clone()))
 }
 
-/// Builds the deferred content at `MacOSTheme.xaml(43,45)` (a template or a deferred resource).
+/// Builds the deferred content at `MacOSTheme.xaml(48,45)` (a template or a deferred resource).
 fn populate_macostheme_xaml_deferred_5419(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
@@ -69610,7 +69613,7 @@ fn populate_macostheme_xaml_deferred_5419(
     ::core::result::Result::Ok(rt::to_value(::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("SF Pro Text, .AppleSystemUIFont, SF Pro, Helvetica Neue, Arial, $Default"))))
 }
 
-/// Builds the deferred content at `MacOSTheme.xaml(44,46)` (a template or a deferred resource).
+/// Builds the deferred content at `MacOSTheme.xaml(49,46)` (a template or a deferred resource).
 fn populate_macostheme_xaml_deferred_5420(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
@@ -69618,7 +69621,7 @@ fn populate_macostheme_xaml_deferred_5420(
     ::core::result::Result::Ok(rt::to_value(::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("SF Pro Display, .AppleSystemUIFont, SF Pro, Helvetica Neue, Arial, $Default"))))
 }
 
-/// Builds the deferred content at `MacOSTheme.xaml(45,48)` (a template or a deferred resource).
+/// Builds the deferred content at `MacOSTheme.xaml(50,48)` (a template or a deferred resource).
 fn populate_macostheme_xaml_deferred_5421(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
@@ -69846,9 +69849,9 @@ pub fn build_controls_macoscontrols_xaml(
     rt::add_deferred_resource(&resource_dictionary_0, "ProgressBarTextFormatConverter", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_152, 23, 4)?;
     // Controls/MacOSControls.xaml(24,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultProgressBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_153, 24, 4)?;
-    // Controls/MacOSControls.xaml(133,4) Content (resource)
-    let deferred_81 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_155, 133, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_81) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 133, 4)?;
+    // Controls/MacOSControls.xaml(134,4) Content (resource)
+    let deferred_81 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_155, 134, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_81) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 134, 4)?;
     // Controls/MacOSControls.xaml(36,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "PathIconUnscaledTemplate", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_156, 36, 4)?;
     // Controls/MacOSControls.xaml(44,4) Content (resource)
@@ -70101,9 +70104,9 @@ pub fn build_controls_macoscontrols_xaml(
     rt::add_deferred_resource(&resource_dictionary_0, "SplitButtonCommandBarStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_356, 384, 4)?;
     // Controls/MacOSControls.xaml(13,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "DefaultToggleSwitchStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_359, 13, 4)?;
-    // Controls/MacOSControls.xaml(160,4) Content (resource)
-    let deferred_181 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_362, 160, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_181) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 160, 4)?;
+    // Controls/MacOSControls.xaml(156,4) Content (resource)
+    let deferred_181 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_362, 156, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_181) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 156, 4)?;
     // Controls/MacOSControls.xaml(24,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "SliderThumbStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_macoscontrols_xaml_deferred_363, 24, 4)?;
     // Controls/MacOSControls.xaml(66,4) Content (resource)
@@ -85396,11 +85399,11 @@ fn build_controls_macoscontrols_xaml_deferred_153(
     rt::add_setter(style_11.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.0_f64));
     ::ferroui_base::styling::StyleBase::__markup_Add_1(style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 104, 8)?);
     ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 100, 6)?);
-    // Controls/MacOSControls.xaml(113,6) Content
-    // Controls/MacOSControls.xaml(113,6) Style
+    // Controls/MacOSControls.xaml(114,6) Content
+    // Controls/MacOSControls.xaml(114,6) Style
     let style_12 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_12.clone()));
-    // Controls/MacOSControls.xaml(113,6) Selector
+    // Controls/MacOSControls.xaml(114,6) Selector
     let selector_42 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_43 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_42), ":indeterminate");
     let selector_44 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_43));
@@ -85408,83 +85411,94 @@ fn build_controls_macoscontrols_xaml_deferred_153(
     let selector_46 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_45), "MacOSIndeterminateFill");
     let selector_47 = ::ferroui_base::styling::Selectors::property_equals_untyped(::core::option::Option::Some(selector_46), rt::property(::ferroui_base::Visual::is_visible_property()), ::std::rc::Rc::new(::core::clone::Clone::clone(&true)));
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_12, ::core::option::Option::Some(selector_47.clone()));
-    // Controls/MacOSControls.xaml(116,10) Animations
+    // Controls/MacOSControls.xaml(117,10) Animations
     let animations_collection_0 = ::ferroui_base::styling::StyleBase::__markup_get_Animations(style_12.upcast_ref::<::ferroui_base::styling::StyleBase>());
-    // Controls/MacOSControls.xaml(116,10) Animation
+    // Controls/MacOSControls.xaml(117,10) Animation
     let animation_0 = ::ferroui_base::animation::Animation::new();
     context.push_parent(rt::to_value(animation_0.clone()));
-    // Controls/MacOSControls.xaml(116,10) IterationCount
-    let value_0 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 116, 20)?;
+    // Controls/MacOSControls.xaml(117,10) IterationCount
+    let value_0 = rt::invoked(::ferroui_base::animation::IterationCount::__markup_parse(::std::string::String::from("Infinite")), 117, 20)?;
     animation_0.set_direct_value(::ferroui_base::animation::Animation::iteration_count_property(), ::core::clone::Clone::clone(&value_0));
-    // Controls/MacOSControls.xaml(116,46) Duration
-    rt::bind_dynamic_resource(&context, animation_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::Animation::duration_property(), "MacOSProgressPulseDuration", 116, 46)?;
-    // Controls/MacOSControls.xaml(117,12) Children
+    // Controls/MacOSControls.xaml(117,46) Duration (setter chosen at run time)
+    let static_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("MacOSProgressPulseDuration"));
+    let provided_9 = rt::provide_value_invoked(&context, rt::property_value(::ferroui_base::animation::Animation::duration_property()), &static_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 117, 46)?;
+    let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
+    if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::UnsetValueType as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+        rt::unset_value(animation_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::Animation::duration_property());
+    } else if rt::is_instance(&value_1, rt::markup_handle(<dyn ::ferroui_base::data::BindingBase as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+        rt::bind(animation_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::Animation::duration_property(), value_1.clone(), 117, 46)?;
+    } else if rt::is_instance(&value_1, rt::markup_handle(<::ferroui_base::animation::TimeSpan as ::ferroui_base::metadata::MarkupTyped>::MARKUP)) {
+        animation_0.set_direct_value(::ferroui_base::animation::Animation::duration_property(), rt::exact(value_1.clone(), "FerroUI.Animation.Animation.set_Duration", 0, 117, 46)?);
+    } else {
+        return ::core::result::Result::Err(rt::no_setter("Duration", &value_1, 117, 46));
+    }
+    // Controls/MacOSControls.xaml(118,12) Children
     let children_collection_0 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_0);
-    // Controls/MacOSControls.xaml(117,12) KeyFrame
+    // Controls/MacOSControls.xaml(118,12) KeyFrame
     let key_frame_0 = ::ferroui_base::animation::KeyFrame::new();
-    // Controls/MacOSControls.xaml(117,12) Cue
-    let value_1 = rt::invoked(::ferroui_base::animation::Cue::__markup_parse(::std::string::String::from("0%")), 117, 21)?;
-    ::ferroui_base::animation::KeyFrame::__markup_set_Cue(&key_frame_0, ::core::clone::Clone::clone(&value_1));
-    // Controls/MacOSControls.xaml(118,14) Setters
+    // Controls/MacOSControls.xaml(118,12) Cue
+    let value_2 = rt::invoked(::ferroui_base::animation::Cue::__markup_parse(::std::string::String::from("0%")), 118, 21)?;
+    ::ferroui_base::animation::KeyFrame::__markup_set_Cue(&key_frame_0, ::core::clone::Clone::clone(&value_2));
+    // Controls/MacOSControls.xaml(119,14) Setters
     let setters_collection_0 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_0);
     let setter_29 = ::ferroui_base::styling::Setter::__markup_new_0();
-    // Controls/MacOSControls.xaml(118,21) Property
+    // Controls/MacOSControls.xaml(119,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_29, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
-    // Controls/MacOSControls.xaml(118,14) Value
+    // Controls/MacOSControls.xaml(119,14) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_29, rt::setter_value(&setter_29, rt::to_object(0.45_f64)));
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_0, ::core::clone::Clone::clone(&setter_29) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&key_frame_0));
-    // Controls/MacOSControls.xaml(120,12) Children
+    // Controls/MacOSControls.xaml(121,12) Children
     let children_collection_1 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_0);
-    // Controls/MacOSControls.xaml(120,12) KeyFrame
+    // Controls/MacOSControls.xaml(121,12) KeyFrame
     let key_frame_1 = ::ferroui_base::animation::KeyFrame::new();
-    // Controls/MacOSControls.xaml(120,12) Cue
-    let value_2 = rt::invoked(::ferroui_base::animation::Cue::__markup_parse(::std::string::String::from("50%")), 120, 21)?;
-    ::ferroui_base::animation::KeyFrame::__markup_set_Cue(&key_frame_1, ::core::clone::Clone::clone(&value_2));
-    // Controls/MacOSControls.xaml(121,14) Setters
+    // Controls/MacOSControls.xaml(121,12) Cue
+    let value_3 = rt::invoked(::ferroui_base::animation::Cue::__markup_parse(::std::string::String::from("50%")), 121, 21)?;
+    ::ferroui_base::animation::KeyFrame::__markup_set_Cue(&key_frame_1, ::core::clone::Clone::clone(&value_3));
+    // Controls/MacOSControls.xaml(122,14) Setters
     let setters_collection_1 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_1);
     let setter_30 = ::ferroui_base::styling::Setter::__markup_new_0();
-    // Controls/MacOSControls.xaml(121,21) Property
+    // Controls/MacOSControls.xaml(122,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_30, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
-    // Controls/MacOSControls.xaml(121,14) Value
+    // Controls/MacOSControls.xaml(122,14) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_30, rt::setter_value(&setter_30, rt::to_object(1.0_f64)));
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_1, ::core::clone::Clone::clone(&setter_30) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&key_frame_1));
-    // Controls/MacOSControls.xaml(123,12) Children
+    // Controls/MacOSControls.xaml(124,12) Children
     let children_collection_2 = ::ferroui_base::animation::Animation::__markup_get_Children(&animation_0);
-    // Controls/MacOSControls.xaml(123,12) KeyFrame
+    // Controls/MacOSControls.xaml(124,12) KeyFrame
     let key_frame_2 = ::ferroui_base::animation::KeyFrame::new();
-    // Controls/MacOSControls.xaml(123,12) Cue
-    let value_3 = rt::invoked(::ferroui_base::animation::Cue::__markup_parse(::std::string::String::from("100%")), 123, 21)?;
-    ::ferroui_base::animation::KeyFrame::__markup_set_Cue(&key_frame_2, ::core::clone::Clone::clone(&value_3));
-    // Controls/MacOSControls.xaml(124,14) Setters
+    // Controls/MacOSControls.xaml(124,12) Cue
+    let value_4 = rt::invoked(::ferroui_base::animation::Cue::__markup_parse(::std::string::String::from("100%")), 124, 21)?;
+    ::ferroui_base::animation::KeyFrame::__markup_set_Cue(&key_frame_2, ::core::clone::Clone::clone(&value_4));
+    // Controls/MacOSControls.xaml(125,14) Setters
     let setters_collection_2 = ::ferroui_base::animation::KeyFrame::__markup_get_Setters(&key_frame_2);
     let setter_31 = ::ferroui_base::styling::Setter::__markup_new_0();
-    // Controls/MacOSControls.xaml(124,21) Property
+    // Controls/MacOSControls.xaml(125,21) Property
     ::ferroui_base::styling::Setter::__markup_set_Property(&setter_31, ::core::option::Option::Some(rt::property(::ferroui_base::Visual::opacity_property())));
-    // Controls/MacOSControls.xaml(124,14) Value
+    // Controls/MacOSControls.xaml(125,14) Value
     ::ferroui_base::styling::Setter::__markup_set_Value(&setter_31, rt::setter_value(&setter_31, rt::to_object(0.45_f64)));
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>>>::__markup_Add_0(&setters_collection_2, ::core::clone::Clone::clone(&setter_31) as ::std::rc::Rc<dyn ::ferroui_base::animation::IAnimationSetter>);
     ::ferroui_base::animation::KeyFrames::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&key_frame_2));
     context.pop_parent();
-    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_0, rt::cast(animation_0.clone(), 116, 10)?);
-    // Controls/MacOSControls.xaml(114,8) Content
+    <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::animation::IAnimation>>>::__markup_Add_0(&animations_collection_0, rt::cast(animation_0.clone(), 117, 10)?);
+    // Controls/MacOSControls.xaml(115,8) Content
     rt::add_setter(style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(1.0_f64));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_12.clone(), 113, 6)?);
-    // Controls/MacOSControls.xaml(129,6) Content
-    // Controls/MacOSControls.xaml(129,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_12.clone(), 114, 6)?);
+    // Controls/MacOSControls.xaml(130,6) Content
+    // Controls/MacOSControls.xaml(130,6) Style
     let style_13 = ::ferroui_base::styling::Style::new();
-    // Controls/MacOSControls.xaml(129,6) Selector
+    // Controls/MacOSControls.xaml(130,6) Selector
     let selector_48 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_49 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_48), ":indeterminate");
     let selector_50 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_49));
     let selector_51 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_50), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_52 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_51), "MacOSIndeterminateStaticFill");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_13, ::core::option::Option::Some(selector_52.clone()));
-    // Controls/MacOSControls.xaml(130,8) Content
+    // Controls/MacOSControls.xaml(131,8) Content
     rt::add_setter(style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::opacity_property()), rt::to_object(0.65_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_13.clone(), 129, 6)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_13.clone(), 130, 6)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -85738,20 +85752,20 @@ fn build_controls_macoscontrols_xaml_deferred_154(
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(133,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(134,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_155(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(133,4) ControlTheme
+    // Controls/MacOSControls.xaml(134,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/MacOSControls.xaml(133,4) TargetType
+    // Controls/MacOSControls.xaml(134,4) TargetType
     ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::ProgressBar as ::ferroui_base::StaticType>::TYPE));
-    // Controls/MacOSControls.xaml(133,71) BasedOn
+    // Controls/MacOSControls.xaml(134,71) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultProgressBarStyle"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 133, 71)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 133, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 133, 71)?);
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 134, 71)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 134, 71)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 134, 71)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -113631,166 +113645,149 @@ fn build_controls_macoscontrols_xaml_deferred_359(
     ::ferroui_markup_xaml::templates::Template::__markup_set_Content(&rt::cast(::core::clone::Clone::clone(&focus_adorner_template_0), 27, 10)?, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&focus_adorner_template_0)));
-    // Controls/MacOSControls.xaml(31,6) Content
-    let setter_12 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::ToggleSwitch::knob_transitions_property()));
-    // Controls/MacOSControls.xaml(32,8) Value
-    let transitions_0 = ::ferroui_base::animation::Transitions::__markup_new_0();
-    context.push_parent(rt::to_value(transitions_0.clone()));
-    // Controls/MacOSControls.xaml(33,10) Content
-    // Controls/MacOSControls.xaml(33,10) DoubleTransition
-    let double_transition_0 = ::ferroui_base::animation::DoubleTransition::new();
-    context.push_parent(rt::to_value(double_transition_0.clone()));
-    // Controls/MacOSControls.xaml(33,10) Property
-    double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Canvas::left_property())));
-    // Controls/MacOSControls.xaml(34,27) Duration
-    rt::bind_dynamic_resource(&context, double_transition_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), "MacOSMotionStandardDuration", 34, 27)?;
-    // Controls/MacOSControls.xaml(33,10) Easing
-    let value_0 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("CubicEaseOut")), 35, 27)?;
-    double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::easing_property(), ::core::clone::Clone::clone(&value_0));
-    context.pop_parent();
-    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(double_transition_0.clone(), 33, 10)?);
-    context.pop_parent();
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_12, rt::to_object(::core::clone::Clone::clone(&transitions_0)));
-    // Controls/MacOSControls.xaml(38,6) Content
+    // Controls/MacOSControls.xaml(33,6) Content
+    // Controls/MacOSControls.xaml(33,40) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ToggleSwitch::knob_transitions_property()), "MacOSSwitchKnobTransitions");
+    // Controls/MacOSControls.xaml(34,6) Content
     let setter_13 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
-    // Controls/MacOSControls.xaml(39,8) Value
+    // Controls/MacOSControls.xaml(35,8) Value
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
-    // Controls/MacOSControls.xaml(40,10) Content
-    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_361, 40, 10)?;
+    // Controls/MacOSControls.xaml(36,10) Content
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_macoscontrols_xaml_deferred_361, 36, 10)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_13, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
-    // Controls/MacOSControls.xaml(108,6) Content
-    // Controls/MacOSControls.xaml(108,6) Style
+    // Controls/MacOSControls.xaml(104,6) Content
+    // Controls/MacOSControls.xaml(104,6) Style
     let style_0 = ::ferroui_base::styling::Style::new();
-    // Controls/MacOSControls.xaml(108,6) Selector
+    // Controls/MacOSControls.xaml(104,6) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_0), ":empty");
     let selector_2 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_1));
     let selector_3 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_2), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
     let selector_4 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_3), "PART_ContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_4.clone()));
-    // Controls/MacOSControls.xaml(109,8) Content
+    // Controls/MacOSControls.xaml(105,8) Content
     rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::is_visible_property()), rt::to_object(::core::clone::Clone::clone(&false)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 108, 6)?);
-    // Controls/MacOSControls.xaml(111,6) Content
-    // Controls/MacOSControls.xaml(111,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 104, 6)?);
+    // Controls/MacOSControls.xaml(107,6) Content
+    // Controls/MacOSControls.xaml(107,6) Style
     let style_1 = ::ferroui_base::styling::Style::new();
-    // Controls/MacOSControls.xaml(111,6) Selector
+    // Controls/MacOSControls.xaml(107,6) Selector
     let selector_5 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_6 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_5), ":unchecked");
     let selector_7 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_6));
     let selector_8 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_7), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
     let selector_9 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_8), "PART_OffContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_9.clone()));
-    // Controls/MacOSControls.xaml(112,8) Content
+    // Controls/MacOSControls.xaml(108,8) Content
     rt::add_setter(style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::is_visible_property()), rt::to_object(::core::clone::Clone::clone(&true)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 111, 6)?);
-    // Controls/MacOSControls.xaml(114,6) Content
-    // Controls/MacOSControls.xaml(114,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 107, 6)?);
+    // Controls/MacOSControls.xaml(110,6) Content
+    // Controls/MacOSControls.xaml(110,6) Style
     let style_2 = ::ferroui_base::styling::Style::new();
-    // Controls/MacOSControls.xaml(114,6) Selector
+    // Controls/MacOSControls.xaml(110,6) Selector
     let selector_10 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_11 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_10), ":checked");
     let selector_12 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_11));
     let selector_13 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_12), <::ferroui_controls::presenters::ContentPresenter as ::ferroui_base::StaticType>::TYPE);
     let selector_14 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_13), "PART_OnContentPresenter");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_14.clone()));
-    // Controls/MacOSControls.xaml(115,8) Content
+    // Controls/MacOSControls.xaml(111,8) Content
     rt::add_setter(style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::Visual::is_visible_property()), rt::to_object(::core::clone::Clone::clone(&true)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 114, 6)?);
-    // Controls/MacOSControls.xaml(117,6) Content
-    // Controls/MacOSControls.xaml(117,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 110, 6)?);
+    // Controls/MacOSControls.xaml(113,6) Content
+    // Controls/MacOSControls.xaml(113,6) Style
     let style_3 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_3.clone()));
-    // Controls/MacOSControls.xaml(117,6) Selector
+    // Controls/MacOSControls.xaml(113,6) Selector
     let selector_15 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_16 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_15), ":pointerover");
     let selector_17 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_16));
     let selector_18 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_17), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_19 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_18), "SwitchTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_19.clone()));
-    // Controls/MacOSControls.xaml(118,8) Content
-    // Controls/MacOSControls.xaml(118,37) Value
+    // Controls/MacOSControls.xaml(114,8) Content
+    // Controls/MacOSControls.xaml(114,37) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ToggleSwitchFillOffPointerOver");
-    // Controls/MacOSControls.xaml(119,8) Content
-    // Controls/MacOSControls.xaml(119,38) Value
+    // Controls/MacOSControls.xaml(115,8) Content
+    // Controls/MacOSControls.xaml(115,38) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "ToggleSwitchStrokeOffPointerOver");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 117, 6)?);
-    // Controls/MacOSControls.xaml(121,6) Content
-    // Controls/MacOSControls.xaml(121,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 113, 6)?);
+    // Controls/MacOSControls.xaml(117,6) Content
+    // Controls/MacOSControls.xaml(117,6) Style
     let style_4 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_4.clone()));
-    // Controls/MacOSControls.xaml(121,6) Selector
+    // Controls/MacOSControls.xaml(117,6) Selector
     let selector_20 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_21 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_20), ":pressed");
     let selector_22 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_21));
     let selector_23 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_22), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_24 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_23), "SwitchTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_24.clone()));
-    // Controls/MacOSControls.xaml(122,8) Content
-    // Controls/MacOSControls.xaml(122,37) Value
+    // Controls/MacOSControls.xaml(118,8) Content
+    // Controls/MacOSControls.xaml(118,37) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ToggleSwitchFillOffPressed");
-    // Controls/MacOSControls.xaml(123,8) Content
-    // Controls/MacOSControls.xaml(123,38) Value
+    // Controls/MacOSControls.xaml(119,8) Content
+    // Controls/MacOSControls.xaml(119,38) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "ToggleSwitchStrokeOffPressed");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 121, 6)?);
-    // Controls/MacOSControls.xaml(125,6) Content
-    // Controls/MacOSControls.xaml(125,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 117, 6)?);
+    // Controls/MacOSControls.xaml(121,6) Content
+    // Controls/MacOSControls.xaml(121,6) Style
     let style_5 = ::ferroui_base::styling::Style::new();
-    // Controls/MacOSControls.xaml(125,6) Selector
+    // Controls/MacOSControls.xaml(121,6) Selector
     let selector_25 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_26 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_25), ":pressed");
     let selector_27 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_26));
     let selector_28 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_27), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_29 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_28), "SwitchKnob");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_29.clone()));
-    // Controls/MacOSControls.xaml(126,8) Content
+    // Controls/MacOSControls.xaml(122,8) Content
     rt::add_setter(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::width_property()), rt::to_object(20.0_f64));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 125, 6)?);
-    // Controls/MacOSControls.xaml(128,6) Content
-    // Controls/MacOSControls.xaml(128,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 121, 6)?);
+    // Controls/MacOSControls.xaml(124,6) Content
+    // Controls/MacOSControls.xaml(124,6) Style
     let style_6 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_6.clone()));
-    // Controls/MacOSControls.xaml(128,6) Selector
+    // Controls/MacOSControls.xaml(124,6) Selector
     let selector_30 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_31 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_30), ":checked");
     let selector_32 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_31));
     let selector_33 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_32), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_34 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_33), "SwitchTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_34.clone()));
-    // Controls/MacOSControls.xaml(129,8) Content
-    // Controls/MacOSControls.xaml(129,37) Value
+    // Controls/MacOSControls.xaml(125,8) Content
+    // Controls/MacOSControls.xaml(125,37) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ToggleSwitchFillOn");
-    // Controls/MacOSControls.xaml(130,8) Content
-    // Controls/MacOSControls.xaml(130,38) Value
+    // Controls/MacOSControls.xaml(126,8) Content
+    // Controls/MacOSControls.xaml(126,38) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "ToggleSwitchStrokeOn");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 128, 6)?);
-    // Controls/MacOSControls.xaml(132,6) Content
-    // Controls/MacOSControls.xaml(132,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 124, 6)?);
+    // Controls/MacOSControls.xaml(128,6) Content
+    // Controls/MacOSControls.xaml(128,6) Style
     let style_7 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_7.clone()));
-    // Controls/MacOSControls.xaml(132,6) Selector
+    // Controls/MacOSControls.xaml(128,6) Selector
     let selector_35 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_36 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_35), ":checked");
     let selector_37 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_36));
     let selector_38 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_37), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_39 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_38), "SwitchKnob");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_7, ::core::option::Option::Some(selector_39.clone()));
-    // Controls/MacOSControls.xaml(133,8) Content
-    // Controls/MacOSControls.xaml(133,37) Value
+    // Controls/MacOSControls.xaml(129,8) Content
+    // Controls/MacOSControls.xaml(129,37) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_7.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ToggleSwitchKnobFillOn");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 132, 6)?);
-    // Controls/MacOSControls.xaml(135,6) Content
-    // Controls/MacOSControls.xaml(135,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_7.clone(), 128, 6)?);
+    // Controls/MacOSControls.xaml(131,6) Content
+    // Controls/MacOSControls.xaml(131,6) Style
     let style_8 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_8.clone()));
-    // Controls/MacOSControls.xaml(135,6) Selector
+    // Controls/MacOSControls.xaml(131,6) Selector
     let selector_40 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_41 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_40), ":checked");
     let selector_42 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_41), ":pointerover");
@@ -113798,19 +113795,19 @@ fn build_controls_macoscontrols_xaml_deferred_359(
     let selector_44 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_43), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_45 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_44), "SwitchTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_8, ::core::option::Option::Some(selector_45.clone()));
-    // Controls/MacOSControls.xaml(136,8) Content
-    // Controls/MacOSControls.xaml(136,37) Value
+    // Controls/MacOSControls.xaml(132,8) Content
+    // Controls/MacOSControls.xaml(132,37) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ToggleSwitchFillOnPointerOver");
-    // Controls/MacOSControls.xaml(137,8) Content
-    // Controls/MacOSControls.xaml(137,38) Value
+    // Controls/MacOSControls.xaml(133,8) Content
+    // Controls/MacOSControls.xaml(133,38) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_8.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "ToggleSwitchStrokeOnPointerOver");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 135, 6)?);
-    // Controls/MacOSControls.xaml(139,6) Content
-    // Controls/MacOSControls.xaml(139,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_8.clone(), 131, 6)?);
+    // Controls/MacOSControls.xaml(135,6) Content
+    // Controls/MacOSControls.xaml(135,6) Style
     let style_9 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_9.clone()));
-    // Controls/MacOSControls.xaml(139,6) Selector
+    // Controls/MacOSControls.xaml(135,6) Selector
     let selector_46 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_47 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_46), ":checked");
     let selector_48 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_47), ":pressed");
@@ -113818,72 +113815,72 @@ fn build_controls_macoscontrols_xaml_deferred_359(
     let selector_50 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_49), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_51 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_50), "SwitchTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_9, ::core::option::Option::Some(selector_51.clone()));
-    // Controls/MacOSControls.xaml(140,8) Content
-    // Controls/MacOSControls.xaml(140,37) Value
+    // Controls/MacOSControls.xaml(136,8) Content
+    // Controls/MacOSControls.xaml(136,37) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ToggleSwitchFillOnPressed");
-    // Controls/MacOSControls.xaml(141,8) Content
-    // Controls/MacOSControls.xaml(141,38) Value
+    // Controls/MacOSControls.xaml(137,8) Content
+    // Controls/MacOSControls.xaml(137,38) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_9.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "ToggleSwitchStrokeOnPressed");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 139, 6)?);
-    // Controls/MacOSControls.xaml(143,6) Content
-    // Controls/MacOSControls.xaml(143,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_9.clone(), 135, 6)?);
+    // Controls/MacOSControls.xaml(139,6) Content
+    // Controls/MacOSControls.xaml(139,6) Style
     let style_10 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_10.clone()));
-    // Controls/MacOSControls.xaml(143,6) Selector
+    // Controls/MacOSControls.xaml(139,6) Selector
     let selector_52 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_53 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_52), ":disabled");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_10, ::core::option::Option::Some(selector_53.clone()));
-    // Controls/MacOSControls.xaml(144,8) Content
-    // Controls/MacOSControls.xaml(144,37) Value
+    // Controls/MacOSControls.xaml(140,8) Content
+    // Controls/MacOSControls.xaml(140,37) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), "ToggleSwitchContentForegroundDisabled");
-    // Controls/MacOSControls.xaml(145,8) Content
-    // Controls/MacOSControls.xaml(145,8) Style
+    // Controls/MacOSControls.xaml(141,8) Content
+    // Controls/MacOSControls.xaml(141,8) Style
     let style_11 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_11.clone()));
-    // Controls/MacOSControls.xaml(145,8) Selector
+    // Controls/MacOSControls.xaml(141,8) Selector
     let selector_54 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_55 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_54));
     let selector_56 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_55), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_57 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_56), "SwitchTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_11, ::core::option::Option::Some(selector_57.clone()));
-    // Controls/MacOSControls.xaml(146,10) Content
-    // Controls/MacOSControls.xaml(146,39) Value
+    // Controls/MacOSControls.xaml(142,10) Content
+    // Controls/MacOSControls.xaml(142,39) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_11.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ToggleSwitchFillOffDisabled");
-    // Controls/MacOSControls.xaml(147,10) Content
-    // Controls/MacOSControls.xaml(147,40) Value
+    // Controls/MacOSControls.xaml(143,10) Content
+    // Controls/MacOSControls.xaml(143,40) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_11.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "ToggleSwitchStrokeOffDisabled");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 145, 8)?);
-    // Controls/MacOSControls.xaml(149,8) Content
-    // Controls/MacOSControls.xaml(149,8) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_11.clone(), 141, 8)?);
+    // Controls/MacOSControls.xaml(145,8) Content
+    // Controls/MacOSControls.xaml(145,8) Style
     let style_12 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_12.clone()));
-    // Controls/MacOSControls.xaml(149,8) Selector
+    // Controls/MacOSControls.xaml(145,8) Selector
     let selector_58 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_59 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_58));
     let selector_60 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_59), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_61 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_60), "SwitchKnob");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_12, ::core::option::Option::Some(selector_61.clone()));
-    // Controls/MacOSControls.xaml(150,10) Content
-    // Controls/MacOSControls.xaml(150,39) Value
+    // Controls/MacOSControls.xaml(146,10) Content
+    // Controls/MacOSControls.xaml(146,39) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ToggleSwitchKnobFillOffDisabled");
-    // Controls/MacOSControls.xaml(151,10) Content
+    // Controls/MacOSControls.xaml(147,10) Content
     rt::add_setter(style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::width_property()), rt::to_object(18.0_f64));
-    // Controls/MacOSControls.xaml(152,10) Content
+    // Controls/MacOSControls.xaml(148,10) Content
     let setter_34 = rt::new_setter(rt::property(::ferroui_controls::Border::box_shadow_property()));
-    // Controls/MacOSControls.xaml(152,10) Value
-    let value_1 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("none")), 152, 38)?;
-    rt::add_setter_value(style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_34, rt::to_object(::core::clone::Clone::clone(&value_1)));
+    // Controls/MacOSControls.xaml(148,10) Value
+    let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("none")), 148, 38)?;
+    rt::add_setter_value(style_12.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_34, rt::to_object(::core::clone::Clone::clone(&value_0)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_12.clone(), 149, 8)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(style_10.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_12.clone(), 145, 8)?);
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 143, 6)?);
-    // Controls/MacOSControls.xaml(155,6) Content
-    // Controls/MacOSControls.xaml(155,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_10.clone(), 139, 6)?);
+    // Controls/MacOSControls.xaml(151,6) Content
+    // Controls/MacOSControls.xaml(151,6) Style
     let style_13 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_13.clone()));
-    // Controls/MacOSControls.xaml(155,6) Selector
+    // Controls/MacOSControls.xaml(151,6) Selector
     let selector_62 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_63 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_62), ":checked");
     let selector_64 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_63), ":disabled");
@@ -113891,14 +113888,14 @@ fn build_controls_macoscontrols_xaml_deferred_359(
     let selector_66 = ::ferroui_base::styling::Selectors::of_type_info(::core::option::Option::Some(selector_65), <::ferroui_controls::Border as ::ferroui_base::StaticType>::TYPE);
     let selector_67 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_66), "SwitchTrack");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_13, ::core::option::Option::Some(selector_67.clone()));
-    // Controls/MacOSControls.xaml(156,8) Content
-    // Controls/MacOSControls.xaml(156,37) Value
+    // Controls/MacOSControls.xaml(152,8) Content
+    // Controls/MacOSControls.xaml(152,37) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "ToggleSwitchFillOnDisabled");
-    // Controls/MacOSControls.xaml(157,8) Content
-    // Controls/MacOSControls.xaml(157,38) Value
+    // Controls/MacOSControls.xaml(153,8) Content
+    // Controls/MacOSControls.xaml(153,38) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_13.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::border_brush_property()), "ToggleSwitchStrokeOnDisabled");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_13.clone(), 155, 6)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_13.clone(), 151, 6)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
@@ -113928,411 +113925,411 @@ fn build_controls_macoscontrols_xaml_deferred_360(
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(40,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(36,10)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_361(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
     let name_scope = context.name_scope_field();
-    // Controls/MacOSControls.xaml(40,10) Border
+    // Controls/MacOSControls.xaml(36,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     context.set_intermediate_root_object(rt::to_value(border_0.clone()));
     border_0.begin_init();
     context.push_parent(rt::to_value(border_0.clone()));
-    // Controls/MacOSControls.xaml(40,17) Background
-    rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 40, 17)?;
-    // Controls/MacOSControls.xaml(41,17) BorderBrush
-    rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 41, 17)?;
-    // Controls/MacOSControls.xaml(42,17) BorderThickness
-    rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_thickness_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 42, 17)?;
-    // Controls/MacOSControls.xaml(43,12) Child
-    // Controls/MacOSControls.xaml(43,12) Grid
+    // Controls/MacOSControls.xaml(36,17) Background
+    rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 36, 17)?;
+    // Controls/MacOSControls.xaml(37,17) BorderBrush
+    rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_brush_property()), 37, 17)?;
+    // Controls/MacOSControls.xaml(38,17) BorderThickness
+    rt::bind_template_binding(border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_thickness_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), 38, 17)?;
+    // Controls/MacOSControls.xaml(39,12) Child
+    // Controls/MacOSControls.xaml(39,12) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     grid_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_controls::Control>()));
     context.push_parent(rt::to_value(grid_0.clone()));
-    // Controls/MacOSControls.xaml(43,12) ColumnDefinitions
+    // Controls/MacOSControls.xaml(39,12) ColumnDefinitions
     let column_definitions_0 = ::ferroui_controls::ColumnDefinitions::__markup_new_0();
-    rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 43, 17)?;
-    // Controls/MacOSControls.xaml(43,17) ColumnDefinition
+    rt::invoked(<::ferroui_controls::FerroListOf<::ferroui_base::Ref<::ferroui_controls::ColumnDefinition>>>::__markup_set_Capacity(&column_definitions_0, 2_i32), 39, 17)?;
+    // Controls/MacOSControls.xaml(39,17) ColumnDefinition
     let column_definition_0 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_0, ::core::clone::Clone::clone(&column_definition_0));
-    // Controls/MacOSControls.xaml(43,17) ColumnDefinition
+    // Controls/MacOSControls.xaml(39,17) ColumnDefinition
     let column_definition_1 = ::ferroui_controls::ColumnDefinition::__markup_new_1(::ferroui_controls::GridLength::__markup_new_2(0.0_f64, ::ferroui_controls::GridUnitType::Auto));
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_0, ::core::clone::Clone::clone(&column_definition_1));
     ::ferroui_controls::Grid::__markup_set_ColumnDefinitions(&grid_0, ::core::clone::Clone::clone(&column_definitions_0));
-    // Controls/MacOSControls.xaml(44,14) Children
+    // Controls/MacOSControls.xaml(40,14) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(44,14) Border
+    // Controls/MacOSControls.xaml(40,14) Border
     let border_1 = ::ferroui_controls::Border::new();
     border_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(border_1.clone()));
-    // Controls/MacOSControls.xaml(44,21) Name
+    // Controls/MacOSControls.xaml(40,21) Name
     border_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchTrack")));
-    rt::register_name(name_scope.as_ref(), "SwitchTrack", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 44, 21)?;
-    // Controls/MacOSControls.xaml(44,14) Width
+    rt::register_name(name_scope.as_ref(), "SwitchTrack", ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>(), 40, 21)?;
+    // Controls/MacOSControls.xaml(40,14) Width
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 38.0_f64, priority_0);
-    // Controls/MacOSControls.xaml(44,14) Height
+    // Controls/MacOSControls.xaml(40,14) Height
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 22.0_f64, priority_1);
-    // Controls/MacOSControls.xaml(44,14) CornerRadius
+    // Controls/MacOSControls.xaml(40,14) CornerRadius
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Border::corner_radius_property(), ::ferroui_base::CornerRadius::__markup_new_3(999.0_f64, 999.0_f64, 999.0_f64, 999.0_f64), priority_2);
-    // Controls/MacOSControls.xaml(44,14) VerticalAlignment
+    // Controls/MacOSControls.xaml(40,14) VerticalAlignment
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_3);
-    // Controls/MacOSControls.xaml(46,21) Background
-    rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ToggleSwitchFillOff", 46, 21)?;
-    // Controls/MacOSControls.xaml(47,21) BorderBrush
-    rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "ToggleSwitchStrokeOff", 47, 21)?;
-    // Controls/MacOSControls.xaml(44,14) BorderThickness
+    // Controls/MacOSControls.xaml(42,21) Background
+    rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ToggleSwitchFillOff", 42, 21)?;
+    // Controls/MacOSControls.xaml(43,21) BorderBrush
+    rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "ToggleSwitchStrokeOff", 43, 21)?;
+    // Controls/MacOSControls.xaml(40,14) BorderThickness
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Border::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(0.5_f64, 0.5_f64, 0.5_f64, 0.5_f64), priority_4);
-    // Controls/MacOSControls.xaml(44,14) IsTemplateFocusTarget
+    // Controls/MacOSControls.xaml(40,14) IsTemplateFocusTarget
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::is_template_focus_target_property(), ::core::clone::Clone::clone(&true), priority_5);
-    // Controls/MacOSControls.xaml(51,18) Transitions
+    // Controls/MacOSControls.xaml(47,18) Transitions
     let transitions_0 = ::ferroui_base::animation::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_0.clone()));
-    // Controls/MacOSControls.xaml(52,20) Content
-    // Controls/MacOSControls.xaml(52,20) BrushTransition
+    // Controls/MacOSControls.xaml(48,20) Content
+    // Controls/MacOSControls.xaml(48,20) BrushTransition
     let brush_transition_0 = ::ferroui_base::animation::BrushTransition::new();
     context.push_parent(rt::to_value(brush_transition_0.clone()));
-    // Controls/MacOSControls.xaml(52,20) Property
+    // Controls/MacOSControls.xaml(48,20) Property
     brush_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Border::background_property())));
-    // Controls/MacOSControls.xaml(52,58) Duration
-    rt::bind_dynamic_resource(&context, brush_transition_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), "MacOSMotionFastDuration", 52, 58)?;
+    // Controls/MacOSControls.xaml(48,58) Duration
+    rt::bind_dynamic_resource(&context, brush_transition_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), "MacOSMotionFastDuration", 48, 58)?;
     context.pop_parent();
-    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(brush_transition_0.clone(), 52, 20)?);
-    // Controls/MacOSControls.xaml(53,20) Content
-    // Controls/MacOSControls.xaml(53,20) BrushTransition
+    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(brush_transition_0.clone(), 48, 20)?);
+    // Controls/MacOSControls.xaml(49,20) Content
+    // Controls/MacOSControls.xaml(49,20) BrushTransition
     let brush_transition_1 = ::ferroui_base::animation::BrushTransition::new();
     context.push_parent(rt::to_value(brush_transition_1.clone()));
-    // Controls/MacOSControls.xaml(53,20) Property
+    // Controls/MacOSControls.xaml(49,20) Property
     brush_transition_1.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Border::border_brush_property())));
-    // Controls/MacOSControls.xaml(53,59) Duration
-    rt::bind_dynamic_resource(&context, brush_transition_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), "MacOSMotionFastDuration", 53, 59)?;
+    // Controls/MacOSControls.xaml(49,59) Duration
+    rt::bind_dynamic_resource(&context, brush_transition_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), "MacOSMotionFastDuration", 49, 59)?;
     context.pop_parent();
-    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(brush_transition_1.clone(), 53, 20)?);
+    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_0, rt::cast(brush_transition_1.clone(), 49, 20)?);
     context.pop_parent();
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    border_1.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_0), 53, 20)?, priority_6);
-    // Controls/MacOSControls.xaml(56,16) Child
-    // Controls/MacOSControls.xaml(56,16) Canvas
+    border_1.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_0), 49, 20)?, priority_6);
+    // Controls/MacOSControls.xaml(52,16) Child
+    // Controls/MacOSControls.xaml(52,16) Canvas
     let canvas_0 = ::ferroui_controls::Canvas::new();
     canvas_0.begin_init();
     border_1.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&canvas_0).upcast::<::ferroui_controls::Control>()));
     context.push_parent(rt::to_value(canvas_0.clone()));
-    // Controls/MacOSControls.xaml(56,23) Name
+    // Controls/MacOSControls.xaml(52,23) Name
     canvas_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_SwitchKnob")));
-    rt::register_name(name_scope.as_ref(), "PART_SwitchKnob", ::core::clone::Clone::clone(&canvas_0).upcast::<::ferroui_base::FerroObject>(), 56, 23)?;
-    // Controls/MacOSControls.xaml(56,16) Width
+    rt::register_name(name_scope.as_ref(), "PART_SwitchKnob", ::core::clone::Clone::clone(&canvas_0).upcast::<::ferroui_base::FerroObject>(), 52, 23)?;
+    // Controls/MacOSControls.xaml(52,16) Width
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     canvas_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 16.0_f64, priority_7);
-    // Controls/MacOSControls.xaml(56,16) Height
+    // Controls/MacOSControls.xaml(52,16) Height
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     canvas_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 22.0_f64, priority_8);
-    // Controls/MacOSControls.xaml(56,16) HorizontalAlignment
+    // Controls/MacOSControls.xaml(52,16) HorizontalAlignment
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     canvas_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_9);
-    // Controls/MacOSControls.xaml(56,16) Margin
+    // Controls/MacOSControls.xaml(52,16) Margin
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     canvas_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(-0.5_f64, -0.5_f64, -0.5_f64, -0.5_f64), priority_10);
-    // Controls/MacOSControls.xaml(58,18) Children
+    // Controls/MacOSControls.xaml(54,18) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(canvas_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(58,18) Grid
+    // Controls/MacOSControls.xaml(54,18) Grid
     let grid_1 = ::ferroui_controls::Grid::new();
     grid_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(grid_1.clone()));
-    // Controls/MacOSControls.xaml(58,23) Name
+    // Controls/MacOSControls.xaml(54,23) Name
     grid_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_MovingKnobs")));
-    rt::register_name(name_scope.as_ref(), "PART_MovingKnobs", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 58, 23)?;
-    // Controls/MacOSControls.xaml(58,18) Width
+    rt::register_name(name_scope.as_ref(), "PART_MovingKnobs", ::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>(), 54, 23)?;
+    // Controls/MacOSControls.xaml(54,18) Width
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 22.0_f64, priority_11);
-    // Controls/MacOSControls.xaml(58,18) Height
+    // Controls/MacOSControls.xaml(54,18) Height
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     grid_1.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 22.0_f64, priority_12);
-    // Controls/MacOSControls.xaml(59,20) Children
+    // Controls/MacOSControls.xaml(55,20) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(grid_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(59,20) Border
+    // Controls/MacOSControls.xaml(55,20) Border
     let border_2 = ::ferroui_controls::Border::new();
     border_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(border_2.clone()));
-    // Controls/MacOSControls.xaml(59,27) Name
+    // Controls/MacOSControls.xaml(55,27) Name
     border_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchKnob")));
-    rt::register_name(name_scope.as_ref(), "SwitchKnob", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 59, 27)?;
-    // Controls/MacOSControls.xaml(59,20) Width
+    rt::register_name(name_scope.as_ref(), "SwitchKnob", ::core::clone::Clone::clone(&border_2).upcast::<::ferroui_base::FerroObject>(), 55, 27)?;
+    // Controls/MacOSControls.xaml(55,20) Width
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 18.0_f64, priority_13);
-    // Controls/MacOSControls.xaml(59,20) Height
+    // Controls/MacOSControls.xaml(55,20) Height
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 18.0_f64, priority_14);
-    // Controls/MacOSControls.xaml(59,20) HorizontalAlignment
+    // Controls/MacOSControls.xaml(55,20) HorizontalAlignment
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_15);
-    // Controls/MacOSControls.xaml(59,20) VerticalAlignment
+    // Controls/MacOSControls.xaml(55,20) VerticalAlignment
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_16);
-    // Controls/MacOSControls.xaml(59,20) CornerRadius
+    // Controls/MacOSControls.xaml(55,20) CornerRadius
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Border::corner_radius_property(), ::ferroui_base::CornerRadius::__markup_new_3(999.0_f64, 999.0_f64, 999.0_f64, 999.0_f64), priority_17);
-    // Controls/MacOSControls.xaml(59,20) BorderThickness
+    // Controls/MacOSControls.xaml(55,20) BorderThickness
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Border::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(0.5_f64, 0.5_f64, 0.5_f64, 0.5_f64), priority_18);
-    // Controls/MacOSControls.xaml(62,27) Background
-    rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ToggleSwitchKnobFillOff", 62, 27)?;
-    // Controls/MacOSControls.xaml(63,27) BorderBrush
-    rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "ToggleSwitchKnobStrokeOn", 63, 27)?;
-    // Controls/MacOSControls.xaml(59,20) BoxShadow
-    let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 2 0 #30000000")), 64, 27)?;
+    // Controls/MacOSControls.xaml(58,27) Background
+    rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "ToggleSwitchKnobFillOff", 58, 27)?;
+    // Controls/MacOSControls.xaml(59,27) BorderBrush
+    rt::bind_dynamic_resource(&context, border_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::border_brush_property(), "ToggleSwitchKnobStrokeOn", 59, 27)?;
+    // Controls/MacOSControls.xaml(55,20) BoxShadow
+    let value_0 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("0 1 2 0 #30000000")), 60, 27)?;
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     border_2.set_value_with_priority(::ferroui_controls::Border::box_shadow_property(), ::core::clone::Clone::clone(&value_0), priority_19);
-    // Controls/MacOSControls.xaml(66,24) Transitions
+    // Controls/MacOSControls.xaml(62,24) Transitions
     let transitions_1 = ::ferroui_base::animation::Transitions::__markup_new_0();
     context.push_parent(rt::to_value(transitions_1.clone()));
-    // Controls/MacOSControls.xaml(67,26) Content
-    // Controls/MacOSControls.xaml(67,26) BrushTransition
+    // Controls/MacOSControls.xaml(63,26) Content
+    // Controls/MacOSControls.xaml(63,26) BrushTransition
     let brush_transition_2 = ::ferroui_base::animation::BrushTransition::new();
     context.push_parent(rt::to_value(brush_transition_2.clone()));
-    // Controls/MacOSControls.xaml(67,26) Property
+    // Controls/MacOSControls.xaml(63,26) Property
     brush_transition_2.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_controls::Border::background_property())));
-    // Controls/MacOSControls.xaml(67,64) Duration
-    rt::bind_dynamic_resource(&context, brush_transition_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), "MacOSMotionFastDuration", 67, 64)?;
+    // Controls/MacOSControls.xaml(63,64) Duration
+    rt::bind_dynamic_resource(&context, brush_transition_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), "MacOSMotionFastDuration", 63, 64)?;
     context.pop_parent();
-    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(brush_transition_2.clone(), 67, 26)?);
-    // Controls/MacOSControls.xaml(68,26) Content
-    // Controls/MacOSControls.xaml(68,26) DoubleTransition
+    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(brush_transition_2.clone(), 63, 26)?);
+    // Controls/MacOSControls.xaml(64,26) Content
+    // Controls/MacOSControls.xaml(64,26) DoubleTransition
     let double_transition_0 = ::ferroui_base::animation::DoubleTransition::new();
     context.push_parent(rt::to_value(double_transition_0.clone()));
-    // Controls/MacOSControls.xaml(68,26) Property
+    // Controls/MacOSControls.xaml(64,26) Property
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::property_property(), ::core::option::Option::Some(rt::property(::ferroui_base::layout::Layoutable::width_property())));
-    // Controls/MacOSControls.xaml(68,60) Duration
-    rt::bind_dynamic_resource(&context, double_transition_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), "MacOSMotionFastDuration", 68, 60)?;
-    // Controls/MacOSControls.xaml(68,26) Easing
-    let value_1 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("CubicEaseOut")), 68, 113)?;
+    // Controls/MacOSControls.xaml(64,60) Duration
+    rt::bind_dynamic_resource(&context, double_transition_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::animation::TransitionBase::duration_property(), "MacOSMotionFastDuration", 64, 60)?;
+    // Controls/MacOSControls.xaml(64,26) Easing
+    let value_1 = rt::invoked(::ferroui_base::animation::easings::Easing::__markup_parse(::std::string::String::from("CubicEaseOut")), 64, 113)?;
     double_transition_0.set_direct_value(::ferroui_base::animation::TransitionBase::easing_property(), ::core::clone::Clone::clone(&value_1));
     context.pop_parent();
-    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_0.clone(), 68, 26)?);
+    ::ferroui_base::animation::Transitions::__markup_Add_0(&transitions_1, rt::cast(double_transition_0.clone(), 64, 26)?);
     context.pop_parent();
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
-    border_2.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_1), 68, 26)?, priority_20);
+    border_2.set_value_with_priority(::ferroui_base::animation::Animatable::transitions_property(), rt::cast(::core::clone::Clone::clone(&transitions_1), 64, 26)?, priority_20);
     context.pop_parent();
-    rt::invoked(border_2.try_end_init(), 59, 20)?;
+    rt::invoked(border_2.try_end_init(), 55, 20)?;
     context.pop_parent();
-    rt::invoked(grid_1.try_end_init(), 58, 18)?;
+    rt::invoked(grid_1.try_end_init(), 54, 18)?;
     context.pop_parent();
-    rt::invoked(canvas_0.try_end_init(), 56, 16)?;
+    rt::invoked(canvas_0.try_end_init(), 52, 16)?;
     context.pop_parent();
-    rt::invoked(border_1.try_end_init(), 44, 14)?;
-    // Controls/MacOSControls.xaml(75,14) Children
+    rt::invoked(border_1.try_end_init(), 40, 14)?;
+    // Controls/MacOSControls.xaml(71,14) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(75,14) StackPanel
+    // Controls/MacOSControls.xaml(71,14) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     stack_panel_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_controls::Control>());
     context.push_parent(rt::to_value(stack_panel_0.clone()));
-    // Controls/MacOSControls.xaml(75,25) Name
+    // Controls/MacOSControls.xaml(71,25) Name
     stack_panel_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("SwitchLabels")));
-    rt::register_name(name_scope.as_ref(), "SwitchLabels", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 75, 25)?;
-    // Controls/MacOSControls.xaml(75,14) Column
+    rt::register_name(name_scope.as_ref(), "SwitchLabels", ::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_base::FerroObject>(), 71, 25)?;
+    // Controls/MacOSControls.xaml(71,14) Column
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_21);
-    // Controls/MacOSControls.xaml(75,14) Orientation
+    // Controls/MacOSControls.xaml(71,14) Orientation
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_22);
-    // Controls/MacOSControls.xaml(75,14) Spacing
+    // Controls/MacOSControls.xaml(71,14) Spacing
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::spacing_property(), 6.0_f64, priority_23);
-    // Controls/MacOSControls.xaml(75,14) Margin
+    // Controls/MacOSControls.xaml(71,14) Margin
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_24);
-    // Controls/MacOSControls.xaml(75,14) VerticalAlignment
+    // Controls/MacOSControls.xaml(71,14) VerticalAlignment
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_25);
-    // Controls/MacOSControls.xaml(78,18) IsVisible
+    // Controls/MacOSControls.xaml(74,18) IsVisible
     let multi_binding_0 = ::ferroui_base::data::MultiBinding::__markup_new_0();
     context.push_parent(rt::to_value(multi_binding_0.clone()));
-    // Controls/MacOSControls.xaml(78,31) Converter
+    // Controls/MacOSControls.xaml(74,31) Converter
     let value_2 = ::ferroui_base::data::converters::BoolConverters::__markup_field_Or();
-    ::ferroui_base::data::MultiBinding::__markup_set_Converter(&multi_binding_0, rt::cast(::core::clone::Clone::clone(&value_2), 78, 31)?);
-    // Controls/MacOSControls.xaml(79,20) Bindings
+    ::ferroui_base::data::MultiBinding::__markup_set_Converter(&multi_binding_0, rt::cast(::core::clone::Clone::clone(&value_2), 74, 31)?);
+    // Controls/MacOSControls.xaml(75,20) Bindings
     let bindings_collection_0 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let reflection_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_0.clone()));
-    // Controls/MacOSControls.xaml(79,28) Path
-    ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 79, 28)?, ::std::string::String::from("Content"));
-    // Controls/MacOSControls.xaml(79,43) RelativeSource
+    // Controls/MacOSControls.xaml(75,28) Path
+    ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 75, 28)?, ::std::string::String::from("Content"));
+    // Controls/MacOSControls.xaml(75,43) RelativeSource
     let relative_source_extension_0 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_11 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 79, 43)?;
-    ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 79, 43)?, rt::cast(::core::clone::Clone::clone(&provided_11), 79, 43)?);
-    // Controls/MacOSControls.xaml(79,93) Converter
+    let provided_11 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_0, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 75, 43)?;
+    ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 75, 43)?, rt::cast(::core::clone::Clone::clone(&provided_11), 75, 43)?);
+    // Controls/MacOSControls.xaml(75,93) Converter
     let value_3 = ::ferroui_base::data::converters::ObjectConverters::__markup_field_IsNotNull();
-    ::ferroui_base::data::ReflectionBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 79, 93)?, rt::cast(::core::clone::Clone::clone(&value_3), 79, 93)?);
+    ::ferroui_base::data::ReflectionBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_0), 75, 93)?, rt::cast(::core::clone::Clone::clone(&value_3), 75, 93)?);
     context.pop_parent();
     let provided_12 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &reflection_binding_extension_0, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_12) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
-    // Controls/MacOSControls.xaml(80,20) Bindings
+    // Controls/MacOSControls.xaml(76,20) Bindings
     let bindings_collection_1 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let reflection_binding_extension_1 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_1.clone()));
-    // Controls/MacOSControls.xaml(80,28) Path
-    ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 80, 28)?, ::std::string::String::from("OffContent"));
-    // Controls/MacOSControls.xaml(80,46) RelativeSource
+    // Controls/MacOSControls.xaml(76,28) Path
+    ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 76, 28)?, ::std::string::String::from("OffContent"));
+    // Controls/MacOSControls.xaml(76,46) RelativeSource
     let relative_source_extension_1 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_13 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_1, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 80, 46)?;
-    ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 80, 46)?, rt::cast(::core::clone::Clone::clone(&provided_13), 80, 46)?);
-    // Controls/MacOSControls.xaml(80,96) Converter
+    let provided_13 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_1, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 76, 46)?;
+    ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 76, 46)?, rt::cast(::core::clone::Clone::clone(&provided_13), 76, 46)?);
+    // Controls/MacOSControls.xaml(76,96) Converter
     let value_4 = ::ferroui_base::data::converters::ObjectConverters::__markup_field_IsNotNull();
-    ::ferroui_base::data::ReflectionBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 80, 96)?, rt::cast(::core::clone::Clone::clone(&value_4), 80, 96)?);
+    ::ferroui_base::data::ReflectionBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_1), 76, 96)?, rt::cast(::core::clone::Clone::clone(&value_4), 76, 96)?);
     context.pop_parent();
     let provided_14 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &reflection_binding_extension_1, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_14) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
-    // Controls/MacOSControls.xaml(81,20) Bindings
+    // Controls/MacOSControls.xaml(77,20) Bindings
     let bindings_collection_2 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let reflection_binding_extension_2 = ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_new_0();
     context.push_parent(rt::to_value(reflection_binding_extension_2.clone()));
-    // Controls/MacOSControls.xaml(81,28) Path
-    ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 81, 28)?, ::std::string::String::from("OnContent"));
-    // Controls/MacOSControls.xaml(81,45) RelativeSource
+    // Controls/MacOSControls.xaml(77,28) Path
+    ::ferroui_base::data::ReflectionBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 77, 28)?, ::std::string::String::from("OnContent"));
+    // Controls/MacOSControls.xaml(77,45) RelativeSource
     let relative_source_extension_2 = ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_new_1(::ferroui_base::data::RelativeSourceMode::TemplatedParent);
-    let provided_15 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_2, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 81, 45)?;
-    ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 81, 45)?, rt::cast(::core::clone::Clone::clone(&provided_15), 81, 45)?);
-    // Controls/MacOSControls.xaml(81,95) Converter
+    let provided_15 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::ReflectionBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "RelativeSource", false, rt::markup_handle(<::ferroui_base::data::RelativeSource as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &relative_source_extension_2, ::ferroui_markup_xaml::markup_extensions::RelativeSourceExtension::__markup_ProvideValue_0, 77, 45)?;
+    ::ferroui_base::data::ReflectionBinding::__markup_set_RelativeSource(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 77, 45)?, rt::cast(::core::clone::Clone::clone(&provided_15), 77, 45)?);
+    // Controls/MacOSControls.xaml(77,95) Converter
     let value_5 = ::ferroui_base::data::converters::ObjectConverters::__markup_field_IsNotNull();
-    ::ferroui_base::data::ReflectionBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 81, 95)?, rt::cast(::core::clone::Clone::clone(&value_5), 81, 95)?);
+    ::ferroui_base::data::ReflectionBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&reflection_binding_extension_2), 77, 95)?, rt::cast(::core::clone::Clone::clone(&value_5), 77, 95)?);
     context.pop_parent();
     let provided_16 = rt::provide_value(&context, rt::boxed(rt::clr_property_info(<::ferroui_base::data::MultiBinding as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Bindings", false, rt::markup_handle(<::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>> as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false)), &reflection_binding_extension_2, ::ferroui_markup_xaml::markup_extensions::ReflectionBindingExtension::__markup_ProvideValue_0);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_2, ::core::clone::Clone::clone(&provided_16) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
     context.pop_parent();
-    rt::bind(stack_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), multi_binding_0, 78, 18)?;
-    // Controls/MacOSControls.xaml(84,16) Children
+    rt::bind(stack_panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), multi_binding_0, 74, 18)?;
+    // Controls/MacOSControls.xaml(80,16) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(84,16) ContentPresenter
+    // Controls/MacOSControls.xaml(80,16) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
     content_presenter_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
-    // Controls/MacOSControls.xaml(84,33) Name
+    // Controls/MacOSControls.xaml(80,33) Name
     content_presenter_0.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_ContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 84, 33)?;
-    // Controls/MacOSControls.xaml(85,33) Content (setter chosen at run time)
+    rt::register_name(name_scope.as_ref(), "PART_ContentPresenter", ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>(), 80, 33)?;
+    // Controls/MacOSControls.xaml(81,33) Content (setter chosen at run time)
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_3 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
     let provided_17 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_3);
     let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
     if value_6.is_some() {
-        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_6.clone(), 85, 33)?;
+        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_6.clone(), 81, 33)?;
     } else {
-        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 85, 33)?, priority_26);
+        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 81, 33)?, priority_26);
     }
-    // Controls/MacOSControls.xaml(86,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 86, 33)?;
-    // Controls/MacOSControls.xaml(87,33) Foreground
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 87, 33)?;
-    // Controls/MacOSControls.xaml(88,33) HorizontalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), 88, 33)?;
-    // Controls/MacOSControls.xaml(89,33) VerticalContentAlignment
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), rt::property(::ferroui_controls::ContentControl::vertical_content_alignment_property()), 89, 33)?;
-    // Controls/MacOSControls.xaml(84,16) IsHitTestVisible
+    // Controls/MacOSControls.xaml(82,33) ContentTemplate
+    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 82, 33)?;
+    // Controls/MacOSControls.xaml(83,33) Foreground
+    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 83, 33)?;
+    // Controls/MacOSControls.xaml(84,33) HorizontalContentAlignment
+    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::horizontal_content_alignment_property(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), 84, 33)?;
+    // Controls/MacOSControls.xaml(85,33) VerticalContentAlignment
+    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::vertical_content_alignment_property(), rt::property(::ferroui_controls::ContentControl::vertical_content_alignment_property()), 85, 33)?;
+    // Controls/MacOSControls.xaml(80,16) IsHitTestVisible
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_27);
-    // Controls/MacOSControls.xaml(84,16) RecognizesAccessKey
+    // Controls/MacOSControls.xaml(80,16) RecognizesAccessKey
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::recognizes_access_key_property(), ::core::clone::Clone::clone(&true), priority_28);
-    rt::invoked(content_presenter_0.try_end_init(), 84, 16)?;
-    // Controls/MacOSControls.xaml(91,16) Children
+    rt::invoked(content_presenter_0.try_end_init(), 80, 16)?;
+    // Controls/MacOSControls.xaml(87,16) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(91,16) ContentPresenter
+    // Controls/MacOSControls.xaml(87,16) ContentPresenter
     let content_presenter_1 = ::ferroui_controls::presenters::ContentPresenter::new();
     content_presenter_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_controls::Control>());
-    // Controls/MacOSControls.xaml(91,33) Name
+    // Controls/MacOSControls.xaml(87,33) Name
     content_presenter_1.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OffContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OffContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 91, 33)?;
-    // Controls/MacOSControls.xaml(92,33) Content (setter chosen at run time)
+    rt::register_name(name_scope.as_ref(), "PART_OffContentPresenter", ::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>(), 87, 33)?;
+    // Controls/MacOSControls.xaml(88,33) Content (setter chosen at run time)
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_8 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ToggleSwitch::off_content_property()));
     let provided_22 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_8);
     let value_7: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
     if value_7.is_some() {
-        rt::bind(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_7.clone(), 92, 33)?;
+        rt::bind(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_7.clone(), 88, 33)?;
     } else {
-        content_presenter_1.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_7.clone(), "ContentControl.Content", 1, 92, 33)?, priority_29);
+        content_presenter_1.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_7.clone(), "ContentControl.Content", 1, 88, 33)?, priority_29);
     }
-    // Controls/MacOSControls.xaml(93,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ToggleSwitch::off_content_template_property()), 93, 33)?;
-    // Controls/MacOSControls.xaml(94,33) Foreground
-    rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 94, 33)?;
-    // Controls/MacOSControls.xaml(91,16) IsVisible
+    // Controls/MacOSControls.xaml(89,33) ContentTemplate
+    rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ToggleSwitch::off_content_template_property()), 89, 33)?;
+    // Controls/MacOSControls.xaml(90,33) Foreground
+    rt::bind_template_binding(content_presenter_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 90, 33)?;
+    // Controls/MacOSControls.xaml(87,16) IsVisible
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_30);
-    // Controls/MacOSControls.xaml(91,16) IsHitTestVisible
+    // Controls/MacOSControls.xaml(87,16) IsHitTestVisible
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_31);
-    // Controls/MacOSControls.xaml(91,16) VerticalAlignment
+    // Controls/MacOSControls.xaml(87,16) VerticalAlignment
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_32);
-    rt::invoked(content_presenter_1.try_end_init(), 91, 16)?;
-    // Controls/MacOSControls.xaml(97,16) Children
+    rt::invoked(content_presenter_1.try_end_init(), 87, 16)?;
+    // Controls/MacOSControls.xaml(93,16) Children
     let children_collection_6 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/MacOSControls.xaml(97,16) ContentPresenter
+    // Controls/MacOSControls.xaml(93,16) ContentPresenter
     let content_presenter_2 = ::ferroui_controls::presenters::ContentPresenter::new();
     content_presenter_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_controls::Control>());
-    // Controls/MacOSControls.xaml(97,33) Name
+    // Controls/MacOSControls.xaml(93,33) Name
     content_presenter_2.set_direct_value(::ferroui_base::StyledElement::name_property(), ::core::option::Option::Some(::std::string::String::from("PART_OnContentPresenter")));
-    rt::register_name(name_scope.as_ref(), "PART_OnContentPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 97, 33)?;
-    // Controls/MacOSControls.xaml(98,33) Content (setter chosen at run time)
+    rt::register_name(name_scope.as_ref(), "PART_OnContentPresenter", ::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>(), 93, 33)?;
+    // Controls/MacOSControls.xaml(94,33) Content (setter chosen at run time)
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_11 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ToggleSwitch::on_content_property()));
     let provided_25 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_11);
     let value_8: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_25);
     if value_8.is_some() {
-        rt::bind(content_presenter_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_8.clone(), 98, 33)?;
+        rt::bind(content_presenter_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_8.clone(), 94, 33)?;
     } else {
-        content_presenter_2.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 98, 33)?, priority_33);
+        content_presenter_2.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_8.clone(), "ContentControl.Content", 1, 94, 33)?, priority_33);
     }
-    // Controls/MacOSControls.xaml(99,33) ContentTemplate
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ToggleSwitch::on_content_template_property()), 99, 33)?;
-    // Controls/MacOSControls.xaml(100,33) Foreground
-    rt::bind_template_binding(content_presenter_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 100, 33)?;
-    // Controls/MacOSControls.xaml(97,16) IsVisible
+    // Controls/MacOSControls.xaml(95,33) ContentTemplate
+    rt::bind_template_binding(content_presenter_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ToggleSwitch::on_content_template_property()), 95, 33)?;
+    // Controls/MacOSControls.xaml(96,33) Foreground
+    rt::bind_template_binding(content_presenter_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::foreground_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()), 96, 33)?;
+    // Controls/MacOSControls.xaml(93,16) IsVisible
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_base::Visual::is_visible_property(), ::core::clone::Clone::clone(&false), priority_34);
-    // Controls/MacOSControls.xaml(97,16) IsHitTestVisible
+    // Controls/MacOSControls.xaml(93,16) IsHitTestVisible
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_base::input::InputElement::is_hit_test_visible_property(), ::core::clone::Clone::clone(&false), priority_35);
-    // Controls/MacOSControls.xaml(97,16) VerticalAlignment
+    // Controls/MacOSControls.xaml(93,16) VerticalAlignment
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_2.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_36);
-    rt::invoked(content_presenter_2.try_end_init(), 97, 16)?;
+    rt::invoked(content_presenter_2.try_end_init(), 93, 16)?;
     context.pop_parent();
-    rt::invoked(stack_panel_0.try_end_init(), 75, 14)?;
+    rt::invoked(stack_panel_0.try_end_init(), 71, 14)?;
     context.pop_parent();
-    rt::invoked(grid_0.try_end_init(), 43, 12)?;
+    rt::invoked(grid_0.try_end_init(), 39, 12)?;
     context.pop_parent();
-    rt::invoked(border_0.try_end_init(), 40, 10)?;
+    rt::invoked(border_0.try_end_init(), 36, 10)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/MacOSControls.xaml(160,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/MacOSControls.xaml(156,4)` (a template or a deferred resource).
 fn build_controls_macoscontrols_xaml_deferred_362(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadException> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_MACOSCONTROLS_XAML_DOCUMENT);
-    // Controls/MacOSControls.xaml(160,4) ControlTheme
+    // Controls/MacOSControls.xaml(156,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/MacOSControls.xaml(160,4) TargetType
+    // Controls/MacOSControls.xaml(156,4) TargetType
     ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::ToggleSwitch as ::ferroui_base::StaticType>::TYPE));
-    // Controls/MacOSControls.xaml(160,73) BasedOn
+    // Controls/MacOSControls.xaml(156,73) BasedOn
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("DefaultToggleSwitchStyle"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 160, 73)?;
-    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 160, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 160, 73)?);
+    let provided_0 = rt::provide_value_invoked(&context, rt::boxed(rt::clr_property_info(rt::class_markup(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "BasedOn", false, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), false)), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 156, 73)?;
+    ::ferroui_base::styling::ControlTheme::__markup_set_BasedOn(&control_theme_0, rt::exact(rt::cast_checked(provided_0, rt::class_handle(<::ferroui_base::styling::ControlTheme as ::ferroui_base::StaticType>::TYPE), "FerroUI.Styling.ControlTheme", 156, 73)?, "FerroUI.Styling.ControlTheme.set_BasedOn", 0, 156, 73)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
