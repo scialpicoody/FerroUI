@@ -10,7 +10,7 @@
     "template_comparison": "Parsed XML, ignoring comments/formatting and the intentional assembly/manifest rename",
     "unchanged_template_meaning": "The template structure is inherited; shared macOS resources and runtime settings can still change its appearance",
     "changed_template_meaning": "The template structure differs from the baseline; this is not a native fidelity measurement",
-    "current_xaml_sha256": "0009a712d398f37786829a2c558cb582da43060a11458e7ce24f0e9d6612fa92"
+    "current_xaml_sha256": "31af3303244b0cae4b8f5d4c10fd1277ea39a7bc97b379d3f55439ffb392bbf8"
   },
   "static_contracts": {
     "status": "pass",
@@ -23,7 +23,7 @@
     "new_control_documents": [],
     "baseline_default_theme_keys": 84,
     "preserved_default_theme_keys": 84,
-    "duration_consumers": 75,
+    "duration_consumers": 74,
     "duration_resource_keys": [
       "MacOSMotionFastDuration",
       "MacOSMotionStandardDuration",
@@ -806,6 +806,7 @@
       "MacOSFocusBrush",
       "MacOSMenuGlassMaterial",
       "MacOSMenuShadow",
+      "MacOSMenuShadowMargin",
       "MacOSMinimizeCaptionButton",
       "MacOSModalTransition",
       "MacOSMotionFastDuration",
@@ -818,7 +819,11 @@
       "MacOSSegmentSelectedBrush",
       "MacOSSegmentShadow",
       "MacOSSidebarGlassMaterial",
+      "MacOSSwitchKnobShadow",
       "MacOSSwitchKnobTransitions",
+      "MacOSToolTipShadow",
+      "MacOSToolTipShadowMargin",
+      "MacOSToolTipTransitions",
       "MacOSToolbarGlassMaterial",
       "MacOSTrafficCloseGeometry",
       "MacOSTrafficLightBorderBrush",
@@ -831,6 +836,7 @@
       "MacOSTrafficRestoreGeometry",
       "MacOSTrafficZoomGeometry",
       "MacOSWindowCornerRadius",
+      "MacOSWindowShadowMargin",
       "MacOSWindowTitleBarHeight",
       "MacOSWindowTitleFontSize",
       "MacOSWindowTitleFontWeight",
@@ -1122,7 +1128,7 @@
         }
       ],
       "baseline_sha256": "b4c5918b5fde4894ae6e621c844e795d0345a864ba374e0ab528713c8bed825d",
-      "macos_sha256": "3dcbda24d9e34032de9928e43c48db253576ee1c465a506f4e061af086ccab56",
+      "macos_sha256": "e0aef75072992a6927371109556eeadc9d6114dbfd2c5c51ea6c05fa34c92e3a",
       "native_fidelity": "unverified"
     },
     {
@@ -1241,7 +1247,7 @@
         }
       ],
       "baseline_sha256": "1f0ad796db5ee4e006e88006dcf1cd830d56ee331bde94af9d92bcca3b1bef9f",
-      "macos_sha256": "4b79a636eb1ae8669da2ba791fa5f9c93f49acf2fc5da6b3339c01963f0b7866",
+      "macos_sha256": "056ac2683ca131553d55c4f6f6f61d7a8eabff6a0f215d67783c69822ee24ad5",
       "native_fidelity": "unverified"
     },
     {
@@ -1410,7 +1416,7 @@
         }
       ],
       "baseline_sha256": "6a3f13f43ded4b4e9b4435b60711df0aaf0d35cb30353ad25611eeec679cad16",
-      "macos_sha256": "bf14ed064691bf6abe611e18b4783e6ddd40cc1a8c82d4bf137980c01ee4157a",
+      "macos_sha256": "97d14828c0f17a3ab529b0f51ef243b2406cf0fd41d44b23692e0daa47faadab",
       "native_fidelity": "unverified"
     },
     {
@@ -1974,7 +1980,7 @@
         }
       ],
       "baseline_sha256": "a070e9b7299ae1d57c3869485ea7af35e0724b13615b8561a65198b1a32ac3a7",
-      "macos_sha256": "86eb1c084b9b63ab784964a555e89fa6af293e12f23a79a5f1f5748b4b47d059",
+      "macos_sha256": "a362696b5b81aadda95d7896be9fbd2cb0c523cd04db4027d2d7079ffd0de7be",
       "native_fidelity": "unverified"
     },
     {
@@ -1989,7 +1995,7 @@
         }
       ],
       "baseline_sha256": "552f773424a9e84395f7bb2597826235521bd92b0d99c5e1f826bd232fe8eef7",
-      "macos_sha256": "e702f2fbe88e2f45fe17577a2e77585b8f477b2842e0f340c4a508eceda452a5",
+      "macos_sha256": "7522c24c95898c431319bd8fd8bf819926036766d868abdf01b976d7fefb8e58",
       "native_fidelity": "unverified"
     },
     {
@@ -2064,7 +2070,7 @@
         }
       ],
       "baseline_sha256": "a8763df6049b9ef721b91fe3a56f0710758efc96b1ee7ff01e9e88a66f6e03ee",
-      "macos_sha256": "5aa51de50e0244a70ca420ee01dc7e7e3e522fb1ff6b88d6008a44426d44bd3f",
+      "macos_sha256": "a5a316d9f83df1528f5e155978f58a7c34d3d0c6c960d0f5f043bc83d5435f1c",
       "native_fidelity": "unverified"
     },
     {
@@ -3117,12 +3123,6 @@
     {
       "document": "Controls/ToggleSwitch.xaml",
       "element": "/ResourceDictionary/ControlTheme[1]/Setter[14]/ControlTemplate[1]/Border[1]/Grid[1]/Border[1]/Canvas[1]/Grid[1]/Border[1]/Border.Transitions[1]/Transitions[1]/DoubleTransition[1]/@Duration",
-      "value": "{DynamicResource MacOSMotionFastDuration}",
-      "resource_key": "MacOSMotionFastDuration"
-    },
-    {
-      "document": "Controls/ToolTip.xaml",
-      "element": "/ResourceDictionary/ControlTheme[1]/Setter[13]/Transitions[1]/DoubleTransition[1]/@Duration",
       "value": "{DynamicResource MacOSMotionFastDuration}",
       "resource_key": "MacOSMotionFastDuration"
     },
