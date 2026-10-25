@@ -36,12 +36,12 @@ THEME_DIRECTORY = f"src/{THEME_ASSEMBLY}"
 REPORT_PATH = "docs/porting/data/macos26-theme.json"
 XAML_KEY = "{http://schemas.microsoft.com/winfx/2006/xaml}Key"
 MOTION_TOKENS = {
-    "MacOSMotionFastDuration",
-    "MacOSMotionStandardDuration",
-    "MacOSMotionSlowDuration",
-    # An indeterminate pulse retains its period; reduced motion sets its
-    # separate iteration-count resource to zero to prevent a busy loop.
-    "MacOSProgressPulseDuration",
+    "MacOSMotionFastDuration": "DynamicResource",
+    "MacOSMotionStandardDuration": "DynamicResource",
+    "MacOSMotionSlowDuration": "DynamicResource",
+    # This period is immutable and must resolve before Animation interprets
+    # keyframes. Reduce Motion deactivates its selector, not its duration.
+    "MacOSProgressPulseDuration": "StaticResource",
 }
 # A necessary exception must identify its document, XML element path and reason.
 # There are currently no exceptions to live central duration resources.
@@ -191,8 +191,11 @@ def motion_consumers(roots: dict[str, ET.Element], errors: list[dict]) -> list[d
             if name.endswith(".Duration"):
                 child = next(iter(node), None)
                 value = (node.text or "").strip()
-                if child is not None and local_name(child.tag) in {"DynamicResource", "DynamicResourceExtension"}:
-                    value = "{DynamicResource " + child.get("ResourceKey", "") + "}"
+                if child is not None and local_name(child.tag) in {
+                    "DynamicResource", "DynamicResourceExtension", "StaticResource", "StaticResourceExtension"
+                }:
+                    kind = local_name(child.tag).removesuffix("Extension")
+                    value = "{" + kind + " " + child.get("ResourceKey", "") + "}"
                 durations.append((location, value))
             timed = name in {"Animation", "CrossFade", "PageSlide"} or (
                 name.endswith("Transition") and "." not in name and name != "CompositePageTransition"
@@ -203,13 +206,13 @@ def motion_consumers(roots: dict[str, ET.Element], errors: list[dict]) -> list[d
                 match = RESOURCE.fullmatch(value)
                 token = match.group(2) if match else None
                 exception = DURATION_EXCEPTIONS.get((document, property_path))
-                central = bool(match and match.group(1) == "DynamicResource" and token in MOTION_TOKENS)
+                central = bool(match and match.group(1) == MOTION_TOKENS.get(token))
                 entry = {"document": document, "element": property_path, "value": value, "resource_key": token}
                 if exception:
                     entry["exception_reason"] = exception
                 if not central and not exception:
                     errors.append({"code": "noncentral_motion_duration", "document": document, "element": property_path,
-                                   "detail": f"{value!r}; use a live central macOS duration resource"})
+                                   "detail": f"{value!r}; use the central token with its declared resource lifetime"})
                 result.append(entry)
     return result
 

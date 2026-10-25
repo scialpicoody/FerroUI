@@ -105,15 +105,16 @@
         <Setter Property="Opacity" Value="0"/>
       </Style>
     </Style>
-    <!-- Deactivating the style disposes its running animation. Restoring motion creates a
-         fresh clock, so there is no completed zero-iteration animation left to restart.
-         Cues are normalized: a resource-bound duration can be unresolved while styles are
-         attached. Absolute KeyTime values would divide by that zero duration during
-         Animation::interpret_keyframes, even for an initially determinate progress bar. -->
+    <!-- Resolve the nonzero pulse period eagerly: Animation is not a resource host,
+         and its keyframes are interpreted when the style attaches, before its
+         activation is evaluated. Normalized cues do not divide by Duration.
+         Accessibility gates activation, never a zero-duration infinite loop.
+         Deactivating the style disposes its running animation. Restoring motion creates a
+         fresh clock, so there is no completed zero-iteration animation left to restart. -->
     <Style Selector="^:indeterminate /template/ Border#MacOSIndeterminateFill[IsVisible=true]">
       <Setter Property="Opacity" Value="1"/>
       <Style.Animations>
-        <Animation IterationCount="Infinite" Duration="{DynamicResource MacOSProgressPulseDuration}">
+        <Animation IterationCount="Infinite" Duration="{StaticResource MacOSProgressPulseDuration}">
           <KeyFrame Cue="0%">
             <Setter Property="Opacity" Value="0.45"/>
           </KeyFrame>

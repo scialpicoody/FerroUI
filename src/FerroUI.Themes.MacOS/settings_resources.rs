@@ -5,14 +5,15 @@
 //! fallback. This does not assert equivalence to AppKit's optical refraction.
 
 use crate::{ControlSize, DensityStyle, MacOSTheme};
-use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, TimeSpan};
+use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, TimeSpan, Transitions};
+use ferroui_base::animation::transitions::DoubleTransition;
 use ferroui_base::animation::easings::Easing;
 use ferroui_base::controls::{ResourceKey, ResourceValue};
 use ferroui_base::media::{AcrylicBackgroundSource, Color, ExperimentalAcrylicMaterial, SolidColorBrush};
 use ferroui_base::metadata::{from_markup_value, into_markup_value};
 use ferroui_base::styling::{Styles, ThemeVariant};
 use ferroui_base::{CornerRadius, Thickness};
-use ferroui_controls::{WindowTransparencyLevel, WindowTransparencyLevelCollection};
+use ferroui_controls::{Canvas, WindowTransparencyLevel, WindowTransparencyLevelCollection};
 use std::rc::Rc;
 
 fn is_dark(variant: Option<&ThemeVariant>) -> bool {
@@ -20,6 +21,15 @@ fn is_dark(variant: Option<&ThemeVariant>) -> bool {
     if *variant == ThemeVariant::light() { return false; }
     if *variant == ThemeVariant::dark() { return true; }
     variant.inherit_variant().as_ref().map_or(true, |parent| is_dark(Some(parent)))
+}
+
+fn is_high_contrast(variant: Option<&ThemeVariant>) -> bool {
+    let mut current = variant.cloned();
+    while let Some(value) = current {
+        if value == MacOSTheme::high_contrast() { return true; }
+        current = value.inherit_variant();
+    }
+    false
 }
 
 fn accent(theme: &MacOSTheme, variant: Option<&ThemeVariant>) -> Color {
@@ -38,7 +48,8 @@ fn color(value: u32) -> ResourceValue { into_markup_value(Color::from_uint32(val
 pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&ThemeVariant>) -> Option<ResourceValue> {
     let name = key.as_str()?;
     let dark = is_dark(variant);
-    let contrast = theme.effective_increase_contrast() || variant.is_some_and(|v| *v == MacOSTheme::high_contrast());
+    let high_contrast_variant = is_high_contrast(variant);
+    let contrast = theme.effective_increase_contrast() || high_contrast_variant;
     let active = theme.window_active();
     let size = if theme.density_style() == DensityStyle::Compact { ControlSize::Small } else { theme.control_size() };
 
@@ -53,6 +64,20 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
     }
 
     match name {
+        "MacOSSwitchKnobTransitions" => {
+            // The control observes this resource; a transition buried in a setter
+            // value cannot inherit that control's dynamic-resource context. Assign
+            // an already configured collection, as for the page transitions below.
+            let transition = DoubleTransition::new();
+            transition.set_property(Some(Canvas::left_property().as_property()));
+            transition.set_duration(if theme.effective_reduce_motion() {
+                TimeSpan::ZERO
+            } else {
+                TimeSpan::from_milliseconds(180.0)
+            });
+            transition.set_easing(Easing::parse("CubicEaseOut").expect("built-in easing"));
+            return Some(into_markup_value(Transitions::from_items([transition.into()])));
+        }
         "MacOSNavigationTransition" | "MacOSModalTransition" => {
             // PageSlide is a plain transition object, so its Duration cannot host
             // DynamicResource. Replace the whole typed transition at its styled
@@ -74,9 +99,9 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
         ))),
         "MacOSAnimationsEnabled" => return Some(into_markup_value(!theme.effective_reduce_motion())),
         "MacOSReduceMotion" => return Some(into_markup_value(theme.effective_reduce_motion())),
-        // Repeating animations keep a nonzero duration and stop iterating when
-        // motion is reduced. A zero-duration infinite animation would spin.
-        "MacOSProgressPulseDuration" => return Some(into_markup_value(TimeSpan::from_seconds(1.2))),
+        // The fixed pulse period lives in MacOSMaterials.xaml and is resolved
+        // eagerly. Retain the iteration resource for existing application users;
+        // the theme's progress template gates the animation through its selector.
         "MacOSProgressPulseIterations" => return Some(into_markup_value(if theme.effective_reduce_motion() { IterationCount::new(0) } else { IterationCount::INFINITE })),
         "MacOSControlHeight" | "ButtonMinHeight" | "TextControlThemeMinHeight" | "ComboBoxMinHeight" | "SplitButtonMinHeight" => return Some(into_markup_value(size.height())),
         "MacOSControlFontSize" | "ControlContentThemeFontSize" | "ButtonFontSize" | "TextControlThemeFontSize" => return Some(into_markup_value(size.font_size())),
@@ -139,6 +164,18 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
         }
     }
 
+    // A brush realized from the inherited dark dictionary can otherwise retain
+    // the dark background when its host requests the named contrast variant.
+    // Resolve both forms coherently at the consuming host, including derived
+    // contrast variants. IncreaseContrast alone keeps the chosen appearance.
+    if high_contrast_variant && matches!(name, "SolidBackgroundFillColorBase" | "SolidBackgroundFillColorBaseBrush") {
+        let styles: &Styles = theme;
+        let background = styles.try_get_resource(&ResourceKey::from("SystemColorWindowColor"), variant)
+            .and_then(|value| from_markup_value::<Color>(&value))
+            .unwrap_or(Color::from_uint32(0xFF1C1C1E));
+        return Some(if name.ends_with("Brush") { solid(background) } else { into_markup_value(background) });
+    }
+
     if contrast {
         // The inherited high-contrast dictionary defines its system window color,
         // but the normal solid-background brush can already have been realized in
@@ -161,12 +198,57 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
     }
 
     if !active {
-        // Selection remains recognizable but loses key-window accent emphasis.
+        // Inactive primary buttons lose accent prominence without changing their
+        // default-action semantics. Preserve disabled resources and let the
+        // existing disabled selectors win over hover and pressed states.
+        let neutral = match name {
+            "AccentButtonBackground" => Some("ButtonBackground"),
+            "AccentButtonBackgroundPointerOver" => Some("ButtonBackgroundPointerOver"),
+            "AccentButtonBackgroundPressed" => Some("ButtonBackgroundPressed"),
+            "AccentButtonForeground" => Some("ButtonForeground"),
+            "AccentButtonForegroundPointerOver" => Some("ButtonForegroundPointerOver"),
+            "AccentButtonForegroundPressed" => Some("ButtonForegroundPressed"),
+            "AccentButtonBorderBrush" => Some("ButtonBorderBrush"),
+            "AccentButtonBorderBrushPointerOver" => Some("ButtonBorderBrushPointerOver"),
+            "AccentButtonBorderBrushPressed" => Some("ButtonBorderBrushPressed"),
+            _ => None,
+        };
+        if let Some(neutral) = neutral {
+            let styles: &Styles = theme;
+            return styles.try_get_resource(&ResourceKey::from(neutral), variant);
+        }
+        // Update foreground/background pairs for every selected interaction
+        // state, not just the resting state; otherwise white hover text can
+        // survive after its selection background has become pale gray.
         match name {
-            "MacOSSelectionBrush" | "ListViewItemBackgroundSelected" | "ListViewItemBackgroundSelectedPointerOver" | "ListViewItemBackgroundSelectedPressed" | "TreeViewItemBackgroundSelected" => return Some(solid(Color::from_uint32(if dark { 0xFF555557 } else { 0xFFDCDCDD }))),
-            "MacOSSelectionForegroundBrush" | "ListViewItemForegroundSelected" | "TreeViewItemForegroundSelected" => return Some(solid(Color::from_uint32(if dark { 0xFFF2F2F2 } else { 0xFF262626 }))),
+            "MacOSSelectionBrush"
+            | "ListViewItemBackgroundSelected"
+            | "ListViewItemBackgroundSelectedPointerOver"
+            | "ListViewItemBackgroundSelectedPressed"
+            | "TreeViewItemBackgroundSelected"
+            | "TreeViewItemBackgroundSelectedPointerOver"
+            | "TreeViewItemBackgroundSelectedPressed"
+            | "TabularSurfaceRowBackgroundSelectedBrush"
+            | "TabularSurfaceRowBackgroundSelectedPointerOverBrush"
+            | "TabularSurfaceRowBackgroundSelectedPressedBrush" =>
+                return Some(solid(Color::from_uint32(if dark { 0xFF555557 } else { 0xFFDCDCDD }))),
+            "MacOSSelectionForegroundBrush"
+            | "ListViewItemForegroundSelected"
+            | "ListViewItemForegroundSelectedPointerOver"
+            | "ListViewItemForegroundSelectedPressed"
+            | "TreeViewItemForegroundSelected"
+            | "TreeViewItemForegroundSelectedPointerOver"
+            | "TreeViewItemForegroundSelectedPressed"
+            | "TabularSurfaceRowForegroundSelectedBrush"
+            | "TabularSurfaceRowForegroundSelectedPointerOverBrush"
+            | "TabularSurfaceRowForegroundSelectedPressedBrush" =>
+                return Some(solid(Color::from_uint32(if dark { 0xFFF2F2F2 } else { 0xFF262626 }))),
             _ => {}
         }
     }
     None
 }
+
+#[cfg(test)]
+#[path = "tests/recovery_regressions.rs"]
+mod recovery_regressions;

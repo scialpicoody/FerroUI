@@ -4,7 +4,12 @@
      Calibrated metrics are not claimed to be private AppKit constants. -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="using:System"
                     x:ClassModifier="internal">
+  <!-- A fixed, eagerly resolved pulse period. Reduce Motion removes the animated
+       style instead of making an infinite animation have a zero duration. -->
+  <sys:TimeSpan x:Key="MacOSProgressPulseDuration">0:0:1.2</sys:TimeSpan>
+
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Default">
       <SolidColorBrush x:Key="MacOSTrafficLightInactiveBrush" Color="#FF5A5A5A" />

@@ -28,13 +28,9 @@
                 BorderBrush="{DynamicResource MacOSFocusBrush}" />
       </FocusAdornerTemplate>
     </Setter>
-    <Setter Property="KnobTransitions">
-      <Transitions>
-        <DoubleTransition Property="Canvas.Left"
-                          Duration="{DynamicResource MacOSMotionStandardDuration}"
-                          Easing="CubicEaseOut" />
-      </Transitions>
-    </Setter>
+    <!-- Resolve at the control: nested setter values have no resource host of
+         their own. Each lookup creates an independently owned typed collection. -->
+    <Setter Property="KnobTransitions" Value="{DynamicResource MacOSSwitchKnobTransitions}" />
     <Setter Property="Template">
       <ControlTemplate>
         <Border Background="{TemplateBinding Background}"
