@@ -20,8 +20,8 @@ use ferroui_controls::automation::{AutomationProperties, peers::ControlAutomatio
 use ferroui_controls::shapes::Path;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{
-    Border, Button, CalendarDateRange, Control, Grid, Panel, PathIcon, ScrollViewer, TextBox,
-    Window,
+    Border, Button, CalendarDateRange, Control, Grid, Panel, PathIcon, ScrollViewer, TextBlock,
+    TextBox, Window,
 };
 use std::cell::Cell;
 use std::rc::Rc;
@@ -475,6 +475,46 @@ fn range_calendar_scrolls_real_months_virtualizes_and_draws_half_cell_endpoints(
     w.update_layout();
     assert_eq!(date(2026, 8, 1), p.displayed_month());
     assert!(months.realized_month_count() <= 5);
+}
+
+#[test]
+fn complete_range_header_wraps_remaining_width_without_overlapping_mode_button() {
+    let (_app, _) = application();
+    let p = picker();
+    p.set_selection_mode(MaterialDateSelectionMode::Range);
+    p.set_selection(Some(date(2026, 10, 22)), Some(date(2026, 10, 29)));
+    let w = window(&p);
+    let header: Ref<Grid> = named(&p, "PART_Header");
+    let headline: Ref<Panel> = named(&p, "PART_RangeHeadline");
+    let start: Ref<TextBlock> = named(&p, "PART_RangeHeadlineStart");
+    let end: Ref<TextBlock> = named(&p, "PART_RangeHeadlineEnd");
+    let toggle: Ref<Button> = named(&p, "PART_ModeToggle");
+    assert_eq!(360.0, p.bounds().width);
+    assert_eq!(224.0, headline.bounds().width);
+    assert_eq!(28.0, start.bounds().height);
+    assert!(
+        end.bounds().height >= 56.0,
+        "the end date wraps in the remaining width"
+    );
+    assert!(end.bounds().right() <= headline.bounds().width + 1e-9);
+    assert_eq!(
+        20.0 + end.bounds().height.max(48.0) + 12.0 + 1.0,
+        header.bounds().height,
+        "the header grows with its content and includes the divider"
+    );
+    let horizontal_bounds = |control: &Visual| {
+        let left = control.translate_point(Point::default(), &w).unwrap().x;
+        let right = control
+            .translate_point(Point::new(control.bounds().width, 0.0), &w)
+            .unwrap()
+            .x;
+        (left.min(right), left.max(right))
+    };
+    assert!(horizontal_bounds(&end).1 <= horizontal_bounds(&toggle).0);
+    p.set_flow_direction(FlowDirection::RightToLeft);
+    w.update_layout();
+    assert!(horizontal_bounds(&end).0 >= horizontal_bounds(&toggle).1);
+    assert!(end.bounds().right() <= headline.bounds().width + 1e-9);
 }
 
 #[test]

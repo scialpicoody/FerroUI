@@ -55,7 +55,7 @@ use ferroui_controls::primitives::{
     UniformGrid,
 };
 use ferroui_controls::{
-    Button, Control, ControlImpl, Grid, Panel, ScrollViewer, StackPanel, TextBlock, TextBox,
+    Button, Control, ControlImpl, Grid, Panel, ScrollViewer, TextBlock, TextBox,
 };
 use ferroui_controls::{Calendar, CalendarBlackoutDatesCollection};
 use std::cell::{Cell, RefCell};
@@ -69,7 +69,7 @@ struct Parts {
     input_transform: Ref<TranslateTransform>,
     title: Ref<TextBlock>,
     headline: Ref<TextBlock>,
-    range_headline: Ref<StackPanel>,
+    range_headline: Ref<Panel>,
     range_headline_start: Ref<TextBlock>,
     range_headline_end: Ref<TextBlock>,
     header: Ref<Grid>,
@@ -337,7 +337,7 @@ impl TemplatedControlImpl for MaterialDatePicker {
             input_transform,
             title: part!(TextBlock, "PART_Title"),
             headline: part!(TextBlock, "PART_Headline"),
-            range_headline: part!(StackPanel, "PART_RangeHeadline"),
+            range_headline: part!(Panel, "PART_RangeHeadline"),
             range_headline_start: part!(TextBlock, "PART_RangeHeadlineStart"),
             range_headline_end: part!(TextBlock, "PART_RangeHeadlineEnd"),
             header: part!(Grid, "PART_Header"),

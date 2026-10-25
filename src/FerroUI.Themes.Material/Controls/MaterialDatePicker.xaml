@@ -77,12 +77,14 @@
               <TextBlock x:Name="PART_Headline" FontSize="32" FontWeight="Normal" LineHeight="40" LetterSpacing="0"
                          Foreground="{TemplateBinding SubheadForeground}" Margin="24,0,12,12" VerticalAlignment="Center"
                          TextWrapping="NoWrap" AutomationProperties.HeadingLevel="1"/>
-              <StackPanel x:Name="PART_RangeHeadline" Orientation="Horizontal" Spacing="4" Margin="64,0,12,12" VerticalAlignment="Center" IsVisible="False"
-                          AutomationProperties.HeadingLevel="1">
-                <TextBlock x:Name="PART_RangeHeadlineStart" FontSize="22" LineHeight="28" TextWrapping="Wrap" Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.AccessibilityView="Raw"/>
-                <TextBlock Text="-" FontSize="22" LineHeight="28" Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.AccessibilityView="Raw"/>
-                <TextBlock x:Name="PART_RangeHeadlineEnd" FontSize="22" LineHeight="28" TextWrapping="Wrap" Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.AccessibilityView="Raw"/>
-              </StackPanel>
+              <!-- The native Row measures each successive date with the width remaining.
+                   DockPanel preserves that contract so a complete range can wrap its end date. -->
+              <DockPanel x:Name="PART_RangeHeadline" HorizontalSpacing="4" LastChildFill="True" Margin="64,0,12,12" VerticalAlignment="Center" IsVisible="False"
+                         AutomationProperties.HeadingLevel="1">
+                <TextBlock x:Name="PART_RangeHeadlineStart" DockPanel.Dock="Left" FontSize="22" LineHeight="28" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.AccessibilityView="Raw"/>
+                <TextBlock DockPanel.Dock="Left" Text="-" FontSize="22" LineHeight="28" VerticalAlignment="Center" Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.AccessibilityView="Raw"/>
+                <TextBlock x:Name="PART_RangeHeadlineEnd" FontSize="22" LineHeight="28" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{TemplateBinding SubheadForeground}" AutomationProperties.AccessibilityView="Raw"/>
+              </DockPanel>
               <Button x:Name="PART_ModeToggle" Grid.Column="1" Theme="{StaticResource MaterialIconButton}" Width="48" Height="48"
                       Margin="0,0,12,12" VerticalAlignment="Center" Foreground="{TemplateBinding SubheadForeground}">
                 <Panel Width="24" Height="24" IsHitTestVisible="False" AutomationProperties.AccessibilityView="Raw">

@@ -184,3 +184,19 @@ fn gallery_culture(british: bool) -> CultureInfo {
 pub fn create() -> Ref<ferroui_controls::Control> {
     DatePickersPage::new().upcast()
 }
+
+/// Creates the same interactive page with a stable complete range for capture and review.
+pub fn create_range() -> Ref<ferroui_controls::Control> {
+    let page = DatePickersPage::new();
+    let picker = page.get_control::<MaterialDatePicker>("DemoPicker");
+    picker.set_selection_mode(MaterialDateSelectionMode::Range);
+    picker.set_selection(
+        Some(DateTime::new(2026, 10, 22)),
+        Some(DateTime::new(2026, 10, 29)),
+    );
+    picker.set_displayed_month(DateTime::new(2026, 10, 1));
+    page.get_control::<Button>("ToggleRange")
+        .set_content(Some(Rc::new("Choose one date".to_owned())));
+    page.update_selection();
+    page.upcast()
+}
