@@ -7,6 +7,7 @@ use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::metadata::from_markup_value;
 use ferroui_base::styling::ThemeVariant;
+use ferroui_base::threading::Dispatcher;
 use ferroui_base::Ref;
 use ferroui_controls::{Application, Border, Canvas, Control, Grid, ToggleSwitch, Window};
 use std::rc::Rc;
@@ -58,6 +59,11 @@ fn existing_switch_knob_transitions_follow_reduce_motion_and_restore() {
     let window = Window::new();
     window.set_content(Some(Control::boxed(&switch)));
     window.show();
+    window.update_layout();
+    // ToggleSwitch installs KnobTransitions on PART_MovingKnobs in on_loaded.
+    // Layout applies the template but does not dispatch the queued Loaded event.
+    // Exercise the real lifecycle rather than manually assigning transitions.
+    Dispatcher::ui_thread().run_jobs(None);
     window.update_layout();
     let moving = switch.get_visual_descendants()
         .find(|v| v.name().as_deref() == Some("PART_MovingKnobs"))
