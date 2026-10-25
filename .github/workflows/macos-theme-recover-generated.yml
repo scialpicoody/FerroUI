@@ -1,0 +1,132 @@
+name: Recover macOS theme generated references
+
+# One-shot recovery for PR #340. This workflow is inert on main and on unrelated
+# pushes. Remove it after the generated-reference commit has been verified.
+on:
+  push:
+    branches: [feat/macos26-theme]
+    paths: ['.github/workflows/macos-theme-recover-generated.yml']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-theme-generated-recovery
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    if: >-
+      github.repository == 'wieslawsoltes/FerroUI' &&
+      github.ref == 'refs/heads/feat/macos26-theme' &&
+      contains(github.event.head_commit.message, '[macos-theme-regenerate]')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    env:
+      CARGO_BUILD_JOBS: 2
+      CARGO_INCREMENTAL: 0
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      RUST_BACKTRACE: 1
+      SOURCE_COMMIT: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify the exact recovery input
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_COMMIT"
+          test "$(git rev-parse HEAD^)" = abd995a30ff222d92d060924018a6f6e88ba29e4
+          test "$(git diff --name-only HEAD^ HEAD)" = .github/workflows/macos-theme-recover-generated.yml
+          test -z "$(git status --porcelain)"
+          test "$(git ls-remote origin refs/heads/feat/macos26-theme | cut -f1)" = "$SOURCE_COMMIT"
+          mkdir -p "$RUNNER_TEMP/macos-recovery"
+          printf '%s\n' "$SOURCE_COMMIT" > "$RUNNER_TEMP/macos-recovery/source-commit.txt"
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: macos-theme-linux
+          cache-on-failure: true
+      - name: Native build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config clang lld libssl-dev libfontconfig1-dev libfreetype6-dev \
+            fonts-dejavu-core libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev \
+            libxcursor-dev libxfixes-dev libxext-dev libxkbcommon-dev libgl1-mesa-dev
+      - name: Regenerate with the existing Rust and inventory generators
+        run: |
+          set -euo pipefail
+          cargo test --locked -p ferroui-themes-macos --lib \
+            tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored --exact \
+            2>&1 | tee "$RUNNER_TEMP/macos-recovery/regenerate.log"
+          python3 scripts/macos-theme/audit.py --write \
+            2>&1 | tee "$RUNNER_TEMP/macos-recovery/audit-write.log"
+          python3 scripts/macos-theme/audit.py --check \
+            2>&1 | tee "$RUNNER_TEMP/macos-recovery/audit-check.log"
+      - name: Validate generated references and all theme contracts
+        run: |
+          set -euo pipefail
+          cargo test --locked -p ferroui-themes-macos --lib \
+            2>&1 | tee "$RUNNER_TEMP/macos-recovery/theme-tests.log"
+          cargo test --locked -p ferroui-base --lib platform::default_platform_settings::tests \
+            2>&1 | tee "$RUNNER_TEMP/macos-recovery/platform-tests.log"
+          cargo check --locked -p control-catalog --features macos-theme --lib \
+            2>&1 | tee "$RUNNER_TEMP/macos-recovery/catalogue-check.log"
+          python3 -m unittest discover -s scripts/macos-theme -p 'test_*.py' -v \
+            2>&1 | tee "$RUNNER_TEMP/macos-recovery/python-tests.log"
+      - name: Commit only validated generated outputs and fast-forward the PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import subprocess
+          allowed = {
+              'src/FerroUI.Themes.MacOS/compiled_xaml.rs',
+              'src/FerroUI.Themes.MacOS/compiled_xaml.xamlmeta',
+              'docs/porting/data/macos26-theme.json',
+          }
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines())
+          untracked = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard'], text=True).splitlines()
+          if changed - allowed or untracked:
+              raise SystemExit(f'Refusing unexpected generated files: {changed - allowed}, {untracked}')
+          PY
+          git diff --check
+          git add -- src/FerroUI.Themes.MacOS/compiled_xaml.rs \
+            src/FerroUI.Themes.MacOS/compiled_xaml.xamlmeta docs/porting/data/macos26-theme.json
+          if git diff --cached --quiet; then
+            echo 'Generated references already match the recovery sources.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          test "$(git ls-remote origin refs/heads/feat/macos26-theme | cut -f1)" = "$SOURCE_COMMIT"
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'chore(macos-theme): regenerate validated recovery references'
+          # Supply the token only to this final Git operation, never persist it
+          # in the checkout, and never force-push over concurrent branch work.
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          GIT_CONFIG_COUNT=1 \
+          GIT_CONFIG_KEY_0=http.https://github.com/.extraheader \
+          GIT_CONFIG_VALUE_0="AUTHORIZATION: basic $auth" \
+            git push origin HEAD:refs/heads/feat/macos26-theme
+          test "$(git ls-remote origin refs/heads/feat/macos26-theme | cut -f1)" = "$(git rev-parse HEAD)"
+          git rev-parse HEAD > "$RUNNER_TEMP/macos-recovery/published-commit.txt"
+          printf 'Published validated generated references: `%s`\n' "$(git rev-parse HEAD)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve regeneration and validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: macos-theme-recovery-validation
+          path: ${{ runner.temp }}/macos-recovery
+          if-no-files-found: warn
+          retention-days: 14
