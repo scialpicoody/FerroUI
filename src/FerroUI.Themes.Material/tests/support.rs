@@ -7,6 +7,7 @@ pub fn start_themed_application() -> UnitTestApplicationScope {
     register_types();
     UnitTestApplication::start(
         TestServices::styled_window()
+            .with_keyboard_device(|| Some(ferroui_base::input::KeyboardDevice::new()))
             .with_global_clock(Rc::new(MockGlobalClock::new()))
             .with_theme(|| {
                 let theme = MaterialTheme::new();

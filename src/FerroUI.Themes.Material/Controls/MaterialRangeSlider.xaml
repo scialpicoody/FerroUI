@@ -63,7 +63,7 @@
       <Setter Property="HorizontalAlignment" Value="Center" />
       <Setter Property="VerticalAlignment" Value="Stretch" />
     </Style>
-    <Style Selector="^ /template/ material:MaterialRangeSliderThumb:pressed, ^ /template/ material:MaterialRangeSliderThumb:focus-visible">
+    <Style Selector="^ /template/ material|MaterialRangeSliderThumb:pressed, ^ /template/ material|MaterialRangeSliderThumb:focus-visible">
       <Setter Property="ToolTip.IsOpen" Value="True" />
     </Style>
     <Style Selector="^:disabled">

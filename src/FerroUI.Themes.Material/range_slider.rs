@@ -1126,7 +1126,7 @@ impl Geometry {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ferroui_base::input::raw::RawInputModifiers;
+    use ferroui_base::input::RawInputModifiers;
     use ferroui_base::input::{
         KeyModifiers, MouseButton, Pointer, PointerPointProperties, PointerUpdateKind,
     };
@@ -1380,8 +1380,8 @@ mod tests {
             AutomationControlType::Slider,
             start_peer.get_automation_control_type()
         );
-        assert_eq!(Some("Minimum price".into()), start_peer.get_name());
-        assert_eq!(Some("Maximum price".into()), end_peer.get_name());
+        assert_eq!("Minimum price", start_peer.get_name());
+        assert_eq!("Maximum price", end_peer.get_name());
         let first = start_peer
             .get_provider::<dyn IRangeValueProvider>()
             .unwrap();

@@ -6,6 +6,9 @@ use ferroui_base::{Ref, TypeInfo};
 use ferroui_controls::Control;
 
 mod material_components_page;
+mod material_interactions_page;
+mod floating_actions_page;
+mod app_bars_page;
 mod buttons_page;
 mod toggles_page;
 mod text_input_page;
@@ -24,6 +27,9 @@ mod dialogs_page;
 mod text_calibration_page;
 
 pub use material_components_page::MaterialComponentsPage;
+pub use material_interactions_page::MaterialInteractionsPage;
+pub use floating_actions_page::FloatingActionsPage;
+pub use app_bars_page::AppBarsPage;
 pub use buttons_page::ButtonsPage;
 pub use toggles_page::TogglesPage;
 pub use text_input_page::TextInputPage;
@@ -66,6 +72,9 @@ impl PageInfo {
 /// The pages, in the order of the list of the window.
 pub static PAGES: &[PageInfo] = &[
     PageInfo { id: "material", title: "Material 3 Expressive", document: MaterialComponentsPage::DOCUMENT_PATH, create: material_components_page::create },
+    PageInfo { id: "interactions", title: "Search, snackbars and sheets", document: MaterialInteractionsPage::DOCUMENT_PATH, create: material_interactions_page::create },
+    PageInfo { id: "floating", title: "Floating action buttons", document: FloatingActionsPage::DOCUMENT_PATH, create: floating_actions_page::create },
+    PageInfo { id: "appbars", title: "Top app bars", document: AppBarsPage::DOCUMENT_PATH, create: app_bars_page::create },
     PageInfo {
         id: "buttons",
         title: "Buttons",
@@ -167,6 +176,9 @@ pub static PAGES: &[PageInfo] = &[
 /// The classes of the namespace `MaterialThemeGallery.Pages` (`X::TYPE`).
 pub(crate) const TYPES: &[&TypeInfo] = &[
     MaterialComponentsPage::TYPE,
+    MaterialInteractionsPage::TYPE,
+    FloatingActionsPage::TYPE,
+    AppBarsPage::TYPE,
     ButtonsPage::TYPE,
     TogglesPage::TYPE,
     TextInputPage::TYPE,
@@ -188,6 +200,9 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
 /// The classes of the namespace that have a document (`&X::XAML_CLASS`).
 pub(crate) const CLASSES: &[&XamlClass] = &[
     &MaterialComponentsPage::XAML_CLASS,
+    &MaterialInteractionsPage::XAML_CLASS,
+    &FloatingActionsPage::XAML_CLASS,
+    &AppBarsPage::XAML_CLASS,
     &ButtonsPage::XAML_CLASS,
     &TogglesPage::XAML_CLASS,
     &TextInputPage::XAML_CLASS,

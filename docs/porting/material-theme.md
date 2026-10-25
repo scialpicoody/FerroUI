@@ -7,7 +7,7 @@ and replaces their visual system with Android Material 3 Expressive.
 
 ## Reference
 
-Reference checked on **2026-10-24**:
+Reference checked on **2026-10-25**:
 
 - [AndroidX Material3 release notes](https://developer.android.com/jetpack/androidx/releases/compose-material3):
   stable **1.4.0**, newest Expressive preview **1.5.0-beta02**, released 2026-10-21.
@@ -153,11 +153,14 @@ controls without a Material counterpart receive a coordinated Material skin.
 | Component | Default or explicit API | Implemented visual anatomy |
 | --- | --- | --- |
 | Buttons | `Button`, `MaterialFilledButton`, `MaterialTonalButton`, `MaterialOutlinedButton`, `MaterialTextButton`, `MaterialElevatedButton` | Filled 40dp surface within a minimum 48dp target, pill shape, state layers, bounded ripple, expressive pressed shape |
-| Button sizes and FAB | `MaterialExtraSmallButton`, `MaterialMediumButton`, `MaterialLargeButton`, `MaterialExtraLargeButton`, `MaterialFab` | Expressive size metrics and rounded FAB container |
+| Button sizes | `MaterialExtraSmallButton`, `MaterialMediumButton`, `MaterialLargeButton`, `MaterialExtraLargeButton` | Expressive size metrics and state-dependent corners |
+| Icon buttons | `MaterialIconButton`, `MaterialFilledIconButton`, `MaterialTonalIconButton`, `MaterialOutlinedIconButton`; corresponding toggle themes | Five expressive sizes, narrow/default/wide widths, round/square and selected/pressed shapes, 48dp minimum targets |
+| Floating action buttons | `MaterialFab`, `MaterialExtendedFab`, toggle FAB themes | Small/medium/large geometry, primary/secondary/tertiary/surface colors, real Button commands, animated intrinsic width and label visibility |
 | Checkboxes and radio buttons | `CheckBox`, `RadioButton` | 18dp checkbox or 20dp radio geometry, 40dp feedback layer, 48dp target, selected/indeterminate/disabled states |
 | Switch | `ToggleSwitch` | 52×32dp track, 2dp outline, 16/24/28dp off/on/pressed thumb, original drag and knob travel contracts |
 | Slider | `Slider` | 16dp track, 4×44dp handle, 2dp pressed handle, gaps and stop mark, horizontal/vertical layout, keyboard and value binding |
-| Text fields | `TextBox`; classes `outlined`, `floatingLabel` | Filled/outlined 56dp fields, indicator and outline states, persistent editor/selection/IME parts, optional floating label |
+| Range slider | `MaterialRangeSlider` | Two independent focus/automation targets, native track/handle/gap/tick geometry, continuous/discrete values, noncrossing touch and keyboard selection, RTL |
+| Text fields | `TextBox`; `MaterialTextField` attached properties; classes `outlined`, `floatingLabel` | Separate label/placeholder, leading/trailing icons, prefix/suffix, supporting/error text and UTF-16 counter; 56dp painted field, outline notch, retained editor/selection/IME |
 | Progress | `MaterialLinearProgress`, `MaterialWavyLinearProgress`, `MaterialCircularProgress`, `MaterialWavyCircularProgress` on `ProgressBar` | Material caps, gaps, stop indicators, native wavy construction, determinate and indeterminate animation |
 | Loading | `MaterialLoadingIndicator`; `MaterialContainedLoadingIndicator` | Seven rounded polygon shapes and morphs, determinate circle-to-soft-burst path, optional container |
 | Cards | `MaterialFilledCard`, `MaterialElevatedCard`, `MaterialOutlinedCard` on `ContentControl` | Material surface roles, 12dp corners, elevation/outline variants |
@@ -165,9 +168,10 @@ controls without a Material counterpart receive a coordinated Material skin.
 | Segmented buttons | `MaterialSegmentedButton` on `ToggleButton`; classes `leading`, `middle`, `trailing` | Segment border joining, selected check and secondary-container colors |
 | Navigation | `MaterialNavigationBar`, `MaterialNavigationBarTall`, `MaterialNavigationRail`, `MaterialNavigationRailNarrow` on `TabControl` | 64/80dp bars, 96/80dp rails, icon/label geometry, selected pill and live selection |
 | Tabs | `TabControl`, `TabItem` | Material primary indicator, selected text, scrolling and retained item presentation |
-| Search | `MaterialSearchBar` on `TextBox` | 56dp rounded search surface and text-input behavior |
+| Search | `MaterialSearchBar` on `TextBox`; `MaterialSearchView` | 56dp rounded input and docked expandable results, retained query editor, clear/back/submit actions, native expansion/collapse motion roles |
+| Snackbar | `MaterialSnackbar`, `MaterialSnackbarHost` | FIFO host, action/dismiss controls, cancellable handles and futures, visible-time timeout policy, source fade/scale transitions and live-region semantics |
 | Badges | `MaterialBadge` on `Border`, `MaterialBadgeWithLabel` on `ContentControl` | 6dp dot or 16dp label badge with error/on-error roles |
-| Dialog and sheet surfaces | `MaterialDialog`, `MaterialBottomSheet` on `GroupBox` | Dialog/sheet dimensions, corners, title spacing and surface roles |
+| Dialog and sheet surfaces | `MaterialDialog`, `MaterialBottomSheet` on `GroupBox`; `MaterialBottomSheetHost` | Surface themes plus an in-window modal sheet host with anchors, scrim, drag, vetoable dismissal, back navigation, focus containment/restoration and host-supplied insets |
 | Other existing controls | ComboBox, lists, menus, tooltips, calendars, pickers, command bars, trees, tabs, managed dialogs, and the inherited theme surface | Material typography, colors, spacing, feedback and template-part compatibility |
 
 Example composition:
@@ -176,7 +180,8 @@ Example composition:
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:material="using:FerroUI.Themes.Material" Spacing="16">
   <Button Theme="{StaticResource MaterialTonalButton}" Content="Save changes" />
-  <TextBox Classes="outlined floatingLabel" PlaceholderText="Project name" Text="My project" />
+  <TextBox Classes="outlined" material:MaterialTextField.Label="Project name"
+           material:MaterialTextField.SupportingText="Shown to your team" Text="My project" />
   <ProgressBar Theme="{StaticResource MaterialWavyLinearProgress}" Value="64" />
   <material:MaterialLoadingIndicator
       Theme="{StaticResource MaterialContainedLoadingIndicator}" />
@@ -185,12 +190,76 @@ Example composition:
 
 A card theme does not make `ContentControl` clickable. Put an actual input control
 inside or use an application control with the desired command semantics.
-Segment grouping and exclusive selection remain the application's responsibility.
-The dialog and bottom-sheet keys style surfaces; the host supplies modality,
-scrim, drag/dismiss gestures and window/inset behavior. The search theme does not
-create a search-results overlay. Calendar and time-picker controls preserve
+The original dialog and bottom-sheet **resource keys** style surfaces. Use
+`MaterialBottomSheetHost` for implemented modal behavior, or those resource keys
+when the application already owns its overlay. `MaterialSearchView` supplies a
+docked results view; the application provides its result items and search logic.
+Calendar and time-picker controls preserve
 FerroUI's existing behavior; they do not become Compose's date-range picker or
 analog clock picker by changing their theme.
+
+### Stateful components
+
+Put a sheet host last in the application's overlay `Grid`. Its body is ordinary
+FerroUI content, and `State` is a two-way bindable requested state:
+
+```xml
+<Grid xmlns="https://github.com/ferroui"
+      xmlns:material="using:FerroUI.Themes.Material">
+  <!-- The application page goes here. -->
+  <material:MaterialBottomSheetHost Name="DetailsSheet" Padding="24" State="Hidden">
+    <StackPanel Spacing="16">
+      <TextBlock Theme="{StaticResource MaterialHeadlineSmall}" Text="Details" />
+      <TextBlock Text="Your sheet content" />
+    </StackPanel>
+  </material:MaterialBottomSheetHost>
+</Grid>
+```
+
+Call `show()`, `expand()` and `hide()`, or bind `State`. The semantic states are
+`Hidden`, `PartiallyExpanded` and `Expanded`. A short sheet retains its partial
+state even when partial and expanded coordinates coincide; growing that content
+uses the pinned implementation's reconciliation rule. Back visits the partial
+anchor before dismissal when it is distinct. `set_confirm_state_change` can veto
+a state change. `Dismissed` is raised after exit settles; removal does not report
+a completed dismissal. `SafeInsets` receives system-bar and keyboard insets from
+the platform host.
+
+`MaterialSearchView::Query` is two-way bindable. `QuerySubmitted` reports Enter or
+an explicit `submit_query()` call; expansion never recreates its TextBox. `Content`
+holds results. Escape/back collapses the results, and Down moves focus into them.
+The expanded docked height respects the 240dp minimum, the window's two-thirds
+cap and an optional `MaxExpandedHeight`.
+
+```rust
+use ferroui_themes_material::{MaterialSnackbarHost, MaterialSnackbarMessage};
+
+let host = MaterialSnackbarHost::new(); // Add this control to the overlay.
+let request = host.show(MaterialSnackbarMessage::new("Item archived").with_action("Undo"));
+// request.result() is None until action, dismissal, timeout or cancellation.
+// request.perform_action(), request.dismiss() and request.cancel() affect only this request.
+```
+
+Only the current snackbar's visible time counts toward its timeout. Short and
+long durations are 4 and 10 seconds; an action defaults to indefinite. The host
+can receive a `MaterialSnackbarTimeoutPolicy` to apply an accessibility timeout.
+Requests are FIFO; completing an older handle cannot dismiss its successor.
+The handle can also be awaited, and dropping its pending future cancels that
+request. Hidden and detached hosts pause scheduling.
+
+Use `MaterialExtendedFab` for a real expanding/collapsing button. Its ordinary
+`Content` and `Command` remain active; `Icon`, `IsExpanded` and `SizeVariant`
+control the expressive presentation. Small/medium/large heights are 56/80/96dp.
+Width uses FastSpatial motion and label opacity uses FastEffects, with velocity
+preserved on interruption. The label stays mounted through its exit and drops
+out of measurement and duplicated semantics when collapsed.
+
+Text fields use an advisory `CharacterLimit`/`ShowCharacterCount` pair. The
+counter counts UTF-16 code units, as Android does, but does not truncate the
+editor's text. `ErrorText` and `IsError` add Material presentation without
+replacing FerroUI validation. The native minimum field width is 280dp; the
+`compactWidth` class explicitly opts into the old 120dp desktop minimum.
+An automatic clear button is opt-in through the `clearButton` class.
 
 `DensityStyle::Compact` retains a compatibility switch for existing applications
 but does not reduce required Material touch targets. Existing application
@@ -214,9 +283,12 @@ theme.set_reduced_motion(true);
 
 Six roles separate spatial motion from effects. The analytic spring solver
 handles underdamped, critical and overdamped springs; `MaterialSpringState`
-retargets from the current position and velocity. The easing adapter converts
-settling time to FerroUI transitions without replacing the spring with a Bezier
-curve. Controls use the appropriate spatial/effects roles, and navigation page
+retargets from the current position and velocity. `MaterialDoubleTransition`,
+`MaterialCornerRadiusTransition` and `MaterialThicknessTransition` carry
+per-property spring velocity through actual FerroUI transition interruption.
+A restarted transition samples its predecessor at the elapsed clock time and
+integrates from that position and velocity; completion and removal clear the
+retained state. Controls use the appropriate spatial/effects roles, and navigation page
 transitions update when the scheme changes.
 
 | Role | Expressive damping / stiffness | Standard damping / stiffness |
@@ -387,9 +459,10 @@ Material elevation levels are 0, 1, 3, 6, 8 and 12dp. The theme's paired
 `BoxShadow` resources approximate Android's ambient/spot shadow rendering;
 FerroUI's shadow rasterizer is not Android's physical renderer. Text shaping,
 hinting, subpixel placement and font fallback also depend on the active backend.
-FerroUI transition interruption uses its existing transition engine; exposing an
-analytic retargetable spring API does not replace that engine throughout every
-control. Platform navigation, predictive back, edge-to-edge insets, haptics,
+The Material scalar, corner and thickness adapters integrate with FerroUI's
+transition engine and preserve interruption velocity. Color and shadow
+transitions continue to use the renderer's existing value interpolation.
+Platform navigation, predictive back, edge-to-edge insets, haptics,
 Android accessibility services and OS dialogs belong to the host/backend.
 
 Desktop-only components and the documented composite surfaces are adaptations.

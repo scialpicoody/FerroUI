@@ -6,7 +6,13 @@ use crate::accents::SystemAccentColors;
 use crate::converters::{CornerRadiusToThicknessConverter, CornerRadiusToThicknessConverterKind};
 use crate::primitives::{InfoBarPanel, TabViewEqualWidthPanel};
 use crate::material_theme::{DensityStyle, MaterialTheme};
-use crate::{MaterialMotionScheme, MaterialRipple, MaterialProgressIndicator, MaterialLoadingIndicator, MaterialSelectionMark, MaterialTextFieldBorder};
+use crate::{MaterialBottomSheetHost, MaterialSheetState, MaterialSnackbar, MaterialSnackbarHost};
+use crate::{MaterialTextField, MaterialTextFieldLayout, MaterialTextFieldSlot};
+use crate::MaterialSearchView;
+use crate::{MaterialAppBar, MaterialAppBarLayout, MaterialAppBarSize, MaterialAppBarScrollBehavior};
+use crate::{MaterialExtendedFab, MaterialExtendedFabLayout, MaterialExtendedFabSize};
+use crate::{MaterialRangeSlider, MaterialRangeSliderThumb, MaterialRangeSliderLayout, MaterialRangeSliderThumbAutomationPeer};
+use crate::{MaterialDoubleTransition, MaterialCornerRadiusTransition, MaterialThicknessTransition, MaterialMotionScheme, MaterialRipple, MaterialProgressIndicator, MaterialLoadingIndicator, MaterialSelectionMark, MaterialTextFieldBorder};
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition, FERRO_XML_NAMESPACE};
@@ -22,7 +28,19 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_themes_material::loading_indicator", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::selection_mark", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::text_field_border", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::text_field", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::text_field_layout", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::motion", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::app_bar", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::app_bar_layout", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::app_bar_state", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::spring_transitions", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::sheet_state", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::bottom_sheet", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::search_view", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::extended_fab", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::range_slider", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::snackbar", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::accents", "FerroUI.Themes.Material.Accents"),
     ("ferroui_themes_material::converters", "FerroUI.Themes.Material.Converters"),
     ("ferroui_themes_material::primitives", "FerroUI.Themes.Material.Primitives"),
@@ -39,11 +57,21 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 };
 
 const TYPES: &[&TypeInfo] =
-    &[MaterialTheme::TYPE, MaterialRipple::TYPE, MaterialProgressIndicator::TYPE, MaterialLoadingIndicator::TYPE, MaterialSelectionMark::TYPE, MaterialTextFieldBorder::TYPE, SystemAccentColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
+    &[MaterialAppBar::TYPE, MaterialAppBarLayout::TYPE,
+    MaterialRangeSlider::TYPE, MaterialRangeSliderThumb::TYPE, MaterialRangeSliderLayout::TYPE, MaterialRangeSliderThumbAutomationPeer::TYPE,
+    MaterialExtendedFab::TYPE, MaterialExtendedFabLayout::TYPE,
+    MaterialSearchView::TYPE, MaterialTextField::TYPE, MaterialTextFieldLayout::TYPE,
+    MaterialBottomSheetHost::TYPE, MaterialSnackbar::TYPE, MaterialSnackbarHost::TYPE,
+    MaterialDoubleTransition::TYPE, MaterialCornerRadiusTransition::TYPE, MaterialThicknessTransition::TYPE, MaterialTheme::TYPE, MaterialRipple::TYPE, MaterialProgressIndicator::TYPE, MaterialLoadingIndicator::TYPE, MaterialSelectionMark::TYPE, MaterialTextFieldBorder::TYPE, SystemAccentColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
 
 const MARKUP_TYPES: &[&MarkupType] = &[
     <DensityStyle as MarkupTyped>::MARKUP,
     <MaterialMotionScheme as MarkupTyped>::MARKUP,
+    <MaterialSheetState as MarkupTyped>::MARKUP,
+    <MaterialTextFieldSlot as MarkupTyped>::MARKUP,
+    <MaterialExtendedFabSize as MarkupTyped>::MARKUP,
+    <MaterialAppBarSize as MarkupTyped>::MARKUP,
+    <MaterialAppBarScrollBehavior as MarkupTyped>::MARKUP,
     <CornerRadiusToThicknessConverter as MarkupTyped>::MARKUP,
     <CornerRadiusToThicknessConverterKind as MarkupTyped>::MARKUP,
 ];
@@ -73,6 +101,11 @@ pub fn register_types() {
 fn register_value_types() {
     ValueTypes::register_nullable::<DensityStyle>();
     ValueTypes::register_nullable::<MaterialMotionScheme>();
+    ValueTypes::register_nullable::<MaterialSheetState>();
+    ValueTypes::register_nullable::<MaterialTextFieldSlot>();
+    ValueTypes::register_nullable::<MaterialExtendedFabSize>();
+    ValueTypes::register_nullable::<MaterialAppBarSize>();
+    ValueTypes::register_nullable::<MaterialAppBarScrollBehavior>();
     ValueTypes::register_nullable::<CornerRadiusToThicknessConverterKind>();
     ValueTypes::register_nullable::<Rc<CornerRadiusToThicknessConverter>>();
     ValueTypes::register_cast::<Rc<CornerRadiusToThicknessConverter>, Rc<dyn IValueConverter>>(|c| c.clone());

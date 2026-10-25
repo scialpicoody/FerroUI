@@ -1,5 +1,6 @@
 <UserControl xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material"
              x:Class="MaterialThemeGallery.Pages.RangePage">
   <!-- Slider (horizontal and vertical, pointer over, disabled, with ticks), ProgressBar (values,
        indeterminate, disabled), ScrollBar in the mouse indicator mode with its thin collapsed
@@ -39,6 +40,17 @@
       </StackPanel>
 
       <StackPanel Grid.Column="1" Spacing="12">
+        <TextBlock Text="Range slider" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+        <material:MaterialRangeSlider Width="260" HorizontalAlignment="Left"
+                                      RangeStart="20" RangeEnd="75"
+                                      StartLabel="Minimum price" EndLabel="Maximum price" />
+        <TextBlock Text="Discrete · 5 steps" />
+        <material:MaterialRangeSlider Width="260" HorizontalAlignment="Left"
+                                      Minimum="0" Maximum="60" RangeStart="10" RangeEnd="40" Steps="5" />
+        <TextBlock Text="Disabled" />
+        <material:MaterialRangeSlider Width="260" HorizontalAlignment="Left"
+                                      RangeStart="20" RangeEnd="75" IsEnabled="False" />
+
         <TextBlock Text="Vertical slider" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
         <StackPanel Orientation="Horizontal" Spacing="24" Height="120">
           <Slider Orientation="Vertical" Minimum="0" Maximum="100" Value="30" />
