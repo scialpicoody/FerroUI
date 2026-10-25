@@ -9,3 +9,4 @@ mod extended_fab;
 mod text_field;
 mod icon_buttons;
 mod app_bar;
+mod segmented_group;

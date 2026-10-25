@@ -107,3 +107,22 @@ fn submit_is_a_single_routed_action_and_does_not_clear_the_editor() {
     assert_eq!(1, count.get());
     assert_eq!(Some("forms".to_string()), view.query());
 }
+
+#[test]
+fn native_docked_motion_animates_constraints_and_keeps_revealed_results_opaque() {
+    let _app = start_themed_application();
+    let (window, view) = host();
+    view.set_reduced_motion(false);
+    view.expand();
+    view.advance_motion(0.1);
+    window.update_layout();
+    // At100ms the native SlowSpatial spring's interpolated screen cap already
+    // exceeds240dp. Short content is fully revealed while the spring continues.
+    assert_eq!(240.0, view.bounds().height);
+    let results: Ref<ferroui_controls::ScrollViewer> = named(&view, "PART_Results");
+    assert_eq!(1.0, results.opacity());
+    view.set_reduced_motion(true);
+    view.collapse();
+    window.update_layout();
+    assert_eq!(56.0, view.bounds().height);
+}

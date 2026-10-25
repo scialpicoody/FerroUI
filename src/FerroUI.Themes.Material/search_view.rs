@@ -46,6 +46,8 @@ pub struct MaterialSearchView {
     visibility_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     progress: RefCell<MaterialSpringState>,
     result_height: Cell<f64>,
+    maximum_height: Cell<f64>,
+    parent_height: Cell<f64>,
     synchronizing: Cell<bool>,
     suppress_expand: Cell<bool>,
     frame_pending: Cell<bool>,
@@ -155,7 +157,6 @@ impl LayoutableImpl for MaterialSearchView {
         let maximum = (viewport * 2.0 / 3.0)
             .min(this.max_expanded_height())
             .max(56.0);
-        let minimum = 240.0_f64.min(maximum);
         let natural = this
             .result_content
             .borrow()
@@ -167,8 +168,13 @@ impl LayoutableImpl for MaterialSearchView {
                 ));
                 presenter.desired_size().height
             });
-        let height = (56.0 + natural).clamp(minimum, maximum) - 56.0;
-        if (this.result_height.replace(height) - height).abs() > 0.001 {
+        let old_natural = this.result_height.replace(natural + 1.0); // Native divider.
+        let old_maximum = this.maximum_height.replace(maximum);
+        let old_parent = this.parent_height.replace(available.height.max(56.0));
+        if (old_natural - natural - 1.0).abs() > 0.001
+            || old_maximum != maximum
+            || old_parent != this.parent_height.get()
+        {
             this.apply_progress();
             Self::parent_measure_override(this, available)
         } else {
@@ -307,7 +313,9 @@ impl MaterialSearchView {
                 MaterialMotionScheme::Expressive.spring(MaterialMotionRole::SlowSpatial),
                 0.0,
             )),
-            result_height: Cell::new(184.0),
+            result_height: Cell::new(0.0),
+            maximum_height: Cell::new(480.0),
+            parent_height: Cell::new(f64::INFINITY),
             synchronizing: Cell::new(false),
             suppress_expand: Cell::new(false),
             frame_pending: Cell::new(false),
@@ -420,13 +428,34 @@ impl MaterialSearchView {
         self.request_frame();
     }
     fn apply_progress(&self) {
-        let progress = self.progress.borrow().current().value.clamp(0.0, 1.0);
+        let progress = self.progress.borrow().current().value.max(0.0);
+        // DockedSearchBarLayoutImpl animates the maximum constraint toward the
+        // screen cap. It does not multiply the final measured height by progress:
+        // short result sets reach their native 240dp minimum before the spring
+        // finishes, and spatial overshoot is retained for a full result list.
+        let maximum = (56.0 + (self.maximum_height.get() - 56.0) * progress)
+            .min(self.parent_height.get())
+            .max(56.0);
+        let height = (56.0 + self.result_height.get()).clamp(240.0_f64.min(maximum), maximum);
         if let Some(results) = self.results.borrow().as_ref() {
-            results.set_height(progress * self.result_height.get());
-            results.set_opacity(progress);
+            results.set_height((height - 56.0).max(0.0));
+            // The gapless native docked surface reveals opaque content by clipping.
+            results.set_opacity(1.0);
             results.set_is_hit_test_visible(self.is_expanded());
             results.set_is_visible(progress > 0.0 || self.is_expanded());
         }
+    }
+    pub(crate) fn advance_motion(&self, seconds: f64) {
+        {
+            let mut progress = self.progress.borrow_mut();
+            progress.set_reduced_motion(!animations_enabled(self.reduced_motion()));
+            progress.advance(seconds);
+            if progress.is_at_rest(0.001, 0.01) {
+                progress.finish();
+                self.last_frame.set(None);
+            }
+        }
+        self.apply_progress();
     }
     fn invalidate_frame(&self) {
         self.frame_generation
@@ -458,16 +487,7 @@ impl MaterialSearchView {
                 .last_frame
                 .replace(Some(now))
                 .map_or(0.0, |last| (now - last).total_seconds().max(0.0));
-            {
-                let mut progress = this.progress.borrow_mut();
-                progress.set_reduced_motion(!animations_enabled(this.reduced_motion()));
-                progress.advance(elapsed);
-                if progress.is_at_rest(0.001, 0.01) {
-                    progress.finish();
-                    this.last_frame.set(None);
-                }
-            }
-            this.apply_progress();
+            this.advance_motion(elapsed);
             this.request_frame();
         });
     }

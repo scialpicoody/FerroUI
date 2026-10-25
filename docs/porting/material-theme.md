@@ -132,10 +132,13 @@ theme.set_color_scheme(ThemeVariant::dark(),
 ```
 
 Seed schemes use real CAM16/HCT tonal palettes and dynamic contrast constraints.
-Nine palette variants and contrast levels -1 through +1 are supported. The
-algorithm is pinned separately from the AndroidX baseline: the Rust dependency's
-role curves are not a claim of equivalence to every newer Material Color Utilities
-release or OEM wallpaper algorithm. Complete device-role and tonal-palette
+Nine palette variants and contrast levels -1 through +1 are supported. Palette
+and role rules follow Google Material Color Utilities commit
+`bd811e4ca2ab94c4ce3cadc89c19b1820b9704b3`, separately from the AndroidX baseline.
+`MaterialColorSpec::Spec2021` is that source's default; `Spec2025` enables its
+newer phone palettes and role curves, and `Spec2026` applies the source's fallback
+for the nine supported single-seed styles. Independent TypeScript-generated
+fixtures cover 3,456 schemes and all 165,888 ARGB role values. Complete device-role and tonal-palette
 imports preserve the supplied colors. Enable `android-dynamic-color` on Android and call
 `theme.use_android_dynamic_colors()` after platform initialization to read and
 follow the system colors. See
@@ -155,7 +158,7 @@ controls without a Material counterpart receive a coordinated Material skin.
 | Buttons | `Button`, `MaterialFilledButton`, `MaterialTonalButton`, `MaterialOutlinedButton`, `MaterialTextButton`, `MaterialElevatedButton` | Filled 40dp surface within a minimum 48dp target, pill shape, state layers, bounded ripple, expressive pressed shape |
 | Button sizes | `MaterialExtraSmallButton`, `MaterialMediumButton`, `MaterialLargeButton`, `MaterialExtraLargeButton` | Expressive size metrics and state-dependent corners |
 | Icon buttons | `MaterialIconButton`, `MaterialFilledIconButton`, `MaterialTonalIconButton`, `MaterialOutlinedIconButton`; corresponding toggle themes | Five expressive sizes, narrow/default/wide widths, round/square and selected/pressed shapes, 48dp minimum targets |
-| Floating action buttons | `MaterialFab`, `MaterialExtendedFab`, toggle FAB themes | Small/medium/large geometry, primary/secondary/tertiary/surface colors, real Button commands, animated intrinsic width and label visibility |
+| Floating action buttons | `MaterialFloatingActionButton`, `MaterialSmallFab`, `MaterialMediumFab`, `MaterialLargeFab`, `MaterialExtendedFab`, toggle FAB themes | Native geometry and icon sizes, primary/secondary/tertiary/surface colors, real Button commands, animated intrinsic width and label visibility; original `MaterialFab` key retained |
 | Checkboxes and radio buttons | `CheckBox`, `RadioButton` | 18dp checkbox or 20dp radio geometry, 40dp feedback layer, 48dp target, selected/indeterminate/disabled states |
 | Switch | `ToggleSwitch` | 52×32dp track, 2dp outline, 16/24/28dp off/on/pressed thumb, original drag and knob travel contracts |
 | Slider | `Slider` | 16dp track, 4×44dp handle, 2dp pressed handle, gaps and stop mark, horizontal/vertical layout, keyboard and value binding |
@@ -165,8 +168,9 @@ controls without a Material counterpart receive a coordinated Material skin.
 | Loading | `MaterialLoadingIndicator`; `MaterialContainedLoadingIndicator` | Seven rounded polygon shapes and morphs, determinate circle-to-soft-burst path, optional container |
 | Cards | `MaterialFilledCard`, `MaterialElevatedCard`, `MaterialOutlinedCard` on `ContentControl` | Material surface roles, 12dp corners, elevation/outline variants |
 | Chips | `MaterialAssistChip`, `MaterialSuggestionChip` on `Button`; `MaterialFilterChip`, `MaterialInputChip` on `ToggleButton` | 32dp painted containers within 48dp targets, selected check, outlines, ripple and disabled treatment |
-| Segmented buttons | `MaterialSegmentedButton` on `ToggleButton`; classes `leading`, `middle`, `trailing` | Segment border joining, selected check and secondary-container colors |
+| Segmented buttons | `MaterialSegmentedGroup` with real `RadioButton` or `ToggleButton` children; original `MaterialSegmentedButton` key retained | Private single-choice group identity or independent multiple choice, equal widths/1dp outline overlap, automatic logical corners and interaction stacking, stable reserved check space, native check/label motion and selection automation |
 | Navigation | `MaterialNavigationBar`, `MaterialNavigationBarTall`, `MaterialNavigationRail`, `MaterialNavigationRailNarrow` on `TabControl` | 64/80dp bars, 96/80dp rails, icon/label geometry, selected pill and live selection |
+| Top app bars | `MaterialAppBar`; small/center-aligned/medium/large/flexible variants | Native title/subtitle layouts, pinned/enter-always/exit-until-collapsed scroll arbitration, spline fling and snap, container-color interpolation, title semantics handoff, RTL and host insets |
 | Tabs | `TabControl`, `TabItem` | Material primary indicator, selected text, scrolling and retained item presentation |
 | Search | `MaterialSearchBar` on `TextBox`; `MaterialSearchView` | 56dp rounded input and docked expandable results, retained query editor, clear/back/submit actions, native expansion/collapse motion roles |
 | Snackbar | `MaterialSnackbar`, `MaterialSnackbarHost` | FIFO host, action/dismiss controls, cancellable handles and futures, visible-time timeout policy, source fade/scale transitions and live-region semantics |

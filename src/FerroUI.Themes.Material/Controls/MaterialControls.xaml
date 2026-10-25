@@ -101,6 +101,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/TreeView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/AutoCompleteBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialComponents.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialSegmentedGroup.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialIconButtons.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialAppBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialBottomSheet.xaml" />

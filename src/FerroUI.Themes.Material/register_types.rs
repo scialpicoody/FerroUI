@@ -10,6 +10,7 @@ use crate::{MaterialBottomSheetHost, MaterialSheetState, MaterialSnackbar, Mater
 use crate::{MaterialTextField, MaterialTextFieldLayout, MaterialTextFieldSlot};
 use crate::MaterialSearchView;
 use crate::{MaterialAppBar, MaterialAppBarLayout, MaterialAppBarSize, MaterialAppBarScrollBehavior};
+use crate::{MaterialSegmentedContent, MaterialSegmentedGroup, MaterialSegmentedGroupAutomationPeer};
 use crate::{MaterialExtendedFab, MaterialExtendedFabLayout, MaterialExtendedFabSize};
 use crate::{MaterialRangeSlider, MaterialRangeSliderThumb, MaterialRangeSliderLayout, MaterialRangeSliderThumbAutomationPeer};
 use crate::{MaterialDoubleTransition, MaterialCornerRadiusTransition, MaterialThicknessTransition, MaterialMotionScheme, MaterialRipple, MaterialProgressIndicator, MaterialLoadingIndicator, MaterialSelectionMark, MaterialTextFieldBorder};
@@ -34,6 +35,8 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_themes_material::app_bar", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::app_bar_layout", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::app_bar_state", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::segmented_content", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::segmented_group", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::spring_transitions", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::sheet_state", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::bottom_sheet", "FerroUI.Themes.Material"),
@@ -58,6 +61,7 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 
 const TYPES: &[&TypeInfo] =
     &[MaterialAppBar::TYPE, MaterialAppBarLayout::TYPE,
+    MaterialSegmentedContent::TYPE, MaterialSegmentedGroup::TYPE, MaterialSegmentedGroupAutomationPeer::TYPE,
     MaterialRangeSlider::TYPE, MaterialRangeSliderThumb::TYPE, MaterialRangeSliderLayout::TYPE, MaterialRangeSliderThumbAutomationPeer::TYPE,
     MaterialExtendedFab::TYPE, MaterialExtendedFabLayout::TYPE,
     MaterialSearchView::TYPE, MaterialTextField::TYPE, MaterialTextFieldLayout::TYPE,

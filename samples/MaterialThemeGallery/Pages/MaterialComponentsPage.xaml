@@ -70,10 +70,10 @@
     </TabControl>
     <WrapPanel ItemSpacing="8">
       <Button Theme="{StaticResource MaterialAssistChip}" Content="Add a task" />
-      <StackPanel Orientation="Horizontal">
-        <RadioButton Theme="{StaticResource MaterialSegmentedButton}" Classes="leading" GroupName="Period" Content="Day" IsChecked="True" />
-        <RadioButton Theme="{StaticResource MaterialSegmentedButton}" Classes="trailing" GroupName="Period" Content="Week" />
-      </StackPanel>
+      <material:MaterialSegmentedGroup>
+        <RadioButton Content="Day" IsChecked="True" />
+        <RadioButton Content="Week" />
+      </material:MaterialSegmentedGroup>
       <Button Content="Disabled" IsEnabled="False" />
     </WrapPanel>
   </StackPanel>
