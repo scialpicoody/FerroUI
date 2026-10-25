@@ -5,6 +5,8 @@ on:
     paths:
       - 'src/FerroUI.Themes.MacOS/**'
       - 'scripts/macos-theme/**'
+      - 'samples/ControlCatalog/tests/macos_theme_review.rs'
+      - 'samples/ControlCatalog/tests/mod.rs'
       - '.github/workflows/macos-theme-review.yml'
   workflow_dispatch:
 
@@ -53,3 +55,55 @@ jobs:
           path: ${{ runner.temp }}/macos-theme-review
           if-no-files-found: error
           retention-days: 3
+
+  rendered-states:
+    name: Rendered control states (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-26]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      CARGO_BUILD_JOBS: 2
+      CARGO_INCREMENTAL: 0
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      RUST_BACKTRACE: 1
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6
+        with:
+          key: macos-theme-render-review
+          cache-on-failure: true
+      - name: Linux rendering dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config clang lld libssl-dev libfontconfig1-dev libfreetype6-dev \
+            fonts-dejavu-core libx11-dev libx11-xcb-dev libxi-dev libxrandr-dev \
+            libxcursor-dev libxfixes-dev libxext-dev libxkbcommon-dev libgl1-mesa-dev
+      - name: Render the compiled theme and assert disabled-state precedence
+        run: |
+          export FERROUI_MACOS_REVIEW_DIR="$RUNNER_TEMP/macos-theme-renders"
+          mkdir -p "$FERROUI_MACOS_REVIEW_DIR"
+          git rev-parse HEAD > "$FERROUI_MACOS_REVIEW_DIR/source-commit.txt"
+          cargo test --locked -p control-catalog --features macos-theme,runtime-markup \
+            --lib tests::macos_theme_review -- --nocapture \
+            2>&1 | tee "$FERROUI_MACOS_REVIEW_DIR/test.log"
+      - name: Publish rendered states, provenance and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: macos-theme-renders-${{ matrix.os }}
+          path: ${{ runner.temp }}/macos-theme-renders
+          if-no-files-found: warn
+          retention-days: 14

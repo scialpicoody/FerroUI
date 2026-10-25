@@ -6,7 +6,7 @@
 
 use crate::{ControlSize, DensityStyle, MacOSTheme};
 use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, TimeSpan, Transitions};
-use ferroui_base::animation::transitions::DoubleTransition;
+use ferroui_base::animation::DoubleTransition;
 use ferroui_base::animation::easings::Easing;
 use ferroui_base::controls::{ResourceKey, ResourceValue};
 use ferroui_base::media::{AcrylicBackgroundSource, Color, ExperimentalAcrylicMaterial, SolidColorBrush};
