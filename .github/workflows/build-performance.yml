@@ -1,0 +1,120 @@
+name: Build performance
+
+on:
+  pull_request:
+    paths:
+      - 'src/FerroUI.Build.Scan/**'
+      - 'src/FerroUI.Build.Tasks/**'
+      - 'src/Markup/FerroUI.Markup.Xaml.Loader/**'
+      - 'scripts/build-perf/**'
+      - '.github/workflows/build-performance.yml'
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: 'Baseline commit or branch (same benchmark command/toolchain)'
+        default: 'main'
+        required: true
+      repetitions:
+        description: 'Independent cold builds per revision'
+        default: '3'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: never
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_PROFILE_TEST_DEBUG: 0
+  RUST_BACKTRACE: 1
+
+jobs:
+  compiler:
+    name: Cold XAML build and output equivalence
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: baseline
+          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - name: Benchmark evidence checks
+        run: python3 -m unittest discover -s candidate/scripts/build-perf -p 'test_*.py'
+      - name: Alternating cold builds of the full WinUI theme dependency graph
+        env:
+          REPETITIONS: ${{ inputs.repetitions || '3' }}
+        run: >-
+          python3 candidate/scripts/build-perf/compare.py
+          --baseline baseline --candidate candidate --output results/compile
+          --package ferroui-themes-winui --repetitions "$REPETITIONS" --jobs 4
+      - name: Publish raw logs, unit graph, generated-output hashes and Cargo timings
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: cold-build-evidence
+          path: results
+          if-no-files-found: error
+
+  correctness:
+    name: Build tools and native core correctness
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - name: Scanner, compiler, property system, controls and WinUI theme suites
+        run: >-
+          cargo test --locked --lib --no-fail-fast --timings
+          -p ferroui-build-scan -p ferroui-build -p xamlx
+          -p ferroui-base -p ferroui-controls -p ferroui-markup-xaml-loader
+          -p ferroui-themes-winui
+      - name: Publish correctness build timings
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: correctness-build-timings
+          path: target/cargo-timings
+
+  scanner:
+    name: Scanner speed and exact semantic output
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: baseline
+          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - name: Compare models, diagnostics, inputs, functions and statistics over five scans
+        run: >-
+          python3 candidate/scripts/build-perf/scanner.py
+          --baseline baseline --candidate candidate --output results/scanner --repetitions 5
+      - name: Publish scanner evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: scanner-evidence
+          path: results/scanner
+          if-no-files-found: error
