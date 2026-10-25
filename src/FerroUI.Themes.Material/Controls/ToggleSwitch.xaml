@@ -23,7 +23,7 @@
       </FocusAdornerTemplate>
     </Setter>
     <Setter Property="KnobTransitions"><Transitions>
-      <DoubleTransition Property="Canvas.Left" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+      <material:MaterialDoubleTransition Property="Canvas.Left" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" />
     </Transitions></Setter>
     <Setter Property="Template">
       <ControlTemplate>
@@ -43,7 +43,7 @@
                 <Border x:Name="MaterialStateLayer" Width="40" Height="40" CornerRadius="20"
                         Margin="-4" Background="{DynamicResource MaterialOnSurfaceBrush}" Opacity="0"
                         HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
-                  <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+                  <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
                 </Border>
                 <material:MaterialRipple x:Name="MaterialRipple" Fill="{DynamicResource MaterialOnSurfaceBrush}"
                                          Width="40" Height="40" Margin="-4" CornerRadius="20"
@@ -53,7 +53,7 @@
                         Background="{DynamicResource MaterialOutlineBrush}"
                         HorizontalAlignment="Center" VerticalAlignment="Center" IsHitTestVisible="False">
                   <Border.Transitions><Transitions>
-                    <DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /><DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /><BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+                    <material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" /><material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionFastSpatialDuration}" Easing="{DynamicResource MaterialMotionFastSpatialEasing}" /><BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
                   </Transitions></Border.Transitions>
                 </Border>
               </Grid>

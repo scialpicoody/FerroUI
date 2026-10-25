@@ -345,6 +345,79 @@ impl MaterialSpringSpec {
         }
         upper
     }
+
+    /// A conservative settling time for an arbitrary interrupted spring, in seconds.
+    ///
+    /// Both the position and velocity stay below their respective tolerances after this
+    /// time. Unlike the unit-step adapter, this accounts for momentum when the new target
+    /// is very close to the current position. Bounds are analytical exponential envelopes;
+    /// this does not advance a simulation or mistake an oscillation's zero crossing for rest.
+    pub fn settling_duration_from(
+        self,
+        displacement: f64,
+        velocity: f64,
+        position_threshold: f64,
+        velocity_threshold: f64,
+    ) -> f64 {
+        assert!(displacement.is_finite() && velocity.is_finite(), "non-finite spring state");
+        assert!(position_threshold.is_finite() && position_threshold > 0.0, "invalid position threshold");
+        assert!(velocity_threshold.is_finite() && velocity_threshold > 0.0, "invalid velocity threshold");
+        if displacement == 0.0 && velocity == 0.0 {
+            return 0.0;
+        }
+        let omega = self.stiffness.sqrt();
+        let zeta = self.damping_ratio;
+        if zeta == 0.0 {
+            return f64::INFINITY;
+        }
+        if zeta < 1.0 {
+            let alpha = zeta * omega;
+            let frequency = omega * ((1.0 - zeta) * (1.0 + zeta)).sqrt();
+            let position_envelope = displacement.hypot((velocity + alpha * displacement) / frequency);
+            let velocity_envelope = velocity.hypot((alpha * velocity + self.stiffness * displacement) / frequency);
+            return ((position_envelope / position_threshold).ln()
+                .max((velocity_envelope / velocity_threshold).ln()) / alpha).max(0.0);
+        }
+
+        // Use fixed-size coefficients: this calculation allocates nothing when a control
+        // changes target, and no duration search is performed on animation frames.
+        let coefficient = (velocity + omega * displacement).abs();
+        let factor = 1.0 + (((zeta - 1.0) / zeta) * (1.0 + zeta.recip())).sqrt();
+        let slow = -omega / zeta / factor;
+        let fast = -omega * zeta * factor;
+        let a = if zeta == 1.0 { 0.0 } else { (displacement - velocity / fast) / (1.0 - slow / fast) };
+        let b = displacement - a;
+        let mut lower = if zeta == 1.0 { omega.recip() } else { 0.0 };
+        let settled = |t: f64| {
+            let (position, speed) = if zeta == 1.0 {
+                let decay = (-omega * t).exp();
+                ((displacement.abs() + coefficient * t) * decay,
+                 (velocity.abs() + omega * coefficient * t) * decay)
+            } else {
+                let slow_decay = (slow * t).exp();
+                let fast_decay = (fast * t).exp();
+                (a.abs() * slow_decay + b.abs() * fast_decay,
+                 (a * slow).abs() * slow_decay + (b * fast).abs() * fast_decay)
+            };
+            position <= position_threshold && speed <= velocity_threshold
+        };
+        if settled(lower) {
+            return lower;
+        }
+        let mut upper = lower.max(omega.recip());
+        while !settled(upper) {
+            lower = upper;
+            upper *= 2.0;
+            if !upper.is_finite() {
+                return f64::INFINITY;
+            }
+        }
+        for _ in 0..48 {
+            let middle = (lower + upper) * 0.5;
+            if settled(middle) { upper = middle; } else { lower = middle; }
+        }
+        upper
+    }
 }
 
 fn sinc(value: f64) -> f64 {
@@ -477,6 +550,16 @@ impl MaterialSpringEasing {
             check_platform: true,
             policy: None,
         }
+    }
+
+    /// Parameters consumed by the velocity-preserving Material property transitions.
+    pub fn spring_spec(&self) -> MaterialSpringSpec {
+        self.spec
+    }
+
+    pub(crate) fn motion_disabled(&self) -> bool {
+        self.reduced_motion || (self.check_platform && !animations_enabled(false))
+            || self.policy.as_ref().is_some_and(|(policy, generation)| policy.interrupted_since(*generation))
     }
 
     fn evaluate(&self, progress: f64, reduced_motion: bool) -> f64 {
@@ -725,6 +808,23 @@ mod tests {
                 assert_eq!(1.0, easing.ease(1.0));
             }
         }
+    }
+
+    #[test]
+    fn interrupted_settling_bound_covers_high_momentum_and_every_damping_regime() {
+        for damping in [0.6, 0.8, 0.999999, 1.0, 1.000001, 2.0, 20.0] {
+            let spec = MaterialSpringSpec::new(damping, 380.0);
+            for (displacement, velocity) in [(0.0, 4000.0), (100.0, -3000.0), (-0.01, 1000.0), (0.0, 0.0)] {
+                let time = spec.settling_duration_from(displacement, velocity, 0.001, 0.01);
+                assert!(time.is_finite(), "damping={damping}, displacement={displacement}, velocity={velocity}");
+                for step in 0..50 {
+                    let sample = spec.sample(time + step as f64 * 0.01, displacement, 0.0, velocity);
+                    assert!(sample.value.abs() <= 0.00100001, "late displacement {sample:?} at {time}");
+                    assert!(sample.velocity.abs() <= 0.0100001, "late velocity {sample:?} at {time}");
+                }
+            }
+        }
+        assert!(MaterialSpringSpec::new(0.0, 380.0).settling_duration_from(1.0, 0.0, 0.001, 0.01).is_infinite());
     }
 
     #[test]

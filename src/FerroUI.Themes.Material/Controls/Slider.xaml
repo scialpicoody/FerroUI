@@ -5,7 +5,7 @@
   token definitions (Apache-2.0; see NOTICE.md). FerroUI template contracts are adapted
   from the WinUI theme, Copyright (c) Microsoft Corporation, MIT license.
 -->
-<ResourceDictionary xmlns="https://github.com/ferroui"
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:ClassModifier="internal">
   <ControlTheme x:Key="MaterialHorizontalSliderThumb" TargetType="Thumb">
@@ -16,7 +16,7 @@
         <Border x:Name="MaterialHandle" Background="{TemplateBinding Background}"
                 CornerRadius="2" Width="{TemplateBinding MinWidth}" Height="44"
                 HorizontalAlignment="Center" VerticalAlignment="Center">
-          <Border.Transitions><Transitions><DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Border.Transitions>
+          <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Border.Transitions>
         </Border>
       </Grid>
     </ControlTemplate></Setter>
@@ -54,7 +54,7 @@
         <Border x:Name="MaterialHandle" Background="{TemplateBinding Background}"
                 CornerRadius="2" Width="44" Height="{TemplateBinding MinHeight}"
                 HorizontalAlignment="Center" VerticalAlignment="Center">
-          <Border.Transitions><Transitions><DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Border.Transitions>
+          <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" /></Transitions></Border.Transitions>
         </Border>
       </Grid>
     </ControlTemplate></Setter>

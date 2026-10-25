@@ -4,7 +4,7 @@
   own interaction, navigation and accessibility. Structural contracts derive from the
   WinUI theme (Microsoft copyright, MIT; see NOTICE.md). Material tokens: Apache-2.0.
 -->
-<ResourceDictionary xmlns="https://github.com/ferroui"
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:ClassModifier="internal">
   <ControlTheme x:Key="InfoBarCloseButtonStyle" TargetType="Button" BasedOn="{StaticResource SubtleButtonStyle}">
@@ -21,7 +21,7 @@
     <Setter Property="Template"><ControlTemplate>
       <Border x:Name="ContentRoot" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
               Padding="{TemplateBinding Padding}" BoxShadow="{DynamicResource MaterialElevation3BoxShadow}">
-        <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+        <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
         <Grid ColumnDefinitions="*,Auto">
           <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}"
                             Foreground="{TemplateBinding Foreground}" VerticalContentAlignment="Center" Margin="0,8,8,8" />

@@ -33,7 +33,7 @@
             <Border x:Name="MaterialStateLayer" Width="40" Height="40" CornerRadius="20"
                     Background="{DynamicResource MaterialOnSurfaceBrush}" Opacity="0"
                     IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center">
-              <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+              <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
             </Border>
             <material:MaterialRipple x:Name="MaterialRipple" Fill="{DynamicResource MaterialOnSurfaceBrush}"
                                      Width="40" Height="40" CornerRadius="20"

@@ -36,7 +36,7 @@
             <Border x:Name="SelectionIndicator" Height="3" MinWidth="24" CornerRadius="3,3,0,0" Background="{DynamicResource MaterialPrimaryBrush}" Opacity="0" IsHitTestVisible="False" HorizontalAlignment="Center" VerticalAlignment="Bottom" RenderTransformOrigin="50%,50%" RenderTransform="scaleX(0.5)">
               <Border.Transitions>
                 <Transitions>
-                  <DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
+                  <material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}"/>
                   <TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}"/>
                 </Transitions>
               </Border.Transitions>

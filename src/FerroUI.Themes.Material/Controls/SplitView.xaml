@@ -2,7 +2,7 @@
      Structural heritage: Microsoft Corporation, MIT; see NOTICE.md.
      Open/close still reveals the pane through a width/height clip; it is not the
      Android modal drawer's offset gesture animation. -->
-<ResourceDictionary xmlns="https://github.com/ferroui"
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:ClassModifier="internal">
   <Design.PreviewWith>
@@ -333,16 +333,16 @@
     <Style Selector="^:inline:open /template/ Panel#PART_PaneRoot, ^:compactinline:open /template/ Panel#PART_PaneRoot">
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
-          <DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
         </Transitions>
       </Setter>
     </Style>
     <Style Selector="^:inline:closed /template/ Panel#PART_PaneRoot, ^:compactinline:closed /template/ Panel#PART_PaneRoot">
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
-          <DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
         </Transitions>
       </Setter>
     </Style>
@@ -350,16 +350,16 @@
     <Style Selector="^:overlay:open /template/ Panel#PART_PaneRoot, ^:compactoverlay:open /template/ Panel#PART_PaneRoot">
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
-          <DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
         </Transitions>
       </Setter>
     </Style>
     <Style Selector="^:overlay:closed /template/ Panel#PART_PaneRoot, ^:compactoverlay:closed /template/ Panel#PART_PaneRoot">
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
-          <DoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <material:MaterialDoubleTransition Property="Width" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+          <material:MaterialDoubleTransition Property="Height" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
         </Transitions>
       </Setter>
     </Style>

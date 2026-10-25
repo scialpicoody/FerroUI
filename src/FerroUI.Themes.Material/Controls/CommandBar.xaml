@@ -45,14 +45,14 @@
           <Border x:Name="MaterialContainer" Margin="4" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" TemplatedControl.IsTemplateFocusTarget="True">
             <Border.Transitions>
               <Transitions>
-                <CornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+                <material:MaterialCornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultEffectsDuration}" Easing="{DynamicResource MaterialMotionDefaultEffectsEasing}" />
               </Transitions>
             </Border.Transitions>
             <Panel>
               <Border x:Name="StateLayer" Background="{TemplateBinding Foreground}" CornerRadius="{Binding #MaterialContainer.CornerRadius}" Opacity="0" IsHitTestVisible="False">
                 <Border.Transitions>
                   <Transitions>
-                    <DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+                    <material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
                   </Transitions>
                 </Border.Transitions>
               </Border>
@@ -173,14 +173,14 @@
           <Border x:Name="MaterialContainer" Margin="4" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" TemplatedControl.IsTemplateFocusTarget="True">
             <Border.Transitions>
               <Transitions>
-                <CornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+                <material:MaterialCornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultEffectsDuration}" Easing="{DynamicResource MaterialMotionDefaultEffectsEasing}" />
               </Transitions>
             </Border.Transitions>
             <Panel>
               <Border x:Name="StateLayer" Background="{TemplateBinding Foreground}" CornerRadius="{Binding #MaterialContainer.CornerRadius}" Opacity="0" IsHitTestVisible="False">
                 <Border.Transitions>
                   <Transitions>
-                    <DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
+                    <material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
                   </Transitions>
                 </Border.Transitions>
               </Border>

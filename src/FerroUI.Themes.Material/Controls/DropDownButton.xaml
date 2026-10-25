@@ -19,14 +19,14 @@
                   BorderThickness="{TemplateBinding BorderThickness}"
                   CornerRadius="{TemplateBinding CornerRadius}">
             <Border.Transitions><Transitions>
-              <CornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultSpatialDuration}" Easing="{DynamicResource MaterialMotionDefaultSpatialEasing}" />
+              <material:MaterialCornerRadiusTransition Property="CornerRadius" Duration="{DynamicResource MaterialMotionDefaultEffectsDuration}" Easing="{DynamicResource MaterialMotionDefaultEffectsEasing}" />
               <BrushTransition Property="Background" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" />
             </Transitions></Border.Transitions>
             <Grid>
               <Border x:Name="MaterialStateLayer" Background="{TemplateBinding Foreground}"
                       CornerRadius="{Binding #MaterialContainer.CornerRadius}" Opacity="0"
                       IsHitTestVisible="False">
-                <Border.Transitions><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
+                <Border.Transitions><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Border.Transitions>
               </Border>
               <material:MaterialRipple x:Name="MaterialRipple" Fill="{TemplateBinding Foreground}"
                                        CornerRadius="{Binding #MaterialContainer.CornerRadius}"

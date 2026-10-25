@@ -6,7 +6,7 @@
   Material design/source references: https://developer.android.com/develop/ui/compose/designsystems/material3
   See docs/porting/material-theme.md for measured fidelity and platform differences.
 -->
-<ResourceDictionary xmlns="https://github.com/ferroui"
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:material="using:FerroUI.Themes.Material"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:ClassModifier="internal">
   <ControlTheme x:Key="DefaultToolTipStyle" TargetType="ToolTip">
@@ -20,7 +20,7 @@
     <Setter Property="MaxWidth" Value="200" />
     <Setter Property="CornerRadius" Value="4" />
     <Setter Property="Opacity" Value="0" />
-    <Setter Property="Transitions"><Transitions><DoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Setter>
+    <Setter Property="Transitions"><Transitions><material:MaterialDoubleTransition Property="Opacity" Duration="{DynamicResource MaterialMotionFastEffectsDuration}" Easing="{DynamicResource MaterialMotionFastEffectsEasing}" /></Transitions></Setter>
     <Setter Property="Template">
       <ControlTemplate>
         <ContentPresenter x:Name="PART_ContentPresenter" Background="{TemplateBinding Background}" Foreground="{TemplateBinding Foreground}"
