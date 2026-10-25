@@ -5,7 +5,7 @@ use crate::MacOSTheme;
 use ferroui_base::animation::{TimeSpan, TransitionBase, Transitions};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::{Color, IBrush};
-use ferroui_base::metadata::{from_markup_value, IntoMarkupValue};
+use ferroui_base::metadata::from_markup_value;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::Ref;
 use ferroui_controls::{Application, Border, Canvas, Control, Grid, ToggleSwitch, Window};
@@ -17,7 +17,7 @@ fn installed_theme() -> Ref<MacOSTheme> {
     style.as_object().unwrap().downcast_ref::<MacOSTheme>().unwrap().to_ref()
 }
 
-fn resource<T: IntoMarkupValue + Clone + 'static>(theme: &MacOSTheme, key: &str, variant: &ThemeVariant) -> T {
+fn resource<T: Clone + 'static>(theme: &MacOSTheme, key: &str, variant: &ThemeVariant) -> T {
     let value = theme.try_get_resource(&ResourceKey::from(key), Some(variant))
         .unwrap_or_else(|| panic!("missing {key}"));
     from_markup_value::<T>(&value).unwrap_or_else(|| panic!("incorrect resource type for {key}"))
