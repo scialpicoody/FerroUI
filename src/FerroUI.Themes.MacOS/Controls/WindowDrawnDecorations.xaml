@@ -132,7 +132,7 @@
   <ControlTheme x:Key="DefaultTitleBarStyle" TargetType="WindowDrawnDecorations">
     <Setter Property="DefaultTitleBarHeight" Value="{DynamicResource MacOSWindowTitleBarHeight}"/>
     <Setter Property="DefaultFrameThickness" Value="1"/>
-    <Setter Property="DefaultShadowThickness" Value="20"/>
+    <Setter Property="DefaultShadowThickness" Value="{DynamicResource MacOSWindowShadowMargin}"/>
     <Setter Property="Template">
       <WindowDrawnDecorationsTemplate>
         <WindowDrawnDecorationsContent>

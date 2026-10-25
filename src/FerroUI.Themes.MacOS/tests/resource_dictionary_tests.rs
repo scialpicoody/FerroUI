@@ -36,10 +36,28 @@ fn should_define_identical_keys_in_theme_dictionaries() {
     assert!(flat.iter().any(|(variant, _)| *variant == ThemeVariant::light()));
     assert!(flat.iter().any(|(variant, _)| *variant == MacOSTheme::high_contrast()));
     for (variant, keys) in &flat {
-        let other_keys: Vec<&ResourceKey> =
-            flat.iter().filter(|(other, _)| other != variant).flat_map(|(_, keys)| keys.iter()).collect();
-        for key in keys {
-            assert!(other_keys.contains(&key), "{key:?} of {variant:?} is not defined in the other variants");
+        for (other_variant, other_keys) in &flat {
+            if variant == other_variant {
+                continue;
+            }
+            let missing = missing_keys(keys, other_keys);
+            assert!(missing.is_empty(),
+                "resources declared by {variant:?} but missing from {other_variant:?}: {missing:?}");
         }
     }
+}
+
+/// Compare each variant independently. Comparing with the union of the other
+/// variants accepts a key present in Light and Default but absent in contrast.
+fn missing_keys<'a>(expected: &'a [ResourceKey], actual: &[ResourceKey]) -> Vec<&'a ResourceKey> {
+    expected.iter().filter(|key| !actual.contains(key)).collect()
+}
+
+#[test]
+fn pairwise_comparison_detects_a_key_missing_from_only_one_variant() {
+    let normal = vec![ResourceKey::from("Common"), ResourceKey::from("Surface")];
+    let contrast = vec![ResourceKey::from("Common")];
+    assert!(missing_keys(&normal, &normal).is_empty());
+    assert!(missing_keys(&contrast, &normal).is_empty());
+    assert_eq!(vec![&normal[1]], missing_keys(&normal, &contrast));
 }

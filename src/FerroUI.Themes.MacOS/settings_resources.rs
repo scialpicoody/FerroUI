@@ -9,10 +9,10 @@ use ferroui_base::animation::{IterationCount, PageSlide, SlideAxis, TimeSpan, Tr
 use ferroui_base::animation::DoubleTransition;
 use ferroui_base::animation::easings::Easing;
 use ferroui_base::controls::{ResourceKey, ResourceValue};
-use ferroui_base::media::{AcrylicBackgroundSource, Color, ExperimentalAcrylicMaterial, SolidColorBrush};
+use ferroui_base::media::{AcrylicBackgroundSource, BoxShadows, Color, ExperimentalAcrylicMaterial, SolidColorBrush};
 use ferroui_base::metadata::{from_markup_value, into_markup_value};
 use ferroui_base::styling::{Styles, ThemeVariant};
-use ferroui_base::{CornerRadius, Thickness};
+use ferroui_base::{CornerRadius, Rect, Thickness, Visual};
 use ferroui_controls::{Canvas, WindowTransparencyLevel, WindowTransparencyLevelCollection};
 use std::rc::Rc;
 
@@ -42,6 +42,28 @@ fn accent(theme: &MacOSTheme, variant: Option<&ThemeVariant>) -> Color {
         .unwrap_or(Color::from_rgb(0, 122, 255))
 }
 
+// Explicit keys, not a suffix wildcard: application-specific shadows retain
+// their own policy. Every consumer must use DynamicResource for live updates.
+const DECORATIVE_SHADOW_KEYS: &[&str] = &[
+    "MacOSWindowShadow", "MacOSSegmentShadow", "MacOSMenuShadow",
+    "MacOSControlShadow", "MacOSSwitchKnobShadow", "MacOSToolTipShadow",
+    "WindowDrawnDecorationsWindowBorderBoxShadow",
+    "ThemeShadowFlyoutBoxShadow", "ThemeShadowSubMenuBoxShadow", "ThemeShadowToolTipBoxShadow",
+];
+
+fn shadow_margin(shadows: &BoxShadows) -> Thickness {
+    // Use the renderer's bound calculation, including multiple/inset shadows,
+    // spread and offsets. Round outwards rather than clipping fractional bounds.
+    let content = Rect::new(0.0, 0.0, 1.0, 1.0);
+    let bounds = shadows.transform_bounds(content);
+    Thickness::new(
+        (-bounds.x).max(0.0).ceil(),
+        (-bounds.y).max(0.0).ceil(),
+        (bounds.right() - content.right()).max(0.0).ceil(),
+        (bounds.bottom() - content.bottom()).max(0.0).ceil(),
+    )
+}
+
 fn solid(value: Color) -> ResourceValue { into_markup_value(SolidColorBrush::with_color(value)) }
 fn color(value: u32) -> ResourceValue { into_markup_value(Color::from_uint32(value)) }
 
@@ -52,6 +74,23 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
     let contrast = theme.effective_increase_contrast() || high_contrast_variant;
     let active = theme.window_active();
     let size = if theme.density_style() == DensityStyle::Compact { ControlSize::Small } else { theme.control_size() };
+
+    if contrast && DECORATIVE_SHADOW_KEYS.contains(&name) {
+        return Some(into_markup_value(BoxShadows::default()));
+    }
+    let shadow_key = match name {
+        "MacOSMenuShadowMargin" => Some("MacOSMenuShadow"),
+        "MacOSWindowShadowMargin" => Some("WindowDrawnDecorationsWindowBorderBoxShadow"),
+        "MacOSToolTipShadowMargin" => Some("MacOSToolTipShadow"),
+        _ => None,
+    };
+    if let Some(shadow_key) = shadow_key {
+        // A different key, so this does not recurse back into the margin lookup.
+        // Consult the live provider too: contrast can replace the shadow by none.
+        let value = theme.try_get_resource(&ResourceKey::from(shadow_key), variant)?;
+        let shadows = from_markup_value::<BoxShadows>(&value)?;
+        return Some(into_markup_value(shadow_margin(&shadows)));
+    }
 
     let duration = match name {
         "MacOSMotionFastDuration" => Some(100.0),
@@ -64,6 +103,17 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
     }
 
     match name {
+        "MacOSToolTipTransitions" => {
+            let transition = DoubleTransition::new();
+            transition.set_property(Some(Visual::opacity_property().as_property()));
+            transition.set_duration(if theme.effective_reduce_motion() {
+                TimeSpan::ZERO
+            } else {
+                TimeSpan::from_milliseconds(100.0)
+            });
+            // Preserve the original opacity transition's default easing.
+            return Some(into_markup_value(Transitions::from_items([transition.into()])));
+        }
         "MacOSSwitchKnobTransitions" => {
             // The control observes this resource; a transition buried in a setter
             // value cannot inherit that control's dynamic-resource context. Assign
@@ -252,3 +302,7 @@ pub(crate) fn resolve(theme: &MacOSTheme, key: &ResourceKey, variant: Option<&Th
 #[cfg(test)]
 #[path = "tests/recovery_regressions.rs"]
 mod recovery_regressions;
+
+#[cfg(test)]
+#[path = "tests/theme_review_regressions.rs"]
+mod theme_review_regressions;

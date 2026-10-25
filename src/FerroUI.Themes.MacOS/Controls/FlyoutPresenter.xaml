@@ -31,7 +31,7 @@
     <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto"/>
     <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto"/>
     <Setter Property="CornerRadius" Value="12"/>
-    <Setter Property="Margin" Value="{StaticResource ThemeShadowFlyoutMargin}"/>
+    <Setter Property="Margin" Value="{DynamicResource MacOSMenuShadowMargin}"/>
     <Setter Property="Template">
       <ControlTemplate>
         <Border x:Name="ThemeShadowWrapper" BoxShadow="{DynamicResource MacOSMenuShadow}" CornerRadius="{TemplateBinding CornerRadius}">

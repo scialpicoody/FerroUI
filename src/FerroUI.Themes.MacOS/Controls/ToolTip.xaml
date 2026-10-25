@@ -25,24 +25,19 @@
     <Setter Property="MaxWidth" Value="{StaticResource ToolTipMaxWidth}"/>
     <Setter Property="CornerRadius" Value="5"/>
     <Setter Property="Opacity" Value="0"/>
-    <Setter Property="Transitions">
-      <Transitions>
-        <DoubleTransition Property="Opacity" Duration="{DynamicResource MacOSMotionFastDuration}"/>
-      </Transitions>
-    </Setter>
+    <!-- Setter-owned values have no resource host. Resolve a fresh, configured
+         collection at the ToolTip itself, as the switch does for its knob. -->
+    <Setter Property="Transitions" Value="{DynamicResource MacOSToolTipTransitions}"/>
     <Setter Property="Template">
       <ControlTemplate>
-        <Border x:Name="ThemeShadowWrapper" CornerRadius="{TemplateBinding CornerRadius}" BoxShadow="0 2 6 0 #26000000">
+        <Border x:Name="ThemeShadowWrapper" CornerRadius="{TemplateBinding CornerRadius}" BoxShadow="{DynamicResource MacOSToolTipShadow}">
           <ContentPresenter x:Name="PART_ContentPresenter" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" BackgroundSizing="{TemplateBinding BackgroundSizing}" BorderBrush="{TemplateBinding BorderBrush}" MaxWidth="{TemplateBinding MaxWidth}" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Padding="{TemplateBinding Padding}" TextWrapping="Wrap" CornerRadius="{TemplateBinding CornerRadius}"/>
         </Border>
       </ControlTemplate>
     </Setter>
     <Style Selector="^:open">
       <Setter Property="Opacity" Value="1"/>
-      <Setter Property="Margin" Value="{StaticResource ThemeShadowToolTipMargin}"/>
-    </Style>
-    <Style Selector="^:open /template/ Border#ThemeShadowWrapper">
-      <Setter Property="BoxShadow" Value="{DynamicResource ThemeShadowToolTipBoxShadow}"/>
+      <Setter Property="Margin" Value="{DynamicResource MacOSToolTipShadowMargin}"/>
     </Style>
   </ControlTheme>
   <ControlTheme x:Key="{x:Type ToolTip}" TargetType="ToolTip" BasedOn="{StaticResource DefaultToolTipStyle}"/>

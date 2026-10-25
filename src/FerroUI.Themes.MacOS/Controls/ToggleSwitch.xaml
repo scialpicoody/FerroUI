@@ -57,7 +57,7 @@
                           CornerRadius="999" BorderThickness="0.5"
                           Background="{DynamicResource ToggleSwitchKnobFillOff}"
                           BorderBrush="{DynamicResource ToggleSwitchKnobStrokeOn}"
-                          BoxShadow="0 1 2 0 #30000000">
+                          BoxShadow="{DynamicResource MacOSSwitchKnobShadow}">
                     <Border.Transitions>
                       <Transitions>
                         <BrushTransition Property="Background" Duration="{DynamicResource MacOSMotionFastDuration}" />
