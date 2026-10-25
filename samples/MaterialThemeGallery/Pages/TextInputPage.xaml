@@ -1,73 +1,56 @@
 <UserControl xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:data="using:FerroUI.Data"
+             xmlns:material="using:FerroUI.Themes.Material"
              x:Class="MaterialThemeGallery.Pages.TextInputPage">
-  <!-- TextBox in its states (a placeholder, a text, pointer over, disabled, read-only, a
-       password, several lines, a validation error shown by DataValidationErrors), Label,
-       TextBlock and SelectableTextBlock. The password is a text box with the theme
-       DefaultPasswordBoxStyle, the WinUI password box. The native counterpart is
-       TextInputPage.winui.xml. -->
   <StackPanel Margin="24" Spacing="12">
-    <TextBlock Text="Text input" FontSize="28" FontWeight="SemiBold" />
-
-    <TextBlock Text="TextBox" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
-    <Grid ColumnSpacing="16" RowSpacing="12" HorizontalAlignment="Left">
-      <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="160" />
-        <ColumnDefinition Width="300" />
-      </Grid.ColumnDefinitions>
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="Auto" />
-        <RowDefinition Height="Auto" />
-      </Grid.RowDefinitions>
-
-      <TextBlock Grid.Row="0" Text="Placeholder" VerticalAlignment="Center" />
-      <TextBox Grid.Row="0" Grid.Column="1" PlaceholderText="Placeholder text" />
-
-      <TextBlock Grid.Row="1" Text="With text" VerticalAlignment="Center" />
-      <TextBox Grid.Row="1" Grid.Column="1" Text="Text content" />
-
-      <TextBlock Grid.Row="2" Text="Pointer over" VerticalAlignment="Center" />
-      <TextBox Grid.Row="2" Grid.Column="1" Text="Text content" Classes="force-pointerover" />
-
-      <TextBlock Grid.Row="3" Text="Disabled" VerticalAlignment="Center" />
-      <TextBox Grid.Row="3" Grid.Column="1" Text="Text content" IsEnabled="False" />
-
-      <TextBlock Grid.Row="4" Text="Read-only" VerticalAlignment="Center" />
-      <TextBox Grid.Row="4" Grid.Column="1" Text="Text content" IsReadOnly="True" />
-
-      <TextBlock Grid.Row="5" Text="Password" VerticalAlignment="Center" />
-      <TextBox Grid.Row="5" Grid.Column="1" Text="password" Theme="{StaticResource DefaultPasswordBoxStyle}" />
-
-      <TextBlock Grid.Row="6" Text="Several lines" VerticalAlignment="Top" />
-      <TextBox Grid.Row="6" Grid.Column="1"
-               AcceptsReturn="True"
-               TextWrapping="Wrap"
-               Height="72"
-               Text="The first line of the text.&#xA;The second line of the text." />
-
-      <TextBlock Grid.Row="7" Text="Validation error" VerticalAlignment="Top" Margin="0,6,0,0" />
-      <TextBox Grid.Row="7" Grid.Column="1" Text="Not an address">
-        <DataValidationErrors.Error>
-          <data:DataValidationException>
-            <x:Arguments>
-              <x:String>Enter a valid email address.</x:String>
-            </x:Arguments>
-          </data:DataValidationException>
-        </DataValidationErrors.Error>
+    <TextBlock Text="Text fields" FontSize="28" FontWeight="SemiBold" />
+    <TextBlock Text="Focus a field to float its label. Type to update the character counter."
+               TextWrapping="Wrap" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}" />
+    <Grid ColumnDefinitions="128,*" ColumnSpacing="16" RowSpacing="12" MaxWidth="560"
+          RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto" HorizontalAlignment="Left">
+      <TextBlock Grid.Row="0" Text="Label + hint" VerticalAlignment="Center" />
+      <TextBox Grid.Row="0" Grid.Column="1" Width="320"
+               material:MaterialTextField.Label="Project name"
+               PlaceholderText="e.g. Material gallery" />
+      <TextBlock Grid.Row="1" Text="Icon + affixes" VerticalAlignment="Center" />
+      <TextBox Grid.Row="1" Grid.Column="1" Width="320" Text="125.00"
+               material:MaterialTextField.Label="Amount"
+               material:MaterialTextField.Prefix="$" material:MaterialTextField.Suffix="USD"
+               material:MaterialTextField.SupportingText="Before tax">
+        <material:MaterialTextField.LeadingIcon>
+          <PathIcon Width="24" Height="24" Data="M20,4 H4 C2.89,4 2.01,4.89 2.01,6 L2,18 C2,19.11 2.89,20 4,20 H20 C21.11,20 22,19.11 22,18 V6 C22,4.89 21.11,4 20,4 Z M20,18 H4 V12 H20 Z M20,8 H4 V6 H20 Z" />
+        </material:MaterialTextField.LeadingIcon>
       </TextBox>
+      <TextBlock Grid.Row="2" Text="Outlined" VerticalAlignment="Center" />
+      <TextBox Grid.Row="2" Grid.Column="1" Width="320" Classes="outlined" Text="hello@example.com"
+               material:MaterialTextField.Label="Email address">
+        <material:MaterialTextField.LeadingIcon>
+          <PathIcon Width="24" Height="24" Data="M20,4 H4 C2.9,4 2.01,4.9 2.01,6 L2,18 C2,19.1 2.9,20 4,20 H20 C21.1,20 22,19.1 22,18 V6 C22,4.9 21.1,4 20,4 Z M20,8 L12,13 L4,8 V6 L12,11 L20,6 Z" />
+        </material:MaterialTextField.LeadingIcon>
+      </TextBox>
+      <TextBlock Grid.Row="3" Text="Character count" VerticalAlignment="Center" />
+      <TextBox Grid.Row="3" Grid.Column="1" Width="320" Text="FerroUI"
+               material:MaterialTextField.Label="Display name"
+               material:MaterialTextField.SupportingText="Visible to your team"
+               material:MaterialTextField.ShowCharacterCount="True"
+               material:MaterialTextField.CharacterLimit="24" />
+      <TextBlock Grid.Row="4" Text="Validation" VerticalAlignment="Center" />
+      <TextBox Grid.Row="4" Grid.Column="1" Width="320" Classes="outlined" Text="not an address"
+               material:MaterialTextField.Label="Email address"
+               material:MaterialTextField.ErrorText="Enter a valid email address." />
+      <TextBlock Grid.Row="5" Text="Disabled" VerticalAlignment="Center" />
+      <TextBox Grid.Row="5" Grid.Column="1" Width="320" Text="Archived project" IsEnabled="False"
+               material:MaterialTextField.Label="Project name"
+               material:MaterialTextField.SupportingText="This project is read-only" />
+      <TextBlock Grid.Row="6" Text="Password" VerticalAlignment="Center" />
+      <TextBox Grid.Row="6" Grid.Column="1" Width="320" Text="password"
+               Theme="{StaticResource DefaultPasswordBoxStyle}"
+               material:MaterialTextField.Label="Password" />
+      <TextBlock Grid.Row="7" Text="Multiple lines" VerticalAlignment="Top" Margin="0,16,0,0" />
+      <TextBox Grid.Row="7" Grid.Column="1" Width="320" Classes="outlined" Height="96"
+               AcceptsReturn="True" TextWrapping="Wrap"
+               material:MaterialTextField.Label="Notes"
+               Text="A first line of notes.&#xA;A second line with more detail." />
     </Grid>
-
-    <TextBlock Text="Label, TextBlock and SelectableTextBlock" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
-    <Label Content="A label for the box below" />
-    <TextBox Width="300" HorizontalAlignment="Left" PlaceholderText="A labelled box" />
-    <TextBlock Text="A text block with plain text." />
-    <SelectableTextBlock Text="A selectable text block: its text can be selected and copied." />
   </StackPanel>
 </UserControl>

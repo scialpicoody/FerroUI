@@ -211,7 +211,7 @@ fn outlined_floating_label_opens_a_real_notch_and_keeps_border_state_selectors()
     assert_eq!(1.0, surface.notch_open());
     assert_eq!(label.bounds().width, surface.notch_width());
     assert_eq!(16.0, label.line_height());
-    assert_eq!(-8.0, label.bounds().y);
+    assert_eq!(surface.bounds().y - 8.0, label.bounds().y);
     field.pseudo_classes().set(":focus", true);
     window.update_layout();
     assert_eq!(2.0, surface.border_thickness().top);
