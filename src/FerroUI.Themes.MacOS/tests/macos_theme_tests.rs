@@ -104,8 +104,13 @@ fn theme_loads_and_is_added_to_the_styles_of_an_application() {
     assert_eq!(1, theme.resources().merged_dictionaries().count());
     let button_theme = application.try_get_resource(&ResourceKey::Type(Button::TYPE), None);
     assert!(button_theme.flatten().is_some());
+    // Once attached, follow the owner's actual platform accent. The standalone
+    // provider test above covers the macOS fallback in the absence of an owner.
+    // TestServices installs platform settings whose accent need not be Apple blue.
+    let platform_accent = application.platform_settings().expect("application platform settings")
+        .get_color_values().accent_color1();
     assert_eq!(
-        Some(Color::from_rgb(0, 122, 255)),
+        Some(platform_accent),
         color_of(application.try_get_resource(&key("SystemAccentColor"), None))
     );
 }
