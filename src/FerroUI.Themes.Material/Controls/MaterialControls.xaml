@@ -109,6 +109,9 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialSearchView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialExtendedFab.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialRangeSlider.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialDatePicker.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialTimePicker.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.Material/Controls/MaterialChips.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

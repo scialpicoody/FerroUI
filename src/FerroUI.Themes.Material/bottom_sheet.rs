@@ -71,7 +71,7 @@ ferro_class_info!(MaterialBottomSheetHost {
     new: MaterialBottomSheetHost::new,
     markup: { attributes: [PseudoClasses(":open", ":dragging", ":expanded", ":partial")] },
 });
-ferro_impl_classes!(MaterialBottomSheetHost: StyledElementImpl, InteractiveImpl, ControlImpl, ContentControlImpl);
+ferro_impl_classes!(MaterialBottomSheetHost: StyledElementImpl, InteractiveImpl, ContentControlImpl);
 
 ferro_properties! { impl MaterialBottomSheetHost {
     /// Requested state. Bind this property two-way to application state.
@@ -100,6 +100,12 @@ ferro_properties! { impl MaterialBottomSheetHost {
         FerroProperty::register::<Self, _>("MotionScheme", MaterialMotionScheme::Expressive)
     }
 } }
+
+impl ControlImpl for MaterialBottomSheetHost {
+    fn on_create_automation_peer(this: &Self) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
+        crate::MaterialBottomSheetAutomationPeer::new(this).upcast()
+    }
+}
 
 impl FerroObjectImpl for MaterialBottomSheetHost {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {

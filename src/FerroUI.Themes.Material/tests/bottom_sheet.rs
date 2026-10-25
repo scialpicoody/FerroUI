@@ -304,3 +304,32 @@ fn persistent_expanded_sheet_cannot_drag_into_a_disabled_partial_anchor() {
     touch_release(&sheet, &window, &pointer, Point::new(100.0, 600.0));
     assert_eq!(MaterialSheetState::Expanded, sheet.current_state());
 }
+
+#[test]
+fn automation_exposes_semantic_sheet_states_and_honors_dismissal_policy() {
+    use ferroui_controls::automation::{ExpandCollapseState, peers::{AutomationControlType, ControlAutomationPeer}, provider::IExpandCollapseProvider};
+    let _app = start_themed_application();
+    let (window, sheet, _, _) = host(600.0);
+    let peer = ControlAutomationPeer::create_peer_for_element(&sheet);
+    assert_eq!(AutomationControlType::Pane, peer.get_automation_control_type());
+    let provider = peer.get_provider::<dyn IExpandCollapseProvider>().expect("sheet expansion actions");
+    assert_eq!(ExpandCollapseState::Collapsed, provider.expand_collapse_state());
+    sheet.show();
+    window.update_layout();
+    assert_eq!(ExpandCollapseState::PartiallyExpanded, provider.expand_collapse_state());
+    provider.expand().unwrap();
+    assert_eq!(ExpandCollapseState::Expanded, provider.expand_collapse_state());
+    sheet.set_is_dismiss_enabled(false);
+    assert!(provider.collapse().is_err());
+    assert_eq!(MaterialSheetState::Expanded, sheet.state());
+    sheet.set_is_dismiss_enabled(true);
+    sheet.set_confirm_state_change(Some(Rc::new(|state| state != MaterialSheetState::Hidden)));
+    assert!(provider.collapse().is_err());
+    assert_eq!(ExpandCollapseState::Expanded, provider.expand_collapse_state());
+    sheet.set_confirm_state_change(None);
+    provider.collapse().unwrap();
+    assert_eq!(ExpandCollapseState::Collapsed, provider.expand_collapse_state());
+    sheet.set_is_enabled(false);
+    assert!(provider.expand().is_err());
+    window.close();
+}

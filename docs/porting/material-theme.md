@@ -167,8 +167,8 @@ controls without a Material counterpart receive a coordinated Material skin.
 | Progress | `MaterialLinearProgress`, `MaterialWavyLinearProgress`, `MaterialCircularProgress`, `MaterialWavyCircularProgress` on `ProgressBar` | Material caps, gaps, stop indicators, native wavy construction, determinate and indeterminate animation |
 | Loading | `MaterialLoadingIndicator`; `MaterialContainedLoadingIndicator` | Seven rounded polygon shapes and morphs, determinate circle-to-soft-burst path, optional container |
 | Cards | `MaterialFilledCard`, `MaterialElevatedCard`, `MaterialOutlinedCard` on `ContentControl` | Material surface roles, 12dp corners, elevation/outline variants |
-| Chips | `MaterialAssistChip`, `MaterialSuggestionChip` on `Button`; `MaterialFilterChip`, `MaterialInputChip` on `ToggleButton` | 32dp painted containers within 48dp targets, selected check, outlines, ripple and disabled treatment |
-| Segmented buttons | `MaterialSegmentedGroup` with real `RadioButton` or `ToggleButton` children; original `MaterialSegmentedButton` key retained | Private single-choice group identity or independent multiple choice, equal widths/1dp outline overlap, automatic logical corners and interaction stacking, stable reserved check space, native check/label motion and selection automation |
+| Chips | `MaterialAssistChip`, `MaterialSuggestionChip` on `Button`; `MaterialFilterChip`, `MaterialInputChip` on `ToggleButton` | Native assist/suggestion/filter/input slots, avatar precedence, selected icon and label motion, ordinary/elevated/expressive shapes and colors, independent optional dismiss command, 48dp targets |
+| Segmented buttons | `MaterialSegmentedGroup` with real `RadioButton` or `ToggleButton` children; original `MaterialSegmentedButton` key retained | Parent-scoped single choice or independent multiple choice, equal widths/1dp outline overlap, automatic logical corners and interaction stacking, stable reserved check space, native check/label motion and selection automation |
 | Navigation | `MaterialNavigationBar`, `MaterialNavigationBarTall`, `MaterialNavigationRail`, `MaterialNavigationRailNarrow` on `TabControl` | 64/80dp bars, 96/80dp rails, icon/label geometry, selected pill and live selection |
 | Top app bars | `MaterialAppBar`; small/center-aligned/medium/large/flexible variants | Native title/subtitle layouts, pinned/enter-always/exit-until-collapsed scroll arbitration, spline fling and snap, container-color interpolation, title semantics handoff, RTL and host insets |
 | Tabs | `TabControl`, `TabItem` | Material primary indicator, selected text, scrolling and retained item presentation |
@@ -176,6 +176,8 @@ controls without a Material counterpart receive a coordinated Material skin.
 | Snackbar | `MaterialSnackbar`, `MaterialSnackbarHost` | FIFO host, action/dismiss controls, cancellable handles and futures, visible-time timeout policy, source fade/scale transitions and live-region semantics |
 | Badges | `MaterialBadge` on `Border`, `MaterialBadgeWithLabel` on `ContentControl` | 6dp dot or 16dp label badge with error/on-error roles |
 | Dialog and sheet surfaces | `MaterialDialog`, `MaterialBottomSheet` on `GroupBox`; `MaterialBottomSheetHost` | Surface themes plus an in-window modal sheet host with anchors, scrim, drag, vetoable dismissal, back navigation, focus containment/restoration and host-supplied insets |
+| Date pickers | `MaterialDatePicker` with single/range selection and picker/input modes | 360dp calendar, 48dp day targets and 40dp circles, native headers, year selection, virtualized range months, culture-aware validation and selection automation |
+| Time pickers | `MaterialTimePicker` with dial/input modes and classic/vibrant variants | Native portrait/landscape metrics, 12/24-hour dial and AM/PM controls, numeric drafts, interruptible hand motion, real keyboard and value/selection automation |
 | Other existing controls | ComboBox, lists, menus, tooltips, calendars, pickers, command bars, trees, tabs, managed dialogs, and the inherited theme surface | Material typography, colors, spacing, feedback and template-part compatibility |
 
 Example composition:
@@ -198,9 +200,37 @@ The original dialog and bottom-sheet **resource keys** style surfaces. Use
 `MaterialBottomSheetHost` for implemented modal behavior, or those resource keys
 when the application already owns its overlay. `MaterialSearchView` supplies a
 docked results view; the application provides its result items and search logic.
-Calendar and time-picker controls preserve
-FerroUI's existing behavior; they do not become Compose's date-range picker or
-analog clock picker by changing their theme.
+The inherited calendar and picker controls preserve FerroUI's behavior. Use the
+new `MaterialDatePicker` and `MaterialTimePicker` controls for the Material
+calendar/range and analog-clock/input anatomy.
+
+Use `MaterialSymbolIcon` on `PathIcon` for source-defined symbols authored in a
+24×24 viewport. It scales the full viewport and preserves the icon’s interior
+whitespace. Arbitrary application paths retain the ordinary `PathIcon` theme.
+See [Material chips](material-chips.md) for chip slots and dismissal examples.
+
+### Calendar and clock pickers
+
+`MaterialDatePicker` supports `SelectionMode=Single` or `Range`, and
+`DisplayMode=Picker` or `Input`. Bind `SelectedDate` for a single date or
+`SelectedStartDate`/`SelectedEndDate` for an inclusive range. `DisplayedMonth`,
+`Today`, `Culture`, the first day of the week, year bounds, blackout dates and a
+custom date validator control the calendar. `Culture` reads FerroUI’s culture-data
+provider; applications supply that provider or explicit `DateTimeFormatInfo`
+when localized data is needed. The standalone gallery supplies US/UK examples.
+`ShowActions` adds confirmation and
+cancel controls when the picker is hosted in a dialog or sheet. Invalid input
+retains a usable date selection and displays field-specific errors.
+
+`MaterialTimePicker` keeps `Hour` in 0–23 and `Minute` in 0–59 independently of
+`Is24Hour`. `DisplayMode=Input` exposes numeric editors; `DisplayMode=Picker`
+exposes the clock dial and active hour/minute selection. `IsVibrant=True` enables
+the expressive variant, and `Orientation=Horizontal` selects the landscape
+layout. Incomplete numeric drafts remain separate from committed values. The
+dial uses actual radio-button automation nodes and the picker exposes an
+`IValueProvider` value in `HH:mm` form. Each picker supplies selection events,
+keyboard navigation and reduced-motion behavior. See [Material time picker](material-time-picker.md)
+for exact dial/input metrics, localization hooks and accessibility integration.
 
 ### Stateful components
 
@@ -227,7 +257,8 @@ uses the pinned implementation's reconciliation rule. Back visits the partial
 anchor before dismissal when it is distinct. `set_confirm_state_change` can veto
 a state change. `Dismissed` is raised after exit settles; removal does not report
 a completed dismissal. `SafeInsets` receives system-bar and keyboard insets from
-the platform host.
+the platform host. The sheet exposes accessible expand/collapse actions, and
+its automation state follows the settled semantic state.
 
 `MaterialSearchView::Query` is two-way bindable. `QuerySubmitted` reports Enter or
 an explicit `submit_query()` call; expansion never recreates its TextBox. `Content`
@@ -362,9 +393,9 @@ xvfb-run -a target/debug/material-theme-gallery
 On Windows/macOS or a desktop Linux session, omit `xvfb-run`. Optional variables
 include `FERROUI_MATERIAL_GALLERY_SIZE=720x960`, `SCALE=2` with the same prefix,
 and `SETTLE_MS=300`. Set `PAGES=material,buttons` with the same prefix to capture
-a subset. By default all 17 gallery pages are included. The CI workflow runs
-token regeneration, theme and gallery tests, facade compilation and all 102
-combinations of the 17 pages, three color variants and two text directions,
+a subset. By default all 22 gallery pages are included. The CI workflow runs
+token regeneration, theme and gallery tests, facade compilation and all 132
+combinations of the 22 pages, three color variants and two text directions,
 and uploads the images.
 
 Tests cover literal baseline roles, independent HCT seed goldens, contrast,

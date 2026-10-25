@@ -9,6 +9,8 @@ mod material_components_page;
 mod material_interactions_page;
 mod floating_actions_page;
 mod app_bars_page;
+mod date_pickers_page;
+mod time_pickers_page;
 mod buttons_page;
 mod toggles_page;
 mod text_input_page;
@@ -30,6 +32,8 @@ pub use material_components_page::MaterialComponentsPage;
 pub use material_interactions_page::MaterialInteractionsPage;
 pub use floating_actions_page::FloatingActionsPage;
 pub use app_bars_page::AppBarsPage;
+pub use date_pickers_page::DatePickersPage;
+pub use time_pickers_page::TimePickersPage;
 pub use buttons_page::ButtonsPage;
 pub use toggles_page::TogglesPage;
 pub use text_input_page::TextInputPage;
@@ -71,6 +75,8 @@ impl PageInfo {
 
 /// The pages, in the order of the list of the window.
 pub static PAGES: &[PageInfo] = &[
+    PageInfo { id: "timepickers", title: "Material time pickers", document: TimePickersPage::DOCUMENT_PATH, create: time_pickers_page::create },
+    PageInfo { id: "datepickers", title: "Material date pickers", document: DatePickersPage::DOCUMENT_PATH, create: date_pickers_page::create },
     PageInfo { id: "material", title: "Material 3 Expressive", document: MaterialComponentsPage::DOCUMENT_PATH, create: material_components_page::create },
     PageInfo { id: "interactions", title: "Search, snackbars and sheets", document: MaterialInteractionsPage::DOCUMENT_PATH, create: material_interactions_page::create },
     PageInfo { id: "floating", title: "Floating action buttons", document: FloatingActionsPage::DOCUMENT_PATH, create: floating_actions_page::create },
@@ -179,6 +185,8 @@ pub(crate) const TYPES: &[&TypeInfo] = &[
     MaterialInteractionsPage::TYPE,
     FloatingActionsPage::TYPE,
     AppBarsPage::TYPE,
+    DatePickersPage::TYPE,
+    TimePickersPage::TYPE,
     ButtonsPage::TYPE,
     TogglesPage::TYPE,
     TextInputPage::TYPE,
@@ -203,6 +211,8 @@ pub(crate) const CLASSES: &[&XamlClass] = &[
     &MaterialInteractionsPage::XAML_CLASS,
     &FloatingActionsPage::XAML_CLASS,
     &AppBarsPage::XAML_CLASS,
+    &DatePickersPage::XAML_CLASS,
+    &TimePickersPage::XAML_CLASS,
     &ButtonsPage::XAML_CLASS,
     &TogglesPage::XAML_CLASS,
     &TextInputPage::XAML_CLASS,

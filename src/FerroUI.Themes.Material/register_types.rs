@@ -9,6 +9,10 @@ use crate::material_theme::{DensityStyle, MaterialTheme};
 use crate::{MaterialBottomSheetHost, MaterialSheetState, MaterialSnackbar, MaterialSnackbarHost};
 use crate::{MaterialTextField, MaterialTextFieldLayout, MaterialTextFieldSlot};
 use crate::MaterialSearchView;
+use crate::{MaterialChip, MaterialChipKind, MaterialChipDismissButton, MaterialChipLayout};
+use crate::{MaterialDatePicker, MaterialDatePickerAutomationPeer, MaterialDateCell, MaterialDateCellAutomationPeer, MaterialDateMonthView, MaterialDateMonthsPanel, MaterialDatePickerMode, MaterialDateSelectionMode};
+use crate::{MaterialTimePicker, MaterialTimePickerField, MaterialTimePickerLayout, MaterialTimePickerAutomationPeer, MaterialTimePickerDial, MaterialTimePickerNumber, MaterialTimeSelection, MaterialTimeDisplayMode};
+use crate::MaterialBottomSheetAutomationPeer;
 use crate::{MaterialAppBar, MaterialAppBarLayout, MaterialAppBarSize, MaterialAppBarScrollBehavior};
 use crate::{MaterialSegmentedContent, MaterialSegmentedGroup, MaterialSegmentedGroupAutomationPeer};
 use crate::{MaterialExtendedFab, MaterialExtendedFabLayout, MaterialExtendedFabSize};
@@ -23,6 +27,16 @@ use std::rc::Rc;
 
 /// The dotted namespaces of the modules of this crate.
 const NAMESPACES: &[(&str, &str)] = &[
+    ("ferroui_themes_material::chip", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::chip_layout", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::date_picker", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::date_picker_calendar", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::date_picker_state", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::time_picker", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::time_picker_dial", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::time_picker_state", "FerroUI.Themes.Material"),
+    ("ferroui_themes_material::bottom_sheet_automation", "FerroUI.Themes.Material"),
+
     ("ferroui_themes_material", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::ripple", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::progress_indicator", "FerroUI.Themes.Material"),
@@ -60,7 +74,9 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 };
 
 const TYPES: &[&TypeInfo] =
-    &[MaterialAppBar::TYPE, MaterialAppBarLayout::TYPE,
+    &[MaterialChip::TYPE, MaterialChipDismissButton::TYPE, MaterialChipLayout::TYPE, MaterialDatePicker::TYPE, MaterialDatePickerAutomationPeer::TYPE, MaterialDateCell::TYPE, MaterialDateCellAutomationPeer::TYPE, MaterialDateMonthView::TYPE, MaterialDateMonthsPanel::TYPE,
+    MaterialTimePicker::TYPE, MaterialTimePickerField::TYPE, MaterialTimePickerLayout::TYPE, MaterialTimePickerAutomationPeer::TYPE, MaterialTimePickerDial::TYPE, MaterialTimePickerNumber::TYPE,
+    MaterialBottomSheetAutomationPeer::TYPE, MaterialAppBar::TYPE, MaterialAppBarLayout::TYPE,
     MaterialSegmentedContent::TYPE, MaterialSegmentedGroup::TYPE, MaterialSegmentedGroupAutomationPeer::TYPE,
     MaterialRangeSlider::TYPE, MaterialRangeSliderThumb::TYPE, MaterialRangeSliderLayout::TYPE, MaterialRangeSliderThumbAutomationPeer::TYPE,
     MaterialExtendedFab::TYPE, MaterialExtendedFabLayout::TYPE,
@@ -69,6 +85,12 @@ const TYPES: &[&TypeInfo] =
     MaterialDoubleTransition::TYPE, MaterialCornerRadiusTransition::TYPE, MaterialThicknessTransition::TYPE, MaterialTheme::TYPE, MaterialRipple::TYPE, MaterialProgressIndicator::TYPE, MaterialLoadingIndicator::TYPE, MaterialSelectionMark::TYPE, MaterialTextFieldBorder::TYPE, SystemAccentColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
 
 const MARKUP_TYPES: &[&MarkupType] = &[
+    <MaterialChipKind as MarkupTyped>::MARKUP,
+    <MaterialDatePickerMode as MarkupTyped>::MARKUP,
+    <MaterialDateSelectionMode as MarkupTyped>::MARKUP,
+    <MaterialTimeSelection as MarkupTyped>::MARKUP,
+    <MaterialTimeDisplayMode as MarkupTyped>::MARKUP,
+
     <DensityStyle as MarkupTyped>::MARKUP,
     <MaterialMotionScheme as MarkupTyped>::MARKUP,
     <MaterialSheetState as MarkupTyped>::MARKUP,
@@ -103,6 +125,12 @@ pub fn register_types() {
 /// What the untyped value conversions must know about the types of this crate: the nullable
 /// forms of the enumerations and of the converter, and the converter as its contract.
 fn register_value_types() {
+    ValueTypes::register_nullable::<MaterialChipKind>();
+    ValueTypes::register_nullable::<MaterialDatePickerMode>();
+    ValueTypes::register_nullable::<MaterialDateSelectionMode>();
+    ValueTypes::register_nullable::<MaterialTimeSelection>();
+    ValueTypes::register_nullable::<MaterialTimeDisplayMode>();
+
     ValueTypes::register_nullable::<DensityStyle>();
     ValueTypes::register_nullable::<MaterialMotionScheme>();
     ValueTypes::register_nullable::<MaterialSheetState>();

@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - 'src/FerroUI.Themes.Material/**'
+      - 'src/FerroUI.Base/animation/**'
+      - 'src/FerroUI.Base/input/gestures.rs'
+      - 'src/FerroUI.Base/input/input_tests.rs'
+      - 'src/FerroUI.Controls/text_box.rs'
+      - 'src/FerroUI.Controls/text_box_tests.rs'
       - 'samples/MaterialThemeGallery/**'
       - 'scripts/material-theme/**'
       - 'src/FerroUI/Cargo.toml'
@@ -45,6 +50,11 @@ jobs:
         run: python3 scripts/material-theme/generate.py --check
       - name: Motion, palette, template and input contracts
         run: cargo test --locked -p ferroui-themes-material --lib
+      - name: Interrupted transition and IME regression contracts
+        run: |
+          cargo test --locked -p ferroui-base --lib animation::tests::animatable_tests
+          cargo test --locked -p ferroui-base --lib input::input_tests::hold_
+          cargo test --locked -p ferroui-controls --lib canceling_preedit_restores_empty_state_without_committing_text
       - name: Facade integration
         run: cargo check --locked -p ferroui --no-default-features --features material-theme
       - name: Gallery compiled and runtime markup contracts
