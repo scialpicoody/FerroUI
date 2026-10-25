@@ -18,8 +18,9 @@ use std::io;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-// The exported metadata pipeline used by controls and compiled themes. Preserve
-// dependency order and the same transitive models in both binaries.
+// Actual framework sources with explicitly supplied transitive models. Markup
+// is also scanned as an audit workload; its normal Cargo build has no metadata
+// export script. Preserve the same inputs and dependency order in both binaries.
 const CRATES: &[(&str, &str, &[&str])] = &[
     ("ferroui_base", "src/FerroUI.Base/lib.rs", &[]),
     ("ferroui_controls", "src/FerroUI.Controls/lib.rs", &["ferroui_base"]),

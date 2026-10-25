@@ -1,0 +1,155 @@
+# Build performance
+
+FerroUI keeps stock Cargo and rustc. This work measures cold compilation, build-script
+execution, compiler-cache replay, JavaScript validation, compression reporting and test
+execution separately. A speedup in one row is not a speedup of the entire workspace or CI.
+
+## Evidence and decision
+
+The starting point is main commit `98a56f09459c8ae02f07a2bcd235c0e87b4d44b3`.
+The [historical CI audit](build-performance-ci-audit.md) and
+[machine-readable baseline](build-performance-baseline.json) identify the actual runs,
+job steps and compilation messages. The successful October 25 nightly CI run took about
+52 minutes. Dependency caches were already hitting. Windows compiled Base and Controls
+in six command/feature contexts; macOS spent substantial time executing tests after
+compilation. The browser jobs also repeated shared JavaScript work and expensive exact
+compression measurements.
+
+The [research review](build-performance-research.md) covers Cargo, rustc, compiler
+caches, alternative backends/linkers/build systems, feature unification, parallelism,
+relink-without-rebuild and build-system research, with primary-source references.
+A Cargo-only fork is not justified by these measurements: compiler frontend/codegen,
+native dependencies, build scripts, tests and reporting account for the expensive work.
+Sound relink-without-rebuild also requires compiler metadata support. A signature-only
+heuristic that ignores dependency changes would be incorrect.
+
+The requested **10×** improvement remains a workload-specific acceptance objective.
+There is no claim of 10× faster cold whole-workspace compilation. Experiments that
+failed to improve reliably were removed; see [the experimental record](build-performance-experiments.md).
+
+## Implemented build paths
+
+### Optimize the source scanner's implementation
+
+```sh
+cargo --config .cargo/build-tools.toml build --locked -p control-catalog-desktop
+```
+
+The explicitly selected config optimizes four build-tool packages: `ferroui-build-scan`,
+`syn`, `proc-macro2` and `quote`. It preserves all selected features, debug assertions,
+overflow checks and normal Cargo dependency tracking. Package overrides apply wherever
+those packages are compiled, including as build dependencies. Cargo does not load this
+file automatically, and ordinary development/release/distribution/browser settings remain
+available unchanged.
+
+Local repeated scans became about 4.3× faster, with all 20 complete model, diagnostic,
+source-inventory, function-inventory and statistic outputs identical. Compiling the
+optimized tools costs more initially. The full cold-build CI comparison measures that
+tradeoff; use the option only where it pays back, particularly with reused tools or many
+scans. This is scanner execution speed, not a 4.3× rustc speedup.
+
+### Reuse identical Rust compilation through sccache
+
+Install an official sccache release, then opt in with:
+
+```sh
+cargo --config .cargo/compiler-cache.toml build --locked -p ferroui-controls
+cargo --config .cargo/compiler-cache.toml build --locked --release -p ferroui-controls
+sccache --show-stats
+```
+
+The native core graph is the initial audited/benchmarked scope. Stock Cargo still resolves
+features, tracks inputs, runs build scripts and invokes rustc. The wrapper can reuse
+eligible library compilations; linked executables and unsupported invocations still run
+normally. The optional config disables rustc incremental compilation because sccache
+cannot cache the same incremental invocation. Ordinary incremental Cargo may be better
+for local edits; compare actual workloads. No remote cache or credentials are configured.
+
+The benchmark distinguishes no-wrapper compilation, first cache population and populated
+local replay. Installation, network cache transfer and remote upload are not included in
+the replay ratio. Rust proc macros with untracked filesystem reads require separate
+assessment; the two current workspace macros emit tracked Rust `include!`/`env!` or
+transform tokens rather than secretly reading files.
+
+### Build shared browser JavaScript once per batch
+
+```sh
+node scripts/browser/build-webapp.mjs build
+scripts/build-browser.sh themed_view --webapp-prebuilt
+scripts/build-browser.sh control-catalog-browser --webapp-prebuilt
+```
+
+The first command always installs locked npm dependencies, type-checks, lints and bundles.
+Each subsequent reuse checks hashes of every webapp input, installed dependency and
+emitted file, together with the validation recipe and relevant environment. A changed,
+missing or corrupt input/output fails reuse. Failed validation removes the prior receipt.
+Ordinary standalone `build-browser.sh` still validates normally. `--both` validates the
+shared script once before assembling its two variants.
+
+CI uses this explicit contract and retains all existing browser, pixel, rendering,
+platform and Rust tests. The local three-pair validation measured 31.26× faster repeated
+JavaScript work; all six emitted bundles/source maps matched. CI records its own samples.
+
+### Reuse exact compression measurements
+
+```sh
+node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser
+node scripts/browser/module-sizes.mjs target/browser/control-catalog-browser --no-cache
+```
+
+The cache stores exact gzip level 9 and Brotli quality 11 lengths, keyed by file contents,
+algorithm settings, Node/zlib/Brotli versions and platform. Records include an integrity
+checksum. Missing, damaged or inaccessible entries are recomputed. Report stdout and
+GitHub outputs are identical to `--no-cache`. CI transfers these small measurement records
+from component sites to the combined-site report, which previously recompressed the same
+modules. The cache is an optional local build artifact under `target/`.
+
+## Reproduce the measurements
+
+The [Build performance workflow](../.github/workflows/build-performance.yml) pins Rust
+1.99.1 and sccache 0.19.0. Each benchmark preserves raw logs and individual samples.
+The regular CI workflow remains responsible for full platform/browser behavior.
+
+```sh
+# Separate clean checkouts: BASELINE and CANDIDATE.
+# Fetch is outside the timer; every measured command is --locked --offline.
+python3 scripts/build-perf/compare.py \
+  --baseline ../FerroUI-baseline --candidate . --output target/build-perf/cold \
+  --package ferroui-themes-winui --repetitions 3
+
+# Explicit experiment: only the four disclosed build-tool opt levels may differ.
+python3 scripts/build-perf/compare.py \
+  --baseline ../FerroUI-baseline --candidate . --output target/build-perf/cold-tools \
+  --package ferroui-themes-winui --repetitions 3 --candidate-build-tools
+
+# Same driver and actual source tree, with complete semantic-output equality.
+python3 scripts/build-perf/scanner.py \
+  --baseline ../FerroUI-baseline --candidate . --output target/build-perf/scanner \
+  --repetitions 5 --candidate-build-tools
+
+# Identical Cargo commands and profiles; target is empty before every sample.
+python3 scripts/build-perf/cache.py --source . --output target/build-perf/cache \
+  --package ferroui-controls --profile release --repetitions 3
+
+# Actual bundles and the real catalog assets, with exact output checks.
+node scripts/build-perf/browser.mjs \
+  --output target/build-perf/browser.json --samples 3 --site samples/ControlCatalog/Assets
+```
+
+Cold comparisons alternate revision order, force owned target/build directories, reject
+compiler wrappers, verify toolchain identity and reject Cargo-fresh units. Public Cargo
+JSON supplies units, feature sets and build-script output paths. Generated Rust and
+`.xamlmeta` files are compared after normalizing only the checkout/target/OUT_DIR locations
+that legitimately differ between copies. Cargo's documented HTML timings remain available
+for inspecting the critical path; overlapping unit durations are not added into wall time.
+
+Compiler-cache replay requires actual Rust cache hits and the same units/features/profiles,
+not a Cargo no-op. A separate real Cargo fixture changes Rust source, generated input,
+build-script environment, compiler-tracked environment and build.rs, executes the resulting
+program, rejects an intentional compiler error and verifies restoration. The selected
+FerroUI tests run after replay, including release tests in the release lane. Network fetch,
+daemon setup/shutdown, target cleanup and cache storage are separately recorded.
+
+A `--minimum-speedup` option makes a performance target explicit; its default records
+honest evidence without substituting a chosen target for an observation. Measurement
+results and source revisions are recorded with the PR's CI evidence.

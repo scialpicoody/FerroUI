@@ -13,22 +13,37 @@ import tempfile
 import time
 
 
-def build(source: Path, driver: Path, target: Path, output: Path) -> Path:
-    env = dict(os.environ, CARGO_TARGET_DIR=str(target), CARGO_TERM_COLOR="never")
-    command = ["cargo", "build", "--locked", "-p", "ferroui-build-scan", "--lib", "--message-format=json-render-diagnostics"]
-    result = subprocess.run(command, cwd=source, env=env, text=True, stdout=subprocess.PIPE, check=True)
+def build(source: Path, driver: Path, target: Path, output: Path, optimize: bool = False) -> tuple[Path, dict]:
+    env = dict(os.environ, CARGO_TARGET_DIR=str(target), CARGO_BUILD_BUILD_DIR=str(target), CARGO_TERM_COLOR="never",
+               RUSTC_WRAPPER="", RUSTC_WORKSPACE_WRAPPER="", CARGO_BUILD_RUSTC_WRAPPER="", CARGO_BUILD_RUSTC_WORKSPACE_WRAPPER="")
+    command = ["cargo", "build", "--locked", "--offline", "-p", "ferroui-build-scan", "--lib", "--message-format=json-render-diagnostics"]
+    if optimize:
+        command.extend(["--config", str(source / ".cargo/build-tools.toml")])
+    started = time.perf_counter()
+    result = subprocess.run(command, cwd=source, env=env, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    library_seconds = time.perf_counter() - started
     (output / "build.jsonl").write_text(result.stdout)
+    (output / "build.stderr").write_text(result.stderr)
+    (output / "build-result.json").write_text(json.dumps({"command": command, "seconds": library_seconds, "exit_code": result.returncode}, indent=2) + "\n")
+    if result.returncode:
+        raise RuntimeError(f"scanner library failed ({result.returncode}); see {output / 'build.stderr'}\n{result.stderr[-6000:]}")
     artifacts = [json.loads(line) for line in result.stdout.splitlines() if line.startswith("{")]
     libraries = [Path(filename) for artifact in artifacts
                  if artifact.get("reason") == "compiler-artifact" and artifact["target"]["name"] == "ferroui_build_scan"
                  for filename in artifact["filenames"] if filename.endswith(".rlib")]
     if len(libraries) != 1:
         raise RuntimeError(f"Expected one scanner library from Cargo, got {libraries}")
+    dependency_directories = sorted({str(Path(filename).parent) for artifact in artifacts
+                                     if artifact.get("reason") == "compiler-artifact"
+                                     for filename in artifact["filenames"] if filename.endswith(".rlib")})
+    search = [argument for directory in dependency_directories for argument in ("-L", f"dependency={directory}")]
     executable = output / ("scan-bench.exe" if os.name == "nt" else "scan-bench")
-    subprocess.run(["rustc", str(driver), "--edition=2021", "-C", "debuginfo=0", "-C", "opt-level=0",
-                    "--extern", f"ferroui_build_scan={libraries[0]}", "-L", f"dependency={libraries[0].parent}",
+    started = time.perf_counter()
+    subprocess.run([os.environ.get("RUSTC", "rustc"), str(driver), "--edition=2021", "-C", "debuginfo=0", "-C", "opt-level=0",
+                    "--extern", f"ferroui_build_scan={libraries[0]}", *search,
                     "-o", str(executable)], cwd=source, env=env, check=True)
-    return executable
+    return executable, {"library_build_seconds": library_seconds,
+                        "driver_build_seconds": time.perf_counter() - started, "command": command}
 
 
 def fingerprints(directory: Path) -> dict:
@@ -43,25 +58,35 @@ def main() -> int:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--repetitions", default=5, type=int)
     parser.add_argument("--minimum-speedup", default=0.0, type=float)
+    parser.add_argument("--candidate-build-tools", action="store_true")
     args = parser.parse_args()
     if args.repetitions < 1:
         parser.error("repetitions must be positive")
     baseline, candidate, output = (path.resolve() for path in (args.baseline, args.candidate, args.output))
+    rustc = os.environ.get("RUSTC", "rustc")
+    for command in ([rustc, "-Vv"], ["cargo", "-V"]):
+        if subprocess.check_output(command, cwd=baseline) != subprocess.check_output(command, cwd=candidate):
+            parser.error("both checkouts must use exactly the same Cargo and rustc toolchains")
     output.mkdir(parents=True, exist_ok=False)
     driver = candidate / "scripts/build-perf/scan.rs"
     report = {"schema_version": 1, "scenario": "full-framework-source-scan-and-model-export",
-              "toolchain": subprocess.check_output(["rustc", "-Vv"], text=True),
+              "toolchain": subprocess.check_output([rustc, "-Vv"], cwd=candidate, text=True),
               "source": str(candidate), "driver_sha256": hashlib.sha256(driver.read_bytes()).hexdigest(),
               "baseline_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=baseline, text=True).strip(),
               "candidate_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=candidate, text=True).strip(),
-              "repetitions": args.repetitions, "samples": []}
+              "repetitions": args.repetitions, "samples": [], "builds": {},
+              "candidate_optimized_build_tools": args.candidate_build_tools}
     try:
         with tempfile.TemporaryDirectory(prefix="ferroui-scan-benchmark-") as temporary:
             executables = {}
+            for source in (baseline, candidate):
+                subprocess.run(["cargo", "fetch", "--locked"], cwd=source, check=True)
             for label, source in (("baseline", baseline), ("candidate", candidate)):
                 build_dir = output / label
                 build_dir.mkdir()
-                executables[label] = build(source, driver, Path(temporary) / label, build_dir)
+                executables[label], report["builds"][label] = build(
+                    source, driver, Path(temporary) / label, build_dir,
+                    optimize=label == "candidate" and args.candidate_build_tools)
             reference = None
             for repeat in range(1, args.repetitions + 1):
                 labels = ["baseline", "candidate"] if repeat % 2 else ["candidate", "baseline"]
@@ -91,11 +116,13 @@ def main() -> int:
                                  "semantic_outputs_equal": True, "semantic_files": len(reference)}
             (output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
             text = ("## Source scanner comparison\n\n"
-                    "Same driver, same source tree, same compiler/profile; alternating independent processes.\n\n"
+                    "Same driver, source tree and compiler; alternating independent processes. "
+                    f"Candidate uses explicit build-tool opt-level experiment: **{args.candidate_build_tools}**.\n\n"
                     "| Baseline median | Candidate median | Speedup |\n|---:|---:|---:|\n"
                     f"| {medians['baseline']:.3f}s | {medians['candidate']:.3f}s | {report['summary']['speedup']:.3f}× |\n\n"
                     f"All {len(reference)} model, diagnostic, source inventory, function and statistic files agree byte for byte. "
-                    "This measures the build-time scanner, not whole-project Rust compilation.\n")
+                    "This measures the build-time scanner, not whole-project Rust compilation. "
+                    "Library and driver compilation costs are recorded separately in report.json.\n")
             (output / "summary.md").write_text(text)
             print(text)
             if os.environ.get("GITHUB_STEP_SUMMARY"):

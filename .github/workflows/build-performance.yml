@@ -7,6 +7,12 @@ on:
       - 'src/FerroUI.Build.Tasks/**'
       - 'src/Markup/FerroUI.Markup.Xaml.Loader/**'
       - 'scripts/build-perf/**'
+      - 'scripts/browser/build-webapp.mjs'
+      - 'scripts/browser/compression-cache.mjs'
+      - 'scripts/browser/module-sizes.mjs'
+      - 'scripts/browser/tests/build_tooling.test.mjs'
+      - '.cargo/build-tools.toml'
+      - '.cargo/compiler-cache.toml'
       - '.github/workflows/build-performance.yml'
   workflow_dispatch:
     inputs:
@@ -35,7 +41,11 @@ env:
 
 jobs:
   compiler:
-    name: Cold XAML build and output equivalence
+    name: Cold XAML build (${{ matrix.mode }})
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [source, optimized-build-tools]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -55,15 +65,18 @@ jobs:
       - name: Alternating cold builds of the full WinUI theme dependency graph
         env:
           REPETITIONS: ${{ inputs.repetitions || '3' }}
-        run: >-
-          python3 candidate/scripts/build-perf/compare.py
-          --baseline baseline --candidate candidate --output results/compile
-          --package ferroui-themes-winui --repetitions "$REPETITIONS" --jobs 4
+          MODE: ${{ matrix.mode }}
+        run: |
+          OPTIONS=()
+          if [ "$MODE" = optimized-build-tools ]; then OPTIONS+=(--candidate-build-tools); fi
+          python3 candidate/scripts/build-perf/compare.py \
+            --baseline baseline --candidate candidate --output results/compile \
+            --package ferroui-themes-winui --repetitions "$REPETITIONS" --jobs 4 "${OPTIONS[@]}"
       - name: Publish raw logs, unit graph, generated-output hashes and Cargo timings
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: cold-build-evidence
+          name: cold-build-evidence-${{ matrix.mode }}
           path: results
           if-no-files-found: error
 
@@ -92,7 +105,11 @@ jobs:
           path: target/cargo-timings
 
   scanner:
-    name: Scanner speed and exact semantic output
+    name: Scanner speed and exact semantic output (${{ matrix.mode }})
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [source, optimized-build-tools]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -108,13 +125,72 @@ jobs:
         with:
           toolchain: '1.99.1'
       - name: Compare models, diagnostics, inputs, functions and statistics over five scans
-        run: >-
-          python3 candidate/scripts/build-perf/scanner.py
-          --baseline baseline --candidate candidate --output results/scanner --repetitions 5
+        env:
+          MODE: ${{ matrix.mode }}
+        run: |
+          OPTIONS=()
+          if [ "$MODE" = optimized-build-tools ]; then OPTIONS+=(--candidate-build-tools); fi
+          python3 candidate/scripts/build-perf/scanner.py \
+            --baseline baseline --candidate candidate --output results/scanner --repetitions 5 "${OPTIONS[@]}"
       - name: Publish scanner evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: scanner-evidence
+          name: scanner-evidence-${{ matrix.mode }}
           path: results/scanner
+          if-no-files-found: error
+
+  compiler-cache:
+    name: Same-profile compiler cache (${{ matrix.profile }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [dev, release]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - uses: Mozilla-Actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
+        with:
+          version: 'v0.19.0'
+      - name: Cold compilation, cache population, replay and stale-output negative controls
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: >-
+          python3 scripts/build-perf/cache.py --source . --output results/cache
+          --package ferroui-controls --profile "$PROFILE" --repetitions 3 --jobs 4
+      - name: Publish cache statistics, exact workload and invalidation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: compiler-cache-evidence-${{ matrix.profile }}
+          path: results/cache
+          if-no-files-found: error
+
+  browser-tooling:
+    name: Browser build reuse and exact compression
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+      - name: Browser build input and output invalidation tests
+        run: node scripts/browser/tests/build_tooling.test.mjs
+      - name: Measure repeated full validation and verified bundle/compression reuse
+        run: node scripts/build-perf/browser.mjs --output results/browser-tooling/report.json --samples 3 --site samples/ControlCatalog/Assets
+      - name: Publish browser tooling performance and equivalence evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-tooling-evidence
+          path: results/browser-tooling
           if-no-files-found: error

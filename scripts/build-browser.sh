@@ -2,7 +2,7 @@
 # Builds a browser application and assembles its site.
 #
 #   scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both]
-#                            [--features <list>]
+#                            [--features <list>] [--webapp-prebuilt]
 #
 # <application> is either an example of the browser crate (src/Browser/FerroUI.Browser/examples/
 # <application>, with its host page in wwwroot/) or a binary package of the workspace with its host
@@ -14,6 +14,12 @@
 # WebAssembly module with its script, plus the files that build scripts of the application leave for the site in
 # `$OUT_DIR/browser-site/` (asset files the host page downloads). Serve the directory with any
 # static web server.
+#
+# --webapp-prebuilt reuses the shared script module validated earlier in the same build batch by
+# `node scripts/browser/build-webapp.mjs build`. It verifies hashes of all script sources,
+# installed dependencies and emitted files, and fails if any changed. Without the option every
+# invocation installs, type checks, lints and bundles the module. --both does that
+# once for its two sites, whose script module is the same.
 #
 # The module is built with the `browser` profile of the workspace (optimised for size, see
 # docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
@@ -68,6 +74,7 @@ OUT=""
 THREADS=""
 BOTH=""
 FEATURES=""
+WEBAPP_PREBUILT=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --debug) PROFILE="debug";;
@@ -75,13 +82,14 @@ while [ $# -gt 0 ]; do
     --threads) THREADS="1";;
     --both) BOTH="1";;
     --features) shift; FEATURES="$1";;
+    --webapp-prebuilt) WEBAPP_PREBUILT="1";;
     -*) echo "unknown option: $1" >&2; exit 2;;
     *) APPLICATION="$1";;
   esac
   shift
 done
 if [ -z "$APPLICATION" ]; then
-  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both] [--features <list>]" >&2
+  echo "usage: scripts/build-browser.sh <application> [--debug] [--out <directory>] [--threads | --both] [--features <list>] [--webapp-prebuilt]" >&2
   exit 2
 fi
 case "$FEATURES" in
@@ -104,7 +112,12 @@ BUILD_DIR="$TARGET_DIR"
 # --out names the composed site; the two sites it is composed of keep their usual directories.
 if [ -n "$BOTH" ]; then
   command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
-  MODE=()
+  if [ -n "$WEBAPP_PREBUILT" ]; then
+    node "$ROOT/scripts/browser/build-webapp.mjs" verify
+  else
+    node "$ROOT/scripts/browser/build-webapp.mjs" build
+  fi
+  MODE=(--webapp-prebuilt)
   [ "$PROFILE" = "debug" ] && MODE+=(--debug)
   [ -n "$FEATURES" ] && MODE+=(--features "$FEATURES")
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"}
@@ -249,7 +262,11 @@ if [ -n "$THREADS" ]; then
 fi
 
 echo "== script module"
-(cd "$CRATE/webapp" && npm ci --no-audit --no-fund && npm run typecheck && npm run lint && npm run build)
+if [ -n "$WEBAPP_PREBUILT" ]; then
+  node "$ROOT/scripts/browser/build-webapp.mjs" verify
+else
+  node "$ROOT/scripts/browser/build-webapp.mjs" build
+fi
 
 echo "== WebAssembly module ($PROFILE${THREADS:+, threads})"
 FLAGS=()
