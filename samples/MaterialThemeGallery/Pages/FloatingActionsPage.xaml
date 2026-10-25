@@ -1,0 +1,62 @@
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:material="using:FerroUI.Themes.Material"
+             x:Class="MaterialThemeGallery.Pages.FloatingActionsPage">
+  <StackPanel Margin="24" Spacing="16">
+    <StackPanel Spacing="4">
+      <TextBlock Theme="{StaticResource MaterialHeadlineMedium}" Text="Make space for the action"/>
+      <TextBlock Theme="{StaticResource MaterialBodyMedium}" Text="A clear label when you need it. A compact icon when you don't." TextWrapping="Wrap"/>
+    </StackPanel>
+    <WrapPanel ItemSpacing="8">
+      <Button x:Name="ToggleExpanded" Content="Collapse labels" Theme="{StaticResource MaterialTonalButton}"/>
+      <Button x:Name="ToggleDirection" Content="Reverse direction" Theme="{StaticResource MaterialOutlinedButton}"/>
+    </WrapPanel>
+    <ContentControl Theme="{StaticResource MaterialFilledCard}">
+      <Grid x:Name="SizeExamples" ColumnDefinitions="72,*" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+        <TextBlock Text="Small" Theme="{StaticResource MaterialLabelLarge}" VerticalAlignment="Center"/>
+        <material:MaterialExtendedFab x:Name="SmallFab" Grid.Column="1" Content="Compose" SizeVariant="Small">
+          <material:MaterialExtendedFab.Icon><PathIcon Width="24" Height="24" Data="M11,5 L13,5 L13,11 L19,11 L19,13 L13,13 L13,19 L11,19 L11,13 L5,13 L5,11 L11,11 Z"/></material:MaterialExtendedFab.Icon>
+        </material:MaterialExtendedFab>
+        <TextBlock Grid.Row="1" Text="Medium" Theme="{StaticResource MaterialLabelLarge}" VerticalAlignment="Center"/>
+        <material:MaterialExtendedFab x:Name="MediumFab" Grid.Row="1" Grid.Column="1" Content="Compose" SizeVariant="Medium">
+          <material:MaterialExtendedFab.Icon><PathIcon Width="28" Height="28" Data="M11,5 L13,5 L13,11 L19,11 L19,13 L13,13 L13,19 L11,19 L11,13 L5,13 L5,11 L11,11 Z"/></material:MaterialExtendedFab.Icon>
+        </material:MaterialExtendedFab>
+        <TextBlock Grid.Row="2" Text="Large" Theme="{StaticResource MaterialLabelLarge}" VerticalAlignment="Center"/>
+        <material:MaterialExtendedFab x:Name="LargeFab" Grid.Row="2" Grid.Column="1" Content="Compose" SizeVariant="Large">
+          <material:MaterialExtendedFab.Icon><PathIcon Width="36" Height="36" Data="M11,5 L13,5 L13,11 L19,11 L19,13 L13,13 L13,19 L11,19 L11,13 L5,13 L5,11 L11,11 Z"/></material:MaterialExtendedFab.Icon>
+        </material:MaterialExtendedFab>
+      </Grid>
+    </ContentControl>
+    <ContentControl Theme="{StaticResource MaterialOutlinedCard}">
+      <StackPanel Spacing="12">
+        <TextBlock Text="Choose your color" Theme="{StaticResource MaterialTitleMedium}"/>
+        <WrapPanel ItemSpacing="12" LineSpacing="12">
+          <material:MaterialExtendedFab x:Name="SecondaryFab" Content="Share" Background="{DynamicResource MaterialSecondaryContainerBrush}"
+                                        Foreground="{DynamicResource MaterialOnSecondaryContainerBrush}">
+            <material:MaterialExtendedFab.Icon><PathIcon Width="24" Height="24" Data="M18,2 A3,3 0 1 1 15,5 L15,5 L7.8,9.2 A3,3 0 1 1 7.8,14.8 L15,19 A3,3 0 1 1 16,17.3 L8.8,13.1 A3,3 0 0 0 8.8,10.9 L16,6.7 A3,3 0 0 1 18,2 Z"/></material:MaterialExtendedFab.Icon>
+          </material:MaterialExtendedFab>
+          <material:MaterialExtendedFab x:Name="TertiaryFab" Content="Create" Background="{DynamicResource MaterialTertiaryContainerBrush}"
+                                        Foreground="{DynamicResource MaterialOnTertiaryContainerBrush}">
+            <material:MaterialExtendedFab.Icon><PathIcon Width="24" Height="24" Data="M11,5 L13,5 L13,11 L19,11 L19,13 L13,13 L13,19 L11,19 L11,13 L5,13 L5,11 L11,11 Z"/></material:MaterialExtendedFab.Icon>
+          </material:MaterialExtendedFab>
+          <material:MaterialExtendedFab Content="Unavailable" IsEnabled="False" IsExpanded="False" AutomationProperties.Name="Unavailable action">
+            <material:MaterialExtendedFab.Icon><PathIcon Width="24" Height="24" Data="M11,5 L13,5 L13,11 L19,11 L19,13 L13,13 L13,19 L11,19 L11,13 L5,13 L5,11 L11,11 Z"/></material:MaterialExtendedFab.Icon>
+          </material:MaterialExtendedFab>
+        </WrapPanel>
+      </StackPanel>
+    </ContentControl>
+    <ContentControl Theme="{StaticResource MaterialFilledCard}">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+        <StackPanel Spacing="4" VerticalAlignment="Center">
+          <TextBlock Text="Right-to-left" Theme="{StaticResource MaterialTitleMedium}"/>
+          <TextBlock Text="The icon stays at the start." Theme="{StaticResource MaterialBodyMedium}" TextWrapping="Wrap"/>
+        </StackPanel>
+        <material:MaterialExtendedFab x:Name="RtlFab" Grid.Column="1" Content="New note" FlowDirection="RightToLeft">
+          <material:MaterialExtendedFab.Icon><PathIcon Width="24" Height="24" Data="M11,5 L13,5 L13,11 L19,11 L19,13 L13,13 L13,19 L11,19 L11,13 L5,13 L5,11 L11,11 Z"/></material:MaterialExtendedFab.Icon>
+        </material:MaterialExtendedFab>
+      </Grid>
+    </ContentControl>
+    <TextBlock x:Name="ActionStatus" Text="Choose an action to try it." Theme="{StaticResource MaterialBodyMedium}"
+               AutomationProperties.LiveSetting="Polite" Foreground="{DynamicResource MaterialOnSurfaceVariantBrush}"/>
+  </StackPanel>
+</UserControl>
