@@ -1,5 +1,6 @@
-// Copyright 2026 FerroUI contributors.
-// SPDX-License-Identifier: MIT
+// Copyright 2023 The Android Open Source Project (reference behavior).
+// Copyright 2026 FerroUI contributors (Rust adaptation).
+// SPDX-License-Identifier: Apache-2.0
 //! Geometry and input rules translated from AndroidX Material3 TimePicker.kt at
 //! e4d933c98df7baa7ea2b83eea6e086915961e0ff (1.5.0-beta02).
 

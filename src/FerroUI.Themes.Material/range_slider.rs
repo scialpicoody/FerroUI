@@ -1,5 +1,6 @@
-// Copyright 2026 FerroUI contributors.
-// SPDX-License-Identifier: MIT
+// Copyright The Android Open Source Project (reference behavior).
+// Copyright 2026 FerroUI contributors (Rust adaptation).
+// SPDX-License-Identifier: Apache-2.0
 //! Material range selection with two independent keyboard and accessibility targets.
 //!
 //! Geometry and horizontal interaction follow AndroidX Material3 `Slider.kt` and

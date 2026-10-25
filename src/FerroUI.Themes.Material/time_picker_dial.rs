@@ -1,5 +1,6 @@
-// Copyright 2026 FerroUI contributors.
-// SPDX-License-Identifier: MIT
+// Copyright 2023 The Android Open Source Project (reference behavior).
+// Copyright 2026 FerroUI contributors (Rust adaptation).
+// SPDX-License-Identifier: Apache-2.0
 //! Circular time selector, preserving spring velocity, native clipping, and real
 //! RadioButton accessibility nodes. AndroidX TimePicker.kt reference is documented
 //! in time_picker.rs; physical dimensions are in time_picker_state.rs.
