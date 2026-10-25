@@ -15,6 +15,19 @@ not a Google product or an Android platform implementation.
 `material-colors` is used for CAM16/HCT dynamic palettes under MIT OR Apache-2.0.
 Its version and algorithm baseline are recorded in the manifest and port guide.
 
+## Google Material Color Utilities
+
+`dynamic_color_spec.rs` ports the phone palette, color-role, contrast, and
+tone-constraint rules from Google Material Color Utilities, commit
+`bd811e4ca2ab94c4ce3cadc89c19b1820b9704b3`:
+<https://github.com/material-foundation/material-color-utilities/tree/bd811e4ca2ab94c4ce3cadc89c19b1820b9704b3/typescript>.
+Source files are `dynamiccolor/color_spec_2021.ts`, `color_spec_2025.ts`,
+`dynamic_scheme.ts`, `dynamic_color.ts`, and `palettes/tonal_palette.ts`.
+Copyright 2021, 2022, 2025 Google LLC. Licensed under Apache License 2.0; see
+`LICENSE-ANDROID`. The reference fixtures execute the original TypeScript;
+their source hashes and reproducible generation command are recorded in
+`tests/fixtures/dynamic-color-provenance.json` and the dynamic-color port guide.
+
 ## Roboto
 
 `Assets/Roboto.ttf` is distributed under the SIL Open Font License 1.1, included

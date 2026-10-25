@@ -23,12 +23,15 @@ theme.set_color_scheme(MaterialTheme::high_contrast(), &high_contrast);
 # Ok::<(), ferroui_themes_material::MaterialDynamicColorError>(())
 ```
 
-Seed generation uses the CAM16/HCT gamut solver, tonal palettes, tone-delta
-constraints, and dynamic contrast curves in the exactly pinned Rust
-[`material-colors` 0.4.2](https://docs.rs/material-colors/0.4.2/material_colors/).
-It does not blend the seed with black or white in RGB. Source alpha is ignored,
-and generated roles are opaque. Invalid or nonfinite contrast inputs return a
-diagnostic rather than silently changing the requested contrast.
+Seed generation ports the phone palette definitions, tone-delta constraints,
+and dynamic contrast curves from Google's Material Color Utilities at commit
+[`bd811e4ca2ab94c4ce3cadc89c19b1820b9704b3`](https://github.com/material-foundation/material-color-utilities/tree/bd811e4ca2ab94c4ce3cadc89c19b1820b9704b3/typescript),
+verified on 2026-10-25. The exactly pinned Rust
+[`material-colors` 0.4.2](https://docs.rs/material-colors/0.4.2/material_colors/)
+supplies CAM16/HCT gamut solving and temperature analysis. Versioned role rules
+live in `dynamic_color_spec.rs`, so an older dependency's role definitions cannot
+silently replace the selected specification. Source alpha is ignored and
+generated roles are opaque. Invalid or nonfinite contrast inputs return an error.
 
 The palette style is independent of the theme's expressive motion scheme:
 
@@ -49,22 +52,65 @@ to the Material Color Utilities variants. The full algorithm and contrast
 meaning are described in the upstream
 [scheme guide](https://github.com/material-foundation/material-color-utilities/blob/main/dev_guide/creating_color_scheme.md).
 
-### Algorithm version is explicit
+### Select the source specification
 
-`MATERIAL_COLOR_UTILITIES_VERSION` identifies the implementation used for seed
-colors. Version 0.4.2 supports this repository's Rust toolchain; the newer 0.5.0
-release declares Rust 1.97. The dependency is pinned rather than changing seed
-colors implicitly in a patch update.
+`from_seed`, `from_seed_color`, and `from_seed_with_options` use
+`MaterialColorSpec::Spec2021`, matching the pinned upstream
+`DynamicScheme.DEFAULT_SPEC_VERSION`. **For the newer expressive phone color
+system, select `Spec2025` explicitly.** The visual theme's expressive motion
+setting and the palette style remain separate choices.
 
-This does **not** imply that a given seed generates exactly the same scheme as
-every Android release, OEM wallpaper algorithm, or newer Material Color Utilities
-revision. The utility has evolved its role curves. For example, the pinned
-implementation's light `onPrimaryContainer` uses the tone-10 convention, while
-Google's JavaScript 0.3.0 uses a newer tone-30 convention. The current AndroidX
-baseline and API 31 mapping also use tone 10. Default-contrast seed goldens are
-checked independently against Google's JavaScript utilities 0.2.7; high-contrast
-schemes are additionally checked using their rendered sRGB contrast ratios.
-To match actual device colors, use the platform imports below.
+```rust
+use ferroui_themes_material::{
+    MaterialColorScheme, MaterialColorSpec, MaterialDynamicColorOptions,
+    MaterialPaletteStyle,
+};
+
+let scheme = MaterialColorScheme::from_seed_with_spec(seed,
+    MaterialDynamicColorOptions {
+        dark: false,
+        contrast_level: 0.0,
+        style: MaterialPaletteStyle::Expressive,
+    },
+    MaterialColorSpec::Spec2025,
+)?;
+```
+
+The 2025 specification changes accent hues and chromas, uses hue-sensitive and
+chroma-scaled surfaces, resolves accent tone constraints independently, and
+selects container foregrounds using its revised contrast curves. Some palette
+chromas differ between light and dark mode. `MaterialDynamicPalette::from_seed_with_spec`
+therefore also accepts an explicit `dark` argument when generating all five
+101-tone palettes.
+
+The API applies the same fallback as the upstream phone implementation:
+
+| Requested specification | Neutral, Tonal Spot, Vibrant, Expressive | Monochrome, Fidelity, Content, Rainbow, Fruit Salad |
+| --- | --- | --- |
+| `Spec2021` (default) | 2021 rules | 2021 rules |
+| `Spec2025` | 2025 rules | 2021 rules |
+| `Spec2026` | 2025 rules | 2021 rules |
+
+`MaterialColorSpec::effective_for(style)` exposes that selection. Upstream's
+2026 rules introduce a separate CMF variant with multiple source colors; this
+single-seed API exposes the nine styles above and does not claim to implement
+CMF or the separate watch-platform color specification.
+
+`MATERIAL_COLOR_UTILITIES_VERSION` records the exact Google source revision;
+`MATERIAL_HCT_SOLVER_VERSION` records the independently pinned Rust solver. The
+port includes current 2021 role corrections as well as 2025 support: container
+foreground contrast curves and tones, the Monochrome secondary container,
+Vibrant neutral-variant chroma, inclusive hue-rotation boundaries, and Google's
+yellow tone-99 correction. Black HCT tones are clamped at the mathematical zero
+boundary before contrast evaluation, preventing a negative floating-point
+roundoff value in the Rust solver from incorrectly choosing a white foreground.
+
+These seed-generation rules are independent of AndroidX's baseline colors and
+Android's device resources. For example, current 2021 seed rules use tone 30 for
+a standard light Tonal Spot `onPrimaryContainer`, while the AndroidX baseline and
+API 31 mapping use tone 10. Selecting a source specification never changes those
+baseline or import contracts. To reproduce an actual device palette, use the
+platform imports below.
 
 ## Native Android system-color bridge
 
@@ -254,11 +300,36 @@ through `MaterialColorScheme::new`, or generated from a seed with explicit optio
 
 ## Validation
 
-The module tests cover all 48 default-contrast seed colors in light and dark mode
-against independent Google utility goldens, every palette variant, primary
-foreground/background contrast at contrast +1 across saturated and achromatic
-seeds, invalid inputs, exact imported colors, fixed-role mode invariance,
-neutral-variant surface mapping, missing-tone errors, and API 34 role completeness.
+The checked-in `tests/fixtures/dynamic-color-phone.csv` contains **165,888
+independently calculated ARGB values**: 3,456 schemes covering 16 saturated and
+achromatic seeds, all nine styles, light and dark modes, six contrast levels
+(`-1`, `-0.5`, `0`, `0.25`, `0.5`, `1`), and the 2021/2025 source specifications.
+Every role is compared byte for byte. Fixture generation also checks that the
+2026 selection matches the documented fallback for all 1,728 corresponding
+phone cases. These are finite reference cases, not a proof of every possible
+seed and floating-point contrast value.
+
+The reference generator executes Google's original TypeScript, independently of
+the Rust implementation. It records the source commit, SHA-256 of every source
+file, TypeScript compiler version, and fixture SHA-256 in
+`tests/fixtures/dynamic-color-provenance.json`. To regenerate after checking out
+the pinned upstream commit and obtaining TypeScript 5.9.3:
+
+```sh
+node scripts/material-theme/generate-dynamic-color-reference.mjs \
+  /path/to/material-color-utilities/typescript \
+  /path/to/typescript/lib/typescript.js \
+  src/FerroUI.Themes.Material/tests/fixtures
+```
+
+The script emits JavaScript to a temporary directory, resolves upstream's few
+extensionless module imports, and leaves the algorithm source unchanged. It
+does not call the Rust implementation to generate expected values.
+
+Additional tests cover source-default selection, variant fallback, the black
+HCT boundary, primary foreground/background contrast at contrast +1, invalid
+inputs, exact imported colors, fixed-role mode invariance, neutral-variant
+surface mapping, missing-tone errors, and API 34 role completeness.
 Native bridge tests exercise public system-resource names, inverse and fixed-role
 selection, lossless imports, complete-before-install behavior, API 31 system-tone
 requests, and added neutral-tone generation. The CAM16 port has reference primary

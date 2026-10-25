@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //! HCT seed schemes and lossless imports of Android dynamic color palettes.
 //!
-//! Seed generation uses the pinned `material-colors` 0.4.2 CAM16/HCT implementation.
+//! Seed schemes follow versioned Google Material Color Utilities phone specs at
+//! bd811e4ca2ab94c4ce3cadc89c19b1820b9704b3, using `material-colors` 0.4.2 for HCT.
 //! Android imports follow AndroidX Material3 `DynamicTonalPalette.android.kt` at
 //! e4d933c98df7baa7ea2b83eea6e086915961e0ff. See `docs/porting/material-dynamic-color.md`
 //! for the distinction between seed algorithm revisions and system color imports.
@@ -11,12 +12,49 @@
 use crate::{MaterialColorRole, MaterialColorScheme};
 use ferroui_base::media::Color;
 use material_colors::color::Argb;
-use material_colors::dynamic_color::{DynamicScheme, Variant};
+use material_colors::dynamic_color::Variant;
 use material_colors::palette::TonalPalette;
 use std::fmt;
 
-/// The versioned HCT implementation used for locally generated seed schemes.
-pub const MATERIAL_COLOR_UTILITIES_VERSION: &str = "material-colors 0.4.2";
+#[path = "dynamic_color_spec.rs"]
+mod spec;
+
+/// Exact upstream source used for palette, tone-delta, and role-contrast rules.
+pub const MATERIAL_COLOR_UTILITIES_VERSION: &str =
+    "Google Material Color Utilities bd811e4ca2ab94c4ce3cadc89c19b1820b9704b3 (phone)";
+
+/// The separately pinned implementation of the CAM16/HCT gamut solver.
+pub const MATERIAL_HCT_SOLVER_VERSION: &str = "material-colors 0.4.2";
+
+/// Source-spec selection for locally generated phone schemes. The default is
+/// exactly Google's `DynamicScheme.DEFAULT_SPEC_VERSION` at the pinned commit.
+/// This never changes imported Android colors or the AndroidX baseline schemes.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum MaterialColorSpec {
+    #[default]
+    Spec2021,
+    Spec2025,
+    Spec2026,
+}
+
+impl MaterialColorSpec {
+    /// Apply Google's supported-variant fallback. The 2026 spec introduces a
+    /// separate CMF multi-source variant, which this single-seed API does not
+    /// expose. For these nine phone styles its results are identical to 2025.
+    pub const fn effective_for(self, style: MaterialPaletteStyle) -> Self {
+        match (self, style) {
+            (Self::Spec2021, _) => Self::Spec2021,
+            (
+                _,
+                MaterialPaletteStyle::Neutral
+                | MaterialPaletteStyle::TonalSpot
+                | MaterialPaletteStyle::Vibrant
+                | MaterialPaletteStyle::Expressive,
+            ) => Self::Spec2025,
+            _ => Self::Spec2021,
+        }
+    }
+}
 
 /// Material Color Utilities palette variants. This is independent of the UI motion scheme.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
@@ -167,7 +205,7 @@ impl MaterialTonalPalette {
 
     fn from_mcu(palette: &TonalPalette) -> Self {
         Self::from_colors(std::array::from_fn(|tone| {
-            from_argb(palette.tone(tone as i32))
+            from_argb(spec::palette_argb(palette, tone as f64, 1.0))
         }))
     }
 }
@@ -240,8 +278,24 @@ impl MaterialDynamicPalette {
     /// Generates five full HCT palettes locally. To reproduce a device wallpaper
     /// scheme exactly, import its system palettes or direct color roles instead.
     pub fn from_seed(seed: Color, style: MaterialPaletteStyle) -> Self {
-        let scheme =
-            DynamicScheme::by_variant(to_seed_argb(seed), &style.variant(), false, Some(0.0));
+        Self::from_seed_with_spec(seed, style, false, MaterialColorSpec::default())
+    }
+
+    /// Generates all five tone palettes for a source specification. In the 2025
+    /// phone spec some palette chromas depend on dark mode, so it is explicit.
+    pub fn from_seed_with_spec(
+        seed: Color,
+        style: MaterialPaletteStyle,
+        dark: bool,
+        source_spec: MaterialColorSpec,
+    ) -> Self {
+        let scheme = spec::palettes(
+            to_seed_argb(seed),
+            style.variant(),
+            dark,
+            0.0,
+            source_spec.effective_for(style),
+        );
         Self {
             primary: MaterialTonalPalette::from_mcu(&scheme.primary_palette),
             secondary: MaterialTonalPalette::from_mcu(&scheme.secondary_palette),
@@ -321,19 +375,33 @@ impl MaterialColorScheme {
         seed: Color,
         options: MaterialDynamicColorOptions,
     ) -> Result<Self, MaterialDynamicColorError> {
+        Self::from_seed_with_spec(seed, options, MaterialColorSpec::default())
+    }
+
+    /// Generates all 48 roles using an explicit source specification and its
+    /// official phone-variant fallback. `Spec2025` enables the current expressive
+    /// palettes, chroma-sensitive surfaces, and independent tone constraints.
+    pub fn from_seed_with_spec(
+        seed: Color,
+        options: MaterialDynamicColorOptions,
+        source_spec: MaterialColorSpec,
+    ) -> Result<Self, MaterialDynamicColorError> {
         if !options.contrast_level.is_finite() || !(-1.0..=1.0).contains(&options.contrast_level) {
             return Err(MaterialDynamicColorError::InvalidContrast(
                 options.contrast_level,
             ));
         }
-        let scheme = DynamicScheme::by_variant(
+        let source_spec = source_spec.effective_for(options.style);
+        let scheme = spec::palettes(
             to_seed_argb(seed),
-            &options.style.variant(),
+            options.style.variant(),
             options.dark,
-            Some(options.contrast_level),
+            options.contrast_level,
+            source_spec,
         );
+        let resolver = spec::RoleResolver::new(&scheme, source_spec);
         Ok(Self::new(
-            MaterialColorRole::ALL.map(|role| from_argb(dynamic_role(&scheme, role))),
+            MaterialColorRole::ALL.map(|role| from_argb(resolver.argb(role))),
         ))
     }
 
@@ -425,73 +493,160 @@ fn android31_tone(role: MaterialColorRole, dark: bool) -> Option<(MaterialPalett
     })
 }
 
-fn dynamic_role(scheme: &DynamicScheme, role: MaterialColorRole) -> Argb {
-    match role {
-        MaterialColorRole::Background => scheme.background(),
-        MaterialColorRole::Error => scheme.error(),
-        MaterialColorRole::ErrorContainer => scheme.error_container(),
-        MaterialColorRole::InverseOnSurface => scheme.inverse_on_surface(),
-        MaterialColorRole::InversePrimary => scheme.inverse_primary(),
-        MaterialColorRole::InverseSurface => scheme.inverse_surface(),
-        MaterialColorRole::OnBackground => scheme.on_background(),
-        MaterialColorRole::OnError => scheme.on_error(),
-        MaterialColorRole::OnErrorContainer => scheme.on_error_container(),
-        MaterialColorRole::OnPrimary => scheme.on_primary(),
-        MaterialColorRole::OnPrimaryContainer => scheme.on_primary_container(),
-        MaterialColorRole::OnPrimaryFixed => scheme.on_primary_fixed(),
-        MaterialColorRole::OnPrimaryFixedVariant => scheme.on_primary_fixed_variant(),
-        MaterialColorRole::OnSecondary => scheme.on_secondary(),
-        MaterialColorRole::OnSecondaryContainer => scheme.on_secondary_container(),
-        MaterialColorRole::OnSecondaryFixed => scheme.on_secondary_fixed(),
-        MaterialColorRole::OnSecondaryFixedVariant => scheme.on_secondary_fixed_variant(),
-        MaterialColorRole::OnSurface => scheme.on_surface(),
-        MaterialColorRole::OnSurfaceVariant => scheme.on_surface_variant(),
-        MaterialColorRole::OnTertiary => scheme.on_tertiary(),
-        MaterialColorRole::OnTertiaryContainer => scheme.on_tertiary_container(),
-        MaterialColorRole::OnTertiaryFixed => scheme.on_tertiary_fixed(),
-        MaterialColorRole::OnTertiaryFixedVariant => scheme.on_tertiary_fixed_variant(),
-        MaterialColorRole::Outline => scheme.outline(),
-        MaterialColorRole::OutlineVariant => scheme.outline_variant(),
-        MaterialColorRole::Primary => scheme.primary(),
-        MaterialColorRole::PrimaryContainer => scheme.primary_container(),
-        MaterialColorRole::PrimaryFixed => scheme.primary_fixed(),
-        MaterialColorRole::PrimaryFixedDim => scheme.primary_fixed_dim(),
-        MaterialColorRole::Scrim => scheme.scrim(),
-        MaterialColorRole::Secondary => scheme.secondary(),
-        MaterialColorRole::SecondaryContainer => scheme.secondary_container(),
-        MaterialColorRole::SecondaryFixed => scheme.secondary_fixed(),
-        MaterialColorRole::SecondaryFixedDim => scheme.secondary_fixed_dim(),
-        MaterialColorRole::Surface => scheme.surface(),
-        MaterialColorRole::SurfaceBright => scheme.surface_bright(),
-        MaterialColorRole::SurfaceContainer => scheme.surface_container(),
-        MaterialColorRole::SurfaceContainerHigh => scheme.surface_container_high(),
-        MaterialColorRole::SurfaceContainerHighest => scheme.surface_container_highest(),
-        MaterialColorRole::SurfaceContainerLow => scheme.surface_container_low(),
-        MaterialColorRole::SurfaceContainerLowest => scheme.surface_container_lowest(),
-        MaterialColorRole::SurfaceDim => scheme.surface_dim(),
-        MaterialColorRole::SurfaceVariant => scheme.surface_variant(),
-        MaterialColorRole::Tertiary => scheme.tertiary(),
-        MaterialColorRole::TertiaryContainer => scheme.tertiary_container(),
-        MaterialColorRole::TertiaryFixed => scheme.tertiary_fixed(),
-        MaterialColorRole::TertiaryFixedDim => scheme.tertiary_fixed_dim(),
-        MaterialColorRole::SurfaceTint => scheme.surface_tint(),
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    // Generated independently with Google's @material/material-color-utilities
-    // 0.2.7, SchemeTonalSpot and MaterialDynamicColors, not the Rust implementation.
-    // Zero-contrast scheme values are stable across the pinned Rust role revision;
-    // high-contrast surface curves differ and are tested by contrast below.
+    fn assert_reference_spec(specification: MaterialColorSpec, fixture_name: &str) {
+        let csv = include_str!("tests/fixtures/dynamic-color-phone.csv");
+        let mut lines = csv.lines();
+        let header: Vec<_> = lines.next().unwrap().split(',').collect();
+        for (column, role) in header[5..].iter().zip(MaterialColorRole::ALL) {
+            assert_eq!(*column, role.name(), "fixture role order");
+        }
+        let mut schemes = 0;
+        for line in lines {
+            let row: Vec<_> = line.split(',').collect();
+            if row[0] != fixture_name {
+                continue;
+            }
+            let style = match row[2] {
+                "MONOCHROME" => MaterialPaletteStyle::Monochrome,
+                "NEUTRAL" => MaterialPaletteStyle::Neutral,
+                "TONAL_SPOT" => MaterialPaletteStyle::TonalSpot,
+                "VIBRANT" => MaterialPaletteStyle::Vibrant,
+                "EXPRESSIVE" => MaterialPaletteStyle::Expressive,
+                "FIDELITY" => MaterialPaletteStyle::Fidelity,
+                "CONTENT" => MaterialPaletteStyle::Content,
+                "RAINBOW" => MaterialPaletteStyle::Rainbow,
+                "FRUIT_SALAD" => MaterialPaletteStyle::FruitSalad,
+                other => panic!("unknown reference style {other}"),
+            };
+            let seed = Color::from_uint32(u32::from_str_radix(row[1], 16).unwrap());
+            let options = MaterialDynamicColorOptions {
+                style,
+                dark: row[3] == "1",
+                contrast_level: row[4].parse().unwrap(),
+            };
+            let actual =
+                MaterialColorScheme::from_seed_with_spec(seed, options, specification).unwrap();
+            assert_eq!(row.len(), 53);
+            for (role, expected) in MaterialColorRole::ALL.into_iter().zip(&row[5..]) {
+                let expected = u32::from_str_radix(expected, 16).unwrap();
+                assert_eq!(
+                    actual.color(role).to_uint32(),
+                    expected,
+                    "Google MCU {specification:?} seed={} {options:?} {role:?}",
+                    row[1]
+                );
+            }
+            schemes += 1;
+        }
+        assert_eq!(schemes, 1728, "16 seeds × 9 styles × 2 modes × 6 contrasts");
+    }
+
+    #[test]
+    fn current_2021_spec_matches_all_82944_independent_reference_argbs() {
+        assert_reference_spec(MaterialColorSpec::Spec2021, "2021");
+    }
+
+    #[test]
+    fn expressive_2025_spec_matches_all_82944_independent_reference_argbs() {
+        assert_reference_spec(MaterialColorSpec::Spec2025, "2025");
+    }
+
+    #[test]
+    fn source_default_and_2026_phone_fallback_match_the_upstream_contract() {
+        assert_eq!(MaterialColorSpec::default(), MaterialColorSpec::Spec2021);
+        let seed = Color::from_uint32(0xff4285f4);
+        for style in MaterialPaletteStyle::ALL {
+            let effective = if matches!(
+                style,
+                MaterialPaletteStyle::Neutral
+                    | MaterialPaletteStyle::TonalSpot
+                    | MaterialPaletteStyle::Vibrant
+                    | MaterialPaletteStyle::Expressive
+            ) {
+                MaterialColorSpec::Spec2025
+            } else {
+                MaterialColorSpec::Spec2021
+            };
+            assert_eq!(MaterialColorSpec::Spec2025.effective_for(style), effective);
+            assert_eq!(MaterialColorSpec::Spec2026.effective_for(style), effective);
+            for dark in [false, true] {
+                let options = MaterialDynamicColorOptions {
+                    style,
+                    dark,
+                    contrast_level: 0.25,
+                };
+                assert_eq!(
+                    MaterialColorScheme::from_seed_with_options(seed, options).unwrap(),
+                    MaterialColorScheme::from_seed_with_spec(
+                        seed,
+                        options,
+                        MaterialColorSpec::Spec2021
+                    )
+                    .unwrap()
+                );
+                assert_eq!(
+                    MaterialColorScheme::from_seed_with_spec(
+                        seed,
+                        options,
+                        MaterialColorSpec::Spec2026
+                    )
+                    .unwrap(),
+                    MaterialColorScheme::from_seed_with_spec(
+                        seed,
+                        options,
+                        MaterialColorSpec::Spec2025
+                    )
+                    .unwrap()
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn black_fidelity_keeps_the_reference_gray_container_foreground() {
+        for style in [
+            MaterialPaletteStyle::Fidelity,
+            MaterialPaletteStyle::Content,
+        ] {
+            let options = MaterialDynamicColorOptions {
+                style,
+                dark: false,
+                contrast_level: 0.0,
+            };
+            let scheme = MaterialColorScheme::from_seed_with_options(
+                Color::from_uint32(0xff000000),
+                options,
+            )
+            .unwrap();
+            // The dependency's black HCT tone is -2.22e-16 due to fused multiply-add.
+            // Passing that to contrast's range validation incorrectly selects white.
+            assert_eq!(
+                scheme
+                    .color(MaterialColorRole::OnPrimaryContainer)
+                    .to_uint32(),
+                0xff848484
+            );
+            assert_eq!(
+                scheme
+                    .color(MaterialColorRole::OnTertiaryContainer)
+                    .to_uint32(),
+                0xff848484
+            );
+        }
+    }
+
+    // Independently generated by the pinned Google TypeScript implementation.
+    // This small readable golden supplements the complete multi-variant fixture.
     #[test]
     fn seed_schemes_match_official_default_contrast_goldens() {
         let expected: [u32; 48] = [
             0xfffdf7ff, 0xffba1a1a, 0xffffdad6, 0xfff5eff7, 0xffcfbdfe, 0xff322f35, 0xff1d1b20,
-            0xffffffff, 0xff410002, 0xffffffff, 0xff201047, 0xff201047, 0xff4d3d75, 0xffffffff,
-            0xff1e192b, 0xff1e192b, 0xff4a4458, 0xff1d1b20, 0xff49454e, 0xffffffff, 0xff31101d,
+            0xffffffff, 0xff93000a, 0xffffffff, 0xff4d3d75, 0xff201047, 0xff4d3d75, 0xffffffff,
+            0xff4a4458, 0xff1e192b, 0xff4a4458, 0xff1d1b20, 0xff49454e, 0xffffffff, 0xff633b48,
             0xff31101d, 0xff633b48, 0xff7a757f, 0xffcac4cf, 0xff65558f, 0xffe9ddff, 0xffe9ddff,
             0xffcfbdfe, 0xff000000, 0xff625b71, 0xffe8def8, 0xffe8def8, 0xffcbc2db, 0xfffdf7ff,
             0xfffdf7ff, 0xfff2ecf4, 0xffece6ee, 0xffe6e0e9, 0xfff8f2fa, 0xffffffff, 0xffded8e0,
