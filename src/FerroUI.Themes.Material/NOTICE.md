@@ -15,6 +15,10 @@ not a Google product or an Android platform implementation.
 `material-colors` is used for CAM16/HCT dynamic palettes under MIT OR Apache-2.0.
 Its version and algorithm baseline are recorded in the manifest and port guide.
 
+The gallery share symbol uses Google Material Design Icons,
+`src/social/share/materialicons/24px.svg` (blob `07fc6639ed2cf31fbd5e132aa0219d76afd68999`),
+<https://github.com/google/material-design-icons>, Apache License 2.0.
+
 ## Google Material Color Utilities
 
 `dynamic_color_spec.rs` ports the phone palette, color-role, contrast, and

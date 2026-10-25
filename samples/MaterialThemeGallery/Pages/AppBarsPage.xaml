@@ -19,12 +19,12 @@
                                 SizeVariant="LargeFlexible" ScrollBehavior="ExitUntilCollapsed">
           <material:MaterialAppBar.Navigation>
             <Button x:Name="BackToTop" Theme="{StaticResource MaterialIconButton}" AutomationProperties.Name="Back to top" ToolTip.Tip="Back to top">
-              <PathIcon Width="24" Height="24" Data="M20,11 L7.8,11 L13.4,5.4 L12,4 L4,12 L12,20 L13.4,18.6 L7.8,13 L20,13 Z"/>
+              <PathIcon Theme="{StaticResource MaterialSymbolIcon}" Width="24" Height="24" Data="M20,11 L7.8,11 L13.4,5.4 L12,4 L4,12 L12,20 L13.4,18.6 L7.8,13 L20,13 Z"/>
             </Button>
           </material:MaterialAppBar.Navigation>
           <material:MaterialAppBar.Actions>
             <Button x:Name="ExpandBar" Theme="{StaticResource MaterialIconButton}" AutomationProperties.Name="Expand app bar" ToolTip.Tip="Expand app bar">
-              <PathIcon Width="24" Height="24" Data="M6,8 L12,14 L18,8 L19.4,9.4 L12,16.8 L4.6,9.4 Z"/>
+              <PathIcon Theme="{StaticResource MaterialSymbolIcon}" Width="24" Height="24" Data="M6,8 L12,14 L18,8 L19.4,9.4 L12,16.8 L4.6,9.4 Z"/>
             </Button>
           </material:MaterialAppBar.Actions>
         </material:MaterialAppBar>
