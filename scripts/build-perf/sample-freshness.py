@@ -251,7 +251,8 @@ def main() -> int:
     for command in ([rustc, "-Vv"], ["cargo", "-V"]):
         if len({command_text(command, source, env) for source in sources.values()}) != 1:
             parser.error("both revisions must use exactly the same Cargo and rustc")
-    report = {"schema_version": 1, "scenario": "unchanged-sample-build-after-target-population",
+    report = {"schema_version": 1,
+              "scenario": "sample-build-input-invalidation-fixture" if args.fixture_only else "unchanged-sample-build-after-target-population",
               "toolchain": command_text([rustc, "-Vv"], sources["candidate"], env),
               "cargo": command_text(["cargo", "-V"], sources["candidate"], env),
               "harness_sha256": sha256(Path(__file__)),
@@ -312,7 +313,7 @@ def main() -> int:
         report["summary"] = {"repeat_median_seconds": medians,
                              "repeat_speedup": medians["baseline"] / medians["candidate"] if medians else None,
                              "initial_population_seconds": {row["label"]: row["seconds"] for row in report["population"]},
-                             "same_graph_features_profiles_and_generated_files": True,
+                             "same_graph_features_profiles_and_generated_files": True if medians else None,
                              "candidate_unchanged_builds_all_fresh": True,
                              "optional_file_and_source_and_asset_invalidation": True,
                              "fixture_runtime_and_generated_outputs_equal": True}
