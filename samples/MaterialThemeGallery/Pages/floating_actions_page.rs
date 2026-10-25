@@ -92,7 +92,7 @@ impl FloatingActionsPage {
                         let count = this.action_count.get().saturating_add(1);
                         this.action_count.set(count);
                         this.get_control::<TextBlock>("ActionStatus")
-                            .set_text(format!("Action activated · {count}"));
+                            .set_text(Some(&format!("Action activated · {count}")));
                     }
                 });
         }

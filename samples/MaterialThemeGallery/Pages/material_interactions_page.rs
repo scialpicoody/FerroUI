@@ -79,7 +79,7 @@ impl MaterialInteractionsPage {
                         .query()
                         .unwrap_or_default();
                     this.get_control::<TextBlock>("SearchStatus")
-                        .set_text(format!("Submitted: {query}"));
+                        .set_text(Some(&format!("Submitted: {query}")));
                 }
             });
         this
