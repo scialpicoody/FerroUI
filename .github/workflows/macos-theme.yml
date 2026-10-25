@@ -54,6 +54,8 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+      - name: Native evidence and source contract regressions
+        run: python3 -m unittest discover -s scripts/macos-theme -p 'test_*.py' -v
       - name: Pinned theme inventory and source audit
         run: python3 scripts/macos-theme/audit.py --check
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
@@ -171,11 +173,18 @@ jobs:
             2>&1 | tee "$MACOS_THEME_CAPTURE_DIR/compile.log"
       - name: Capture actual native control metrics and view images
         run: |
-          "$RUNNER_TEMP/ferroui-macos26-capture" --output "$MACOS_THEME_CAPTURE_DIR" \
+          "$RUNNER_TEMP/ferroui-macos26-capture" --output "$MACOS_THEME_CAPTURE_DIR" --require-state-coverage \
             2>&1 | tee "$MACOS_THEME_CAPTURE_DIR/capture.log"
       # This is evidence collection, not a pixel-diff assertion. View snapshots
       # may omit WindowServer optics; local --screen-capture is documented in
       # scripts/macos-theme/README.md and is never granted permissions by CI.
+      - name: Validate observed native state coverage
+        if: ${{ !cancelled() }}
+        run: |
+          python3 scripts/macos-theme/validate_reference.py \
+            "$MACOS_THEME_CAPTURE_DIR/native-reference.json" \
+            --scope state-coverage \
+            --report "$MACOS_THEME_CAPTURE_DIR/reference-validation.json"
       - name: Publish native reference evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
