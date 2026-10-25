@@ -23,7 +23,7 @@ use ferroui_base::reactive::{
 };
 use ferroui_base::{
     AnyValue, BoxedValue, CornerRadius, FerroObjectImpl, FerroProperty, PropertyValue, Ref,
-    Thickness, Upcast, Visual,
+    Thickness, Visual,
 };
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -427,7 +427,7 @@ mod tests {
     use crate::motion::{MaterialMotionPolicy, MaterialMotionRole, MaterialMotionScheme};
     use ferroui_base::animation::{ITransition, PlayState, Transitions};
     use ferroui_base::reactive::LightweightSubject;
-    use ferroui_base::{ObjectType, Visual};
+    use ferroui_base::Visual;
     use ferroui_controls::testing::{TestServices, UnitTestApplication};
     use ferroui_controls::{Border, Button, Control, Window};
 
