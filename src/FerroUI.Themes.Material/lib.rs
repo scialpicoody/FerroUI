@@ -43,7 +43,7 @@ mod time_picker;
 mod time_picker_dial;
 mod time_picker_state;
 pub use time_picker::{MaterialTimePicker, MaterialTimePickerField, MaterialTimePickerLayout, MaterialTimePickerAutomationPeer, MaterialTimeChangedEventArgs};
-pub use time_picker_dial::{MaterialTimePickerDial, MaterialTimePickerNumber};
+pub use time_picker_dial::{MaterialTimePickerDial, MaterialTimePickerNumber, MaterialTimePickerNumberAutomationPeer};
 pub use time_picker_state::{MaterialTimeSelection, MaterialTimeDisplayMode};
 mod bottom_sheet_automation;
 pub use bottom_sheet_automation::MaterialBottomSheetAutomationPeer;

@@ -75,12 +75,13 @@ impl PageInfo {
 
 /// The pages, in the order of the list of the window.
 pub static PAGES: &[PageInfo] = &[
-    PageInfo { id: "timepickers", title: "Material time pickers", document: TimePickersPage::DOCUMENT_PATH, create: time_pickers_page::create },
-    PageInfo { id: "datepickers", title: "Material date pickers", document: DatePickersPage::DOCUMENT_PATH, create: date_pickers_page::create },
     PageInfo { id: "material", title: "Material 3 Expressive", document: MaterialComponentsPage::DOCUMENT_PATH, create: material_components_page::create },
     PageInfo { id: "interactions", title: "Search, snackbars and sheets", document: MaterialInteractionsPage::DOCUMENT_PATH, create: material_interactions_page::create },
     PageInfo { id: "floating", title: "Floating action buttons", document: FloatingActionsPage::DOCUMENT_PATH, create: floating_actions_page::create },
     PageInfo { id: "appbars", title: "Top app bars", document: AppBarsPage::DOCUMENT_PATH, create: app_bars_page::create },
+    PageInfo { id: "datepickers", title: "Material date pickers", document: DatePickersPage::DOCUMENT_PATH, create: date_pickers_page::create },
+    PageInfo { id: "daterange", title: "Material date range", document: DatePickersPage::DOCUMENT_PATH, create: date_pickers_page::create_range },
+    PageInfo { id: "timepickers", title: "Material time pickers", document: TimePickersPage::DOCUMENT_PATH, create: time_pickers_page::create },
     PageInfo {
         id: "buttons",
         title: "Buttons",

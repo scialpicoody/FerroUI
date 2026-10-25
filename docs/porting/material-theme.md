@@ -258,7 +258,10 @@ anchor before dismissal when it is distinct. `set_confirm_state_change` can veto
 a state change. `Dismissed` is raised after exit settles; removal does not report
 a completed dismissal. `SafeInsets` receives system-bar and keyboard insets from
 the platform host. The sheet exposes accessible expand/collapse actions, and
-its automation state follows the settled semantic state.
+its automation state follows the settled semantic state. Nested touch scrolling
+uses the source pre/post-scroll and pre/post-fling ordering: sheet expansion
+consumes an upward fling first, child inertia uses Android spline decay, and
+only unconsumed boundary velocity reaches sheet settling.
 
 `MaterialSearchView::Query` is two-way bindable. `QuerySubmitted` reports Enter or
 an explicit `submit_query()` call; expansion never recreates its TextBox. `Content`
@@ -393,9 +396,9 @@ xvfb-run -a target/debug/material-theme-gallery
 On Windows/macOS or a desktop Linux session, omit `xvfb-run`. Optional variables
 include `FERROUI_MATERIAL_GALLERY_SIZE=720x960`, `SCALE=2` with the same prefix,
 and `SETTLE_MS=300`. Set `PAGES=material,buttons` with the same prefix to capture
-a subset. By default all 22 gallery pages are included. The CI workflow runs
-token regeneration, theme and gallery tests, facade compilation and all 132
-combinations of the 22 pages, three color variants and two text directions,
+a subset. By default all 23 gallery pages are included. The CI workflow runs
+token regeneration, theme and gallery tests, facade compilation and all 138
+combinations of the 23 pages, three color variants and two text directions,
 and uploads the images.
 
 Tests cover literal baseline roles, independent HCT seed goldens, contrast,

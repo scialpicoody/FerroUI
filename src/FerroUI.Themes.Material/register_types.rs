@@ -11,7 +11,7 @@ use crate::{MaterialTextField, MaterialTextFieldLayout, MaterialTextFieldSlot};
 use crate::MaterialSearchView;
 use crate::{MaterialChip, MaterialChipKind, MaterialChipDismissButton, MaterialChipLayout};
 use crate::{MaterialDatePicker, MaterialDatePickerAutomationPeer, MaterialDateCell, MaterialDateCellAutomationPeer, MaterialDateMonthView, MaterialDateMonthsPanel, MaterialDatePickerMode, MaterialDateSelectionMode};
-use crate::{MaterialTimePicker, MaterialTimePickerField, MaterialTimePickerLayout, MaterialTimePickerAutomationPeer, MaterialTimePickerDial, MaterialTimePickerNumber, MaterialTimeSelection, MaterialTimeDisplayMode};
+use crate::{MaterialTimePicker, MaterialTimePickerField, MaterialTimePickerLayout, MaterialTimePickerAutomationPeer, MaterialTimePickerDial, MaterialTimePickerNumber, MaterialTimePickerNumberAutomationPeer, MaterialTimeSelection, MaterialTimeDisplayMode};
 use crate::MaterialBottomSheetAutomationPeer;
 use crate::{MaterialAppBar, MaterialAppBarLayout, MaterialAppBarSize, MaterialAppBarScrollBehavior};
 use crate::{MaterialSegmentedContent, MaterialSegmentedGroup, MaterialSegmentedGroupAutomationPeer};
@@ -75,7 +75,7 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
 
 const TYPES: &[&TypeInfo] =
     &[MaterialChip::TYPE, MaterialChipDismissButton::TYPE, MaterialChipLayout::TYPE, MaterialDatePicker::TYPE, MaterialDatePickerAutomationPeer::TYPE, MaterialDateCell::TYPE, MaterialDateCellAutomationPeer::TYPE, MaterialDateMonthView::TYPE, MaterialDateMonthsPanel::TYPE,
-    MaterialTimePicker::TYPE, MaterialTimePickerField::TYPE, MaterialTimePickerLayout::TYPE, MaterialTimePickerAutomationPeer::TYPE, MaterialTimePickerDial::TYPE, MaterialTimePickerNumber::TYPE,
+    MaterialTimePicker::TYPE, MaterialTimePickerField::TYPE, MaterialTimePickerLayout::TYPE, MaterialTimePickerAutomationPeer::TYPE, MaterialTimePickerDial::TYPE, MaterialTimePickerNumber::TYPE, MaterialTimePickerNumberAutomationPeer::TYPE,
     MaterialBottomSheetAutomationPeer::TYPE, MaterialAppBar::TYPE, MaterialAppBarLayout::TYPE,
     MaterialSegmentedContent::TYPE, MaterialSegmentedGroup::TYPE, MaterialSegmentedGroupAutomationPeer::TYPE,
     MaterialRangeSlider::TYPE, MaterialRangeSliderThumb::TYPE, MaterialRangeSliderLayout::TYPE, MaterialRangeSliderThumbAutomationPeer::TYPE,

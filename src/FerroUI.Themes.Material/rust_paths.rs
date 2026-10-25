@@ -48,6 +48,7 @@ ferroui_base::ferro_rust_paths! {
         crate::MaterialTimePickerField,
         crate::MaterialTimePickerLayout,
         crate::MaterialTimePickerNumber,
+        crate::MaterialTimePickerNumberAutomationPeer,
         crate::accents::SystemAccentColors,
         crate::primitives::InfoBarPanel,
         crate::primitives::TabViewEqualWidthPanel,

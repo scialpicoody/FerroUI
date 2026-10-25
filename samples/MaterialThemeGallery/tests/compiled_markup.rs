@@ -30,5 +30,12 @@ fn every_document_with_a_class_is_compiled() {
         assert!(SAMPLE.find_class(path).is_some(), "{path} has no class");
         compiled += 1;
     }
-    assert_eq!(compiled, 3 + crate::PAGES.len(), "the documents with a class");
+    // Multiple gallery states can reuse one compiled page (single-date/range).
+    let page_documents: std::collections::BTreeSet<_> =
+        crate::PAGES.iter().map(|page| page.document).collect();
+    for path in &page_documents {
+        assert!(SAMPLE.is_compiled(path), "gallery page {path} is not compiled");
+        assert!(SAMPLE.find_class(path).is_some(), "gallery page {path} has no class");
+    }
+    assert_eq!(compiled, 3 + page_documents.len(), "the documents with a class");
 }
