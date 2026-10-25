@@ -77,10 +77,20 @@ The long compilation commands in that job were:
 | ControlCatalog for accessibility capture | 135 s |
 | WinUI samples | 133 s |
 
-The last two catalog builds deserve explicit fingerprint comparison: the same package
-is built again within one job. The accessibility step sets an environment variable
-that may affect generated metadata or its source dependency graph. A timing-only
-claim cannot establish that bypassing the second Cargo invocation would be correct.
+The last two catalog builds use the same Cargo command. Follow-up fingerprint
+analysis found a concrete freshness defect: `SampleBuild::read_excluded` watched
+`excluded.txt` even when that optional file did not exist. Twenty of its twenty-one
+sample consumers, including `treedatagrid-demo`, lack that file. Cargo explicitly
+reports a missing watched file as dirty, then rebuilds the dependent application.
+The historical second invocation starts with precisely that sample dependency,
+followed by the catalog and desktop host.
+
+The repair emits the file watch only while the file exists. The existing recursive
+crate-directory watch still detects creation, editing and deletion. Actual Cargo
+regression controls verify those transitions and the resulting generated values.
+The new repeated-build comparison measures the real sample graph separately from
+its first compilation. It retains the original Cargo commands and all correctness
+checks. See [Cargo's documented missing-input behavior](https://doc.rust-lang.org/cargo/faq.html#why-is-cargo-rebuilding-my-code).
 
 Potential approaches, in order of evidence needed:
 

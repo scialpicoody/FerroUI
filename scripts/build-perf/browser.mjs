@@ -32,6 +32,8 @@ for (let i = 2; i < process.argv.length; i++) {
     else throw new Error(`unknown option: ${option}`);
 }
 if (!Number.isSafeInteger(samples) || samples < 3 || samples > 20) throw new Error("--samples must be an integer between 3 and 20");
+// Capture before creating a possibly untracked results directory in the checkout.
+const initialStatus = spawnSync("git", ["status", "--porcelain"], { cwd: repository, encoding: "utf8" });
 const logs = path.join(path.dirname(output), `${path.parse(output).name}-logs`);
 fs.mkdirSync(logs, { recursive: true });
 const report = {
@@ -41,8 +43,8 @@ const report = {
     provenance: { node: process.version, zlib: process.versions.zlib, brotli: process.versions.brotli, platform: process.platform, arch: process.arch, cpus: os.availableParallelism(), runner: process.env.RUNNER_NAME ?? null, github_sha: process.env.GITHUB_SHA ?? null },
     methodology: {
         samples,
-        javascript: "Alternating pairs: full npm ci/typecheck/lint/bundle with receipt creation, followed by verified reuse of the exact validated inputs and six outputs. npm transfer time is included; the dependency download cache is not reset.",
-        compression: "Alternating pairs: exact uncached report, separately recorded cache population, then reuse of that populated cache. Same file bytes, gzip9, Brotli11 and Node implementation; report stdout must be byte-identical.",
+        javascript: "Repeated pairs: full npm ci/typecheck/lint/bundle with receipt creation, followed by verified reuse of the exact validated inputs and six outputs. npm transfer time is included; the dependency download cache is not reset.",
+        compression: "Repeated pairs: exact uncached report, separately recorded cache population, then reuse of that populated cache. Same file bytes, gzip9, Brotli11 and Node implementation; report stdout must be byte-identical.",
         limits: "These measure avoided repeated build-tool work, not Rust compilation, cold full builds, runtime rendering, or whole CI. Speedup is median baseline seconds divided by median reuse seconds.",
     },
     javascript_pairs: [],
@@ -83,8 +85,11 @@ function summary(pairs) {
 try {
     const commit = run("commit", "git", ["rev-parse", "HEAD"]);
     report.provenance.checkout_sha = fs.readFileSync(path.join(path.dirname(output), commit.stdout_file), "utf8").trim();
-    const status = run("worktree-status", "git", ["status", "--porcelain"]);
-    report.provenance.worktree_dirty = fs.readFileSync(path.join(path.dirname(output), status.stdout_file), "utf8").trim().length > 0;
+    if (initialStatus.error) throw initialStatus.error;
+    if (initialStatus.status !== 0) throw new Error(`git status failed: ${initialStatus.stderr}`);
+    fs.writeFileSync(path.join(logs, "worktree-status.stdout"), initialStatus.stdout);
+    fs.writeFileSync(path.join(logs, "worktree-status.stderr"), initialStatus.stderr);
+    report.provenance.worktree_dirty = initialStatus.stdout.trim().length > 0;
     report.measurement_sources = ["scripts/build-perf/browser.mjs", "scripts/browser/build-webapp.mjs", "scripts/browser/module-sizes.mjs", "scripts/browser/compression-cache.mjs"].map(name => fileIdentity(path.join(repository, name), name));
     let firstBundle;
     for (let index = 0; index < samples; index++) {
@@ -127,7 +132,7 @@ try {
     report.status = "passed";
     save();
     const rows = Object.entries(report.summary).map(([name, value]) => `| ${name} | ${value.median_full_seconds.toFixed(3)} | ${value.median_reused_seconds.toFixed(3)} | ${value.ratio_of_medians.toFixed(2)}x |`);
-    const markdown = ["## Browser build-tool measurements", "", "Same input/output bytes; alternating samples. These ratios apply to repeated JavaScript validation and compression reporting, not Rust compilation or whole CI.", "", "| Workload | Full median (s) | Reuse median (s) | Ratio |", "|---|---:|---:|---:|", ...rows, "", `All ${samples} JavaScript pairs preserved the six emitted files; all ${samples} compression pairs preserved the complete report bytes.`, ""].join("\n");
+    const markdown = ["## Browser build-tool measurements", "", "Same input/output bytes; repeated full/reuse pairs. These ratios apply to repeated JavaScript validation and compression reporting, not Rust compilation or whole CI.", "", "| Workload | Full median (s) | Reuse median (s) | Ratio |", "|---|---:|---:|---:|", ...rows, "", `All ${samples} JavaScript pairs preserved the six emitted files; all ${samples} compression pairs preserved the complete report bytes.`, ""].join("\n");
     fs.writeFileSync(`${output}.md`, markdown);
     if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, markdown);
     console.log(markdown);

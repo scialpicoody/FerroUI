@@ -6,6 +6,7 @@ on:
       - 'src/FerroUI.Build.Scan/**'
       - 'src/FerroUI.Build.Tasks/**'
       - 'src/Markup/FerroUI.Markup.Xaml.Loader/**'
+      - 'samples/SampleBuild/**'
       - 'scripts/build-perf/**'
       - 'scripts/browser/build-webapp.mjs'
       - 'scripts/browser/compression-cache.mjs'
@@ -40,6 +41,35 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  sample-freshness:
+    name: Cargo sample freshness and input invalidation
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: candidate
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          path: baseline
+          ref: ${{ github.event.pull_request.base.sha || inputs.baseline || 'main' }}
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable action
+        with:
+          toolchain: '1.99.1'
+      - name: Compare unchanged real sample builds and check optional input transitions
+        run: >-
+          python3 candidate/scripts/build-perf/sample-freshness.py
+          --baseline baseline --candidate candidate --output results/sample-freshness
+          --repetitions 3 --jobs 4
+      - name: Publish first-build costs, repeated-build samples and input-change controls
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: sample-freshness-evidence
+          path: results/sample-freshness
+          if-no-files-found: error
+
   compiler:
     name: Cold XAML build (${{ matrix.mode }})
     strategy:

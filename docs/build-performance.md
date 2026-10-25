@@ -22,12 +22,37 @@ A Cargo-only fork is not justified by these measurements: compiler frontend/code
 native dependencies, build scripts, tests and reporting account for the expensive work.
 Sound relink-without-rebuild also requires compiler metadata support. A signature-only
 heuristic that ignores dependency changes would be incorrect.
+The [architecture review](build-performance-architecture.md) identifies a concrete
+follow-up boundary for removing Base and Markup runtime libraries from the model
+compiler's host prerequisites, including the API and metadata compatibility work it
+requires. That refactor is proposed, not implemented or benchmarked here.
 
 The requested **10×** improvement remains a workload-specific acceptance objective.
 There is no claim of 10× faster cold whole-workspace compilation. Experiments that
 failed to improve reliably were removed; see [the experimental record](build-performance-experiments.md).
 
 ## Implemented build paths
+
+### Keep unchanged sample builds fresh
+
+`SampleBuild` previously emitted `rerun-if-changed` for an optional `excluded.txt`
+even when the file did not exist. Cargo consequently reran the build script and
+recompiled its consumer on unchanged invocations. This affected twenty of the
+twenty-one samples using the helper, including the catalog's TreeDataGrid dependency.
+
+The fix watches an existing exclusion file explicitly and retains the existing
+recursive source-directory watch, which also detects creation and deletion. Cargo
+still decides freshness normally. An actual SampleBuild fixture checks generated
+tables and executes a dependent program after exclusion-file creation, editing and
+deletion, Rust source edits and asset edits. Each change must rebuild correctly;
+each unchanged candidate repeat must be fully fresh.
+
+The performance lane measures three alternating baseline/candidate repeats of the
+same `treedatagrid-demo --lib --no-default-features` graph after separately recorded
+first builds. This feature selection is identical in both measured variants and
+does not change production commands or coverage. `--catalog` measures the complete
+desktop catalog instead when its platform dependencies are available. An unchanged
+build becoming fast is distinct from faster compilation of changed source.
 
 ### Optimize the source scanner's implementation
 
@@ -121,6 +146,11 @@ python3 scripts/build-perf/compare.py \
 python3 scripts/build-perf/compare.py \
   --baseline ../FerroUI-baseline --candidate . --output target/build-perf/cold-tools \
   --package ferroui-themes-winui --repetitions 3 --candidate-build-tools
+
+# Repeated real sample build; first compilation and input-change controls are separate.
+python3 scripts/build-perf/sample-freshness.py \
+  --baseline ../FerroUI-baseline --candidate . --output target/build-perf/freshness \
+  --repetitions 3
 
 # Same driver and actual source tree, with complete semantic-output equality.
 python3 scripts/build-perf/scanner.py \

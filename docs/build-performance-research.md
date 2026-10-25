@@ -99,6 +99,13 @@ script. Watching a directory requires scanning it for modifications. This
 suggests two distinct opportunities: avoid unnecessary reruns, and make necessary
 reruns cheaper.
 
+The audit found an instance of the first problem in `samples/SampleBuild/lib.rs`:
+an unconditional watch on an absent optional `excluded.txt`. Cargo's
+[freshness FAQ][cargo-faq] identifies missing watched files as an always-rebuild
+cause. Guarding that explicit file watch while retaining the recursive directory
+watch allows unchanged sample builds to stay fresh; creation, edits and deletion
+remain observable. This fixes declared inputs instead of bypassing Cargo's checks.
+
 For FerroUI, retain a complete dependency closure: source modules, included files,
 manifests, target/features, relevant environment, and generated inputs. Additions
 and removals matter as well as edits. Reuse parsed data only after validating
@@ -180,6 +187,19 @@ resources, and reliability as well as the successful compile phase.
 
 ## Compiler and build-system research
 
+### Cargo's upstream shared build cache
+
+The accepted [cross-workspace cache goal][cargo-shared-cache] and its
+[current design discussion][cargo-shared-design] are directly relevant to repeat
+checkouts and CI. Cargo can use dependency-graph knowledge that a compiler wrapper
+has to infer. The initial design conservatively targets immutable registry/git
+units, excluding build-script executions and proc-macro dependents; broader
+coverage and remote integration require more work. The October 2026 discussion
+still concerns content-addressed storage and the overall design. This is an
+upstream development path, not a verified stable replacement for FerroUI's local,
+generated-code-heavy build graph. A private Cargo fork would duplicate that design
+and compatibility burden without evidence of a better result.
+
 ### Relink Don't Rebuild
 
 The accepted [RDR proposal][rdr] needs rustc to expose a compiler-visible interface
@@ -226,6 +246,16 @@ The [Rust integration goal][tpde-goal] is experimental and plans fallback to LLV
 for unsupported cases. Its long-term example discusses around 50% end-to-end
 improvement for backend-dominated debug builds. Do not transform a 10–20x backend
 claim into a 10x Cargo-build claim.
+
+### Independent Rust frontends
+
+[mrustc][mrustc] is useful for bootstrapping rustc, but its own documentation says
+it assumes valid input and is unsuitable for everyday use. It does not establish
+equivalent validation of new FerroUI code. [gccrs's August 2026 report][gccrs-report]
+still describes milestones around Rust 1.49 and ongoing language/library support.
+Neither is a demonstrated drop-in, full-feature alternative for this Rust 2024
+workspace. Compiler-backend alternatives retaining rustc's frontend should be
+distinguished from replacing its language and correctness implementation.
 
 ### Slicing and monomorphization
 
@@ -340,6 +370,11 @@ direction; skipping compiler checks or accepting stale artifacts does not.
 [cargo-guide]: https://doc.rust-lang.org/cargo/guide/build-performance.html
 [lld-default]: https://blog.rust-lang.org/2025/09/01/rust-lld-on-1.90.0-stable/
 [wild]: https://github.com/wild-linker/wild
+[cargo-faq]: https://doc.rust-lang.org/cargo/faq.html#why-is-cargo-rebuilding-my-code
+[cargo-shared-cache]: https://goals.rust-lang.org/2026/cargo-cross-workspace-cache.html
+[cargo-shared-design]: https://github.com/rust-lang/cargo/issues/5931
+[mrustc]: https://github.com/thepowersgang/mrustc
+[gccrs-report]: https://rust-gcc.github.io/2026/09/08/2026-08-monthly-report.html
 [buck2]: https://buck2.build/docs/about/bootstrapping/
 [reindeer]: https://github.com/facebookincubator/reindeer
 [bazel-rust]: https://bazelbuild.github.io/rules_rust/crate_universe_bzlmod.html
