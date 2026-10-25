@@ -20,7 +20,9 @@ use ferroui_base::media::FlowDirection;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver, LightweightSubject};
 use ferroui_base::{ObjectType, Point, Ref, Size, Visual};
 use ferroui_controls::automation::peers::{AutomationControlType, ControlAutomationPeer};
-use ferroui_controls::automation::provider::{ISelectionItemProvider, IValueProvider};
+use ferroui_controls::automation::provider::{
+    IInvokeProvider, ISelectionItemProvider, IValueProvider,
+};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Border, Control, RadioButton, TextBlock, Window};
 use std::cell::{Cell, RefCell};
@@ -476,13 +478,21 @@ fn independent_pickers_keep_hour_period_and_dial_groups_separate() {
 }
 #[test]
 fn clock_keyboard_arrows_only_move_focus_and_activation_does_not_auto_advance() {
-    let _app = start_themed_application();
+    let (_app, clock) = animated();
     let picker = MaterialTimePicker::new();
     picker.set_is_24_hour(true);
     picker.set_time(11, 15);
     let _window = host(&picker);
     let dial: Ref<MaterialTimePickerDial> = named(&picker, "PART_Dial");
     let numbers = dial.numbers();
+    let finished = Rc::new(Cell::new(0));
+    let count = finished.clone();
+    picker.add_handler(
+        MaterialTimePicker::time_change_finished_event(),
+        move |_, _| {
+            count.set(count.get() + 1);
+        },
+    );
     numbers[11].focus();
     assert!(key(&numbers[11], Key::Right, true));
     assert!(numbers[12].is_focused());
@@ -491,9 +501,126 @@ fn clock_keyboard_arrows_only_move_focus_and_activation_does_not_auto_advance() 
     key(&numbers[12], Key::Space, false);
     assert_eq!(12, picker.hour());
     assert_eq!(MaterialTimeSelection::Hour, picker.selection());
+    assert_eq!(0.0, dial.hand_velocity());
+    assert!((dial.hand_angle().rem_euclid(TAU) - (-FRAC_PI_2).rem_euclid(TAU)).abs() < 1e-9);
+    key(&numbers[12], Key::Space, true);
+    key(&numbers[12], Key::Space, false);
+    assert_eq!(
+        2,
+        finished.get(),
+        "activating the selected number still completes an edit"
+    );
+    tick(&clock, 0.0);
+    tick(&clock, 1.0);
+    assert_eq!(MaterialTimeSelection::Hour, picker.selection());
     assert!(key(&numbers[12], Key::Tab, true));
     let minute: Ref<RadioButton> = named(&picker, "PART_Minute");
     assert!(minute.is_focused());
+}
+
+#[test]
+fn clock_semantic_invoke_snaps_and_advances_even_when_the_number_was_selected() {
+    let (_app, clock) = animated();
+    let picker = MaterialTimePicker::new();
+    picker.set_hour(3);
+    let _window = host(&picker);
+    let dial: Ref<MaterialTimePickerDial> = named(&picker, "PART_Dial");
+    let numbers = dial.numbers();
+    let peer = ControlAutomationPeer::create_peer_for_element(&numbers[3]);
+    let invoke = peer
+        .get_provider::<dyn IInvokeProvider>()
+        .expect("native semantic click");
+    let finished = Rc::new(Cell::new(0));
+    let count = finished.clone();
+    picker.add_handler(
+        MaterialTimePicker::time_change_finished_event(),
+        move |_, _| {
+            count.set(count.get() + 1);
+        },
+    );
+    assert_eq!(Some(true), numbers[3].is_checked());
+    invoke.invoke().unwrap();
+    assert_eq!(1, finished.get());
+    assert_eq!(0.0, dial.hand_velocity());
+    tick(&clock, 0.0);
+    tick(&clock, 0.09);
+    assert_eq!(MaterialTimeSelection::Hour, picker.selection());
+    tick(&clock, 0.11);
+    assert_eq!(MaterialTimeSelection::Minute, picker.selection());
+
+    picker.set_auto_advance(false);
+    picker.set_selection(MaterialTimeSelection::Hour);
+    let peer = ControlAutomationPeer::create_peer_for_element(&numbers[9]);
+    let invoke = peer.get_provider::<dyn IInvokeProvider>().unwrap();
+    let select = peer.get_provider::<dyn ISelectionItemProvider>().unwrap();
+    invoke.invoke().unwrap();
+    assert_eq!(9, picker.hour());
+    assert_eq!(0.0, dial.hand_velocity());
+    assert!((dial.hand_angle().rem_euclid(TAU) - PI).abs() < 1e-9);
+    tick(&clock, 1.0);
+    assert_eq!(MaterialTimeSelection::Hour, picker.selection());
+    assert_eq!(2, finished.get());
+    picker.set_is_read_only(true);
+    assert!(invoke.invoke().is_err());
+    assert!(select.select().is_err());
+    picker.set_is_read_only(false);
+    picker.set_is_enabled(false);
+    assert!(invoke.invoke().is_err());
+    assert!(select.select().is_err());
+    assert_eq!(2, finished.get());
+}
+
+#[test]
+fn invalid_active_input_uses_error_text_and_inactive_selector_uses_on_error_container() {
+    use ferroui_base::controls::ResourceKey;
+    use ferroui_base::media::Color;
+    use ferroui_base::metadata::from_markup_value;
+    let _app = start_themed_application();
+    for vibrant in [false, true] {
+        let picker = MaterialTimePicker::new();
+        picker.set_is_vibrant(vibrant);
+        picker.set_display_mode(MaterialTimeDisplayMode::Input);
+        let window = host(&picker);
+        let field: Ref<MaterialTimePickerField> = named(&picker, "PART_HourField");
+        field.focus();
+        field.select_all();
+        type_text(&field, "99");
+        assert!(!picker.is_hour_input_valid());
+        let color = |key: &str| -> Color {
+            from_markup_value(
+                &picker
+                    .try_find_resource(
+                        &ResourceKey::from(key),
+                        picker.actual_theme_variant().as_ref(),
+                    )
+                    .flatten(),
+            )
+            .unwrap()
+        };
+        assert_eq!(
+            color("MaterialErrorColor"),
+            field
+                .foreground()
+                .unwrap()
+                .as_solid_color_brush()
+                .unwrap()
+                .color()
+        );
+        picker.set_selection(MaterialTimeSelection::Minute);
+        window.update_layout();
+        let selector: Ref<RadioButton> = named(&picker, "PART_Hour");
+        assert!(selector.is_visible());
+        assert_eq!(
+            color("MaterialOnErrorContainerColor"),
+            selector
+                .foreground()
+                .unwrap()
+                .as_solid_color_brush()
+                .unwrap()
+                .color()
+        );
+        window.close();
+    }
 }
 #[test]
 fn root_and_dial_automation_expose_the_real_value_and_selectable_clock_items() {

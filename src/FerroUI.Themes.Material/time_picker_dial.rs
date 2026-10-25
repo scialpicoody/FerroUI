@@ -33,12 +33,20 @@ use ferroui_base::{
     StyledProperty, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef, ferro_class,
     ferro_class_info, ferro_impl_classes, ferro_properties, instantiate,
 };
-use ferroui_controls::automation::AutomationProperties;
+use ferroui_controls::automation::peers::{
+    AutomationPeer, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
+    RadioButtonAutomationPeer, RadioButtonAutomationPeerImpl,
+};
+use ferroui_controls::automation::provider::{
+    IInvokeProvider, ISelectionItemProvider, ISelectionProvider,
+};
+use ferroui_controls::automation::{AutomationProperties, ElementNotEnabledException};
 use ferroui_controls::primitives::{
     TemplatedControl, TemplatedControlImpl, ToggleButton, ToggleButtonImpl,
 };
 use ferroui_controls::{
-    ButtonImpl, ContentControlImpl, Control, ControlImpl, Panel, PanelImpl, RadioButton,
+    ButtonImpl, ButtonImplExt, ContentControlImpl, Control, ControlImpl, Panel, PanelImpl,
+    RadioButton,
 };
 use std::cell::{Cell, RefCell};
 use std::f64::consts::FRAC_PI_2;
@@ -486,6 +494,40 @@ impl MaterialTimePickerDial {
             number.invalidate_visual();
         }
     }
+
+    fn activate_number(&self, index: usize, semantic_click: bool) -> bool {
+        let Some(owner) = self.owner().filter(|owner| {
+            owner.can_edit() && owner.display_mode() == MaterialTimeDisplayMode::Dial
+        }) else {
+            return false;
+        };
+        if index >= self.face.get().count() {
+            return false;
+        }
+        self.cancel_interaction();
+        owner.select_number(self.face.get().value(index));
+        // ClockText uses SnapSpec for keyboard and semantic activation. Pointer
+        // taps use the animated path instead. Activation also applies to the
+        // already selected number, which raises no IsChecked property change.
+        self.hand.borrow_mut().finish();
+        if semantic_click
+            && owner.auto_advance()
+            && owner.selection() == MaterialTimeSelection::Hour
+        {
+            if animations_enabled(owner.reduced_motion()) && self.is_attached_to_visual_tree() {
+                self.pending_advance.set(Some(0.1));
+            } else {
+                owner.set_selection(MaterialTimeSelection::Minute);
+            }
+        }
+        owner.finish_edit();
+        self.invalidate_visual();
+        for number in self.numbers() {
+            number.invalidate_visual();
+        }
+        self.update_clock();
+        true
+    }
     pub(crate) fn cancel_interaction(&self) {
         self.pending_advance.set(None);
         let drag = self.drag.borrow_mut().take();
@@ -676,7 +718,7 @@ ferro_class!(MaterialTimePickerNumber:RadioButton);
 ferro_class_info!(MaterialTimePickerNumber {
     new: MaterialTimePickerNumber::new
 });
-ferro_impl_classes!(MaterialTimePickerNumber:StyledElementImpl,LayoutableImpl,InteractiveImpl,ControlImpl,TemplatedControlImpl,ContentControlImpl,ButtonImpl,ToggleButtonImpl);
+ferro_impl_classes!(MaterialTimePickerNumber:StyledElementImpl,LayoutableImpl,InteractiveImpl,TemplatedControlImpl,ContentControlImpl,ToggleButtonImpl);
 impl FerroObjectImpl for MaterialTimePickerNumber {
     fn on_property_changed(this: &Self, e: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, e);
@@ -685,15 +727,26 @@ impl FerroObjectImpl for MaterialTimePickerNumber {
         {
             if let Some(dial) = this.dial() {
                 if !dial.updating.get() {
-                    if let Some(owner) = dial.owner() {
-                        owner.select_number(dial.face.get().value(this.index.get()));
-                        owner.finish_edit();
+                    if !dial.activate_number(this.index.get(), false) {
+                        dial.synchronize();
                     }
                 }
             }
         }
         if e.property() == TemplatedControl::font_size_property().as_property() {
             this.invalidate_visual();
+        }
+    }
+}
+impl ControlImpl for MaterialTimePickerNumber {
+    fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
+        MaterialTimePickerNumberAutomationPeer::new(this).upcast()
+    }
+}
+impl ButtonImpl for MaterialTimePickerNumber {
+    fn on_click(this: &Self) {
+        if this.activate(false) {
+            Self::parent_on_click(this);
         }
     }
 }
@@ -761,5 +814,80 @@ impl MaterialTimePickerNumber {
     }
     fn dial(&self) -> Option<Ref<MaterialTimePickerDial>> {
         self.dial.borrow().as_ref().and_then(WeakRef::upgrade)
+    }
+    fn activate(&self, semantic_click: bool) -> bool {
+        self.dial()
+            .is_some_and(|dial| dial.activate_number(self.index.get(), semantic_click))
+    }
+}
+
+/// A clock number exposes selection and the distinct native semantic click.
+/// Invoking may advance to minutes; selection and keyboard activation do not.
+#[repr(C)]
+pub struct MaterialTimePickerNumberAutomationPeer {
+    base: RadioButtonAutomationPeer,
+}
+ferro_class!(MaterialTimePickerNumberAutomationPeer: RadioButtonAutomationPeer);
+ferro_class_info!(MaterialTimePickerNumberAutomationPeer {
+    interfaces: [
+        Rc<dyn IInvokeProvider> => MaterialTimePickerNumberAutomationPeer::invoke_provider,
+        Rc<dyn ISelectionItemProvider> => MaterialTimePickerNumberAutomationPeer::selection_provider
+    ]
+});
+ferro_impl_classes!(MaterialTimePickerNumberAutomationPeer: FerroObjectImpl, AutomationPeerImpl, ControlAutomationPeerImpl, RadioButtonAutomationPeerImpl);
+impl MaterialTimePickerNumberAutomationPeer {
+    pub fn new(owner: &MaterialTimePickerNumber) -> Ref<Self> {
+        instantiate(Self {
+            base: RadioButtonAutomationPeer::construct(owner),
+        })
+    }
+    fn number(&self) -> Ref<MaterialTimePickerNumber> {
+        ControlAutomationPeer::owner(self)
+            .cast()
+            .expect("clock number owner")
+    }
+    fn invoke_provider(peer: Ref<Self>) -> Rc<dyn IInvokeProvider> {
+        Rc::new(TimeNumberProvider(peer))
+    }
+    fn selection_provider(peer: Ref<Self>) -> Rc<dyn ISelectionItemProvider> {
+        Rc::new(TimeNumberProvider(peer))
+    }
+    fn activate(&self, semantic_click: bool) -> Result<(), ElementNotEnabledException> {
+        if self.number().activate(semantic_click) {
+            Ok(())
+        } else {
+            Err(ElementNotEnabledException::with_message(
+                "The clock number is unavailable, disabled, or read-only.",
+            ))
+        }
+    }
+}
+struct TimeNumberProvider(Ref<MaterialTimePickerNumberAutomationPeer>);
+impl IInvokeProvider for TimeNumberProvider {
+    fn peer(&self) -> Ref<AutomationPeer> {
+        self.0.clone().upcast()
+    }
+    fn invoke(&self) -> Result<(), ElementNotEnabledException> {
+        self.0.activate(true)
+    }
+}
+impl ISelectionItemProvider for TimeNumberProvider {
+    fn peer(&self) -> Ref<AutomationPeer> {
+        self.0.clone().upcast()
+    }
+    fn is_selected(&self) -> bool {
+        self.0.number().is_checked() == Some(true)
+    }
+    fn selection_container(&self) -> Option<Rc<dyn ISelectionProvider>> {
+        None
+    }
+    fn add_to_selection(&self) -> Result<(), ElementNotEnabledException> {
+        self.0.add_to_selection()
+    }
+    fn remove_from_selection(&self) -> Result<(), ElementNotEnabledException> {
+        self.0.remove_from_selection()
+    }
+    fn select(&self) -> Result<(), ElementNotEnabledException> {
+        self.0.activate(false)
     }
 }

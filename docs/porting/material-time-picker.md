@@ -101,24 +101,30 @@ negative rotation. Hour/minute labels crossfade using default effects motion.
 Reduced motion settles active spring state immediately. Pending hour-to-minute
 advancement is cancelled when the dial leaves the visual tree or input mode changes.
 
-The clock contains real `RadioButton` nodes with selection-item automation.
+The clock contains real `RadioButton` nodes with selection-item and invoke automation.
 Arrow keys move focus around the current ring and between the two 24-hour rings;
 they do not select a value. Enter or Space selects the focused value. Tab escapes
 to the next display control and Shift+Tab returns to the active display control.
+Clock-number activation snaps the hand, as the native `ClockText` uses `SnapSpec`.
+An accessibility invoke can advance to minutes, including when the invoked number
+was already selected. Keyboard activation and selection-provider actions never
+advance. Each successful activation completes an edit even if the time is unchanged.
 The composite exposes a value provider accepting `HH:mm`; the selected numeric
 unit retains `TextBox` editing, clipboard, IME composition, and edit automation.
 
 `AutoAdvance` controls automatic movement from hours to minutes. Hosts with touch
 exploration enabled must set it to false; FerroUI does not currently provide a
 cross-platform accessibility-service-state signal for this component to query.
-Clock keyboard and selection-provider activation never auto-advance. Numeric
+Accessibility invocation honors the host's `AutoAdvance` setting. Numeric
 typing or paste advances after a valid two-digit hour, or a new digit 2–9 in
 12-hour mode, when `AutoAdvance` is enabled.
 
 The gallery's **Material time pickers** page exercises classic and vibrant clocks,
 format and mode switching, numeric input, and landscape layout. Tests cover the
-source geometry and thresholds, actual arranged templates, invalid drafts,
+source geometry and thresholds, actual arranged templates, active versus inactive
+error colors, invalid drafts,
 clipboard and IME commits, keyboard traversal, automation value/selection,
-pointer capture, interrupted motion, and detached weak ownership. Native Android
+pointer capture, interrupted motion, real visual-tree rendering through label
+crossfades, and detached weak ownership. Native Android
 rendering traces and device accessibility testing remain necessary for a claim
 of complete platform equivalence.

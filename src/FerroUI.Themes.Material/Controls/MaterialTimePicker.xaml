@@ -93,7 +93,7 @@
     <Style Selector="^:focus"><Setter Property="Background" Value="{DynamicResource MaterialPrimaryContainerBrush}" /><Setter Property="Foreground" Value="{DynamicResource MaterialOnPrimaryContainerBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialOutlineBrush}" /><Setter Property="BorderThickness" Value="2" /></Style>
     <Style Selector="^:vibrant"><Setter Property="CornerRadius" Value="16" /><Setter Property="FontSize" Value="57" /><Setter Property="Background" Value="{DynamicResource MaterialSurfaceContainerLowestBrush}" /><Setter Property="BorderBrush" Value="Transparent" /></Style>
     <Style Selector="^:vibrant:focus"><Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialPrimaryBrush}" /></Style>
-    <Style Selector="^:invalid"><Setter Property="Background" Value="{DynamicResource MaterialErrorContainerBrush}" /><Setter Property="Foreground" Value="{DynamicResource MaterialOnErrorContainerBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialErrorBrush}" /><Setter Property="CaretBrush" Value="{DynamicResource MaterialErrorBrush}" /></Style>
+    <Style Selector="^:invalid"><Setter Property="Background" Value="{DynamicResource MaterialErrorContainerBrush}" /><Setter Property="Foreground" Value="{DynamicResource MaterialErrorBrush}" /><Setter Property="BorderBrush" Value="{DynamicResource MaterialErrorBrush}" /><Setter Property="CaretBrush" Value="{DynamicResource MaterialErrorBrush}" /></Style>
   </ControlTheme>
 
   <ControlTheme x:Key="{x:Type material:MaterialTimePicker}" TargetType="material:MaterialTimePicker">
