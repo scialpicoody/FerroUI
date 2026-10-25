@@ -18,7 +18,7 @@ use ferroui_base::media::FlowDirection;
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::{
     AttachedProperty, CornerRadius, DirectProperty, FerroObjectImpl, FerroObjectImplExt,
-    FerroProperty, FerroPropertyChangedEventArgs, ObjectType, Rect, Ref, Size, StyledElement,
+    FerroProperty, FerroPropertyChangedEventArgs, Rect, Ref, Size, StyledElement,
     StyledElementImpl, StyledProperty, Visual, VisualImpl, VisualImplExt,
     VisualTreeAttachmentEventArgs, WeakRef, ferro_class, ferro_class_info, ferro_impl_classes,
     ferro_properties, ferro_routed_event, instantiate,
@@ -32,10 +32,6 @@ use ferroui_controls::primitives::ToggleButton;
 use ferroui_controls::{Button, Control, ControlImpl, Panel, PanelImpl, PanelImplExt, RadioButton};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering};
-
-static NEXT_GROUP: AtomicU64 = AtomicU64::new(1);
-
 struct OwnedChild {
     child: WeakRef<Control>,
     original_group: Option<String>,
@@ -47,14 +43,13 @@ struct OwnedChild {
 /// A Material segmented row. Use `RadioButton` children for single choice (the default),
 /// or set `IsMultiSelect="True"` and use `ToggleButton` children for independent choices.
 ///
-/// The group supplies a private radio identity, equal widths, overlapping outlines,
+/// The group scopes radio selection to its logical children, supplies equal widths, overlapping outlines,
 /// first/last logical corner shapes, selection/interaction stacking and arrow navigation.
 /// Child `IsChecked`, `IsEnabled`, `Content`, commands and automation remain native.
 /// Set `IsMultiSelect` before adding children; replace the children to change their kind.
 #[repr(C)]
 pub struct MaterialSegmentedGroup {
     base: Panel,
-    group_name: String,
     owned: RefCell<Vec<OwnedChild>>,
     updating: Cell<bool>,
     selected_index: Cell<i32>,
@@ -260,10 +255,6 @@ impl MaterialSegmentedGroup {
     pub fn construct() -> Self {
         Self {
             base: Panel::construct(),
-            group_name: format!(
-                "__FerroUI_MaterialSegmented_{}",
-                NEXT_GROUP.fetch_add(1, Ordering::Relaxed)
-            ),
             owned: RefCell::new(Vec::new()),
             updating: Cell::new(false),
             selected_index: Cell::new(-1),
@@ -388,11 +379,11 @@ impl MaterialSegmentedGroup {
                 });
             }
             if let Some(radio) = child.cast::<RadioButton>() {
-                if radio.group_name().as_deref() != Some(&self.group_name) {
-                    radio.set_current_value(
-                        RadioButton::group_name_property(),
-                        Some(self.group_name.clone()),
-                    );
+                if radio.group_name().is_some() {
+                    // The native RadioButtonGroupManager scopes unnamed groups to
+                    // their logical parent. This is already a private identity for
+                    // this row, without exposing generated names in XAML snapshots.
+                    radio.set_current_value(RadioButton::group_name_property(), None);
                 }
             }
             let toggle = child.cast::<ToggleButton>().expect("validated child");

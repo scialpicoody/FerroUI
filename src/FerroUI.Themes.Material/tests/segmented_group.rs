@@ -82,7 +82,7 @@ fn key(target: &Control, key: Key) {
 }
 
 #[test]
-fn single_choice_owns_radio_identity_and_isolates_neighboring_groups() {
+fn single_choice_owns_logical_parent_scope_and_isolates_neighboring_groups() {
     let _app = start_themed_application();
     let first = MaterialSegmentedGroup::new();
     let second = MaterialSegmentedGroup::new();
@@ -99,8 +99,9 @@ fn single_choice_owns_radio_identity_and_isolates_neighboring_groups() {
     parent.children().add(first.clone().upcast::<Control>());
     parent.children().add(second.clone().upcast::<Control>());
     let _window = host(&parent);
-    assert_eq!(a.group_name(), b.group_name());
-    assert_ne!(a.group_name(), other.group_name());
+    assert_eq!(None, a.group_name());
+    assert_eq!(None, b.group_name());
+    assert_eq!(None, other.group_name());
     select(&other);
     select(&a);
     select(&b);
@@ -116,9 +117,12 @@ fn single_choice_owns_radio_identity_and_isolates_neighboring_groups() {
         "selected radio must not toggle off"
     );
     // A later application GroupName assignment cannot merge two owned groups.
-    b.set_group_name(other.group_name());
-    assert_eq!(a.group_name(), b.group_name());
-    assert_ne!(b.group_name(), other.group_name());
+    b.set_group_name(Some("caller-group".into()));
+    assert_eq!(None, b.group_name());
+    assert_eq!(Some(true), other.is_checked());
+    select(&a);
+    assert_eq!(Some(false), b.is_checked());
+    assert_eq!(Some(true), other.is_checked());
 }
 
 #[test]
