@@ -5,8 +5,8 @@
 
 use crate::motion::animations_enabled;
 use crate::{
-    MaterialMotionRole, MaterialMotionScheme, MaterialSheetAnchors, MaterialSheetState,
-    MaterialSpringSpec,
+    MaterialAppBarFling, MaterialMotionRole, MaterialMotionScheme, MaterialSheetAnchors,
+    MaterialSheetState, MaterialSpringSpec,
 };
 use ferroui_base::animation::TimeSpan;
 use ferroui_base::data::BindingMode;
@@ -54,6 +54,7 @@ pub struct MaterialBottomSheetHost {
     velocity: Cell<f64>,
     scrim_opacity: Cell<f64>,
     animation: RefCell<Option<SheetAnimation>>,
+    content_fling: RefCell<Option<SheetContentFling>>,
     drag: Cell<Option<DragState>>,
     touch: RefCell<Option<SheetTouch>>,
     scrim_press: Cell<Option<i32>>,
@@ -102,7 +103,9 @@ ferro_properties! { impl MaterialBottomSheetHost {
 } }
 
 impl ControlImpl for MaterialBottomSheetHost {
-    fn on_create_automation_peer(this: &Self) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
+    fn on_create_automation_peer(
+        this: &Self,
+    ) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
         crate::MaterialBottomSheetAutomationPeer::new(this).upcast()
     }
 }
@@ -135,7 +138,12 @@ impl FerroObjectImpl for MaterialBottomSheetHost {
                 this.set_current_value(Self::state_property(), MaterialSheetState::Expanded);
             }
             "ReducedMotion" | "MotionScheme" => {
-                if this.animation.borrow().is_some() {
+                if this.content_fling.borrow().is_some()
+                    && !animations_enabled(this.reduced_motion())
+                {
+                    this.stop_content_fling();
+                    this.settle_drag(0.0);
+                } else if this.animation.borrow().is_some() {
                     this.transition_to(this.state(), false);
                 }
             }
@@ -157,6 +165,7 @@ impl VisualImpl for MaterialBottomSheetHost {
                         this.request_frame();
                     } else {
                         this.invalidate_frame();
+                        this.content_fling.borrow_mut().take();
                         this.cancel_drag();
                     }
                 }
@@ -175,6 +184,7 @@ impl VisualImpl for MaterialBottomSheetHost {
         this.release_touch();
         this.scrim_press.set(None);
         this.animation.borrow_mut().take();
+        this.content_fling.borrow_mut().take();
         // No completion event for an interrupted, detached visual.
         this.restore_focus();
         Self::parent_on_detached_from_visual_tree(this, event);
@@ -229,6 +239,11 @@ impl LayoutableImpl for MaterialBottomSheetHost {
 
 impl TemplatedControlImpl for MaterialBottomSheetHost {
     fn on_apply_template(this: &Self, event: &TemplateAppliedEventArgs) {
+        let was_flinging = this.content_fling.borrow().is_some();
+        if was_flinging {
+            this.stop_content_fling();
+            this.settle_drag(0.0);
+        }
         Self::parent_on_apply_template(this, event);
         let sheet = event.name_scope().find_as::<Border>("PART_Sheet");
         let transform = TranslateTransform::new();
@@ -343,6 +358,7 @@ impl MaterialBottomSheetHost {
             velocity: Cell::new(0.0),
             scrim_opacity: Cell::new(0.0),
             animation: RefCell::new(None),
+            content_fling: RefCell::new(None),
             drag: Cell::new(None),
             touch: RefCell::new(None),
             scrim_press: Cell::new(None),
@@ -441,7 +457,15 @@ impl MaterialBottomSheetHost {
         self.offset.get()
     }
     pub fn is_animating(&self) -> bool {
-        self.animation.borrow().is_some()
+        self.animation.borrow().is_some() || self.content_fling.borrow().is_some()
+    }
+    #[cfg(test)]
+    pub(crate) fn has_content_fling(&self) -> bool {
+        self.content_fling.borrow().is_some()
+    }
+    #[cfg(test)]
+    pub(crate) fn advance_for_test(&self, seconds: f64) {
+        self.advance(seconds);
     }
 
     /// A synchronous veto applied to programmatic state changes and user gestures.
@@ -533,6 +557,7 @@ impl MaterialBottomSheetHost {
     }
 
     fn transition_to(&self, target: MaterialSheetState, from_drag: bool) {
+        self.stop_content_fling();
         if target != MaterialSheetState::Hidden {
             if self.previous_focus.borrow().is_none() {
                 *self.previous_focus.borrow_mut() = FocusManager::get_focus_manager(self)
@@ -617,6 +642,10 @@ impl MaterialBottomSheetHost {
     }
 
     fn advance(&self, seconds: f64) {
+        if self.content_fling.borrow().is_some() {
+            self.advance_content_fling(seconds);
+            return;
+        }
         if !animations_enabled(self.reduced_motion()) {
             self.finish_transition();
             return;
@@ -706,6 +735,9 @@ impl MaterialBottomSheetHost {
         {
             return;
         }
+        // A new contact interrupts child inertia immediately, before drag slop.
+        self.stop_content_fling();
+        self.request_frame();
         let scroll = event
             .source()
             .and_then(|source| source.cast::<Visual>())
@@ -802,7 +834,8 @@ impl MaterialBottomSheetHost {
             } else {
                 0.0
             };
-            self.settle_drag(velocity);
+            let scroll = touch.scroll.as_ref().and_then(WeakRef::upgrade);
+            self.release_nested_fling(velocity, scroll.as_deref());
             touch.pointer.capture(None);
             event.prevent_gesture_recognition();
             event.set_handled(true);
@@ -828,6 +861,103 @@ impl MaterialBottomSheetHost {
         if available != 0.0 {
             self.consume_sheet_delta(available);
         }
+    }
+
+    /// SheetDefaults.kt onPreFling consumes an upward release in full until the
+    /// sheet is expanded. Otherwise the child decays first, and onPostFling
+    /// passes only its remaining velocity to the anchored sheet.
+    fn release_nested_fling(&self, velocity: f64, scroll: Option<&ScrollViewer>) {
+        if velocity < 0.0 && self.offset.get() > self.anchors.get().expanded {
+            self.settle_drag(velocity);
+            return;
+        }
+        let scroll = scroll.filter(|scroll| {
+            let maximum = (scroll.extent().height - scroll.viewport().height).max(0.0);
+            scroll.is_attached_to_visual_tree()
+                && if velocity < 0.0 {
+                    scroll.offset().y < maximum
+                } else {
+                    scroll.offset().y > 0.0
+                }
+        });
+        if animations_enabled(self.reduced_motion()) && velocity.abs() > 1.0 {
+            if let Some(scroll) = scroll {
+                self.stop_content_fling();
+                self.animation.borrow_mut().take();
+                self.velocity.set(0.0);
+                *self.content_fling.borrow_mut() = Some(SheetContentFling {
+                    curve: MaterialAppBarFling::new(velocity),
+                    elapsed: 0.0,
+                    previous: 0.0,
+                    scroll: scroll.to_ref().downgrade(),
+                });
+                self.request_frame();
+                return;
+            }
+        }
+        self.settle_drag(velocity);
+    }
+
+    fn advance_content_fling(&self, seconds: f64) {
+        let Some(mut fling) = self.content_fling.borrow_mut().take() else {
+            return;
+        };
+        if !animations_enabled(self.reduced_motion()) || !self.is_effectively_enabled() {
+            self.settle_drag(0.0);
+            return;
+        }
+        let Some(scroll) = fling
+            .scroll
+            .upgrade()
+            .filter(|scroll| scroll.is_attached_to_visual_tree())
+        else {
+            self.settle_drag(0.0);
+            return;
+        };
+        let generation = self.frame_generation.get();
+        fling.elapsed += if seconds.is_finite() {
+            seconds.max(0.0)
+        } else {
+            0.0
+        };
+        let (position, velocity) = fling.curve.sample(fling.elapsed);
+        let delta = position - fling.previous;
+        fling.previous = position;
+        let old = scroll.offset();
+        // Inertial deltas are not UserInput. Sending them through the drag's
+        // pre/post-scroll path would move the sheet before the child fling ends.
+        scroll.set_current_value(
+            ScrollViewer::offset_property(),
+            Vector::new(old.x, old.y - delta),
+        );
+        let consumed = old.y - scroll.offset().y;
+        // Offset observers can dismiss, detach, or start a new interaction.
+        // Such reentrancy invalidates this generation and must not restore it.
+        if generation != self.frame_generation.get() {
+            return;
+        }
+        if !self.is_attached_to_visual_tree() || !self.is_effectively_visible() {
+            self.invalidate_frame();
+            return;
+        }
+        if !animations_enabled(self.reduced_motion()) || !self.is_effectively_enabled() {
+            self.settle_drag(0.0);
+            return;
+        }
+        if (delta - consumed).abs() > 0.5 {
+            // DefaultFlingBehavior cancels decay after an unconsumed half pixel.
+            // Keep that frame's velocity for the sheet's normal settle policy.
+            self.settle_drag(velocity);
+        } else if fling.elapsed >= fling.curve.duration_seconds() {
+            self.settle_drag(0.0);
+        } else {
+            *self.content_fling.borrow_mut() = Some(fling);
+        }
+    }
+
+    fn stop_content_fling(&self) {
+        self.content_fling.borrow_mut().take();
+        self.invalidate_frame();
     }
 
     fn consume_sheet_delta(&self, delta: f64) -> f64 {
@@ -866,8 +996,8 @@ impl MaterialBottomSheetHost {
     }
 
     fn begin_drag(&self, y: f64, timestamp: u64, pointer_id: i32) {
+        self.stop_content_fling();
         self.animation.borrow_mut().take();
-        self.invalidate_frame();
         self.velocity.set(0.0);
         self.drag.set(Some(DragState {
             pointer_id,
@@ -932,8 +1062,9 @@ impl MaterialBottomSheetHost {
     }
 
     fn cancel_drag(&self) {
+        let was_flinging = self.content_fling.borrow_mut().take().is_some();
         let touch_dragging = self.release_touch();
-        if self.drag.take().is_some() || touch_dragging {
+        if self.drag.take().is_some() || touch_dragging || was_flinging {
             self.pseudo_classes().set(":dragging", false);
             self.velocity.set(0.0);
             self.transition_to(self.state(), true);
@@ -949,7 +1080,7 @@ impl MaterialBottomSheetHost {
 
     fn request_frame(&self) {
         if self.frame_pending.get()
-            || self.animation.borrow().is_none()
+            || (self.animation.borrow().is_none() && self.content_fling.borrow().is_none())
             || !self.is_attached_to_visual_tree()
             || !self.is_effectively_visible()
         {
@@ -1006,6 +1137,13 @@ struct SheetAnimation {
     alpha_from: f64,
     alpha_to: f64,
     alpha_velocity: f64,
+}
+
+struct SheetContentFling {
+    curve: MaterialAppBarFling,
+    elapsed: f64,
+    previous: f64,
+    scroll: WeakRef<ScrollViewer>,
 }
 impl SheetAnimation {
     fn alpha_sample(&self, scheme: MaterialMotionScheme) -> (f64, f64) {
