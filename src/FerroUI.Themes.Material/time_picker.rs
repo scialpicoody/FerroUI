@@ -1125,9 +1125,10 @@ impl LayoutableImpl for MaterialTimePickerLayout {
             if let Some(button) = button {
                 let rect = if m.horizontal {
                     let w = (m.fields_width() - m.period_inner_gap) / 2.0;
-                    let i = if rtl { 1 - index } else { index };
+                    // HorizontalPeriodToggle uses absolute Placeable.place:
+                    // AM stays left of PM even when the outer groups mirror.
                     Rect::new(
-                        dx + i as f64 * (w + m.period_inner_gap),
+                        dx + index as f64 * (w + m.period_inner_gap),
                         dy + m.field_height + m.period_gap,
                         w,
                         if owner.is_vibrant() { 40.0 } else { 38.0 },

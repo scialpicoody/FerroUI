@@ -329,6 +329,51 @@ fn rtl_mirrors_outer_groups_and_retains_left_to_right_time_and_clock() {
     let numbers = dial.numbers();
     assert!(numbers[3].bounds().x > numbers[9].bounds().x);
 }
+
+#[test]
+fn rtl_landscape_keeps_native_absolute_am_pm_order_in_classic_and_vibrant_layouts() {
+    let _app = start_themed_application();
+    for vibrant in [false, true] {
+        let picker = MaterialTimePicker::new();
+        picker.set_is_vibrant(vibrant);
+        picker.set_orientation(Orientation::Horizontal);
+        picker.set_flow_direction(FlowDirection::RightToLeft);
+        let window = host(&picker);
+        let hour: Ref<RadioButton> = named(&picker, "PART_Hour");
+        let minute: Ref<RadioButton> = named(&picker, "PART_Minute");
+        let am: Ref<RadioButton> = named(&picker, "PART_Am");
+        let pm: Ref<RadioButton> = named(&picker, "PART_Pm");
+        let dial: Ref<MaterialTimePickerDial> = named(&picker, "PART_Dial");
+        assert!(
+            dial.bounds().right() < hour.bounds().x,
+            "outer groups still mirror"
+        );
+        assert!(
+            hour.bounds().x < minute.bounds().x,
+            "time remains left to right"
+        );
+        assert_eq!(hour.bounds().x, am.bounds().x);
+        assert_eq!(am.bounds().y, pm.bounds().y);
+        assert!(
+            am.bounds().x < pm.bounds().x,
+            "HorizontalPeriodToggle uses absolute place, not placeRelative"
+        );
+        assert_eq!(
+            if vibrant { 16.0 } else { 4.0 },
+            pm.bounds().x - am.bounds().right()
+        );
+        assert_eq!(
+            if vibrant {
+                Size::new(100.0, 40.0)
+            } else {
+                Size::new(106.0, 38.0)
+            },
+            am.bounds().size()
+        );
+        assert_eq!(am.bounds().size(), pm.bounds().size());
+        window.close();
+    }
+}
 #[test]
 fn keyboard_input_template_preserves_drafts_and_native_editor_semantics() {
     let _app = start_themed_application();
