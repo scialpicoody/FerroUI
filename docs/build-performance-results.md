@@ -8,14 +8,19 @@ These are completed GitHub Actions measurements of source
 2026 and audited on October 26. The raw artifacts, individual observations,
 toolchain identities, commands and output checks are available in
 [performance run 40192472791](https://github.com/wieslawsoltes/FerroUI/actions/runs/40192472791).
-All **10 performance jobs** and all **15 jobs in the corresponding
+All **10 performance jobs** and all **15 job conclusions in the corresponding
 [platform run 40192472470](https://github.com/wieslawsoltes/FerroUI/actions/runs/40192472470)**
-succeeded.
+succeeded. A successful job conclusion is not a claim that every optional test
+passed: the platform workflow contains existing `continue-on-error` checks. The
+[later platform audit](build-performance-follow-up.md) documents the Windows
+automation failures and their exact agreement with the main baseline.
 
 The [machine-readable audit](build-performance-results.json) retains all individual
 samples, job/artifact links and SHA-256 identities. All nine downloaded benchmark
 archives matched their GitHub artifact digests. This document identifies its
 measured source explicitly; a subsequent source change requires its own CI run.
+The [level-2 and browser-invalidation follow-up](build-performance-follow-up.md)
+records that subsequent run without replacing the historical samples below.
 
 The requested **10× target was exceeded for two populated-local-cache rebuild
 workloads**. It was not achieved for cold compilation of the WinUI theme graph,
@@ -133,9 +138,10 @@ framework crates. Browser measurements compare all six emitted bundle/source-map
 files and the complete compression report bytes.
 
 The browser receipt audit subsequently identified external ESLint configuration
-and esbuild override inputs outside the original webapp hash. Those inputs need
-the accompanying invalidation fix and a fresh CI run. The historical browser
-timings above remain attributable to the stated source revision.
+and esbuild override inputs outside the original webapp hash. Those inputs were
+addressed and revalidated in the [subsequent CI run](build-performance-follow-up.md).
+The historical browser timings above remain attributable to the stated source
+revision.
 
 ## How to use the measured paths
 

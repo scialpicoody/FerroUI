@@ -16,10 +16,12 @@ does enough scanning to repay that cost.
 
 This follow-up responds to the initial CI result in
 [the audited evidence](build-performance-results.md): level 3 accelerated scans
-but increased the first cold WinUI build by 10.4%. The new profile must pass the
+but increased the first cold WinUI build by 10.4%. The new profile passed the
 same CI semantic and correctness checks and the composed cache-replay **10×**
-gate. The historical 13.024× observation belongs to the earlier level-3 revision;
-it is not silently attributed to this configuration.
+gate in the [subsequent measured run](build-performance-follow-up.md), which
+records 12.116× populated-cache replay and a 4.4% cold-build penalty. The
+historical 13.024× observation belongs to the earlier level-3 revision; it is not
+attributed to this configuration.
 
 ## Source and method
 

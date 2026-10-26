@@ -29,13 +29,17 @@ follow-up boundary for removing Base and Markup runtime libraries from the model
 compiler's host prerequisites, including the API and metadata compatibility work it
 requires. That refactor is proposed, not implemented or benchmarked here.
 
-The completed [CI results and raw-evidence audit](build-performance-results.md)
+The completed [level-2 CI results and raw-evidence audit](build-performance-follow-up.md)
 exceed the **10×** target for two populated-local-compiler-cache rebuild workloads:
-13.024× for development builds with optimized scanners and 10.872× for release.
-The same audit records the opt-in scanner configuration's 10.4% first-build penalty
+12.116× for development builds with optimized scanners and 10.876× for release.
+The same audit records the opt-in scanner configuration's 4.4% first-build penalty
 for the full WinUI theme graph. These are separate outcomes; there is no claim of
-10× faster cold whole-workspace compilation. Experiments that failed to improve
+10× faster cold whole-workspace compilation. The [earlier level-3 results](build-performance-results.md)
+remain attributed to their measured revision. Experiments that failed to improve
 reliably were removed; see [the experimental record](build-performance-experiments.md).
+Successful platform job conclusions also retain the workflow's existing optional
+Windows automation failures; the follow-up audit compares all 224 case outcomes
+with main and finds no changed results.
 
 ## Implemented build paths
 
@@ -59,6 +63,41 @@ first builds. This feature selection is identical in both measured variants and
 does not change production commands or coverage. `--catalog` measures the complete
 desktop catalog instead when its platform dependencies are available. An unchanged
 build becoming fast is distinct from faster compilation of changed source.
+
+### Keep the catalog's generated placeholders out of its input watches
+
+The catalog has a separate first-repeat defect. Its build script transforms XAML
+using placeholder geometry, writes the result under `OUT_DIR/placeholder`, then
+watches that generated file as an input. Cargo can therefore rebuild the catalog
+immediately after a successful build even when no source changed. The platform
+audit observed the same desktop command taking 177 seconds and then 127 seconds;
+these observations motivated a controlled comparison, rather than establishing
+a speedup by themselves.
+
+The fix retains watches on the original XAML and geometry sources and embeds the
+transformed UTF-8 bytes as a Rust string literal in the generated asset table.
+The placeholder file remains available to the markup compiler during the build
+script. It is no longer a build-script input or a rustc `include_bytes!` input.
+Ordinary assets still use their existing file-backed embedding. Default branding,
+runtime markup, separate assets, and document-test table placement are preserved.
+
+The regression fixture executes the actual source functions and asset-emission
+loop in small Cargo projects. It checks source and geometry edits, file creation
+and deletion, ordinary binary assets, escaping and Unicode, feature modes, and
+deleted generated intermediates. In particular it forces rustc to recompile a
+consumer while the build script stays fresh and its intermediate remains absent;
+the resulting program must still return the exact asset bytes.
+
+The real catalog benchmark uses three independent population/immediate-repeat
+pairs of `control-catalog --lib` with default features. It cleans only that
+package between pairs and reports population and cleanup costs separately. This
+avoids timing a third baseline build after a first-repeat defect has settled.
+Every candidate repeat must have all Cargo artifacts fresh. Complete generated
+Rust/metadata and first-party outputs are compared; the intentional `assets.rs`
+representation difference is checked by compiling and executing a separate Rust
+probe for all four asset/document tables, including test-only document bytes.
+Against the PR base, the result includes both this catalog fix and its
+TreeDataGrid dependency's SampleBuild fix. It is not a cold compilation result.
 
 ### Optimize the source scanner's implementation
 
@@ -149,7 +188,7 @@ no reusable receipt. An explicit `--webapp-prebuilt` remains strict. Ordinary
 normally, so custom configuration does not break standalone builds.
 
 CI uses this explicit contract and retains all existing browser, pixel, rendering,
-platform and Rust tests. The [audited CI record](build-performance-results.md)
+platform and Rust tests. The [audited CI record](build-performance-follow-up.md)
 identifies its measured revision and preserves all six emitted bundle/source-map
 comparisons. A changed validation contract is benchmarked again by the workflow.
 
@@ -191,6 +230,14 @@ python3 scripts/build-perf/compare.py \
 python3 scripts/build-perf/sample-freshness.py \
   --baseline ../FerroUI-baseline --candidate . --output target/build-perf/freshness \
   --repetitions 3
+
+# Catalog input controls and three independent first-repeat pairs.
+# These outputs must be outside both source trees; native Skia dependencies are needed.
+python3 scripts/build-perf/catalog-inputs.py \
+  --baseline ../FerroUI-baseline --candidate . --output ../catalog-input-evidence
+python3 scripts/build-perf/catalog-freshness.py \
+  --baseline ../FerroUI-baseline --candidate . --output ../catalog-repeat-evidence \
+  --repetitions 3 --jobs 4
 
 # Same driver and actual source tree, with complete semantic-output equality.
 python3 scripts/build-perf/scanner.py \

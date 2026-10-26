@@ -1,6 +1,6 @@
 # Build performance experiments
 
-These are **local measurements from 2026-10-25**, not GitHub Actions results. They
+These are **local measurements from October 25–26, 2026**, not GitHub Actions results. They
 motivate the opt-in configuration and the controlled CI experiments; they do not
 establish a whole-project compilation speedup.
 
@@ -151,6 +151,39 @@ regression to about 9% improvement in a variable shared environment. This does
 not demonstrate a robust improvement worth retaining as a performance change.
 The source edits and their prototype-specific test were removed. The stable
 source-only CI comparison is therefore intentionally a control measurement.
+
+## Not retained: align the native build tool's Base feature context
+
+An October 26 follow-up tested whether enabling Base's existing `markup-functions`
+feature on the build tool's dependency edge would let stock Cargo share native
+host and target units. The [complete experiment record](build-performance-host-feature-alignment.json)
+preserves the exact one-line manifest patch, command, compiler/profile identities,
+unit differences, generated-output hashes and selected Cargo timing observations.
+Its source is `34676fe53c165cd305b7f26f62e7ff1d87427669`, with the same explicit
+level-2 tool configuration on both sides, four jobs, no incremental/compiler cache,
+and new empty targets. This is a different experiment from the scanner rows above.
+
+| One completed pair | Baseline | Feature alignment |
+| --- | ---: | ---: |
+| Cold WinUI build | 139.382 s | 141.266 s |
+| Cold Cargo compilation units | 54 | 51 |
+| Generated Rust/metadata files | 12 | 11 |
+
+Cargo removed the featureless Base build-script/library units and one duplicate
+Markup unit. Normal runtime dependency features and all remaining unit profiles
+matched. Unique generated outputs matched; the only removed metadata file was
+an identical duplicate Base model. The WinUI build-script execution finished
+earlier, but Controls metadata and downstream libraries still determined when the
+final theme library could start: 115.08 s baseline versus 115.11 s candidate.
+
+The wall-time ratio was 0.987×. One pair does not establish a statistical regression,
+but it demonstrates no elapsed-time gain that justifies retaining the change.
+A second pair was interrupted after that decision and contributes no observation.
+An optional-feature variant was checked for default dependency-tree parity on
+native, AArch64 and Wasm graphs, without cross-target compilation or performance
+claims. Neither feature change is included in the production manifests. This
+result also shows why fewer Cargo units alone are insufficient evidence for a
+faster build or a private Cargo fork.
 
 ## Structural findings for subsequent work
 

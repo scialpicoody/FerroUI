@@ -13,7 +13,7 @@ redundant work in FerroUI's build scripts, generated metadata, and CI invocation
 graph. Evaluate caching and experimental toolchain changes independently.
 
 The requested **10x** has since been exceeded for the two
-[audited populated-local-cache rebuild workloads](build-performance-results.md).
+[audited populated-local-cache rebuild workloads](build-performance-follow-up.md).
 A result for a scanner, cache-hit rebuild, or a selected edit/test cycle must be
 reported with that scope. It does not establish a 10x improvement in compiling
 the complete workspace from an empty artifact cache; the cold WinUI comparison
@@ -107,6 +107,15 @@ an unconditional watch on an absent optional `excluded.txt`. Cargo's
 cause. Guarding that explicit file watch while retaining the recursive directory
 watch allows unchanged sample builds to stay fresh; creation, edits and deletion
 remain observable. This fixes declared inputs instead of bypassing Cargo's checks.
+
+The subsequent platform audit found the catalog watching a generated placeholder
+XAML file under `OUT_DIR` as its own input. The [catalog follow-up](build-performance.md#keep-the-catalogs-generated-placeholders-out-of-its-input-watches)
+retains original source watches and embeds transformed text directly in the asset
+table. Simply removing the generated-file watch would be insufficient: rustc's
+old `include_bytes!` would still require that deletable intermediate. The fixture
+therefore checks a real rustc recompilation with the build script fresh and the
+intermediate missing. The real-graph comparison separately measures the first
+repeat after each population, before the baseline defect can settle.
 
 For FerroUI, retain a complete dependency closure: source modules, included files,
 manifests, target/features, relevant environment, and generated inputs. Additions

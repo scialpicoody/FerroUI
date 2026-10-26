@@ -10,7 +10,11 @@ quantities.
 ## The measured baseline
 
 The [2026-10-25 nightly](https://github.com/wieslawsoltes/FerroUI/actions/runs/40155345452)
-passed all 15 jobs. The five largest relevant jobs were:
+has successful conclusions for all 15 jobs. Its existing optional Windows
+automation step reports 49 passed, 136 failed and 39 ignored; the workflow already
+allows those failures. The [follow-up audit](build-performance-follow-up.md)
+compares every named outcome with the candidate run. The five largest relevant
+jobs were:
 
 | Job | Job wall time | Sum of Cargo compilation messages | Other time |
 |---|---:|---:|---:|
@@ -26,8 +30,9 @@ a measurement of Cargo's own scheduler or of rustc alone. The messages round som
 durations to whole seconds. The remaining job time includes tests, installation,
 cache transfer, shell commands, browser automation and artifact handling.
 
-The macOS workspace build took 17m 15s. Its 189 test-harness result lines reported
-673.60 seconds of test execution in total. Compilation improvements alone therefore
+The macOS workspace build took 17m 15s. Of its 189 test-harness result lines, 188
+include durations totaling 673.60 seconds; the custom iOS result has no duration.
+Compilation improvements alone therefore
 cannot reduce that complete job by 10x. Eliminating its compilation time entirely
 would cap the speedup at about 2.40x with the other work unchanged. The equivalent
 upper bounds are about 2.88x for Windows, 4.22x for the browser without threads and
