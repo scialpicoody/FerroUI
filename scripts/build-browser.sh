@@ -19,7 +19,8 @@
 # `node scripts/browser/build-webapp.mjs build`. It verifies hashes of all script sources,
 # installed dependencies and emitted files, and fails if any changed. Without the option every
 # invocation installs, type checks, lints and bundles the module. --both does that
-# once for its two sites, whose script module is the same.
+# once for its two sites when a reusable receipt can cover their shared script inputs;
+# custom external tool configuration falls back to full validation in each child.
 #
 # The module is built with the `browser` profile of the workspace (optimised for size, see
 # docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
@@ -112,12 +113,17 @@ BUILD_DIR="$TARGET_DIR"
 # --out names the composed site; the two sites it is composed of keep their usual directories.
 if [ -n "$BOTH" ]; then
   command -v node >/dev/null || { echo "node is not on PATH" >&2; exit 1; }
+  MODE=()
   if [ -n "$WEBAPP_PREBUILT" ]; then
     node "$ROOT/scripts/browser/build-webapp.mjs" verify
+    MODE+=(--webapp-prebuilt)
   else
     node "$ROOT/scripts/browser/build-webapp.mjs" build
+    # An ordinary full build can succeed with custom external configuration whose inputs
+    # cannot be bounded by a receipt. Keep --both usable in that case; each child runs all
+    # validation gates. A present receipt is always verified again by the child before reuse.
+    if [ -f "$CRATE/dist/.ferroui-validated-webapp.json" ]; then MODE+=(--webapp-prebuilt); fi
   fi
-  MODE=(--webapp-prebuilt)
   [ "$PROFILE" = "debug" ] && MODE+=(--debug)
   [ -n "$FEATURES" ] && MODE+=(--features "$FEATURES")
   "$0" "$APPLICATION" ${MODE[@]+"${MODE[@]}"}

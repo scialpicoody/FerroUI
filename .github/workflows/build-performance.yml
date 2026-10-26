@@ -8,6 +8,7 @@ on:
       - 'src/Markup/FerroUI.Markup.Xaml.Loader/**'
       - 'samples/SampleBuild/**'
       - 'scripts/build-perf/**'
+      - 'scripts/build-browser.sh'
       - 'scripts/browser/build-webapp.mjs'
       - 'scripts/browser/compression-cache.mjs'
       - 'scripts/browser/module-sizes.mjs'
