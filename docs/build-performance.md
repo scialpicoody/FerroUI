@@ -29,9 +29,13 @@ follow-up boundary for removing Base and Markup runtime libraries from the model
 compiler's host prerequisites, including the API and metadata compatibility work it
 requires. That refactor is proposed, not implemented or benchmarked here.
 
-The requested **10×** improvement remains a workload-specific acceptance objective.
-There is no claim of 10× faster cold whole-workspace compilation. Experiments that
-failed to improve reliably were removed; see [the experimental record](build-performance-experiments.md).
+The completed [CI results and raw-evidence audit](build-performance-results.md)
+exceed the **10×** target for two populated-local-compiler-cache rebuild workloads:
+13.024× for development builds with optimized scanners and 10.872× for release.
+The same audit records the opt-in scanner configuration's 10.4% first-build penalty
+for the full WinUI theme graph. These are separate outcomes; there is no claim of
+10× faster cold whole-workspace compilation. Experiments that failed to improve
+reliably were removed; see [the experimental record](build-performance-experiments.md).
 
 ## Implemented build paths
 
@@ -62,18 +66,21 @@ build becoming fast is distinct from faster compilation of changed source.
 cargo --config .cargo/build-tools.toml build --locked -p control-catalog-desktop
 ```
 
-The explicitly selected config optimizes four build-tool packages: `ferroui-build-scan`,
-`syn`, `proc-macro2` and `quote`. It preserves all selected features, debug assertions,
+The explicitly selected config uses `opt-level=2` for four build-tool packages:
+`ferroui-build-scan`, `syn`, `proc-macro2` and `quote`. It preserves all selected features, debug assertions,
 overflow checks and normal Cargo dependency tracking. Package overrides apply wherever
 those packages are compiled, including as build dependencies. Cargo does not load this
 file automatically, and ordinary development/release/distribution/browser settings remain
 available unchanged.
 
-Local repeated scans became about 4.3× faster, with all 20 complete model, diagnostic,
-source-inventory, function-inventory and statistic outputs identical. Compiling the
-optimized tools costs more initially. The full cold-build CI comparison measures that
-tradeoff; use the option only where it pays back, particularly with reused tools or many
-scans. This is scanner execution speed, not a 4.3× rustc speedup.
+The initial level-3 experiment made repeated scans about 4.3× faster, with all 20
+complete model, diagnostic, source-inventory, function-inventory and statistic
+outputs identical. The [subsequent profile comparison](build-performance-profile-tuning.md)
+selected level 2 to reduce tool compilation cost while retaining nearly the same
+scan throughput. Compiling optimized tools still costs more initially than the
+default unoptimized tools. The full cold-build CI comparison measures that
+tradeoff; use the option where it pays back, particularly with reused tools or many
+scans. Scanner execution and rustc compilation are separate measurements.
 
 ### Reuse identical Rust compilation through sccache
 
@@ -124,14 +131,27 @@ scripts/build-browser.sh control-catalog-browser --webapp-prebuilt
 
 The first command always installs locked npm dependencies, type-checks, lints and bundles.
 Each subsequent reuse checks hashes of every webapp input, installed dependency and
-emitted file, together with the validation recipe and relevant environment. A changed,
-missing or corrupt input/output fails reuse. Failed validation removes the prior receipt.
-Ordinary standalone `build-browser.sh` still validates normally. `--both` validates the
-shared script once before assembling its two variants.
+emitted file, together with the validation recipe and relevant environment. It also
+tracks inherited ESLint configuration, configuration discovery boundaries and the
+contents of an `ESBUILD_BINARY_PATH` override, including same-path replacements
+and symlink targets. A changed, missing or corrupt input/output fails reuse. Failed
+validation removes the prior receipt.
+
+Reuse is available only when those external inputs can be bounded. TypeScript
+configuration must describe a leaf project with supported path-free options;
+transitive `extends`/project references, custom resolver paths and inherited
+`@types` packages require full validation. Executable or externally importing
+custom lint configuration, external TypeScript projects, and
+`NODE_PATH`/`NODE_OPTIONS` also require full validation. They still run the complete
+standalone recipe successfully when the underlying tools accept them, but produce
+no reusable receipt. An explicit `--webapp-prebuilt` remains strict. Ordinary
+`--both` reuses the receipt when available and otherwise validates each child
+normally, so custom configuration does not break standalone builds.
 
 CI uses this explicit contract and retains all existing browser, pixel, rendering,
-platform and Rust tests. The local three-pair validation measured 31.26× faster repeated
-JavaScript work; all six emitted bundles/source maps matched. CI records its own samples.
+platform and Rust tests. The [audited CI record](build-performance-results.md)
+identifies its measured revision and preserves all six emitted bundle/source-map
+comparisons. A changed validation contract is benchmarked again by the workflow.
 
 ### Reuse exact compression measurements
 
@@ -152,6 +172,8 @@ modules. The cache is an optional local build artifact under `target/`.
 The [Build performance workflow](../.github/workflows/build-performance.yml) pins Rust
 1.99.1 and sccache 0.19.0. Each benchmark preserves raw logs and individual samples.
 The regular CI workflow remains responsible for full platform/browser behavior.
+The Python evidence tests require Python 3.11 or newer to verify the selected TOML
+configuration against the benchmark's permitted profile difference.
 
 ```sh
 # Separate clean checkouts: BASELINE and CANDIDATE.

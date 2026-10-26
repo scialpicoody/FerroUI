@@ -1,6 +1,6 @@
 # Build and compilation performance: research and decisions
 
-Research date: **2026-10-25**. This document separates published results,
+Research date: **2026-10-25**, alternatives rechecked **2026-10-26**. This document separates published results,
 architectural proposals, and hypotheses that must be measured on FerroUI. It is a
 survey of relevant primary sources, not a claim to have exhaustively reviewed
 every compiler paper. Actual FerroUI benchmark results belong beside the command,
@@ -12,10 +12,12 @@ Keep upstream Cargo and rustc as the production build path. First remove measure
 redundant work in FerroUI's build scripts, generated metadata, and CI invocation
 graph. Evaluate caching and experimental toolchain changes independently.
 
-The requested **10x** is a performance target, not an established result. A 10x
-improvement in a scanner, cache-hit rebuild, or a selected edit/test cycle must be
+The requested **10x** has since been exceeded for the two
+[audited populated-local-cache rebuild workloads](build-performance-results.md).
+A result for a scanner, cache-hit rebuild, or a selected edit/test cycle must be
 reported with that scope. It does not establish a 10x improvement in compiling
-the complete workspace from an empty artifact cache.
+the complete workspace from an empty artifact cache; the cold WinUI comparison
+showed no such improvement.
 
 A Cargo fork is justified only by a measured Cargo bottleneck and a change that
 cannot reasonably be implemented through supported Cargo interfaces or submitted
@@ -180,6 +182,7 @@ FerroUI needs separate native and Emscripten validation.
 | [BuildXL][buildxl] | Build engine with caching, sandboxing, and distributed execution; documented integrations include JavaScript, MSBuild, Ninja, and DScript | Valuable architecture reference. No verified ready-made Cargo integration was found in the reviewed official documentation; do not claim drop-in support. |
 | [sccache distributed compilation][sccache-dist] | Keep Cargo, distribute supported compiler invocations | Requires infrastructure and artifact/input validation; network overhead and the critical path limit gains. |
 | [Kache source audit](build-performance-kache-review.md) | Keep Cargo; cache eligible libraries, linked executables and optionally build-script executions | Additional binary-cache opportunity. The pinned audit documents proc-macro, native-link and build-script replay boundaries. No FerroUI result or production enablement is claimed. |
+| [Hurry](https://github.com/attunehq/hurry#limitations) | Cargo-compatible build wrapper and shared cache | The documentation checked on October 26 limits support to Rust 1.92 or earlier because Cargo 1.93 removed `--build-plan`. It does not accelerate first-party crates or `test`/`run`/`install`, and Windows acceleration is unavailable. It cannot provide a replacement for the pinned Rust 1.99.1 experiments. |
 | [cargo-nextest][nextest] | Cargo-compatible test execution | Speeds some test workloads, not rustc itself; stable doctests still need `cargo test --doc`. |
 
 Remote execution can reduce elapsed time by adding machines; it does not imply

@@ -12,14 +12,32 @@ spec.loader.exec_module(compare)
 class EvidenceTests(unittest.TestCase):
     def test_build_tool_override_allows_only_disclosed_optimization(self):
         unit = {"package": "registry+example#syn@2.0", "profile": {"opt_level": "0", "debug_assertions": True}, "features": ["full"]}
-        changed = {**unit, "profile": {"opt_level": "3", "debug_assertions": True}}
+        changed = {**unit, "profile": {"opt_level": "2", "debug_assertions": True}}
         self.assertNotEqual(compare.comparable_units([unit], False), compare.comparable_units([changed], False))
         self.assertEqual(compare.comparable_units([unit], True), compare.comparable_units([changed], True))
         changed["profile"]["debug_assertions"] = False
         self.assertNotEqual(compare.comparable_units([unit], True), compare.comparable_units([changed], True))
         runtime = {**unit, "package": "path+file://$SOURCE/src/FerroUI.Base#ferroui-base@0.4.0"}
-        runtime_changed = {**runtime, "profile": {"opt_level": "3", "debug_assertions": True}}
+        runtime_changed = {**runtime, "profile": {"opt_level": "2", "debug_assertions": True}}
         self.assertNotEqual(compare.comparable_units([runtime], True), compare.comparable_units([runtime_changed], True))
+
+    def test_build_tool_override_matches_the_checked_configuration_and_rejects_other_levels(self):
+        import tomllib
+
+        configuration = Path(__file__).resolve().parents[2] / ".cargo/build-tools.toml"
+        parsed = tomllib.loads(configuration.read_text())
+        packages = parsed["profile"]["dev"]["package"]
+        # Cargo's JSON profile does not expose every compiler setting (for example,
+        # panic strategy or codegen-unit count). Keep the opt-in file itself narrow.
+        self.assertEqual(parsed, {"profile": {"dev": {"package": packages}}})
+        self.assertEqual(set(packages), compare.BUILD_TOOL_PACKAGES)
+        for package, settings in packages.items():
+            self.assertEqual(settings, {"opt-level": int(compare.BUILD_TOOL_OPT_LEVEL)})
+            unit = {"package": f"registry+example#{package}@2.0",
+                    "profile": {"opt_level": "0", "debug_assertions": True}, "features": ["full"]}
+            for level in ("1", "3", "s", "z"):
+                changed = {**unit, "profile": {"opt_level": level, "debug_assertions": True}}
+                self.assertNotEqual(compare.comparable_units([unit], True), compare.comparable_units([changed], True))
 
     def test_changed_features_or_generated_content_fail_equivalence(self):
         unit = {"features": ["full"], "fresh": False}

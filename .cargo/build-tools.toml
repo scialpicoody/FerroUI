@@ -14,15 +14,17 @@
 # measure the complete cold build before enabling it for a short-lived CI job.
 # The build-performance workflow checks full scanner output against the default
 # profile and reports library compilation separately from scanner execution.
+# Level 2 retains the measured scan throughput of level 3 while reducing the
+# cost of compiling these tools; see docs/build-performance-profile-tuning.md.
 
 [profile.dev.package.ferroui-build-scan]
-opt-level = 3
+opt-level = 2
 
 [profile.dev.package.syn]
-opt-level = 3
+opt-level = 2
 
 [profile.dev.package.proc-macro2]
-opt-level = 3
+opt-level = 2
 
 [profile.dev.package.quote]
-opt-level = 3
+opt-level = 2

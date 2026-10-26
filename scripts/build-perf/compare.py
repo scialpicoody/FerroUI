@@ -147,6 +147,7 @@ def measure(source: Path, output: Path, label: str, sample: int, args) -> dict:
 
 
 BUILD_TOOL_PACKAGES = {"ferroui-build-scan", "syn", "proc-macro2", "quote"}
+BUILD_TOOL_OPT_LEVEL = "2"
 
 
 def comparable_units(items: list[dict], allow_build_tool_optimization: bool) -> list[dict]:
@@ -157,7 +158,7 @@ def comparable_units(items: list[dict], allow_build_tool_optimization: bool) -> 
             profile = item.get("profile", {})
             # Permit exactly the disclosed optimization experiment. Features,
             # debug assertions, overflow checks and every other field still match.
-            if str(profile.get("opt_level")) in {"0", "3"}:
+            if str(profile.get("opt_level")) in {"0", BUILD_TOOL_OPT_LEVEL}:
                 profile["opt_level"] = "explicit-build-tool-experiment"
     return sorted(result, key=lambda item: json.dumps(item, sort_keys=True))
 

@@ -65,8 +65,10 @@ wherever it is used, including as a build dependency. They do not change the Rus
 language, dependency selection, build-script tracking, debug-assertion setting or
 overflow-check setting.
 
-The equivalent reusable configuration is
-[`.cargo/build-tools.toml`](../.cargo/build-tools.toml):
+This initial experiment was implemented in
+[`.cargo/build-tools.toml`](../.cargo/build-tools.toml). A subsequent
+[October 26 profile comparison](build-performance-profile-tuning.md) retunes that
+optional configuration to level 2; the level-3 observations here remain historical:
 
 ```sh
 cargo --config .cargo/build-tools.toml build --locked -p control-catalog-desktop
