@@ -364,6 +364,15 @@ getrandom = { version = "0.4" }
 [profile.release]
 lto = "thin"
 
+# Optimised code for running an application locally (`cargo run --profile fast-release -p <app>`):
+# the optimisation level of release, without link-time optimisation across crates. The last step
+# of an executable then links the optimised crates instead of optimising the whole program again,
+# which took most of a release build of a large application. Not for measurements or shipping:
+# the benchmarks are measured with release, and what is shipped is built with dist.
+[profile.fast-release]
+inherits = "release"
+lto = false
+
 # The build that is shipped and measured (`cargo build --profile dist`, `scripts/perf-report.py
 # --profile dist`): whole-program optimisation in one code generation unit. The executables are
 # 10 to 14 % smaller than with thin LTO over four units and start no slower
