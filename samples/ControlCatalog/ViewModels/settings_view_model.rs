@@ -7,6 +7,24 @@ use mini_mvvm::ViewModelBase;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+/// Not in the original: the item of the theme variant list (Default, Light, Dark) of the
+/// variant a start option selected (`App::initial_theme_variant`), so the list shows it.
+fn initial_theme_variant_index() -> i32 {
+    use ferroui_base::styling::ThemeVariant;
+    let is_catalog = ferroui_controls::Application::current().is_some_and(|app| app.cast::<crate::App>().is_some());
+    if !is_catalog {
+        return 0;
+    }
+    let variant = crate::App::initial_theme_variant();
+    if variant == ThemeVariant::light() {
+        1
+    } else if variant == ThemeVariant::dark() {
+        2
+    } else {
+        0
+    }
+}
+
 /// The view model of the settings page.
 pub struct SettingsViewModel {
     base: ViewModelBase,
@@ -36,7 +54,7 @@ impl SettingsViewModel {
             base: ViewModelBase::new(),
             window_state: Cell::new(WindowState::Normal),
             selected_decoration_index: Cell::new(0),
-            selected_theme_variant_index: Cell::new(0),
+            selected_theme_variant_index: Cell::new(initial_theme_variant_index()),
             selected_transparency_level_index: Cell::new(0),
             selected_flow_direction_index: Cell::new(0),
             window_states: RefCell::new(BindableList::new([

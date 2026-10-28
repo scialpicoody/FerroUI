@@ -7,7 +7,7 @@ use crate::models::CatalogTheme;
 use crate::view_models::{ApplicationViewModel, MainWindowViewModel};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::metadata::from_markup_value;
-use ferroui_base::styling::{IStyle, Style, Styles};
+use ferroui_base::styling::{IStyle, Style, Styles, ThemeVariant};
 use ferroui_base::utilities::EventArgs;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObjectImpl, Ref,
@@ -49,6 +49,9 @@ pub struct App {
     tree_data_grid_generic: RefCell<Option<Rc<dyn IStyle>>>,
     dock_menu_item_count: Cell<i32>,
     prev_theme: Cell<CatalogTheme>,
+    /// Not in the original: the theme variant the main view requests when it is loaded
+    /// (`Default`, following the platform, unless a start option selected another).
+    initial_theme_variant: RefCell<ThemeVariant>,
 }
 
 ferro_class!(App: Application);
@@ -161,6 +164,7 @@ impl App {
             tree_data_grid_generic: RefCell::new(None),
             dock_menu_item_count: Cell::new(0),
             prev_theme: Cell::new(CatalogTheme::WinUI),
+            initial_theme_variant: RefCell::new(ThemeVariant::default()),
         }
     }
 
@@ -261,6 +265,27 @@ impl App {
         Application::current()
             .and_then(|application| application.cast::<App>())
             .expect("the current application is the application of the catalog")
+    }
+
+    /// Not in the original: selects the theme variant the main view requests when it is loaded
+    /// (the desktop entry point's `FERROUI_CATALOG_THEME_VARIANT`).
+    pub fn select_initial_theme_variant(variant: ThemeVariant) {
+        *Self::current_app().initial_theme_variant.borrow_mut() = variant;
+    }
+
+    /// The theme variant of [`select_initial_theme_variant`](Self::select_initial_theme_variant).
+    pub fn initial_theme_variant() -> ThemeVariant {
+        Self::current_app().initial_theme_variant.borrow().clone()
+    }
+
+    /// Not in the original: the high-contrast variant of the current theme (that of the macOS
+    /// theme when it is selected, else that of the WinUI theme).
+    pub fn high_contrast_variant() -> ThemeVariant {
+        #[cfg(feature = "macos-theme")]
+        if Self::current_theme() == CatalogTheme::MacOS {
+            return MacOSTheme::high_contrast();
+        }
+        WinUITheme::high_contrast()
     }
 
     /// `App.CurrentTheme`.
