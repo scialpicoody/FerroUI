@@ -14,8 +14,6 @@ on:
       - 'samples/ControlCatalog.Desktop/**'
       - 'samples/ControlCatalog.Browser/**'
       - 'scripts/macos-theme/**'
-      - 'docs/porting/macos26-theme.md'
-      - 'docs/porting/data/macos26-theme.json'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/macos-theme.yml'
@@ -56,8 +54,10 @@ jobs:
           fetch-depth: 0
       - name: Native evidence and source contract regressions
         run: python3 -m unittest discover -s scripts/macos-theme -p 'test_*.py' -v
-      - name: Pinned theme inventory and source audit
-        run: python3 scripts/macos-theme/audit.py --check
+      - name: Theme inventory, include graph and motion audit
+        run: python3 scripts/macos-theme/audit.py
+      - name: Resource keys resolve for Light, Dark and HighContrast
+        run: python3 scripts/macos-theme/resource_keys.py
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:
@@ -90,6 +90,8 @@ jobs:
         run: cargo test --locked -p ferroui-base --lib platform::default_platform_settings::tests -- --nocapture 2>&1 | tee macos-theme-platform-tests.log
       - name: Optional theme integrates into the compiled catalogue
         run: cargo check --locked -p control-catalog --features macos-theme --lib 2>&1 | tee macos-theme-catalogue-check.log
+      - name: Rendered control states and disabled-state precedence
+        run: cargo test --locked -p control-catalog --features macos-theme,runtime-markup --lib tests::macos_theme_review -- --nocapture 2>&1 | tee macos-theme-render-review.log
       - name: Build desktop catalogue when requested
         if: github.event_name == 'workflow_dispatch' && inputs.build_catalogue
         run: cargo build --locked -p control-catalog-desktop --features macos-theme 2>&1 | tee macos-theme-catalogue-build.log
@@ -102,6 +104,7 @@ jobs:
             macos-theme-tests.log
             macos-theme-platform-tests.log
             macos-theme-catalogue-check.log
+            macos-theme-render-review.log
             macos-theme-catalogue-build.log
           if-no-files-found: warn
           retention-days: 14

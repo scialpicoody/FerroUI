@@ -112,12 +112,13 @@ sidebars, toolbars, scrolling, progress and window chrome. Drawn chrome puts
 close/minimize/zoom controls on the left and centers the title. Template parts,
 bindings, input behavior and accessibility peers remain owned by FerroUI controls.
 
-The deterministic [source audit](data/macos26-theme.json) inventories every copied
-control file and implicit default theme against the pinned WinUI input. It checks
-include reachability, assembly isolation and centralized durations. Unchanged
-template structures can still use the new palette, font and metric resources;
-the report distinguishes them from rewritten templates. Inventory coverage does
-not establish native behavior or visual equivalence.
+`scripts/macos-theme/audit.py` inventories every copied control file and implicit
+default theme against the pinned WinUI input and the current WinUI theme, and checks
+include reachability, assembly isolation and centralized durations; `--json` prints
+the full inventory. `scripts/macos-theme/resource_keys.py` checks that every key the
+templates reference resolves for Light, Dark and HighContrast. Unchanged template
+structures still use the macOS palette, font and metric resources. Inventory coverage
+does not establish native behavior or visual equivalence.
 
 SF Pro is resolved from the host with fallbacks. Apple fonts and SF Symbols are not
 redistributed. Non-Apple font metrics can therefore differ from native references.
@@ -134,12 +135,16 @@ FERROUI_CATALOG_THEME=macos cargo run -p control-catalog-desktop --features maco
 Settings exposes the theme selector, all five sizes, platform and explicit accent
 choices, Reduce Motion, Reduce Transparency, Increase Contrast and an active-window
 preview. Preferences persist when switching away from and back to macOS. A browser
-catalogue built with `macos-theme` accepts `?Theme=macos`.
+catalogue built with `macos-theme` accepts `?Theme=macos`. The desktop catalogue
+also takes `FERROUI_CATALOG_THEME_VARIANT=light|dark|highcontrast` and
+`FERROUI_CATALOG_MACOS_INCREASE_CONTRAST=1`, which with `FERROUI_SMOKE_SCREENSHOTS`
+give screenshot runs of a fixed appearance.
 
 ## Verification
 
 ```sh
-python3 scripts/macos-theme/audit.py --check
+python3 scripts/macos-theme/audit.py
+python3 scripts/macos-theme/resource_keys.py
 cargo test --locked -p ferroui-themes-macos --lib
 cargo test --locked -p ferroui-base --lib platform::default_platform_settings::tests
 cargo check --locked -p control-catalog --features macos-theme --lib
@@ -154,7 +159,6 @@ After intentionally changing markup, regenerate it:
 
 ```sh
 cargo test -p ferroui-themes-macos --lib tests::compiled_xaml_tests::regenerate_compiled_xaml -- --ignored
-python3 scripts/macos-theme/audit.py --write
 ```
 
 The [workflow](../../.github/workflows/macos-theme.yml) runs these contracts, a
@@ -175,7 +179,7 @@ fonts, accent, accessibility settings and window activation. Acceptance areas ar
 - WindowServer refraction, backdrop sampling and glass grouping.
 
 FerroUI pickers and other controls retain their existing behavior; styling them
-does not turn them into native AppKit widgets. The audit records native visual,
+does not turn them into native AppKit widgets. The audit reports native visual,
 material and motion fidelity as unverified until matching captures and comparisons
 are available. A build, static coverage or unit test alone must not be reported as
 100% native fidelity.

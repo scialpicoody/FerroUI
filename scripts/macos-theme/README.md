@@ -30,7 +30,7 @@ Apple reference: [Build an AppKit app with the new design (WWDC25)](https://deve
 
 ## CI evidence
 
-[The macOS theme workflow](../../.github/workflows/macos-theme.yml) runs the complete theme test suite and checks the catalogue with its optional `macos-theme` feature on Linux. A manual workflow run can additionally build the desktop catalogue. A separate job compiles and runs this fixture on GitHub's explicit `macos-26` runner and uploads the native metrics, view captures, toolchain details, and logs. The fixture and workflow both verify the OS major version before accepting images. The [runner label is documented by GitHub](https://github.com/actions/runner-images/issues/13739).
+[The macOS theme workflow](../../.github/workflows/macos-theme.yml) runs the source audit, the resource-key check, the complete theme test suite, the rendered state matrix and checks the catalogue with its optional `macos-theme` feature on Linux. A manual workflow run can additionally build the desktop catalogue. A separate job compiles and runs this fixture on GitHub's explicit `macos-26` runner and uploads the native metrics, view captures, toolchain details, and logs. The fixture and workflow both verify the OS major version before accepting images. The [runner label is documented by GitHub](https://github.com/actions/runner-images/issues/13739).
 
 The native reference job does not request Screen Recording permission or claim a pixel comparison. Its uploaded artifact is reference evidence for subsequent visual calibration. A separate macOS 26 job compiles the generated interop code and Objective-C++ backend and tests automatic accessibility preferences, compatibility with older native libraries, and subscription disposal.
 

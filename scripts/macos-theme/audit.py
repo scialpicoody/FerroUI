@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Audit the copied macOS theme inventory without claiming native visual fidelity.
 
-    python3 scripts/macos-theme/audit.py --write
-    python3 scripts/macos-theme/audit.py --check
+    python3 scripts/macos-theme/audit.py           # print the summary, fail on contract errors
+    python3 scripts/macos-theme/audit.py --json    # also print the full inventory as JSON
 
 The baseline is immutable git content, not the working WinUI directory. XML and
 include-graph checks complement the compiled/runtime Rust suite; they do not
 resolve resource types, exercise interaction, or compare native screenshots.
-The report contains no timestamps or current-HEAD hash, so committing it does
-not immediately make it stale. Standard library only; no network access.
+The inventory is computed on demand and not checked in. Standard library only;
+no network access.
 """
 
 from __future__ import annotations
@@ -33,7 +33,6 @@ BASE_ASSEMBLY = "FerroUI.Themes.WinUI"
 THEME_ASSEMBLY = "FerroUI.Themes.MacOS"
 BASE_DIRECTORY = f"src/{BASE_ASSEMBLY}"
 THEME_DIRECTORY = f"src/{THEME_ASSEMBLY}"
-REPORT_PATH = "docs/porting/data/macos26-theme.json"
 XAML_KEY = "{http://schemas.microsoft.com/winfx/2006/xaml}Key"
 MOTION_TOKENS = {
     "MacOSMotionFastDuration": "DynamicResource",
@@ -248,6 +247,18 @@ def audit(base: dict[str, bytes], current: dict[str, bytes]) -> dict:
         errors.append({"code": "missing_default_control_theme", "key": key, "baseline_documents": sorted(expected[key]),
                        "detail": "The baseline default theme is absent from the macOS merged include graph"})
 
+    # The WinUI theme keeps growing after the fork: every default control theme of the current
+    # WinUI tree needs a macOS counterpart too (or the WinUI addition is ported in the same change).
+    winui_directory = Path(__file__).resolve().parents[2] / BASE_DIRECTORY
+    if winui_directory.is_dir():
+        winui_now = {p.relative_to(winui_directory).as_posix(): p.read_bytes() for p in sorted(winui_directory.rglob("*.xaml"))}
+        winui_roots = parse_documents(winui_now, BASE_ASSEMBLY, errors)
+        winui_reachable, _, _ = include_graph(winui_roots, "WinUITheme.xaml", BASE_ASSEMBLY, errors)
+        winui_keys = {theme["key"] for document in winui_reachable for theme in exported_themes(winui_roots[document])}
+        for key in sorted(winui_keys - available.keys()):
+            errors.append({"code": "missing_current_winui_control_theme", "key": key,
+                           "detail": "The current WinUI theme styles this control; the macOS theme does not"})
+
     controls = []
     for document in sorted(name for name in base_roots if name.startswith("Controls/") and name != "Controls/WinUIControls.xaml"):
         actual = roots.get(document)
@@ -358,9 +369,9 @@ def summary(report: dict) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--write", action="store_true", help=f"write {REPORT_PATH}")
-    mode.add_argument("--check", action="store_true", help="fail when contracts regress or the checked-in report is stale")
+    parser.add_argument("--json", action="store_true", help="print the full inventory as JSON")
+    # Accepted for compatibility with earlier invocations; checking is the default.
+    parser.add_argument("--check", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     repository = Path(__file__).resolve().parents[2]
     try:
@@ -368,23 +379,12 @@ def main() -> int:
     except (OSError, RuntimeError) as exc:
         print(f"macOS theme audit failed: {exc}", file=sys.stderr)
         return 1
-    rendered = json.dumps(report, indent=2, ensure_ascii=False) + "\n"
-    output = repository / REPORT_PATH
     print(summary(report))
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
     for error in report["static_contracts"]["errors"]:
         print("ERROR " + json.dumps(error, sort_keys=True), file=sys.stderr)
-    stale = False
-    if args.write:
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(rendered, encoding="utf-8")
-        print(f"Wrote {REPORT_PATH}")
-    elif args.check:
-        stale = not output.is_file() or output.read_text(encoding="utf-8") != rendered
-        if stale:
-            print(f"ERROR stale report: run python3 scripts/macos-theme/audit.py --write and review {REPORT_PATH}", file=sys.stderr)
-        else:
-            print(f"Report is current: {REPORT_PATH}")
-    return int(bool(report["static_contracts"]["errors"]) or stale)
+    return int(bool(report["static_contracts"]["errors"]))
 
 
 if __name__ == "__main__":
