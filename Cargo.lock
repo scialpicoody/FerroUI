@@ -538,6 +538,7 @@ dependencies = [
  "ferroui-opengl",
  "ferroui-skia",
  "ferroui-themes-fluent",
+ "ferroui-themes-macos",
  "ferroui-themes-simple",
  "ferroui-themes-winui",
  "ferroui-vello",
@@ -1099,6 +1100,7 @@ dependencies = [
  "ferroui-splat",
  "ferroui-system",
  "ferroui-themes-fluent",
+ "ferroui-themes-macos",
  "ferroui-themes-material",
  "ferroui-themes-simple",
  "ferroui-themes-winui",
@@ -1812,6 +1814,18 @@ dependencies = [
 
 [[package]]
 name = "ferroui-themes-fluent"
+version = "0.4.0"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-dialogs",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-themes-macos"
 version = "0.4.0"
 dependencies = [
  "ferroui-base",
