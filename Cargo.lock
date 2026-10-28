@@ -539,6 +539,7 @@ dependencies = [
  "ferroui-skia",
  "ferroui-themes-fluent",
  "ferroui-themes-macos",
+ "ferroui-themes-material",
  "ferroui-themes-simple",
  "ferroui-themes-winui",
  "ferroui-vello",
