@@ -321,19 +321,19 @@ fn disabled_error_field_uses_disabled_roles_and_rtl_keeps_logical_slot_geometry(
 }
 
 #[test]
-fn material_fields_use_native_minimum_width_and_explicit_clear_button_opt_in() {
+fn material_fields_opt_into_native_minimum_width_and_clear_button() {
     let _app = start_themed_application();
     let field = TextBox::new();
     field.set_text(Some("value"));
     let window = host(&field);
     assert!(field.focus());
     let clear: Ref<Button> = named(&field, "DeleteButton");
-    assert_eq!(280.0, field.min_width());
+    assert_eq!(120.0, field.min_width());
     assert!(!clear.is_visible());
-    field.classes().add("compactWidth");
+    field.classes().add("nativeMinWidth");
     field.classes().add("clearButton");
     window.update_layout();
-    assert_eq!(120.0, field.min_width());
+    assert_eq!(280.0, field.min_width());
     assert!(clear.is_visible());
     clear.command().unwrap().execute(None);
     assert!(field.text().is_none_or(|text| text.is_empty()));

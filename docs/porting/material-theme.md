@@ -299,8 +299,10 @@ out of measurement and duplicated semantics when collapsed.
 Text fields use an advisory `CharacterLimit`/`ShowCharacterCount` pair. The
 counter counts UTF-16 code units, as Android does, but does not truncate the
 editor's text. `ErrorText` and `IsError` add Material presentation without
-replacing FerroUI validation. The native minimum field width is 280dp; the
-`compactWidth` class explicitly opts into the old 120dp desktop minimum.
+replacing FerroUI validation. Fields have a 120dp minimum
+width: Compose's 280dp `TextFieldDefaults.MinWidth` is clamped to the width the
+parent offers, whereas a FerroUI `MinWidth` overflows a narrower parent, so the
+280dp minimum is the opt-in `nativeMinWidth` class.
 An automatic clear button is opt-in through the `clearButton` class.
 
 `DensityStyle::Compact` retains a compatibility switch for existing applications

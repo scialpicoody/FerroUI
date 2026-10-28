@@ -205,7 +205,10 @@
     <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
     <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
     <Setter Property="MinHeight" Value="56" />
-    <Setter Property="MinWidth" Value="280" />
+    <!-- 120, not TextFieldDefaults.MinWidth (280): Compose clamps a minimum to the width the
+         parent offers, while a FerroUI MinWidth overflows narrower parents (sidebars, grid cells).
+         The nativeMinWidth class opts into 280. -->
+    <Setter Property="MinWidth" Value="120" />
     <Setter Property="Padding" Value="16" />
     <Setter Property="FocusAdorner" Value="{x:Null}" />
     <Setter Property="ClipToBounds" Value="False" />
@@ -354,7 +357,9 @@
       </ControlTemplate>
     </Setter>
 
-    <!-- Explicit desktop opt-in; the default follows TextFieldDefaults.MinWidth. -->
+    <!-- TextFieldDefaults.MinWidth where the layout has room for it; compactWidth is the default
+         minimum, kept for existing markup. -->
+    <Style Selector="^.nativeMinWidth"><Setter Property="MinWidth" Value="280" /></Style>
     <Style Selector="^.compactWidth"><Setter Property="MinWidth" Value="120" /></Style>
     <Style Selector="^[AcceptsReturn=True]">
       <Setter Property="VerticalContentAlignment" Value="Top" />
