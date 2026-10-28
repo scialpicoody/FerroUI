@@ -10,6 +10,8 @@ on:
       - 'src/FerroUI.Controls/text_box.rs'
       - 'src/FerroUI.Controls/text_box_tests.rs'
       - 'samples/MaterialThemeGallery/**'
+      - 'samples/ControlCatalog/**'
+      - 'samples/ControlCatalog.Desktop/**'
       - 'scripts/material-theme/**'
       - 'scripts/themes/**'
       - 'src/FerroUI/Cargo.toml'
@@ -60,6 +62,8 @@ jobs:
           cargo test --locked -p ferroui-controls --lib canceling_preedit_restores_empty_state_without_committing_text
       - name: Facade integration
         run: cargo check --locked -p ferroui --no-default-features --features material-theme
+      - name: Catalog integration beside the macOS theme
+        run: cargo check --locked -p control-catalog --features material-theme,macos-theme --lib
       - name: Gallery compiled and runtime markup contracts
         run: cargo test --locked -p material-theme-gallery --lib
       - name: Gallery compilation

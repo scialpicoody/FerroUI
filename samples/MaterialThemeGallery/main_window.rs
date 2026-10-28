@@ -141,7 +141,27 @@ impl MainWindow {
         this.accent_choice().set_selected_index(0);
         this.motion_choice().set_selected_index(0);
         this.page_list().set_selected_index(0);
+        this.select_start_options();
         this
+    }
+
+    /// `FERROUI_MATERIAL_GALLERY_START_PAGE=<page id>` and
+    /// `FERROUI_MATERIAL_GALLERY_START_VARIANT=<Light|Dark|HighContrast>` choose the page and the
+    /// theme variant the window opens with (for screenshots of the window); unknown values are
+    /// reported and ignored.
+    fn select_start_options(&self) {
+        if let Some(name) = std::env::var("FERROUI_MATERIAL_GALLERY_START_VARIANT").ok().filter(|v| !v.trim().is_empty()) {
+            match Variant::parse(&name).and_then(|variant| Variant::ALL.iter().position(|v| *v == variant)) {
+                Some(index) => self.variant_choice().set_selected_index(index as i32),
+                None => println!("FERROUI_MATERIAL_GALLERY_START_VARIANT: unknown variant {name:?}"),
+            }
+        }
+        if let Some(id) = std::env::var("FERROUI_MATERIAL_GALLERY_START_PAGE").ok().filter(|v| !v.trim().is_empty()) {
+            match PAGES.iter().position(|page| page.id.eq_ignore_ascii_case(id.trim())) {
+                Some(index) => self.page_list().set_selected_index(index as i32),
+                None => println!("FERROUI_MATERIAL_GALLERY_START_PAGE: unknown page {id:?}"),
+            }
+        }
     }
 
     fn variant_choice(&self) -> Ref<ComboBox> {

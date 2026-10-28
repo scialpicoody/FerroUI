@@ -5,6 +5,7 @@
 //! cargo run -p material-theme-gallery --bin material-theme-gallery
 //! FERROUI_MATERIAL_GALLERY_CAPTURE=target/material-theme-gallery cargo run -p material-theme-gallery --bin material-theme-gallery
 //! FERROUI_SMOKE_EXIT_MS=3000 cargo run -p material-theme-gallery --bin material-theme-gallery
+//! FERROUI_MATERIAL_GALLERY_START_PAGE=timepickers FERROUI_MATERIAL_GALLERY_START_VARIANT=Dark cargo run -p material-theme-gallery --bin material-theme-gallery
 //! ```
 //!
 //! With `FERROUI_MATERIAL_GALLERY_CAPTURE=<directory>` the gallery writes a picture of every page in
