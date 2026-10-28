@@ -71,10 +71,7 @@ pub trait IPlatformSettings {
     /// Raises when current system color values are changed, including
     /// changing of a dark mode and accent colors. Disposing the returned
     /// handle unsubscribes.
-    fn color_values_changed(
-        &self,
-        handler: Rc<dyn Fn(&PlatformColorValues)>,
-    ) -> Rc<dyn IDisposable>;
+    fn color_values_changed(&self, handler: Rc<dyn Fn(&PlatformColorValues)>) -> Rc<dyn IDisposable>;
 
     /// Raised when the system language preferences change. Disposing the
     /// returned handle unsubscribes.
