@@ -42,6 +42,11 @@ const CELL_WIDTH: i32 = 152;
 const ROW_HEIGHT: i32 = 56;
 const LABEL_WIDTH: i32 = 144;
 const HEADER_HEIGHT: i32 = 40;
+/// The two compared cells sit at different x positions, and the rasterizer anti-aliases the
+/// edges of the same geometry slightly differently there (up to about 11 levels of a channel
+/// at the edges of the switch knob). A state that leaks through the disabled state changes
+/// fills and strokes by far more.
+const AA_TOLERANCE: u8 = 24;
 
 fn text(canvas: &Canvas, value: &str, x: f64, y: f64) {
     let label = TextBlock::new();
@@ -149,7 +154,9 @@ fn rendered_state_matrix_and_disabled_precedence() {
                         let other = start + (CELL_WIDTH * scale * 4) as usize;
                         let length = (CELL_WIDTH * scale * 4) as usize;
                         different += pixels[start..start + length].chunks_exact(4)
-                            .zip(pixels[other..other + length].chunks_exact(4)).filter(|(a, b)| a != b).count();
+                            .zip(pixels[other..other + length].chunks_exact(4))
+                            .filter(|(a, b)| a.iter().zip(b.iter()).any(|(x, y)| x.abs_diff(*y) > AA_TOLERANCE))
+                            .count();
                     }
                     comparisons += 1;
                     if different != 0 {
