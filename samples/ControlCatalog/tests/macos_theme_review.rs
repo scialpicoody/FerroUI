@@ -23,7 +23,7 @@ const CASES: &[(&str, &str)] = &[
     ("mixed-checkbox", "<CheckBox Content='Mixed' IsThreeState='True' IsChecked='{x:Null}'/>"),
     ("radio", "<RadioButton Content='Choice' IsChecked='True'/>"),
     ("switch", "<ToggleSwitch IsChecked='True'/>"),
-    ("text", "<TextBox Text='Value' Watermark='Placeholder'/>"),
+    ("text", "<TextBox Text='Value' PlaceholderText='Placeholder'/>"),
     ("combo", "<ComboBox SelectedIndex='0'><ComboBoxItem Content='Choice'/><ComboBoxItem Content='Other'/></ComboBox>"),
     ("numeric", "<NumericUpDown Value='42'/>"),
     ("slider", "<Slider Minimum='0' Maximum='100' Value='40'/>"),
