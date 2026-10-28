@@ -201,6 +201,19 @@ The theme's implementation and native comparison boundaries are recorded in
 and interaction test surface; native macOS 26 reference captures remain necessary to
 establish pixel and motion accuracy.
 
+### Optional Android Material 3 Expressive appearance
+
+The `material-theme` feature adds `ferroui-themes-material` beside the macOS theme; the
+catalog loads its bundled Roboto through `App::with_theme_fonts`.
+
+```sh
+FERROUI_CATALOG_THEME=material FERROUI_CATALOG_THEME_VARIANT=dark cargo run -p control-catalog-desktop --features material-theme
+```
+
+The Material-specific components (date and time pickers, docked search, snackbars, sheets,
+app bars, segmented groups) have no catalog pages; the Material theme gallery
+(`samples/MaterialThemeGallery`) shows them.
+
 ### Default WinUI and optional classic themes
 
 Not in the original: the catalog has the WinUI 3 theme of the port (`ferroui-themes-winui`,

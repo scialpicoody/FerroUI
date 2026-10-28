@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Check the resource keys of the macOS 26 theme per theme variant.
+"""Check the resource keys of a theme derived from the WinUI theme, per theme variant.
 
-    python3 scripts/macos-theme/resource_keys.py            # macOS theme, fail on problems
-    python3 scripts/macos-theme/resource_keys.py --verbose  # also list the keys per finding
+    python3 scripts/themes/resource_keys.py macos             # the macOS 26 theme
+    python3 scripts/themes/resource_keys.py material          # the Android Material theme
+    python3 scripts/themes/resource_keys.py material --verbose  # also list the documents
 
-Every key the documents reachable from MacOSTheme.xaml reference with
+Every key the documents reachable from the theme's root document reference with
 `{StaticResource}`, `{DynamicResource}`, `{ThemeResource}` or a
 `<StaticResource ResourceKey="..."/>` element must resolve for the Light, Dark
 and HighContrast variants, from
@@ -12,7 +13,8 @@ and HighContrast variants, from
 * the top-level entries of a reachable dictionary,
 * the theme dictionary of the variant (HighContrast inherits Dark; every
   variant falls back to the `Default` dictionary, as the resource lookup does),
-* the live keys of `settings_resources.rs` and the accent provider.
+* the keys the theme's Rust code supplies (string literals of its sources: live
+  preference resources, the accent provider, color schemes set from code).
 
 Keys that the WinUI theme references without defining either (framework and
 application resources such as the colour picker's) are reported separately as
@@ -139,12 +141,17 @@ class Theme:
         visit(root, None, False)
 
     def asymmetries(self) -> dict[str, set[str]]:
-        """Keys a variant's theme dictionary lacks although a sibling defines them. The compiled
-        theme flattens the theme dictionaries of all merged documents into one dictionary per
-        variant, so the comparison is over the whole theme, not per document."""
-        union = set().union(*(self.themed.get(name, set()) for name in ("Default", "Light", "HighContrast")))
-        return {name: union - self.themed.get(name, set()) for name in ("Default", "Light", "HighContrast")
-                if union - self.themed.get(name, set())}
+        """Keys a variant does not resolve from its own chain of theme dictionaries although
+        another variant does (the compiled theme flattens the theme dictionaries of all merged
+        documents into one dictionary per variant, so the comparison is over the whole theme).
+        A key only in `Default` counts as missing for Light: Light would get the dark value."""
+        effective = {
+            "Light": self.themed.get("Light", set()),
+            "Dark": self.themed.get("Dark", set()) | self.themed.get("Default", set()),
+            "HighContrast": set().union(*(self.themed.get(name, set()) for name in CHAINS["HighContrast"])),
+        }
+        union = set().union(*effective.values())
+        return {name: union - keys for name, keys in effective.items() if union - keys}
 
     def resolves(self, key: str, variant: str) -> bool:
         if key in self.top or key in self.code_keys:
@@ -168,15 +175,24 @@ def code_keys(paths: list[Path]) -> set[str]:
     return keys
 
 
+# Theme name: (crate directory, root document, Rust sources that supply resource keys).
+THEMES = {
+    "macos": ("FerroUI.Themes.MacOS", "MacOSTheme.xaml", ["settings_resources.rs", "Accents/system_accent_colors.rs"]),
+    "material": ("FerroUI.Themes.Material", "MaterialTheme.xaml", ["material_theme.rs", "color_scheme.rs", "Accents/*.rs"]),
+}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("theme", nargs="?", default="macos", choices=sorted(THEMES), help="the theme to check")
     parser.add_argument("--verbose", action="store_true", help="list the documents of each finding")
     args = parser.parse_args()
     repository = Path(__file__).resolve().parents[2]
-    macos_dir = repository / "src/FerroUI.Themes.MacOS"
+    crate, entry, sources = THEMES[args.theme]
+    macos_dir = repository / "src" / crate
     winui_dir = repository / "src/FerroUI.Themes.WinUI"
-    macos = Theme(macos_dir, "MacOSTheme.xaml", "FerroUI.Themes.MacOS",
-                  code_keys([macos_dir / "settings_resources.rs", macos_dir / "Accents/system_accent_colors.rs"]))
+    code = sorted({path for pattern in sources for path in macos_dir.glob(pattern) if path.name != "compiled_xaml.rs"})
+    macos = Theme(macos_dir, entry, crate, code_keys(code))
     winui = Theme(winui_dir, "WinUITheme.xaml", "FerroUI.Themes.WinUI",
                   code_keys([winui_dir / "Accents/system_accent_colors.rs"]))
 
@@ -194,12 +210,12 @@ def main() -> int:
     inherited = {key: v for key, v in macos_unresolved.items() if key in winui_unresolved}
     dangling = {key: v for key, v in macos_unresolved.items() if key not in winui_unresolved}
 
-    print(f"macOS theme: {len(macos.documents)} documents, {len(macos.references)} referenced keys, "
+    print(f"{crate}: {len(macos.documents)} documents, {len(macos.references)} referenced keys, "
           f"{len(macos.top)} top-level keys, theme dictionaries "
           + ", ".join(f"{name} {len(keys)}" for name, keys in sorted(macos.themed.items()))
           + f", {len(macos.code_keys)} code literals")
     for key in sorted(dangling):
-        origin = "new in macOS" if key not in winui_referenced else "defined by WinUI, not by macOS"
+        origin = f"new in {args.theme}" if key not in winui_referenced else f"defined by WinUI, not by {args.theme}"
         print(f"ERROR dangling key {key} ({origin}) for {', '.join(dangling[key])}"
               + (f": {', '.join(sorted(macos.references[key]))}" if args.verbose else ""))
     failures += len(dangling)
@@ -217,7 +233,7 @@ def main() -> int:
         if keys & baseline:
             print(f"note: theme dictionary {variant} lacks {len(keys & baseline)} keys, as in the WinUI theme")
 
-    print("macOS theme resource keys: " + ("FAIL" if failures else "PASS"))
+    print(f"{crate} resource keys: " + ("FAIL" if failures else "PASS"))
     return 1 if failures else 0
 
 

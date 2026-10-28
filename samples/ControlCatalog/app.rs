@@ -24,6 +24,8 @@ use ferroui_themes_simple::SimpleTheme;
 use ferroui_themes_winui::WinUITheme;
 #[cfg(feature = "macos-theme")]
 use ferroui_themes_macos::MacOSTheme;
+#[cfg(feature = "material-theme")]
+use ferroui_themes_material::MaterialTheme;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -41,6 +43,8 @@ pub struct App {
     winui_theme: RefCell<Option<Ref<WinUITheme>>>,
     #[cfg(feature = "macos-theme")]
     macos_theme: RefCell<Option<Ref<MacOSTheme>>>,
+    #[cfg(feature = "material-theme")]
+    material_theme: RefCell<Option<Ref<MaterialTheme>>>,
     color_picker_fluent: RefCell<Option<Rc<dyn IStyle>>>,
     #[cfg(feature = "classic-themes")]
     color_picker_simple: RefCell<Option<Rc<dyn IStyle>>>,
@@ -109,6 +113,11 @@ impl ApplicationImpl for App {
             // The independently compiled theme supplies all templates from its own XAML assembly.
             *this.macos_theme.borrow_mut() = Some(MacOSTheme::new());
         }
+        #[cfg(feature = "material-theme")]
+        {
+            // Compiled from its own XAML assembly; its Roboto comes from `with_material_fonts`.
+            *this.material_theme.borrow_mut() = Some(MaterialTheme::new());
+        }
         *this.color_picker_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("ColorPickerFluent"));
         *this.tree_data_grid_fluent.borrow_mut() = from_markup_value::<Rc<dyn IStyle>>(&this.resource("TreeDataGridFluent"));
 
@@ -156,6 +165,8 @@ impl App {
             winui_theme: RefCell::new(None),
             #[cfg(feature = "macos-theme")]
             macos_theme: RefCell::new(None),
+            #[cfg(feature = "material-theme")]
+            material_theme: RefCell::new(None),
             color_picker_fluent: RefCell::new(None),
             #[cfg(feature = "classic-themes")]
             color_picker_simple: RefCell::new(None),
@@ -278,12 +289,16 @@ impl App {
         Self::current_app().initial_theme_variant.borrow().clone()
     }
 
-    /// Not in the original: the high-contrast variant of the current theme (that of the macOS
-    /// theme when it is selected, else that of the WinUI theme).
+    /// Not in the original: the high-contrast variant of the current theme (that of the macOS or
+    /// the Material theme when it is selected, else that of the WinUI theme).
     pub fn high_contrast_variant() -> ThemeVariant {
         #[cfg(feature = "macos-theme")]
         if Self::current_theme() == CatalogTheme::MacOS {
             return MacOSTheme::high_contrast();
+        }
+        #[cfg(feature = "material-theme")]
+        if Self::current_theme() == CatalogTheme::Material {
+            return MaterialTheme::high_contrast();
         }
         WinUITheme::high_contrast()
     }
@@ -295,7 +310,8 @@ impl App {
 
     /// Not in the original: the themes the catalog is built with, the items of the theme list
     /// of the settings page. WinUI is always included; `classic-themes` adds Fluent and Simple
-    /// before it in the original order, and `macos-theme` adds macOS 26 after it.
+    /// before it in the original order, `macos-theme` adds macOS 26 and `material-theme` Android
+    /// Material 3 Expressive after it.
     pub fn available_themes() -> ItemsSource {
         ItemsSource::from_values(Self::themes().iter().copied())
     }
@@ -310,6 +326,8 @@ impl App {
             CatalogTheme::WinUI,
             #[cfg(feature = "macos-theme")]
             CatalogTheme::MacOS,
+            #[cfg(feature = "material-theme")]
+            CatalogTheme::Material,
         ]
     }
 
@@ -320,6 +338,28 @@ impl App {
             .and_then(|application| application.cast::<App>())
             .and_then(|application| {
                 let theme = application.macos_theme.borrow().clone();
+                theme
+            })
+    }
+
+    /// Not in the original: the fonts the optional themes bundle (Roboto of the Material theme),
+    /// added to the application builder of an entry point.
+    pub fn with_theme_fonts(builder: ferroui_controls::AppBuilder) -> ferroui_controls::AppBuilder {
+        #[cfg(feature = "material-theme")]
+        let builder = {
+            use ferroui_themes_material::MaterialAppBuilderExtension;
+            builder.with_material_fonts()
+        };
+        builder
+    }
+
+    /// The retained Material theme instance.
+    #[cfg(feature = "material-theme")]
+    pub fn material_theme() -> Option<Ref<MaterialTheme>> {
+        Application::current()
+            .and_then(|application| application.cast::<App>())
+            .and_then(|application| {
+                let theme = application.material_theme.borrow().clone();
                 theme
             })
     }
@@ -402,6 +442,20 @@ impl App {
             #[cfg(not(feature = "macos-theme"))]
             CatalogTheme::MacOS => panic!(
                 "the macOS theme needs the feature `macos-theme` of control-catalog"
+            ),
+            #[cfg(feature = "material-theme")]
+            CatalogTheme::Material => {
+                let theme = app.material_theme.borrow().clone().expect("the Material theme of the catalog");
+                app.theme_styles_container.set(0, theme.as_style());
+                let color_picker_fluent =
+                    app.color_picker_fluent.borrow().clone().expect("the colour picker Fluent styles of App.xaml");
+                app.theme_styles_container.set(1, color_picker_fluent);
+                app.theme_styles_container.set(2, Style::new());
+                app.theme_styles_container.set(3, tree_data_grid_fluent());
+            }
+            #[cfg(not(feature = "material-theme"))]
+            CatalogTheme::Material => panic!(
+                "the Material theme needs the feature `material-theme` of control-catalog"
             ),
             // Not in the original: the catalog is built without the themes of the original.
             #[cfg(not(feature = "classic-themes"))]

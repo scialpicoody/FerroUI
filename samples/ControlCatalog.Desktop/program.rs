@@ -9,6 +9,7 @@
 //! FERROUI_CATALOG_THEME=fluent cargo run -p control-catalog-desktop --features classic-themes
 //! FERROUI_CATALOG_THEME=simple cargo run -p control-catalog-desktop --features classic-themes
 //! FERROUI_CATALOG_THEME=macos cargo run -p control-catalog-desktop --features macos-theme
+//! FERROUI_CATALOG_THEME=material cargo run -p control-catalog-desktop --features material-theme
 //! FERROUI_CATALOG_THEME_VARIANT=dark cargo run -p control-catalog-desktop
 //! FERROUI_CATALOG_WAYLAND=0 cargo run -p control-catalog-desktop
 //! ```
@@ -16,7 +17,8 @@
 //! `FERROUI_CATALOG_THEME` selects the theme the catalog starts with: `winui`, the WinUI theme
 //! of the port (docs/porting/winui-theme.md) and the default of the port, and, with the feature
 //! `classic-themes` (off by default, docs/binary-size.md), `fluent` (the default of the original)
-//! or `simple`; `macos` selects macOS 26 when built with `macos-theme`. The settings page switches
+//! or `simple`; `macos` selects macOS 26 when built with `macos-theme`, and `material` Android
+//! Material 3 Expressive when built with `material-theme`. The settings page switches
 //! between the themes the catalog is built with. `FERROUI_CATALOG_THEME_VARIANT` (`light`, `dark`,
 //! `highcontrast`) selects the theme variant instead of the platform's, and
 //! `FERROUI_CATALOG_MACOS_INCREASE_CONTRAST=1` the Increase Contrast setting of the macOS theme.
@@ -162,7 +164,7 @@ fn main() -> std::process::ExitCode {
 
 /// The application builder of the catalog.
 pub fn build_ferro_app() -> AppBuilder {
-    let builder = smoke_platform_options(AppBuilder::configure::<App>()).use_platform_detect();
+    let builder = App::with_theme_fonts(smoke_platform_options(AppBuilder::configure::<App>()).use_platform_detect());
     #[cfg(target_os = "linux")]
     let builder = use_wayland_of_the_environment(builder);
     #[cfg(feature = "vello")]
@@ -218,11 +220,14 @@ fn select_theme_of_the_environment() {
         Some("fluent") => CatalogTheme::Fluent,
         Some("simple") => CatalogTheme::Simple,
         Some("macos") | Some("macos26") => CatalogTheme::MacOS,
-        Some(other) => panic!("FERROUI_CATALOG_THEME: unknown theme {other:?} (fluent, simple, winui, macos)"),
+        Some("material") => CatalogTheme::Material,
+        Some(other) => panic!("FERROUI_CATALOG_THEME: unknown theme {other:?} (fluent, simple, winui, macos, material)"),
     };
     if !App::themes().contains(&theme) {
-        let feature = if theme == CatalogTheme::MacOS { "macos-theme" } else { "classic-themes" };
-        panic!("FERROUI_CATALOG_THEME: the theme {theme:?} needs the feature `{feature}` of control-catalog-desktop");
+        panic!(
+            "FERROUI_CATALOG_THEME: the theme {theme:?} needs the feature `{}` of control-catalog-desktop",
+            theme.build_feature()
+        );
     }
     println!("ControlCatalog: the theme {theme:?}");
     App::select_initial_catalog_theme(theme);

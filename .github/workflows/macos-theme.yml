@@ -14,6 +14,7 @@ on:
       - 'samples/ControlCatalog.Desktop/**'
       - 'samples/ControlCatalog.Browser/**'
       - 'scripts/macos-theme/**'
+      - 'scripts/themes/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/macos-theme.yml'
@@ -57,7 +58,7 @@ jobs:
       - name: Theme inventory, include graph and motion audit
         run: python3 scripts/macos-theme/audit.py
       - name: Resource keys resolve for Light, Dark and HighContrast
-        run: python3 scripts/macos-theme/resource_keys.py
+        run: python3 scripts/themes/resource_keys.py macos
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
         with:

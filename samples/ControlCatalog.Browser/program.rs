@@ -383,7 +383,7 @@ fn json_string(text: &str) -> String {
 
 /// The application builder of the catalog.
 pub fn build_ferro_app() -> AppBuilder {
-    AppBuilder::configure::<App>().with_inter_font().with(Rc::new(FontManagerOptions {
+    App::with_theme_fonts(AppBuilder::configure::<App>()).with_inter_font().with(Rc::new(FontManagerOptions {
         default_family_name: Some("fonts:Inter#Inter".to_string()),
         ..Default::default()
     }))
@@ -408,7 +408,7 @@ fn query_value(query: &str, name: &str) -> Option<String> {
         .map(|(_, value)| decode_query_component(value))
 }
 
-/// Select the initial catalog theme with `?Theme=macos`; unavailable optional themes leave
+/// Select the initial catalog theme with `?Theme=macos` (or `material`); unavailable optional themes leave
 /// the default active and report the missing build feature in the browser console.
 fn catalog_theme_of_uri(uri: &str) -> Option<control_catalog::models::CatalogTheme> {
     use control_catalog::models::CatalogTheme;
@@ -416,6 +416,7 @@ fn catalog_theme_of_uri(uri: &str) -> Option<control_catalog::models::CatalogThe
     let theme = match value.to_ascii_lowercase().as_str() {
         "winui" => CatalogTheme::WinUI,
         "macos" | "macos26" => CatalogTheme::MacOS,
+        "material" => CatalogTheme::Material,
         "fluent" => CatalogTheme::Fluent,
         "simple" => CatalogTheme::Simple,
         other => {
@@ -426,8 +427,7 @@ fn catalog_theme_of_uri(uri: &str) -> Option<control_catalog::models::CatalogThe
     if App::themes().contains(&theme) {
         Some(theme)
     } else {
-        let feature = if theme == CatalogTheme::MacOS { "macos-theme" } else { "classic-themes" };
-        println!("ControlCatalog.Theme: {theme:?} needs the `{feature}` build feature");
+        println!("ControlCatalog.Theme: {theme:?} needs the `{}` build feature", theme.build_feature());
         None
     }
 }
