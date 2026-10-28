@@ -72164,7 +72164,8 @@ fn build_controls_macoscontrols_xaml_deferred_31(
     // Controls/MacOSControls.xaml(61,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64)));
     // Controls/MacOSControls.xaml(63,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()), rt::to_object(::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("Segoe UI Variable Text, Segoe UI, $Default"))));
+    // Controls/MacOSControls.xaml(63,35) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()), "ContentControlThemeFontFamily");
     // Controls/MacOSControls.xaml(64,6) Content
     // Controls/MacOSControls.xaml(64,33) Value
     rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()), "CalendarViewDayItemFontSize");
@@ -73115,7 +73116,8 @@ fn build_controls_macoscontrols_xaml_deferred_33(
     // Controls/MacOSControls.xaml(47,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64)));
     // Controls/MacOSControls.xaml(49,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()), rt::to_object(::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("Segoe UI Variable Text, Segoe UI, $Default"))));
+    // Controls/MacOSControls.xaml(49,35) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()), "ContentControlThemeFontFamily");
     // Controls/MacOSControls.xaml(50,6) Content
     // Controls/MacOSControls.xaml(50,33) Value
     rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()), "CalendarViewMonthYearItemFontSize");
@@ -75915,13 +75917,14 @@ fn build_controls_macoscontrols_xaml_deferred_59(
     // Controls/MacOSControls.xaml(39,4) TargetType
     ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_controls::TextBlock as ::ferroui_base::StaticType>::TYPE));
     // Controls/MacOSControls.xaml(40,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::TextBlock::font_family_property()), rt::to_object(::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("Segoe UI Variable Text, Segoe UI, $Default"))));
+    // Controls/MacOSControls.xaml(40,35) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::TextBlock::font_family_property()), "ContentControlThemeFontFamily");
     // Controls/MacOSControls.xaml(41,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::TextBlock::font_size_property()));
     // Controls/MacOSControls.xaml(41,33) Value
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("BodyTextBlockFontSize"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 41, 33)?;
-    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, ::core::clone::Clone::clone(&provided_0));
+    let provided_1 = rt::provide_value_invoked(&context, rt::setter_value_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 41, 33)?;
+    rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, ::core::clone::Clone::clone(&provided_1));
     // Controls/MacOSControls.xaml(42,6) Content
     let setter_2 = rt::new_setter(rt::property(::ferroui_controls::TextBlock::font_weight_property()));
     // Controls/MacOSControls.xaml(42,6) Value
@@ -104715,7 +104718,8 @@ fn build_controls_macoscontrols_xaml_deferred_300(
     // Controls/MacOSControls.xaml(93,6) Content
     rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_size_property()), rt::to_object(28.0_f64));
     // Controls/MacOSControls.xaml(94,6) Content
-    rt::add_setter(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()), rt::to_object(::ferroui_base::media::FontFamily::__markup_new_1(context.base_uri(), ::std::string::String::from("Segoe UI Variable Text, Segoe UI, $Default"))));
+    // Controls/MacOSControls.xaml(94,35) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::font_family_property()), "ContentControlThemeFontFamily");
     // Controls/MacOSControls.xaml(95,6) Content
     // Controls/MacOSControls.xaml(95,31) Value
     rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::margin_property()), "NavigationViewHeaderMargin");

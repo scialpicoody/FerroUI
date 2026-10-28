@@ -37,7 +37,7 @@
   </Design.PreviewWith>
 
   <ControlTheme x:Key="BaseTextBlockStyle" TargetType="TextBlock">
-    <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI, $Default" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="FontSize" Value="{StaticResource BodyTextBlockFontSize}" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="TextTrimming" Value="CharacterEllipsis" />

@@ -60,7 +60,7 @@
     <!-- CalendarItemBorderThickness of DefaultCalendarViewStyle. -->
     <Setter Property="BorderThickness" Value="1" />
     <!-- DayItemFontFamily (XamlAutoFontFamily) and DayItemFontSize of DefaultCalendarViewStyle. -->
-    <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI, $Default" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="FontSize" Value="{DynamicResource CalendarViewDayItemFontSize}" />
     <Setter Property="FontWeight" Value="Normal" />
     <Setter Property="CornerRadius" Value="20" />

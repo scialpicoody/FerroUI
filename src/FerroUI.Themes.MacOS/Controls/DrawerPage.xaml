@@ -91,7 +91,7 @@
   <ControlTheme x:Key="NavigationViewTitleHeaderContentControlTextStyle" TargetType="ContentControl">
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="FontSize" Value="28" />
-    <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI, $Default" />
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
     <Setter Property="Margin" Value="{DynamicResource NavigationViewHeaderMargin}" />
     <Setter Property="VerticalAlignment" Value="Stretch" />
   </ControlTheme>
