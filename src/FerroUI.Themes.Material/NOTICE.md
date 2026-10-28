@@ -34,11 +34,13 @@ their source hashes and reproducible generation command are recorded in
 
 ## Roboto
 
-`Assets/Roboto.ttf` is distributed under the SIL Open Font License 1.1, included
-as `Assets/OFL-Roboto.txt`. The original variable font is unmodified. The regular,
-medium and bold files are static instances generated from it with fontTools so
-font backends need not synthesize weights. Source
-revision, URL and SHA-256 are recorded in `scripts/material-theme/font-provenance.json`.
+`Assets/Roboto-Regular.ttf`, `Assets/Roboto-Medium.ttf` and `Assets/Roboto-Bold.ttf`
+are distributed under the SIL Open Font License 1.1, included as
+`Assets/OFL-Roboto.txt`. They are static instances (weights 400, 500 and 700)
+generated with fontTools from the unmodified Roboto variable font of
+google/fonts, so font backends need not synthesize weights; the variable font
+itself is not redistributed. Its revision, URL and SHA-256, and those of the
+instances, are recorded in `scripts/material-theme/font-provenance.json`.
 
 ## WinUI / Avalonia structural heritage
 

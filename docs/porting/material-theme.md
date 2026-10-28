@@ -413,22 +413,11 @@ expectations for native dimensions are independent of the generated XAML.
 
 ### Recorded desktop verification
 
-The 2026-10-25 implementation validation passed **267 theme tests**, **76 gallery
-markup tests**, **37 focused base-animation tests**, **8 hold-gesture tests**, and
-the core TextBox IME cancellation regression. The facade feature check, token and
-Rust-path regeneration checks, source naming conventions, and release metadata
-for all 72 publishable crates also passed.
-
-The final gallery build produced **138 of 138 standard captures with zero
-capture failures**: all 23 gallery views in Light, Dark and HighContrast, each
-in LTR and RTL. These are Linux/X11 screenshots rendered with Skia under Xvfb at
-720×960, scale 1 and normal density. A second run produced **6 of 6 full-page
-time-picker captures** at 1024×1440, showing complete classic, vibrant,
-numeric-input and landscape examples in every color/direction combination.
-The record, implementation revision and all 144 image hashes are in
-[render-validation.json](data/material-theme/render-validation.json).
-The hashes identify these runs; continuously animated controls make them
-unsuitable as unsynchronized pixel goldens.
+The gallery's capture mode renders all 23 gallery views in Light, Dark and
+HighContrast, each in LTR and RTL (Linux/X11 under Xvfb, Skia, 720x960, scale 1,
+normal density); the Material theme workflow runs it and uploads the images.
+Continuously animated controls make these captures unsuitable as unsynchronized
+pixel goldens.
 
 Visual review verified source-sized icon viewports, real chip dismissal and
 selection, field labels/notches/affixes/supporting rows, complete date-range
