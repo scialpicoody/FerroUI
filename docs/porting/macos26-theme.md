@@ -115,7 +115,7 @@ bindings, input behavior and accessibility peers remain owned by FerroUI control
 `scripts/macos-theme/audit.py` inventories every copied control file and implicit
 default theme against the pinned WinUI input and the current WinUI theme, and checks
 include reachability, assembly isolation and centralized durations; `--json` prints
-the full inventory. `scripts/macos-theme/resource_keys.py` checks that every key the
+the full inventory. `scripts/themes/resource_keys.py macos` checks that every key the
 templates reference resolves for Light, Dark and HighContrast. Unchanged template
 structures still use the macOS palette, font and metric resources. Inventory coverage
 does not establish native behavior or visual equivalence.
@@ -144,7 +144,7 @@ give screenshot runs of a fixed appearance.
 
 ```sh
 python3 scripts/macos-theme/audit.py
-python3 scripts/macos-theme/resource_keys.py
+python3 scripts/themes/resource_keys.py macos
 cargo test --locked -p ferroui-themes-macos --lib
 cargo test --locked -p ferroui-base --lib platform::default_platform_settings::tests
 cargo check --locked -p control-catalog --features macos-theme --lib

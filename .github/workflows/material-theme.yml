@@ -11,6 +11,7 @@ on:
       - 'src/FerroUI.Controls/text_box_tests.rs'
       - 'samples/MaterialThemeGallery/**'
       - 'scripts/material-theme/**'
+      - 'scripts/themes/**'
       - 'src/FerroUI/Cargo.toml'
       - 'src/FerroUI/lib.rs'
       - 'Cargo.toml'
@@ -48,6 +49,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends libfontconfig1-dev libfreetype6-dev libgl1-mesa-dev libx11-dev fonts-dejavu-core xvfb xauth
       - name: Pinned token generation
         run: python3 scripts/material-theme/generate.py --check
+      - name: Resource keys resolve for Light, Dark and HighContrast
+        run: python3 scripts/themes/resource_keys.py material
       - name: Motion, palette, template and input contracts
         run: cargo test --locked -p ferroui-themes-material --lib
       - name: Interrupted transition and IME regression contracts
