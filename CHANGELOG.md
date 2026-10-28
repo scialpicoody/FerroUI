@@ -6,6 +6,8 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Added
 
+- **macOS 26 theme** (#340, [usage and verification](docs/porting/macos26-theme.md)): the independent `ferroui-themes-macos` package, copied from the WinUI compiled-XAML theme, with semantic light/dark resources, macOS control and window templates, five control sizes, accent and accessibility preferences, per-surface glass materials, reduced-motion transitions, and optional catalogue/facade `macos-theme` features. Includes the complete inherited control inventory, runtime regression tests, a deterministic source audit and native AppKit reference capture. Native optical and motion equivalence is tracked separately from theme coverage.
+- Platform settings: a defaulted transparency preference and independent accessibility-change subscription; the macOS backend reads `NSWorkspace` Reduce Motion and Reduce Transparency through a new optional native interface while preserving the original settings ABI.
 - **Windows Calculator framework gaps plan**: [docs/porting/winui-calculator-gaps.md](docs/porting/winui-calculator-gaps.md), the inventory against WinUI, the design and the pull requests of `VisualStateManager` (groups, states, setters with targets, storyboards, transitions, `StateTriggerBase`, `StateTrigger`, `AdaptiveTrigger`), `ListView` and `GridView`, `SwipeControl`, `Pivot`, and system high contrast for the WinUI theme on Windows, macOS and Linux.
 - **Behaviors** ([docs/porting/behaviors.md](docs/porting/behaviors.md), #281): a port of Xaml.Behaviors, the behaviors, triggers and actions attached to elements in XAML (`Interaction.Behaviors`), in ten crates under `src/Behaviors/`:
   - `ferroui-xaml-interactivity`, the object model: `Interaction`, behavior and action collections, behaviors, triggers and actions on objects and on styled elements, the collection templates;
@@ -60,6 +62,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Fixed
 
+- Native COM interface IDs now materialize all eight distinct `Data4` bytes; the old macro repeated its second byte and could prevent Rust from discovering native extension interfaces. A generated-header smoke test checks UUIDs, shared identity, reference counts and callback lifetime.
 - Automation: the peer of a control that is gone no longer panics ("The control of the automation peer no longer exists.") when a platform still asks it something, as UI Automation did during page navigation on Windows: `AutomationPeer::is_element_available` tells such a peer, its public members answer empty values, the nodes of UI Automation answer `UIA_E_ELEMENTNOTAVAILABLE` and the handlers of AT-SPI an unknown object.
 
 ## [0.4.0] - 2026-10-22

@@ -64,6 +64,7 @@ members = [
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
+    "src/FerroUI.Themes.MacOS",
     "src/FerroUI.OpenGL",
     "src/FerroUI.Metal",
     "src/FerroUI.Remote.Protocol",
@@ -254,6 +255,7 @@ ferroui-xaml-interactions-responsive = { version = "=0.4.0", path = "src/Behavio
 ferroui-themes-simple = { version = "=0.4.0", path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { version = "=0.4.0", path = "src/FerroUI.Themes.Fluent" }
 ferroui-themes-winui = { version = "=0.4.0", path = "src/FerroUI.Themes.WinUI" }
+ferroui-themes-macos = { version = "=0.4.0", path = "src/FerroUI.Themes.MacOS" }
 ferroui-opengl = { version = "=0.4.0", path = "src/FerroUI.OpenGL" }
 ferroui-metal = { version = "=0.4.0", path = "src/FerroUI.Metal" }
 ferroui-remote-protocol = { version = "=0.4.0", path = "src/FerroUI.Remote.Protocol" }

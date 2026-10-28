@@ -92,6 +92,7 @@ RUST_PATH_CRATES = [
     "FerroUI.Themes.Simple",
     "FerroUI.Themes.Fluent",
     "FerroUI.Themes.WinUI",
+    "FerroUI.Themes.MacOS",
     "FerroUI.OpenGL",
     "FerroUI.View",
     "FerroUI.Diagnostics",

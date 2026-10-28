@@ -78,6 +78,8 @@ pub fn register_types() {
             ferroui_themes_fluent::register_types();
         }
         ferroui_themes_winui::register_types();
+        #[cfg(feature = "macos-theme")]
+        ferroui_themes_macos::register_types();
         ferroui_controls_color_picker::register_types();
         treedatagrid_demo::register_types();
         ferroui_opengl::register_types();
